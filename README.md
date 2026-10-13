@@ -4,7 +4,25 @@ A calm, mobile-first watercolor practice app built with Expo, React Native, Type
 
 ## Preview in your browser — no local installation
 
-### GitHub Codespaces (recommended)
+### GitHub Pages (recommended — no running cloud workspace)
+
+A repository administrator completes this one-time setup entirely in GitHub:
+
+1. Merge the GitHub Pages deployment changes into `main`.
+2. Open **Settings → Pages**. Under **Build and deployment**, select **Source → GitHub Actions**. No custom domain is needed.
+3. Open **Actions → Deploy Expo web to GitHub Pages → Run workflow**, select `main`, and click **Run workflow**. Pushes to `main` also deploy automatically.
+4. Wait for both **build** and **deploy** jobs to succeed. Open the URL shown in the deployment environment, or return to **Settings → Pages → Visit site**.
+5. For this repository's default Pages domain, open **https://medigol.github.io/watercolor-coach-ai/**. Bookmark this URL; no local installation, Expo Go, or running Codespace is required.
+
+If Pages is unavailable, check your repository visibility and GitHub plan, and ask the repository administrator to enable it. If Actions is disabled, enable it in **Settings → Actions → General**. If the `github-pages` environment requests deployment approval, approve the pending deployment from the workflow run. A failed deployment does not create a working preview; use the Actions job logs to diagnose it.
+
+The workflow uses Node 22, the committed lockfile, strict TypeScript checks, `npm run build:web`, and GitHub's Pages artifact/deployment actions. Expo exports every route as HTML. The non-secret `EXPO_WEB_BASE_PATH` is supplied automatically by GitHub's Pages configuration so navigation and assets work under `/watercolor-coach-ai`; no secret or manual environment-variable setup is needed. Local Expo web keeps its root paths. Later pushes to `main` update the preview automatically.
+
+Static browser checks passed for navigation, both mock flows, and direct route refreshes. Expo/React currently emits recoverable hydration warnings when loading some static routes; it regenerates the working screen on the client. Actual deployment is verified only after the GitHub Actions run succeeds.
+
+GitHub Pages is a public static preview for the existing mock MVP. Do not treat it as private storage. Selected images are still previewed only in your browser and are not uploaded.
+
+### GitHub Codespaces
 
 1. Open this repository on GitHub and select the `codex/browser-preview` branch (or `main` after this PR is merged).
 2. Choose **Code → Codespaces → Create codespace on this branch**. Sign in to GitHub if asked.
@@ -29,7 +47,7 @@ In the repository root of a Codex cloud task, run `npm ci` if dependencies are m
 
 ### Package a web build
 
-Run `npm run build:web` in a Codespaces or Codex terminal to export the existing app into `dist/`. The output can be hosted by a static host with single-page-app fallback to `index.html` for routes such as `/result/improve-painting`. Exporting does not publish a website, and no GitHub Pages deployment is configured.
+Run `npm run build:web` in a Codespaces or Codex terminal to export the existing app into `dist/`. The static export includes HTML for each app route, so direct links and refreshes work without a single-page-app fallback. Exporting alone does not publish a website. The GitHub Pages workflow below publishes this output.
 
 The preview uses existing Expo web support and fixed mock data. No backend, accounts, or API keys are needed. Offline mode skips Expo's optional compatibility API; package installation still needs Internet access.
 
