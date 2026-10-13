@@ -1,5 +1,5 @@
-import { View } from "react-native";
-import { Tabs } from "expo-router";
+import { Pressable, View } from "react-native";
+import { router, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../../components/ui";
@@ -11,6 +11,20 @@ export default function TabLayout() {
         headerStyle: { backgroundColor: colors.background },
         headerShadowVisible: false,
         headerTitleAlign: "center",
+        headerRight: () => (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Account"
+            onPress={() => router.push("/account")}
+            style={{ padding: 14 }}
+          >
+            <Ionicons
+              name="person-circle-outline"
+              color={colors.accent}
+              size={25}
+            />
+          </Pressable>
+        ),
         headerTintColor: colors.ink,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,

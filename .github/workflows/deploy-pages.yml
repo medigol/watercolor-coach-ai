@@ -33,6 +33,8 @@ jobs:
       - name: Export static web app
         run: npm run build:web
         env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
           EXPO_WEB_BASE_PATH: ${{ steps.pages.outputs.base_path }}
       - name: Include Expo assets in Pages
         run: touch dist/.nojekyll

@@ -5,9 +5,11 @@ import { Button, Placeholder, styles } from "./ui";
 export default function ImageSelector({
   sample,
   label,
+  onSelect,
 }: {
   sample: string;
   label: string;
+  onSelect?: (image: { uri: string; mimeType?: string | null }) => void;
 }) {
   const [uri, setUri] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -22,7 +24,10 @@ export default function ImageSelector({
         mediaTypes: ["images"],
         quality: 0.8,
       });
-      if (!result.canceled && result.assets[0]) setUri(result.assets[0].uri);
+      if (!result.canceled && result.assets[0]) {
+        setUri(result.assets[0].uri);
+        onSelect?.(result.assets[0]);
+      }
     } catch {
       setError("We could not open your photos. You can still use the sample.");
     } finally {
@@ -52,7 +57,8 @@ export default function ImageSelector({
         </Text>
       )}
       <Text style={styles.caption}>
-        Images stay on your device. This demo always shows the sample result.
+        Your image is saved privately with your feedback when you continue.
+        Results still use the sample guide.
       </Text>
     </View>
   );

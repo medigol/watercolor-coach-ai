@@ -1,9 +1,9 @@
+import SaveResultButton from "../../components/SaveResultButton";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { router } from "expo-router";
 import ImageSelector from "../../components/ImageSelector";
-import { Button, Screen, styles, colors } from "../../components/ui";
+import { Screen, styles, colors } from "../../components/ui";
 import { FeedbackFocus } from "../../types";
 const options: FeedbackFocus[] = [
   "Overall feedback",
@@ -12,6 +12,10 @@ const options: FeedbackFocus[] = [
   "Watercolor technique",
 ];
 export default function ImprovePainting() {
+  const [image, setImage] = useState<{
+    uri: string;
+    mimeType?: string | null;
+  }>();
   const [focus, setFocus] = useState<FeedbackFocus>("Overall feedback");
   return (
     <Screen>
@@ -22,6 +26,7 @@ export default function ImprovePainting() {
       <ImageSelector
         sample="Lake House — sample painting placeholder"
         label="Choose painting"
+        onSelect={setImage}
       />
       <Text style={styles.heading}>What do you want help with?</Text>
       <View style={{ gap: 10 }}>
@@ -75,14 +80,11 @@ export default function ImprovePainting() {
           </Pressable>
         ))}
       </View>
-      <Button
+      <SaveResultButton
+        mode="improve_painting"
+        focus={focus}
+        image={image}
         title="Get feedback"
-        onPress={() =>
-          router.push({
-            pathname: "/result/improve-painting",
-            params: { focus },
-          })
-        }
       />
       <Text style={styles.caption}>
         Sample feedback only. Your painting is not analysed yet.

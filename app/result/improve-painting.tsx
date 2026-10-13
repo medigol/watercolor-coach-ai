@@ -1,16 +1,26 @@
+import { useSavedResult } from "../../hooks/useSavedResult";
+import { ResultState, SavedImage } from "../../components/SavedResultState";
 import { Text } from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import FeedbackSection from "../../components/FeedbackSection";
 import CompositionSuggestionCard from "../../components/CompositionSuggestionCard";
 import SketchGuideCard from "../../components/SketchGuideCard";
 import ValueStudyCard from "../../components/ValueStudyCard";
 import { Screen, styles } from "../../components/ui";
-import { improveResult as result } from "../../data/mockResults";
+import { improveResult as sample } from "../../data/mockResults";
 export default function ImproveResult() {
-  const { focus } = useLocalSearchParams<{ focus?: string }>();
+  const { result, focus, image, loading, error, warning, retry } =
+    useSavedResult(sample, "improve_painting");
+  if (loading || error)
+    return <ResultState loading={loading} error={error} retry={retry} />;
   return (
     <Screen>
       <Text style={styles.title}>{result.title}</Text>
+      {!!warning && (
+        <Text accessibilityRole="alert" style={styles.body}>
+          {warning}
+        </Text>
+      )}
+      <SavedImage uri={image} />
       <Text style={styles.caption}>
         Sample feedback{focus ? ` · Your selected focus: ${focus}` : ""}
       </Text>
