@@ -23,18 +23,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     let alive = true;
+    let authRevision = 0;
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, next) => {
+    } = supabase.auth.onAuthStateChange((event, next) => {
       if (alive) {
+        // Restoring an older session must never undo a newer sign-in/sign-out.
+        if (event === "INITIAL_SESSION" && authRevision > 0) return;
+        if (event !== "INITIAL_SESSION") authRevision += 1;
         setSession(next);
+        if (event !== "INITIAL_SESSION" || next) setError(null);
         setLoading(false);
       }
     });
     supabase.auth
       .getSession()
       .then(({ data, error: problem }) => {
-        if (alive) {
+        if (alive && authRevision === 0) {
           setSession(data.session);
           setError(
             problem
@@ -45,7 +50,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch(() => {
-        if (alive) {
+        if (alive && authRevision === 0) {
+          setSession(null);
           setError("We could not restore your sign-in. Please sign in again.");
           setLoading(false);
         }
@@ -57,10 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (state === "active") supabase?.auth.startAutoRefresh();
             else supabase?.auth.stopAutoRefresh();
           });
+    if (Platform.OS !== "web") {
+      if (AppState.currentState === "active") supabase.auth.startAutoRefresh();
+      else supabase.auth.stopAutoRefresh();
+    }
     return () => {
       alive = false;
       subscription.unsubscribe();
       appState?.remove();
+      if (Platform.OS !== "web") supabase?.auth.stopAutoRefresh();
     };
   }, []);
   return (

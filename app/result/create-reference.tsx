@@ -9,8 +9,10 @@ import PaintingStepsCard from "../../components/PaintingStepsCard";
 import { Screen, Placeholder, styles } from "../../components/ui";
 import { referenceResult as sample } from "../../data/mockResults";
 export default function ReferenceResult() {
-  const { result, focus, image, loading, error, warning, retry } =
-    useSavedResult(sample, "create_reference");
+  const { result, image, loading, error, warning, retry } = useSavedResult(
+    sample,
+    "create_reference",
+  );
   if (loading || error)
     return <ResultState loading={loading} error={error} retry={retry} />;
   return (
@@ -21,7 +23,7 @@ export default function ReferenceResult() {
           {warning}
         </Text>
       )}
-      <SavedImage uri={image} />
+      <SavedImage uri={image} harbour />
       <Text style={styles.caption}>Sample painting reference</Text>
       <View style={styles.card}>
         <Text style={styles.heading}>Simplified reference</Text>

@@ -5,6 +5,7 @@ import { Pressable, Text, View } from "react-native";
 import ImageSelector from "../../components/ImageSelector";
 import { Screen, styles, colors } from "../../components/ui";
 import { FeedbackFocus } from "../../types";
+import type { ArtworkImage } from "../../lib/artworks";
 const options: FeedbackFocus[] = [
   "Overall feedback",
   "Composition",
@@ -12,10 +13,7 @@ const options: FeedbackFocus[] = [
   "Watercolor technique",
 ];
 export default function ImprovePainting() {
-  const [image, setImage] = useState<{
-    uri: string;
-    mimeType?: string | null;
-  }>();
+  const [image, setImage] = useState<ArtworkImage>();
   const [focus, setFocus] = useState<FeedbackFocus>("Overall feedback");
   return (
     <Screen>

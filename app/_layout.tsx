@@ -40,6 +40,7 @@ function AppRoutes() {
     );
   return (
     <Stack
+      key={session?.user.id ?? "signed-out"}
       screenOptions={{
         headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.ink,

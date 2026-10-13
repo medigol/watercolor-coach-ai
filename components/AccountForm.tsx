@@ -12,8 +12,13 @@ export default function AccountForm({ signup = false }: { signup?: boolean }) {
   const [message, setMessage] = useState("");
   const { error } = useAuth();
   async function submit() {
-    if (!email.trim() || password.length < 8) {
-      setMessage("Enter your email and a password of at least 8 characters.");
+    if (busy) return;
+    if (!email.trim() || !password || (signup && password.length < 8)) {
+      setMessage(
+        signup
+          ? "Enter your email and a password of at least 8 characters."
+          : "Enter your email and password.",
+      );
       return;
     }
     setBusy(true);

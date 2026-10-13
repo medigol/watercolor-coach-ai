@@ -6,6 +6,44 @@ import { Platform } from "react-native";
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
 const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
 const runtime = Platform.OS !== "web" || typeof window !== "undefined";
+// Catch a privileged key accidentally placed in the public client setting.
+// This only checks the JWT's declared role; it does not verify a signature.
+function isPrivilegedKey(value: string) {
+  if (/^sb_secret_/i.test(value)) return true;
+  const parts = value.split(".");
+  if (parts.length !== 3) return false;
+  try {
+    const alphabet =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let payload = "";
+    let bits = 0;
+    let buffer = 0;
+    const encoded = parts[1]
+      .replace(/-/g, "+")
+      .replace(/_/g, "/")
+      .replace(/=+$/, "");
+    for (const character of encoded) {
+      const digit = alphabet.indexOf(character);
+      if (digit < 0) return false;
+      buffer = (buffer << 6) | digit;
+      bits += 6;
+      if (bits >= 8) {
+        bits -= 8;
+        payload += String.fromCharCode((buffer >> bits) & 255);
+        buffer &= (1 << bits) - 1;
+      }
+    }
+    const claims = JSON.parse(payload);
+    return (
+      claims !== null &&
+      typeof claims === "object" &&
+      "role" in claims &&
+      claims.role !== "anon"
+    );
+  } catch {
+    return false;
+  }
+}
 const memory = new Map<string, string | null>();
 const webStorage = {
   getItem: (name: string) => {
@@ -34,7 +72,7 @@ const webStorage = {
   },
 };
 function makeClient() {
-  if (!url || !key) return null;
+  if (!url || !key || isPrivilegedKey(key)) return null;
   try {
     if (!["http:", "https:"].includes(new URL(url).protocol)) return null;
     return createClient(url, key, {

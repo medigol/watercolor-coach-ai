@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
 import { Text, View } from "react-native";
-import { saveArtwork, type SavedMode } from "../lib/artworks";
+import {
+  saveArtwork,
+  type ArtworkImage,
+  type SavedMode,
+} from "../lib/artworks";
+import { useAuth } from "../providers/AuthProvider";
 import { Button, styles } from "./ui";
 export default function SaveResultButton({
   mode,
@@ -11,17 +16,31 @@ export default function SaveResultButton({
 }: {
   mode: SavedMode;
   focus?: string;
-  image?: { uri: string; mimeType?: string | null };
+  image?: ArtworkImage;
   title: string;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const saving = useRef(false);
+  const active = useRef(false);
+  const { session } = useAuth();
+  const account = useRef(session?.user.id);
+  account.current = session?.user.id;
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
   async function save() {
-    if (busy) return;
+    if (saving.current) return;
+    saving.current = true;
+    const userId = account.current;
     setBusy(true);
     setError("");
     try {
       const { id, warning } = await saveArtwork(mode, focus || null, image);
+      if (!active.current || account.current !== userId) return;
       router.push({
         pathname:
           mode === "improve_painting"
@@ -30,13 +49,15 @@ export default function SaveResultButton({
         params: { id, ...(warning ? { warning } : {}) },
       });
     } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : "We could not save your result. Please try again.",
-      );
+      if (active.current && account.current === userId)
+        setError(
+          e instanceof Error
+            ? e.message
+            : "We could not save your result. Please try again.",
+        );
     } finally {
-      setBusy(false);
+      saving.current = false;
+      if (active.current) setBusy(false);
     }
   }
   return (

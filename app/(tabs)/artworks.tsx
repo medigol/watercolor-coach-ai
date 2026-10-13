@@ -4,31 +4,39 @@ import { ActivityIndicator, Text } from "react-native";
 import ArtworkCard from "../../components/ArtworkCard";
 import { Button, Screen, styles, colors } from "../../components/ui";
 import { requireSupabase } from "../../lib/supabase";
-import { imageUrl, type SavedArtwork } from "../../lib/artworks";
+import { imageUrl, validArtwork, type SavedArtwork } from "../../lib/artworks";
 import { useAuth } from "../../providers/AuthProvider";
 export default function Artworks() {
   const { session } = useAuth();
+  const userId = session?.user.id;
   const [items, setItems] = useState<
     (SavedArtwork & { signedImage?: string })[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const requestKey = `${userId ?? ""}/${attempt}`;
+  const [completedRequest, setCompletedRequest] = useState("");
   useFocusEffect(
     useCallback(() => {
       let alive = true;
+      const controller = new AbortController();
       setLoading(true);
       setError("");
+      setItems([]);
       (async () => {
         try {
+          if (!userId) throw new Error("Sign in required");
           const { data, error } = await requireSupabase()
             .from("artworks")
             .select("id,mode,title,image_url,focus_area,created_at")
-            .eq("user_id", session!.user.id)
-            .order("created_at", { ascending: false });
-          if (error) throw error;
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false })
+            .abortSignal(controller.signal);
+          if (error || !Array.isArray(data) || !data.every(validArtwork))
+            throw new Error("Artworks unavailable");
           const list = await Promise.all(
-            (data as SavedArtwork[]).map(async (row) => ({
+            data.map(async (row) => ({
               ...row,
               signedImage: await imageUrl(row.image_url),
             })),
@@ -38,19 +46,23 @@ export default function Artworks() {
           if (alive)
             setError("We could not load your artworks. Please try again.");
         } finally {
-          if (alive) setLoading(false);
+          if (alive) {
+            setLoading(false);
+            setCompletedRequest(requestKey);
+          }
         }
       })();
       return () => {
         alive = false;
+        controller.abort();
       };
-    }, [session?.user.id, attempt]),
+    }, [userId, requestKey]),
   );
   return (
     <Screen>
       <Text style={styles.title}>My Artworks</Text>
       <Text style={styles.body}>Your paintings and saved feedback.</Text>
-      {loading ? (
+      {loading || completedRequest !== requestKey ? (
         <ActivityIndicator color={colors.accent} />
       ) : error ? (
         <>

@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "preview": "node scripts/expo-web.cjs",
-    "build:web": "node scripts/expo-web.cjs build"
+    "build:web": "node scripts/expo-web.cjs build",
+    "test": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

@@ -3,11 +3,9 @@ import SaveResultButton from "../../components/SaveResultButton";
 import { Text } from "react-native";
 import ImageSelector from "../../components/ImageSelector";
 import { Screen, styles } from "../../components/ui";
+import type { ArtworkImage } from "../../lib/artworks";
 export default function CreateReference() {
-  const [image, setImage] = useState<{
-    uri: string;
-    mimeType?: string | null;
-  }>();
+  const [image, setImage] = useState<ArtworkImage>();
   return (
     <Screen>
       <Text style={styles.title}>Create painting reference</Text>

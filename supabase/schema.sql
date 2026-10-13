@@ -1,5 +1,8 @@
 -- Run in the Supabase SQL Editor as the project administrator.
 -- Safe to rerun for this schema. Review policies before applying to an existing app.
+-- Run the entire script together; a failed statement leaves no partial setup.
+begin;
+
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
@@ -67,6 +70,22 @@ grant select on public.profiles, public.usage_counters to authenticated;
 grant update (display_name) on public.profiles to authenticated;
 grant select, insert, update, delete on public.artworks, public.ai_results to authenticated;
 
+-- Permissive policies are OR-ed together. These restrictive guards keep an
+-- older/broader project policy from granting access to another user's rows.
+-- They do not grant access themselves; the operation policies below do that.
+drop policy if exists watercolor_profiles_owner_guard on public.profiles;
+create policy watercolor_profiles_owner_guard on public.profiles as restrictive for all to anon, authenticated
+using (id = (select auth.uid())) with check (id = (select auth.uid()));
+drop policy if exists watercolor_artworks_owner_guard on public.artworks;
+create policy watercolor_artworks_owner_guard on public.artworks as restrictive for all to anon, authenticated
+using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists watercolor_results_owner_guard on public.ai_results;
+create policy watercolor_results_owner_guard on public.ai_results as restrictive for all to anon, authenticated
+using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists watercolor_usage_owner_guard on public.usage_counters;
+create policy watercolor_usage_owner_guard on public.usage_counters as restrictive for all to anon, authenticated
+using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+
 drop policy if exists profiles_read_own on public.profiles;
 create policy profiles_read_own on public.profiles for select to authenticated using (id = (select auth.uid()));
 drop policy if exists profiles_update_own on public.profiles;
@@ -80,12 +99,20 @@ create policy usage_read_own on public.usage_counters for select to authenticate
 -- Counters are provisioned but not enforced or editable by the frontend in this MVP.
 
 -- Atomic artwork + mock-result insert. SECURITY INVOKER keeps RLS active.
+-- Remove the earlier signature to avoid ambiguous PostgREST RPC overloads.
+-- The optional expected user keeps older callers working while new callers can
+-- reject a save if the account changed between selecting an image and saving.
+drop function if exists public.save_mock_artwork(text, text, text, text, jsonb);
 create or replace function public.save_mock_artwork(
-  p_mode text, p_title text, p_focus_area text, p_image_path text, p_result jsonb
+  p_mode text, p_title text, p_focus_area text, p_image_path text, p_result jsonb,
+  p_expected_user_id uuid default null
 ) returns uuid language plpgsql security invoker set search_path = '' as $$
 declare saved_id uuid;
 begin
   if auth.uid() is null then raise exception 'Sign in required'; end if;
+  if p_expected_user_id is not null and p_expected_user_id <> auth.uid() then
+    raise exception 'Your account changed. Please try again.';
+  end if;
   insert into public.artworks(user_id, mode, title, image_url, focus_area)
   values (auth.uid(), p_mode, p_title, p_image_path, p_focus_area) returning id into saved_id;
   insert into public.ai_results(artwork_id, user_id, mode, provider, result_json)
@@ -93,13 +120,19 @@ begin
   return saved_id;
 end;
 $$;
-revoke all on function public.save_mock_artwork(text, text, text, text, jsonb) from public, anon;
-grant execute on function public.save_mock_artwork(text, text, text, text, jsonb) to authenticated;
+revoke all on function public.save_mock_artwork(text, text, text, text, jsonb, uuid) from public, anon;
+grant execute on function public.save_mock_artwork(text, text, text, text, jsonb, uuid) to authenticated;
 
 -- Enforce private access on this app bucket, including on reruns.
 insert into storage.buckets(id, name, public, file_size_limit, allowed_mime_types)
 values ('artworks', 'artworks', false, 10485760, array['image/jpeg', 'image/png', 'image/webp'])
 on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+-- Storage is shared across buckets. Restrict this bucket even if an existing
+-- project policy permits broad reads/writes, without changing other buckets.
+drop policy if exists watercolor_images_owner_guard on storage.objects;
+create policy watercolor_images_owner_guard on storage.objects as restrictive for all to anon, authenticated
+using (bucket_id <> 'artworks' or (storage.foldername(name))[1] = (select auth.uid())::text)
+with check (bucket_id <> 'artworks' or (storage.foldername(name))[1] = (select auth.uid())::text);
 drop policy if exists watercolor_images_upload_own on storage.objects;
 create policy watercolor_images_upload_own on storage.objects for insert to authenticated
 with check (bucket_id = 'artworks' and (storage.foldername(name))[1] = (select auth.uid())::text);
@@ -109,4 +142,6 @@ using (bucket_id = 'artworks' and (storage.foldername(name))[1] = (select auth.u
 drop policy if exists watercolor_images_delete_own on storage.objects;
 create policy watercolor_images_delete_own on storage.objects for delete to authenticated
 using (bucket_id = 'artworks' and (storage.foldername(name))[1] = (select auth.uid())::text);
--- No storage UPDATE grant/policy: objects use new names rather than overwrite.
+-- No storage UPDATE policy is added: objects use new names rather than overwrite.
+
+commit;

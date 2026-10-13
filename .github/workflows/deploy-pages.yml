@@ -28,6 +28,8 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Install dependencies
         run: npm ci
+      - name: Run regression tests
+        run: npm test
       - name: Check TypeScript
         run: npm run typecheck
       - name: Export static web app

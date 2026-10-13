@@ -1,3 +1,6 @@
+const { assertPublicSupabaseKey } = require("./scripts/check-public-env.cjs");
+
+assertPublicSupabaseKey(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
 const { expo } = require("./app.json");
 
 // GitHub project Pages sites live below /repository-name. Local web runs

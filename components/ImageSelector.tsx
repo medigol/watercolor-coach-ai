@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Image, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Button, Placeholder, styles } from "./ui";
+import type { ArtworkImage } from "../lib/artworks";
 export default function ImageSelector({
   sample,
   label,
@@ -9,11 +10,12 @@ export default function ImageSelector({
 }: {
   sample: string;
   label: string;
-  onSelect?: (image: { uri: string; mimeType?: string | null }) => void;
+  onSelect?: (image: ArtworkImage) => void;
 }) {
   const [uri, setUri] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const [failedUri, setFailedUri] = useState<string>();
   async function select() {
     setBusy(true);
     setError(undefined);
@@ -36,12 +38,18 @@ export default function ImageSelector({
   }
   return (
     <View style={styles.card}>
-      {uri ? (
+      {uri && failedUri !== uri ? (
         <Image
           source={{ uri }}
           accessibilityLabel="Selected image preview"
           style={{ width: "100%", height: 200, borderRadius: 14 }}
           resizeMode="contain"
+          onError={() => {
+            setFailedUri(uri);
+            setError(
+              "We could not preview this image. You can still use the sample.",
+            );
+          }}
         />
       ) : (
         <Placeholder label={sample} />

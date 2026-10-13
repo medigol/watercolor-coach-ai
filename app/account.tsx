@@ -8,21 +8,29 @@ export default function Account() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const userId = session?.user.id;
   useEffect(() => {
     let alive = true;
-    if (session)
-      requireSupabase()
-        .from("profiles")
-        .select("display_name")
-        .eq("id", session.user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (alive) setName(data?.display_name || "");
-        });
+    setName("");
+    async function loadName() {
+      if (!userId) return;
+      try {
+        const { data, error: problem } = await requireSupabase()
+          .from("profiles")
+          .select("display_name")
+          .eq("id", userId)
+          .maybeSingle();
+        if (alive && !problem && typeof data?.display_name === "string")
+          setName(data.display_name);
+      } catch {
+        // The account and sign-out remain usable when the profile is unavailable.
+      }
+    }
+    void loadName();
     return () => {
       alive = false;
     };
-  }, [session]);
+  }, [userId]);
   async function signout() {
     setBusy(true);
     setError("");
