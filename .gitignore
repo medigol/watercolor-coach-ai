@@ -6,3 +6,7 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Supabase CLI local metadata
+supabase/.temp/
+supabase/.branches/

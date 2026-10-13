@@ -8,7 +8,7 @@ import ValueStudyCard from "../../components/ValueStudyCard";
 import { Screen, styles } from "../../components/ui";
 import { improveResult as sample } from "../../data/mockResults";
 export default function ImproveResult() {
-  const { result, focus, image, loading, error, warning, retry } =
+  const { result, provider, focus, image, loading, error, warning, retry } =
     useSavedResult(sample, "improve_painting");
   if (loading || error)
     return <ResultState loading={loading} error={error} retry={retry} />;
@@ -22,7 +22,8 @@ export default function ImproveResult() {
       )}
       <SavedImage uri={image} />
       <Text style={styles.caption}>
-        Sample feedback{focus ? ` · Your selected focus: ${focus}` : ""}
+        {provider === "mock" ? "Sample feedback" : "Painting feedback"}
+        {focus ? ` · Your selected focus: ${focus}` : ""}
       </Text>
       <FeedbackSection title="Main advice" text={result.mainAdvice} highlight />
       <FeedbackSection title="What works" items={result.whatWorks} />

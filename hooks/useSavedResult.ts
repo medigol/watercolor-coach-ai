@@ -6,6 +6,7 @@ import {
   validArtworkId,
   validResult,
   type SavedMode,
+  type ResultProvider,
   type ImproveData,
   type ReferenceData,
 } from "../lib/artworks";
@@ -23,6 +24,7 @@ export function useSavedResult<T extends ImproveData | ReferenceData>(
   const { session } = useAuth();
   const userId = session?.user.id;
   const [result, setResult] = useState<T>(sample);
+  const [provider, setProvider] = useState<ResultProvider>("mock");
   const [image, setImage] = useState<string>();
   const [focus, setFocus] = useState<string | null>(null);
   const [loading, setLoading] = useState(!!id);
@@ -37,6 +39,7 @@ export function useSavedResult<T extends ImproveData | ReferenceData>(
     setError("");
     setImage(undefined);
     setFocus(null);
+    setProvider("mock");
     setResult(sample);
     if (!id) return;
     (async () => {
@@ -47,14 +50,19 @@ export function useSavedResult<T extends ImproveData | ReferenceData>(
         const { data: row, error: problem } = await client
           .from("ai_results")
           .select(
-            "result_json, artworks!ai_results_artwork_id_fkey!inner(image_url,focus_area)",
+            "provider,result_json, artworks!ai_results_artwork_id_fkey!inner(image_url,focus_area)",
           )
           .eq("artwork_id", id)
           .eq("user_id", userId)
           .eq("mode", mode)
           .abortSignal(controller.signal)
           .single();
-        if (problem || !row || !validResult(row.result_json, mode))
+        if (
+          problem ||
+          !row ||
+          !validResult(row.result_json, mode) ||
+          (row.provider !== "mock" && row.provider !== "openai")
+        )
           throw new Error("Result unavailable");
         const artwork = Array.isArray(row.artworks)
           ? row.artworks[0]
@@ -71,6 +79,7 @@ export function useSavedResult<T extends ImproveData | ReferenceData>(
         const url = await imageUrl(artwork?.image_url ?? null);
         if (alive) {
           setResult(row.result_json as T);
+          setProvider(row.provider);
           setFocus(artwork?.focus_area ?? null);
           setImage(url);
         }
@@ -93,6 +102,7 @@ export function useSavedResult<T extends ImproveData | ReferenceData>(
   }, [id, mode, sample, userId, requestKey]);
   return {
     result: id ? result : sample,
+    provider: id ? provider : "mock",
     image: id ? image : undefined,
     focus: id
       ? focus

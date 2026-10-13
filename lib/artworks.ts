@@ -1,5 +1,36 @@
 import { requireSupabase } from "./supabase";
 import { improveResult, referenceResult } from "../data/mockResults";
+export type ResultProvider = "mock" | "openai";
+export const freeLimitMessage =
+  "You have used your 3 free AI feedback results. More feedback will be available after subscriptions are added.";
+export function createSaveAttempt(): SaveAttempt {
+  return { id: requestId() };
+}
+export interface SaveAttempt {
+  id: string;
+  ownerId?: string;
+  imagePath?: string | null;
+  warning?: string | null;
+  mayHaveSaved?: boolean;
+}
+function requestId() {
+  // This is an idempotency identifier, never a credential or an access token.
+  return (
+    globalThis.crypto?.randomUUID?.() ??
+    "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const n = Math.floor(Math.random() * 16);
+      return (c === "x" ? n : (n & 3) | 8).toString(16);
+    })
+  );
+}
+function validSave(
+  value: unknown,
+  id: string,
+): value is { id: string; provider: ResultProvider; warning?: string } {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return v.id === id && (v.provider === "mock" || v.provider === "openai");
+}
 export type SavedMode = "improve_painting" | "create_reference";
 export type ImproveData = typeof improveResult;
 export type ReferenceData = typeof referenceResult;
@@ -66,6 +97,7 @@ export async function saveArtwork(
   mode: SavedMode,
   focus: string | null,
   image?: ArtworkImage,
+  attempt: SaveAttempt = createSaveAttempt(),
 ) {
   const client = requireSupabase();
   const {
@@ -75,8 +107,14 @@ export async function saveArtwork(
   if (authError || !user)
     throw new Error("Please sign in again before saving.");
   const ownerId = user.id;
-  let path: string | null = null;
-  let warning: string | null = null;
+  if (
+    !validArtworkId(attempt.id) ||
+    (attempt.ownerId && attempt.ownerId !== ownerId)
+  )
+    throw new Error("Your account changed. Please try again after signing in.");
+  attempt.ownerId = ownerId;
+  let path = attempt.imagePath ?? null;
+  let warning = attempt.warning ?? null;
   async function checkAccount() {
     const { data, error } = await client.auth.getSession();
     if (error || data.session?.user.id !== ownerId)
@@ -84,7 +122,7 @@ export async function saveArtwork(
         "Your account changed. Please try again after signing in.",
       );
   }
-  if (image) {
+  if (image && attempt.imagePath === undefined) {
     try {
       if (image.fileSize !== undefined && image.fileSize > imageLimit)
         throw new Error("Image too large");
@@ -111,46 +149,114 @@ export async function saveArtwork(
     }
   }
   const result = mode === "improve_painting" ? improveResult : referenceResult;
+  const id = attempt.id;
+  attempt.imagePath = path;
+  attempt.warning = warning;
   let definitelyRejected = false;
   let rpcStarted = false;
+  let edgeMayHaveSaved = attempt.mayHaveSaved ?? false;
+  let specificError: string | null = null;
   try {
     await checkAccount();
+    // One ID is shared by Edge and local fallback. If a response is lost after
+    // commit, the fallback returns that saved result instead of saving twice.
+    edgeMayHaveSaved = true;
+    let edge: { data: unknown; error: unknown };
+    try {
+      edge = await client.functions.invoke("generate-feedback", {
+        body: {
+          request_id: id,
+          mode,
+          focus_area: focus,
+          image_path: path,
+          expected_user_id: ownerId,
+        },
+        timeout: 65000,
+      });
+    } catch {
+      edge = { data: null, error: true };
+    }
+    if (!edge.error && validSave(edge.data, id)) {
+      attempt.mayHaveSaved = true;
+      await checkAccount();
+      const edgeWarning =
+        typeof edge.data.warning === "string" ? edge.data.warning : null;
+      return {
+        id,
+        provider: edge.data.provider,
+        warning: warning ?? edgeWarning,
+      };
+    }
+    const context = (edge.error as { context?: Response } | null)?.context;
+    if (context instanceof Response) {
+      // Only definite rejections can safely discard an uploaded image.
+      if ([400, 401, 403, 404, 405].includes(context.status))
+        edgeMayHaveSaved = attempt.mayHaveSaved ?? false;
+      const problem = await context
+        .clone()
+        .json()
+        .catch(() => null);
+      if (problem?.code === "usage_limit") specificError = freeLimitMessage;
+      if (problem?.code === "auth")
+        specificError = "Please sign in again before saving.";
+      if (problem?.code === "invalid_request")
+        specificError = "Your account or image changed. Please try again.";
+      if (problem?.code === "busy")
+        specificError =
+          "Feedback is already being prepared. Check My Artworks in a moment.";
+      if (specificError) throw new Error(specificError);
+    }
+    await checkAccount();
     rpcStarted = true;
-    const {
-      data: id,
-      error,
-      status,
-    } = await client.rpc("save_mock_artwork", {
+    const { data, error, status } = await client.rpc("save_mock_feedback", {
       p_mode: mode,
       p_title: result.title,
       p_focus_area: focus,
       p_image_path: path,
       p_result: result,
       p_expected_user_id: ownerId,
+      p_request_id: id,
     });
-    // A lost response can follow a committed transaction. In that case the
-    // image must remain; deleting it would damage the saved artwork.
     definitelyRejected =
       !!error &&
       status >= 400 &&
       status < 500 &&
       status !== 408 &&
       status !== 429;
-    if (error || !validArtworkId(id)) throw new Error("Save failed");
-    return { id, warning };
+    if (error || !validSave(data, id)) throw new Error("Save failed");
+    attempt.mayHaveSaved = true;
+    await checkAccount();
+    return {
+      id,
+      provider: data.provider,
+      warning:
+        warning ??
+        (data.provider === "mock"
+          ? "Automatic feedback is unavailable. We saved a sample guide instead."
+          : null),
+    };
   } catch {
-    if (path && (!rpcStarted || definitelyRejected))
+    attempt.mayHaveSaved ||=
+      edgeMayHaveSaved || (rpcStarted && !definitelyRejected);
+    if (path && !attempt.mayHaveSaved && (!rpcStarted || definitelyRejected)) {
+      // A definite rejection may remove the image. A retry must upload again;
+      // uncertain outcomes retain both the path and ID for safe recovery.
+      attempt.imagePath = undefined;
+      attempt.warning = undefined;
       await client.storage
         .from("artworks")
         .remove([path])
         .catch(() => {});
+    }
     throw new Error(
-      rpcStarted && !definitelyRejected
-        ? "We could not confirm your save. Check My Artworks before trying again."
-        : "We could not save your feedback. Check your connection and account setup, then try again.",
+      specificError ??
+        ((rpcStarted && !definitelyRejected) || edgeMayHaveSaved
+          ? "We could not confirm your save. Check My Artworks before trying again."
+          : "We could not save your feedback. Check your connection and account setup, then try again."),
     );
   }
 }
+
 export async function imageUrl(path: string | null) {
   if (
     typeof path !== "string" ||

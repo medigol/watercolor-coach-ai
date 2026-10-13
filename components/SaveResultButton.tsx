@@ -3,6 +3,8 @@ import { router } from "expo-router";
 import { Text, View } from "react-native";
 import {
   saveArtwork,
+  createSaveAttempt,
+  type SaveAttempt,
   type ArtworkImage,
   type SavedMode,
 } from "../lib/artworks";
@@ -22,6 +24,7 @@ export default function SaveResultButton({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const saving = useRef(false);
+  const request = useRef<{ key: string; attempt: SaveAttempt } | null>(null);
   const active = useRef(false);
   const { session } = useAuth();
   const account = useRef(session?.user.id);
@@ -39,7 +42,21 @@ export default function SaveResultButton({
     setBusy(true);
     setError("");
     try {
-      const { id, warning } = await saveArtwork(mode, focus || null, image);
+      const key = JSON.stringify([
+        userId,
+        mode,
+        focus ?? null,
+        image?.uri ?? null,
+      ]);
+      if (request.current?.key !== key)
+        request.current = { key, attempt: createSaveAttempt() };
+      const attempt = request.current.attempt;
+      const { id, warning } = await saveArtwork(
+        mode,
+        focus || null,
+        image,
+        attempt,
+      );
       if (!active.current || account.current !== userId) return;
       router.push({
         pathname:
@@ -62,7 +79,11 @@ export default function SaveResultButton({
   }
   return (
     <View style={{ gap: 12 }}>
-      <Button title={busy ? "Saving…" : title} onPress={save} disabled={busy} />
+      <Button
+        title={busy ? "Preparing…" : title}
+        onPress={save}
+        disabled={busy}
+      />
       {!!error && (
         <Text accessibilityRole="alert" style={styles.body}>
           {error}
