@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
@@ -28,19 +29,47 @@ export default function ImprovePainting() {
           <Pressable
             key={option}
             accessibilityRole="radio"
+            accessibilityLabel={option}
             accessibilityState={{ checked: focus === option }}
             onPress={() => setFocus(option)}
             style={{
-              borderRadius: 6,
+              borderRadius: 16,
               padding: 17,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
               minHeight: 56,
               backgroundColor: focus === option ? colors.pale : colors.paper,
               borderWidth: 1,
               borderColor: focus === option ? colors.accent : colors.border,
             }}
           >
-            <Text style={{ fontSize: 16, color: colors.ink }}>
-              {focus === option ? "●" : "○"} {option}
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 10,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor:
+                  focus === option ? "#D4E9DE" : colors.background,
+              }}
+            >
+              <Ionicons
+                name={focus === option ? "checkmark" : "brush-outline"}
+                size={18}
+                color={colors.accent}
+              />
+            </View>
+            <Text
+              style={{
+                fontSize: 15,
+                fontWeight: focus === option ? "600" : "400",
+                color: colors.ink,
+                flex: 1,
+              }}
+            >
+              {option}
             </Text>
           </Pressable>
         ))}

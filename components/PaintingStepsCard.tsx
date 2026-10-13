@@ -1,34 +1,42 @@
 import MiniWatercolorScene, { type StudyKind } from "./MiniWatercolorScene";
 import { Text, View } from "react-native";
 import { colors, styles } from "./ui";
+const kinds: StudyKind[] = ["sketch", "wash", "layers", "layers", "painting"];
 export default function PaintingStepsCard({ steps }: { steps: string[] }) {
   return (
     <View style={styles.card}>
       <Text style={styles.heading}>Painting steps</Text>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-        {(["sketch", "wash", "layers", "painting"] as StudyKind[]).map(
-          (kind, i) => (
+      {steps.map((step, i) => (
+        <View
+          key={step}
+          style={{
+            gap: 12,
+            paddingTop: i ? 18 : 0,
+            borderTopWidth: i ? 1 : 0,
+            borderColor: colors.border,
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+            <View style={{ width: 78, borderRadius: 12, overflow: "hidden" }}>
+              <MiniWatercolorScene kind={kinds[i] || "painting"} height={62} />
+            </View>
             <View
-              key={kind}
               style={{
-                width: "46%",
-                borderWidth: 1,
-                borderColor: colors.border,
-                padding: 5,
+                width: 30,
+                height: 30,
+                borderRadius: 10,
+                backgroundColor: colors.pale,
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <MiniWatercolorScene kind={kind} height={64} />
-              <Text style={styles.caption}>
-                {["Sketch", "First wash", "Middle layers", "Final accents"][i]}
+              <Text style={{ color: colors.accent, fontWeight: "700" }}>
+                {i + 1}
               </Text>
             </View>
-          ),
-        )}
-      </View>
-      {steps.map((step, i) => (
-        <Text key={step} style={styles.body}>
-          {i + 1}. {step}
-        </Text>
+          </View>
+          <Text style={styles.body}>{step}</Text>
+        </View>
       ))}
     </View>
   );
