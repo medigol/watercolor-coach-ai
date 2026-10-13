@@ -3,6 +3,16 @@ import { improveResult, referenceResult } from "../data/mockResults";
 export type ResultProvider = "mock" | "openai";
 export const freeLimitMessage =
   "You have used your 3 free AI feedback results. More feedback will be available after subscriptions are added.";
+export function createSaveAttempt(): SaveAttempt {
+  return { id: requestId() };
+}
+export interface SaveAttempt {
+  id: string;
+  ownerId?: string;
+  imagePath?: string | null;
+  warning?: string | null;
+  mayHaveSaved?: boolean;
+}
 function requestId() {
   // This is an idempotency identifier, never a credential or an access token.
   return (
@@ -87,6 +97,7 @@ export async function saveArtwork(
   mode: SavedMode,
   focus: string | null,
   image?: ArtworkImage,
+  attempt: SaveAttempt = createSaveAttempt(),
 ) {
   const client = requireSupabase();
   const {
@@ -96,8 +107,14 @@ export async function saveArtwork(
   if (authError || !user)
     throw new Error("Please sign in again before saving.");
   const ownerId = user.id;
-  let path: string | null = null;
-  let warning: string | null = null;
+  if (
+    !validArtworkId(attempt.id) ||
+    (attempt.ownerId && attempt.ownerId !== ownerId)
+  )
+    throw new Error("Your account changed. Please try again after signing in.");
+  attempt.ownerId = ownerId;
+  let path = attempt.imagePath ?? null;
+  let warning = attempt.warning ?? null;
   async function checkAccount() {
     const { data, error } = await client.auth.getSession();
     if (error || data.session?.user.id !== ownerId)
@@ -105,7 +122,7 @@ export async function saveArtwork(
         "Your account changed. Please try again after signing in.",
       );
   }
-  if (image) {
+  if (image && attempt.imagePath === undefined) {
     try {
       if (image.fileSize !== undefined && image.fileSize > imageLimit)
         throw new Error("Image too large");
@@ -132,10 +149,12 @@ export async function saveArtwork(
     }
   }
   const result = mode === "improve_painting" ? improveResult : referenceResult;
-  const id = requestId();
+  const id = attempt.id;
+  attempt.imagePath = path;
+  attempt.warning = warning;
   let definitelyRejected = false;
   let rpcStarted = false;
-  let edgeMayHaveSaved = false;
+  let edgeMayHaveSaved = attempt.mayHaveSaved ?? false;
   let specificError: string | null = null;
   try {
     await checkAccount();
@@ -158,6 +177,7 @@ export async function saveArtwork(
       edge = { data: null, error: true };
     }
     if (!edge.error && validSave(edge.data, id)) {
+      attempt.mayHaveSaved = true;
       await checkAccount();
       const edgeWarning =
         typeof edge.data.warning === "string" ? edge.data.warning : null;
@@ -171,7 +191,7 @@ export async function saveArtwork(
     if (context instanceof Response) {
       // Only definite rejections can safely discard an uploaded image.
       if ([400, 401, 403, 404, 405].includes(context.status))
-        edgeMayHaveSaved = false;
+        edgeMayHaveSaved = attempt.mayHaveSaved ?? false;
       const problem = await context
         .clone()
         .json()
@@ -204,6 +224,7 @@ export async function saveArtwork(
       status !== 408 &&
       status !== 429;
     if (error || !validSave(data, id)) throw new Error("Save failed");
+    attempt.mayHaveSaved = true;
     await checkAccount();
     return {
       id,
@@ -215,11 +236,18 @@ export async function saveArtwork(
           : null),
     };
   } catch {
-    if (path && !edgeMayHaveSaved && (!rpcStarted || definitelyRejected))
+    attempt.mayHaveSaved ||=
+      edgeMayHaveSaved || (rpcStarted && !definitelyRejected);
+    if (path && !attempt.mayHaveSaved && (!rpcStarted || definitelyRejected)) {
+      // A definite rejection may remove the image. A retry must upload again;
+      // uncertain outcomes retain both the path and ID for safe recovery.
+      attempt.imagePath = undefined;
+      attempt.warning = undefined;
       await client.storage
         .from("artworks")
         .remove([path])
         .catch(() => {});
+    }
     throw new Error(
       specificError ??
         ((rpcStarted && !definitelyRejected) || edgeMayHaveSaved

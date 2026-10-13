@@ -101,6 +101,15 @@ drop policy if exists ai_results_own on public.ai_results;
 create policy ai_results_own on public.ai_results for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists usage_read_own on public.usage_counters;
 create policy usage_read_own on public.usage_counters for select to authenticated using (user_id = (select auth.uid()));
+-- Enforce read-only client quotas in RLS as well as table privileges. These
+-- guards still deny writes if broader policies or grants are added later.
+-- SECURITY DEFINER server RPCs bypass RLS as the database owner.
+drop policy if exists watercolor_usage_no_client_insert on public.usage_counters;
+create policy watercolor_usage_no_client_insert on public.usage_counters as restrictive for insert to anon, authenticated with check (false);
+drop policy if exists watercolor_usage_no_client_update on public.usage_counters;
+create policy watercolor_usage_no_client_update on public.usage_counters as restrictive for update to anon, authenticated using (false) with check (false);
+drop policy if exists watercolor_usage_no_client_delete on public.usage_counters;
+create policy watercolor_usage_no_client_delete on public.usage_counters as restrictive for delete to anon, authenticated using (false);
 -- Only server-side functions may change quotas or reserve an OpenAI request.
 
 -- A public client cannot forge or modify a paid-model result, even if an old
@@ -123,6 +132,7 @@ create or replace function public.save_mock_artwork(
 declare saved_id uuid; existing_mode text;
 begin
   if auth.uid() is null then raise exception 'Sign in required'; end if;
+  if p_mode is null or p_mode not in ('improve_painting', 'create_reference') then raise exception 'Invalid mode'; end if;
   if p_expected_user_id is not null and p_expected_user_id <> auth.uid() then
     raise exception 'Your account changed. Please try again.';
   end if;

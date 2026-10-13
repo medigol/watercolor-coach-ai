@@ -39,6 +39,7 @@ function fixture(options = {}) {
     fetches: 0,
     signs: [],
     edges: [],
+    rpcAttempt: 0,
   };
   const client = {
     auth: {
@@ -75,6 +76,8 @@ function fixture(options = {}) {
       invoke: async (name, optionsArg) => {
         assert.equal(name, "generate-feedback");
         state.edges.push(optionsArg.body);
+        if (options.edgeResponses)
+          return options.edgeResponses[state.edges.length - 1];
         if (options.edgeThrows) throw new Error("Network unavailable");
         if (options.edgeCode)
           return {
@@ -103,9 +106,12 @@ function fixture(options = {}) {
     rpc: async (name, input) => {
       assert.equal(name, "save_mock_feedback");
       state.saves.push(input);
+      state.rpcAttempt++;
       if (options.transportThrows) throw new Error("Lost response");
       return (
-        options.rpcResponse || {
+        (options.rpcResponses
+          ? options.rpcResponses[state.rpcAttempt - 1]
+          : options.rpcResponse) || {
           data: {
             id: input.p_request_id,
             provider: options.fallbackProvider || "mock",
@@ -369,4 +375,101 @@ test("a failed fallback never removes images potentially committed by Edge", asy
     /could not confirm/,
   );
   assert.equal(state.removals.length, 0);
+});
+
+test("in-place retry preserves request ID and private upload after uncertain responses", async () => {
+  const { api, state } = fixture({
+    edgeThrows: true,
+    rpcResponses: [
+      { data: null, error: { message: "Lost response" }, status: 502 },
+      null,
+    ],
+  });
+  const attempt = api.createSaveAttempt();
+  await assert.rejects(
+    api.saveArtwork(
+      "improve_painting",
+      "Composition",
+      { uri: "blob:painting" },
+      attempt,
+    ),
+    /could not confirm/,
+  );
+  const saved = await api.saveArtwork(
+    "improve_painting",
+    "Composition",
+    { uri: "blob:painting" },
+    attempt,
+  );
+  assert.equal(saved.id, attempt.id);
+  assert.equal(state.edges[0].request_id, state.edges[1].request_id);
+  assert.equal(state.saves[0].p_request_id, state.saves[1].p_request_id);
+  assert.equal(state.uploads.length, 1);
+  assert.equal(state.removals.length, 0);
+});
+
+test("retry after definite rejection replaces a deleted upload but keeps the request ID", async () => {
+  const { api, state } = fixture({
+    rpcResponses: [{ data: null, error: { code: "23514" }, status: 400 }, null],
+  });
+  const attempt = api.createSaveAttempt();
+  await assert.rejects(
+    api.saveArtwork(
+      "create_reference",
+      null,
+      { uri: "blob:painting" },
+      attempt,
+    ),
+    /could not save/,
+  );
+  assert.equal(attempt.imagePath, undefined);
+  const saved = await api.saveArtwork(
+    "create_reference",
+    null,
+    { uri: "blob:painting" },
+    attempt,
+  );
+  assert.equal(saved.id, attempt.id);
+  assert.equal(state.uploads.length, 2);
+  assert.equal(state.removals.length, 1);
+});
+
+test("an attempt cannot be reused by another account", async () => {
+  const { api, state } = fixture();
+  const attempt = { id: artworkId, ownerId: otherUserId };
+  await assert.rejects(
+    api.saveArtwork("improve_painting", null, undefined, attempt),
+    /account changed/,
+  );
+  assert.equal(state.edges.length, 0);
+  assert.equal(state.saves.length, 0);
+  assert.equal(state.uploads.length, 0);
+});
+
+test("a later definite rejection cannot delete an image from a previous uncertain save", async () => {
+  const response = (status, code) => ({
+    data: null,
+    error: { context: new Response(JSON.stringify({ code }), { status }) },
+  });
+  const { api, state } = fixture({
+    edgeResponses: [response(503, "unavailable"), response(404, "not_found")],
+    rpcResponses: [
+      { data: null, error: { message: "Lost response" }, status: 503 },
+      { data: null, error: { message: "New permission error" }, status: 403 },
+    ],
+  });
+  const attempt = api.createSaveAttempt();
+  for (let i = 0; i < 2; i++)
+    await assert.rejects(
+      api.saveArtwork(
+        "improve_painting",
+        null,
+        { uri: "blob:painting" },
+        attempt,
+      ),
+      /could not confirm/,
+    );
+  assert.equal(state.uploads.length, 1);
+  assert.equal(state.removals.length, 0);
+  assert.equal(attempt.mayHaveSaved, true);
 });

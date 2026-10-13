@@ -41,7 +41,8 @@ export function validInput(value: unknown, userId: string): value is Input {
   if (
     !uuid(v.request_id) ||
     v.expected_user_id !== userId ||
-    !["improve_painting", "create_reference"].includes(String(v.mode))
+    typeof v.mode !== "string" ||
+    !["improve_painting", "create_reference"].includes(v.mode)
   )
     return false;
   if (

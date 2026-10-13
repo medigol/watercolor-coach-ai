@@ -4,6 +4,9 @@ begin;
 insert into auth.users(id,email,raw_user_meta_data) values
 ('10000000-0000-4000-8000-000000000003','watercolor-feedback-test@example.invalid','{}');
 create policy watercolor_feedback_test_broad_results on public.ai_results for all to authenticated using (true) with check (true);
+-- Simulate broader grants and a permissive policy from a legacy/misconfigured project.
+grant update(free_results_used, free_results_limit, active_request_id), insert(user_id), delete on public.usage_counters to authenticated;
+create policy watercolor_feedback_test_broad_usage on public.usage_counters for all to authenticated using (true) with check (true);
 set local role authenticated;
 select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000003',true);
 select set_config('request.jwt.claim.role','authenticated',true);
@@ -13,6 +16,22 @@ do $$ declare response jsonb; n integer; begin
   perform public.save_mock_feedback('improve_painting','duplicate',null,null,'{"title":"duplicate"}',auth.uid(),'20000000-0000-4000-8000-000000000010');
   if (select count(*) from public.artworks) <> 1 then raise exception 'duplicate fallback save'; end if;
   if (select free_results_used from public.usage_counters) <> 0 then raise exception 'mock charged quota'; end if;
+  update public.usage_counters set free_results_used=0, free_results_limit=100, active_request_id=null;
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'legacy column grants allowed quota changes'; end if;
+  delete from public.usage_counters;
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'legacy policies allowed counter deletion'; end if;
+  begin
+    insert into public.usage_counters(user_id) values (auth.uid());
+    raise exception 'legacy grants allowed quota provisioning';
+  exception when insufficient_privilege then null; end;
+  begin
+    perform public.save_mock_feedback(null,'invalid replay',null,null,'{}',auth.uid(),'20000000-0000-4000-8000-000000000010');
+    raise exception 'invalid replay mode allowed';
+  exception when raise_exception then
+    if sqlerrm <> 'Invalid mode' then raise; end if;
+  end;
   begin
     perform public.claim_feedback_request(auth.uid(),'20000000-0000-4000-8000-000000000011');
     raise exception 'client claim allowed';
@@ -73,6 +92,9 @@ select set_config('request.jwt.claim.role','authenticated',true);
 do $$ declare response jsonb; n integer; begin
   response := public.save_mock_feedback('improve_painting','fallback',null,null,'{"title":"fallback"}',auth.uid(),'20000000-0000-4000-8000-000000000021');
   if response ->> 'provider' <> 'openai' then raise exception 'fallback overwrote real result'; end if;
+  update public.usage_counters set free_results_used=0;
+  get diagnostics n = row_count;
+  if n <> 0 or (select free_results_used from public.usage_counters) <> 3 then raise exception 'client reset paid quota'; end if;
   update public.ai_results set provider='mock',result_json='{}' where provider='openai';
   get diagnostics n = row_count;
   if n <> 0 then raise exception 'real result modified by client'; end if;

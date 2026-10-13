@@ -38,7 +38,7 @@ function admin() {
 function saved(value: unknown): Saved {
   if (!value || typeof value !== "object") throw new Error("Invalid save");
   const v = value as Record<string, unknown>;
-  if (!uuid(v.id) || !["mock", "openai"].includes(String(v.provider)))
+  if (!uuid(v.id) || (v.provider !== "mock" && v.provider !== "openai"))
     throw new Error("Invalid save");
   return { id: v.id, provider: v.provider as Saved["provider"] };
 }
@@ -63,7 +63,10 @@ const handler = createHandler({
     const { data, error } = await createClient(url, anon, options).auth.getUser(
       token,
     );
-    return error || !data.user ? null : { id: data.user.id, token };
+    // Anonymous Auth sessions are valid JWTs but must not create paid requests.
+    return error || !data.user || data.user.is_anonymous
+      ? null
+      : { id: data.user.id, token };
   },
   async existing(user, input) {
     const { data, error } = await userClient(user)
