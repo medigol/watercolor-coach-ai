@@ -20,7 +20,7 @@ export default function ReferenceResult() {
         text={result.composition}
       />
       <SketchGuideCard title="Line sketch guide" description={result.sketch} />
-      <ValueStudyCard description={result.values} />
+      <ValueStudyCard description={result.values} harbour />
       <PaletteCard palette={result.palette} />
       <PaintingStepsCard steps={result.steps} />
     </Screen>

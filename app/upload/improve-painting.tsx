@@ -31,10 +31,10 @@ export default function ImprovePainting() {
             accessibilityState={{ checked: focus === option }}
             onPress={() => setFocus(option)}
             style={{
-              borderRadius: 14,
+              borderRadius: 6,
               padding: 17,
               minHeight: 56,
-              backgroundColor: focus === option ? colors.pale : "#FFFFFF",
+              backgroundColor: focus === option ? colors.pale : colors.paper,
               borderWidth: 1,
               borderColor: focus === option ? colors.accent : colors.border,
             }}
@@ -46,7 +46,7 @@ export default function ImprovePainting() {
         ))}
       </View>
       <Button
-        title="Get AI Feedback"
+        title="Get feedback"
         onPress={() =>
           router.push({
             pathname: "/result/improve-painting",

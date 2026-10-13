@@ -19,12 +19,12 @@ export default function FeedbackSection({
       style={[
         styles.card,
         tone === "blue" && {
-          backgroundColor: "#F0F5F9",
-          borderColor: "#D9E5EF",
+          backgroundColor: "#F0EFE6",
+          borderColor: colors.border,
         },
         highlight && {
-          backgroundColor: "#E8F2EB",
-          borderColor: "#C5DBCB",
+          backgroundColor: "#EAEBDD",
+          borderColor: "#D0D3BE",
           padding: 24,
           borderLeftWidth: 4,
           borderLeftColor: colors.accent,

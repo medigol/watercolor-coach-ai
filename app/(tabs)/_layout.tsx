@@ -14,9 +14,9 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: colors.paper,
           width: "100%",
-          maxWidth: 760,
+          maxWidth: 480,
           alignSelf: "center",
           height: 60 + Math.max(insets.bottom, 12),
           paddingTop: 8,
