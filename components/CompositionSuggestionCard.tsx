@@ -6,5 +6,5 @@ export default function CompositionSuggestionCard({
   text: string;
   title?: string;
 }) {
-  return <FeedbackSection title={title} text={text} />;
+  return <FeedbackSection title={title} text={text} tone="blue" />;
 }

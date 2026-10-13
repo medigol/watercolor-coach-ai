@@ -9,11 +9,15 @@ export default function TabLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.background },
         headerShadowVisible: false,
+        headerTitleAlign: "center",
         headerTintColor: colors.ink,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
+          width: "100%",
+          maxWidth: 760,
+          alignSelf: "center",
           height: 60 + Math.max(insets.bottom, 12),
           paddingTop: 8,
           paddingBottom: Math.max(insets.bottom, 12),
