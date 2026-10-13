@@ -1,0 +1,16 @@
+{
+  "name": "Watercolor Coach AI browser preview",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "forwardPorts": [
+    8081
+  ],
+  "portsAttributes": {
+    "8081": {
+      "label": "Watercolor Coach AI",
+      "onAutoForward": "openBrowser",
+      "visibility": "private"
+    }
+  },
+  "postCreateCommand": "npm ci",
+  "postStartCommand": "nohup npm run preview > /tmp/watercolor-preview.log 2>&1 &"
+}
