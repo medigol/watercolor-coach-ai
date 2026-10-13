@@ -1,18 +1,12 @@
-import { Platform } from "react-native";
 export const colors = {
-  background: "#F4EFE5",
-  paper: "#FFFCF4",
-  ink: "#343E3B",
-  muted: "#72766C",
-  accent: "#4B7170",
-  pale: "#E5EBDF",
-  border: "#DED8CB",
-  blue: "#E4EBEC",
-  ochre: "#B18D53",
-  sienna: "#A56F55",
+  background: "#F7F8F5",
+  paper: "#FFFFFF",
+  ink: "#253C3C",
+  muted: "#617473",
+  accent: "#236963",
+  pale: "#E8F3ED",
+  border: "#E3EBE7",
+  blue: "#ECF3FA",
+  ochre: "#B38A50",
+  sienna: "#A9715A",
 };
-export const serif = Platform.select({
-  ios: "Georgia",
-  web: "Georgia",
-  default: "serif",
-});

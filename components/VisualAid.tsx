@@ -15,13 +15,16 @@ export default function VisualAid({
       style={{
         borderWidth: 1,
         borderColor: colors.border,
-        padding: 8,
+        padding: 12,
+        borderRadius: 18,
+        overflow: "hidden",
         backgroundColor: colors.paper,
       }}
     >
       <MiniWatercolorScene
         harbour={!label.includes("Lake House")}
         kind={kind === "landscape" ? "painting" : kind}
+        height={180}
       />
       <Text
         style={{

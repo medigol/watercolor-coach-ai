@@ -1,3 +1,4 @@
+import { View } from "react-native";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,21 +17,34 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.paper,
           width: "100%",
-          maxWidth: 480,
+          maxWidth: 430,
           alignSelf: "center",
-          height: 60 + Math.max(insets.bottom, 12),
+          height: 66 + Math.max(insets.bottom, 12),
           paddingTop: 8,
           paddingBottom: Math.max(insets.bottom, 12),
         },
-        tabBarLabelStyle: { fontSize: 12 },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: "600" },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" color={color} size={size} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View
+              style={{
+                backgroundColor: focused ? colors.pale : "transparent",
+                paddingHorizontal: 14,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <Ionicons
+                name={focused ? "home" : "home-outline"}
+                color={color}
+                size={size}
+              />
+            </View>
           ),
         }}
       />
@@ -38,8 +52,21 @@ export default function TabLayout() {
         name="artworks"
         options={{
           title: "My Artworks",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="images-outline" color={color} size={size} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View
+              style={{
+                backgroundColor: focused ? colors.pale : "transparent",
+                paddingHorizontal: 14,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <Ionicons
+                name={focused ? "images" : "images-outline"}
+                color={color}
+                size={size}
+              />
+            </View>
           ),
         }}
       />
@@ -47,8 +74,21 @@ export default function TabLayout() {
         name="practice"
         options={{
           title: "Practice",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="brush-outline" color={color} size={size} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View
+              style={{
+                backgroundColor: focused ? colors.pale : "transparent",
+                paddingHorizontal: 14,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <Ionicons
+                name={focused ? "brush" : "brush-outline"}
+                color={color}
+                size={size}
+              />
+            </View>
           ),
         }}
       />

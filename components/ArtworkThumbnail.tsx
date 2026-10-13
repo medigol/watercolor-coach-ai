@@ -15,9 +15,9 @@ export default function ArtworkThumbnail({
         padding: small ? 4 : 8,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 3,
+        borderRadius: 16,
         width: small ? 86 : "100%",
-        transform: [{ rotate: small ? "-3deg" : "-1deg" }],
+        overflow: "hidden",
       }}
     >
       <MiniWatercolorScene harbour={harbour} height={small ? 82 : 140} />

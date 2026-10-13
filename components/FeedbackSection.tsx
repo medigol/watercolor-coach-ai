@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 import { colors, styles } from "./ui";
 export default function FeedbackSection({
@@ -19,14 +20,14 @@ export default function FeedbackSection({
       style={[
         styles.card,
         tone === "blue" && {
-          backgroundColor: "#F0EFE6",
+          backgroundColor: "#F0F5FB",
           borderColor: colors.border,
         },
         highlight && {
-          backgroundColor: "#EAEBDD",
-          borderColor: "#D0D3BE",
+          backgroundColor: "#E5F2EE",
+          borderColor: "#CADFD8",
           padding: 24,
-          borderLeftWidth: 4,
+          borderLeftWidth: 1,
           borderLeftColor: colors.accent,
         },
       ]}
@@ -59,13 +60,22 @@ export default function FeedbackSection({
         >
           <View
             style={{
-              marginTop: 8,
-              width: 7,
-              height: 7,
-              borderRadius: 4,
-              backgroundColor: accent,
+              width: 24,
+              height: 24,
+              marginTop: 1,
+              borderRadius: 8,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor:
+                title === "What to fix" ? "#FAF1DF" : colors.pale,
             }}
-          />
+          >
+            <Ionicons
+              name={title === "What to fix" ? "arrow-up-outline" : "checkmark"}
+              size={15}
+              color={accent}
+            />
+          </View>
           <Text style={[styles.body, { flex: 1 }]}>{item}</Text>
         </View>
       ))}

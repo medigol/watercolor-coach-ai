@@ -24,7 +24,8 @@ export default function MiniWatercolorScene({
         height,
         width: "100%",
         overflow: "hidden",
-        backgroundColor: colors.paper,
+        backgroundColor: kind === "sketch" ? "#FAFBF8" : "#F1F6F3",
+        borderRadius: 12,
       }}
     >
       {!sketch && (

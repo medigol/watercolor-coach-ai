@@ -2,7 +2,13 @@ import { View } from "react-native";
 export default function WatercolorSwatch({ color }: { color: string }) {
   return (
     <View
-      style={{ width: 45, height: 35, backgroundColor: "#F7F1E3", padding: 3 }}
+      style={{
+        width: 45,
+        height: 35,
+        backgroundColor: "#F5F7F3",
+        padding: 4,
+        borderRadius: 10,
+      }}
     >
       <View
         style={{
@@ -32,7 +38,7 @@ export default function WatercolorSwatch({ color }: { color: string }) {
           top: 9,
           width: 16,
           height: 1,
-          backgroundColor: "#FFFCF4",
+          backgroundColor: "#FFFFFF",
           opacity: 0.45,
         }}
       />

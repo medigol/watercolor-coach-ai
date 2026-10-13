@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import PaperBackground from "./PaperBackground";
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
-import { colors, serif } from "./theme";
+import { colors } from "./theme";
 export { colors } from "./theme";
 export const styles = StyleSheet.create({
   content: {
@@ -10,18 +9,17 @@ export const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 20,
     width: "100%",
-    maxWidth: 480,
+    maxWidth: 430,
     alignSelf: "center",
   },
   title: {
-    fontFamily: serif,
-    fontSize: 29,
+    fontSize: 30,
     lineHeight: 37,
     fontWeight: "700",
+    letterSpacing: -0.6,
     color: colors.ink,
   },
   heading: {
-    fontFamily: serif,
     fontSize: 20,
     lineHeight: 27,
     fontWeight: "600",
@@ -30,15 +28,20 @@ export const styles = StyleSheet.create({
   body: { fontSize: 16, lineHeight: 25, color: colors.muted },
   card: {
     backgroundColor: colors.paper,
-    borderRadius: 8,
+    borderRadius: 22,
     padding: 20,
-    gap: 14,
+    gap: 16,
     borderWidth: 1,
     borderColor: colors.border,
+    shadowColor: "#234641",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.035,
+    shadowRadius: 16,
+    elevation: 1,
   },
   button: {
     backgroundColor: colors.accent,
-    borderRadius: 8,
+    borderRadius: 16,
     padding: 18,
     minHeight: 56,
     alignItems: "center",
@@ -53,14 +56,12 @@ export function Screen({ children }: { children: ReactNode }) {
         flex: 1,
         backgroundColor: colors.background,
         width: "100%",
-        maxWidth: 480,
+        maxWidth: 430,
         alignSelf: "center",
       }}
       contentContainerStyle={styles.content}
     >
-      <PaperBackground>
-        <View style={{ gap: 20 }}>{children}</View>
-      </PaperBackground>
+      <View style={{ gap: 20 }}>{children}</View>
     </ScrollView>
   );
 }
