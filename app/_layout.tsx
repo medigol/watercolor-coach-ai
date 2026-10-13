@@ -12,6 +12,7 @@ export default function RootLayout() {
           headerTintColor: colors.ink,
           headerBackTitle: "Back",
           headerShadowVisible: false,
+          headerTitleAlign: "center",
           contentStyle: { backgroundColor: colors.background },
         }}
       >

@@ -1,24 +1,18 @@
-import React, { ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
-export const colors = {
-  background: "#F8FAF8",
-  ink: "#243C3A",
-  muted: "#5E7370",
-  accent: "#326C70",
-  pale: "#E8F1EF",
-  border: "#DCE7E3",
-  blue: "#EAF2F8",
-};
+import type { ReactNode } from "react";
+import { ScrollView, StyleSheet, Text, Pressable } from "react-native";
+import { colors } from "./theme";
+export { colors } from "./theme";
 export const styles = StyleSheet.create({
   content: {
     padding: 20,
+    paddingTop: 24,
     paddingBottom: 40,
-    gap: 18,
+    gap: 20,
     width: "100%",
-    maxWidth: 640,
+    maxWidth: 680,
     alignSelf: "center",
   },
-  title: { fontSize: 30, lineHeight: 37, fontWeight: "700", color: colors.ink },
+  title: { fontSize: 29, lineHeight: 37, fontWeight: "700", color: colors.ink },
   heading: {
     fontSize: 20,
     lineHeight: 27,
@@ -28,9 +22,9 @@ export const styles = StyleSheet.create({
   body: { fontSize: 16, lineHeight: 25, color: colors.muted },
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 20,
-    gap: 12,
+    gap: 14,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -47,7 +41,13 @@ export const styles = StyleSheet.create({
 export function Screen({ children }: { children: ReactNode }) {
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+        width: "100%",
+        maxWidth: 760,
+        alignSelf: "center",
+      }}
       contentContainerStyle={styles.content}
     >
       {children}
@@ -77,62 +77,4 @@ export function Button({
     </Pressable>
   );
 }
-export function Placeholder({
-  label,
-  kind = "landscape",
-}: {
-  label: string;
-  kind?: "landscape" | "sketch" | "values";
-}) {
-  return (
-    <View
-      accessible
-      accessibilityLabel={label}
-      style={{
-        height: 156,
-        backgroundColor: colors.blue,
-        borderRadius: 14,
-        overflow: "hidden",
-        justifyContent: "flex-end",
-      }}
-    >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          alignItems: "flex-end",
-          gap: 4,
-          paddingHorizontal: 18,
-        }}
-      >
-        {(kind === "values"
-          ? ["#E7ECE8", "#9BAFA7", "#415F58"]
-          : kind === "sketch"
-            ? ["#E1E6DF", "#C1CCC3", "#A5B6AD"]
-            : ["#BBDAD9", "#98BDB0", "#729E91"]
-        ).map((color, i) => (
-          <View
-            key={color}
-            style={{
-              flex: 1,
-              height: [42, 72, 55][i],
-              backgroundColor: color,
-              borderTopLeftRadius: kind === "values" ? 0 : 40,
-              borderTopRightRadius: kind === "values" ? 0 : 30,
-            }}
-          />
-        ))}
-      </View>
-      <Text
-        style={{
-          padding: 12,
-          backgroundColor: "#FFFFFFDD",
-          color: colors.muted,
-          fontSize: 13,
-        }}
-      >
-        {label}
-      </Text>
-    </View>
-  );
-}
+export { default as Placeholder } from "./VisualAid";

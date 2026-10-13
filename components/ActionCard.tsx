@@ -5,11 +5,16 @@ export default function ActionCard({
   title,
   description,
   onPress,
+  tone = "green",
+  icon = "brush-outline",
 }: {
   title: string;
   description: string;
   onPress: () => void;
+  tone?: "green" | "blue";
+  icon?: "brush-outline" | "image-outline";
 }) {
+  const tint = tone === "blue" ? "#EDF3F8" : "#EDF4F0";
   return (
     <Pressable
       accessibilityRole="button"
@@ -17,9 +22,10 @@ export default function ActionCard({
       style={({ pressed }) => [
         styles.card,
         {
-          padding: 24,
-          minHeight: 165,
-          backgroundColor: pressed ? colors.pale : "#FFFFFF",
+          padding: 22,
+          minHeight: 176,
+          backgroundColor: pressed ? colors.pale : tint,
+          borderColor: tone === "blue" ? "#D9E5EF" : "#D5E5DC",
         },
       ]}
     >
@@ -27,12 +33,24 @@ export default function ActionCard({
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
-          gap: 12,
+          alignItems: "center",
         }}
       >
-        <Text style={[styles.heading, { flex: 1 }]}>{title}</Text>
-        <Ionicons name="arrow-forward" size={22} color={colors.accent} />
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 15,
+            backgroundColor: "#FFFFFFCC",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Ionicons name={icon} size={24} color={colors.accent} />
+        </View>
+        <Ionicons name="arrow-forward" size={21} color={colors.accent} />
       </View>
+      <Text style={styles.heading}>{title}</Text>
       <Text style={styles.body}>{description}</Text>
     </Pressable>
   );
