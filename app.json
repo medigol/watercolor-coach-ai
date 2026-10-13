@@ -7,7 +7,9 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "plugins": [
-      ["expo-router"],
+      [
+        "expo-router"
+      ],
       [
         "expo-image-picker",
         {
@@ -15,6 +17,9 @@
         }
       ]
     ],
-    "web": { "bundler": "metro" }
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    }
   }
 }
