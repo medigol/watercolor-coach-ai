@@ -31,6 +31,7 @@ export default function ImprovePainting() {
             accessibilityRole="radio"
             accessibilityLabel={option}
             accessibilityState={{ checked: focus === option }}
+            aria-checked={focus === option}
             onPress={() => setFocus(option)}
             style={{
               borderRadius: 16,
