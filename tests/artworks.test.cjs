@@ -38,6 +38,7 @@ function fixture(options = {}) {
     saves: [],
     fetches: 0,
     signs: [],
+    edges: [],
   };
   const client = {
     auth: {
@@ -70,12 +71,48 @@ function fixture(options = {}) {
         };
       },
     },
+    functions: {
+      invoke: async (name, optionsArg) => {
+        assert.equal(name, "generate-feedback");
+        state.edges.push(optionsArg.body);
+        if (options.edgeThrows) throw new Error("Network unavailable");
+        if (options.edgeCode)
+          return {
+            data: null,
+            error: {
+              context: new Response(
+                JSON.stringify({ code: options.edgeCode }),
+                { status: options.edgeStatus || 403 },
+              ),
+            },
+          };
+        if (options.edgeProvider)
+          return {
+            data: {
+              id: optionsArg.body.request_id,
+              provider: options.edgeProvider,
+            },
+            error: null,
+          };
+        return {
+          data: null,
+          error: { context: new Response("Not found", { status: 404 }) },
+        };
+      },
+    },
     rpc: async (name, input) => {
-      assert.equal(name, "save_mock_artwork");
+      assert.equal(name, "save_mock_feedback");
       state.saves.push(input);
       if (options.transportThrows) throw new Error("Lost response");
       return (
-        options.rpcResponse || { data: artworkId, error: null, status: 200 }
+        options.rpcResponse || {
+          data: {
+            id: input.p_request_id,
+            provider: options.fallbackProvider || "mock",
+          },
+          error: null,
+          status: 200,
+        }
       );
     },
   };
@@ -99,10 +136,11 @@ function fixture(options = {}) {
 
 test("saves mock metadata without an image and binds the expected account", async () => {
   const { api, state } = fixture();
-  assert.deepEqual(await api.saveArtwork("improve_painting", "Composition"), {
-    id: artworkId,
-    warning: null,
-  });
+  const saved = await api.saveArtwork("improve_painting", "Composition");
+  assert(api.validArtworkId(saved.id));
+  assert.equal(saved.provider, "mock");
+  assert.match(saved.warning, /sample guide/);
+  assert.equal(state.edges[0].request_id, state.saves[0].p_request_id);
   assert.equal(state.uploads.length, 0);
   assert.equal(state.saves[0].p_expected_user_id, userId);
   assert.equal(state.saves[0].p_image_path, null);
@@ -279,4 +317,56 @@ test("external URLs and traversal paths are never sent to storage for signing", 
     await api.imageUrl(`${userId}/painting.png`),
     "https://example.invalid/temporary-image",
   );
+});
+
+test("real Edge result bypasses mock save and returns its provider", async () => {
+  const { api, state } = fixture({ edgeProvider: "openai" });
+  const result = await api.saveArtwork("improve_painting", "Composition", {
+    uri: "blob:painting",
+  });
+  assert.equal(result.provider, "openai");
+  assert.equal(result.warning, null);
+  assert.equal(result.id, state.edges[0].request_id);
+  assert.equal(state.saves.length, 0);
+  assert.equal(state.edges[0].image_path, state.uploads[0].name);
+});
+
+test("quota and authorization rejections do not bypass the backend with mock saves", async () => {
+  for (const code of ["usage_limit", "auth", "invalid_request", "busy"]) {
+    const { api, state } = fixture({
+      edgeCode: code,
+      edgeStatus: code === "busy" ? 409 : 403,
+    });
+    await assert.rejects(
+      api.saveArtwork("improve_painting", null, { uri: "blob:painting" }),
+      code === "usage_limit"
+        ? /used your 3 free/
+        : /sign in|changed|already being prepared/,
+    );
+    assert.equal(state.saves.length, 0);
+    assert.equal(state.removals.length, code === "busy" ? 0 : 1);
+  }
+});
+
+test("uncertain Edge outcomes reuse the ID and can recover an already committed real result", async () => {
+  const { api, state } = fixture({
+    edgeThrows: true,
+    fallbackProvider: "openai",
+  });
+  const result = await api.saveArtwork("create_reference", null);
+  assert.equal(result.provider, "openai");
+  assert.equal(result.warning, null);
+  assert.equal(state.edges[0].request_id, state.saves[0].p_request_id);
+});
+
+test("a failed fallback never removes images potentially committed by Edge", async () => {
+  const { api, state } = fixture({
+    edgeThrows: true,
+    rpcResponse: { data: null, error: { code: "denied" }, status: 400 },
+  });
+  await assert.rejects(
+    api.saveArtwork("create_reference", null, { uri: "blob:painting" }),
+    /could not confirm/,
+  );
+  assert.equal(state.removals.length, 0);
 });

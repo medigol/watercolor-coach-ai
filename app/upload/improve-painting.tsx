@@ -85,7 +85,8 @@ export default function ImprovePainting() {
         title="Get feedback"
       />
       <Text style={styles.caption}>
-        Sample feedback only. Your painting is not analysed yet.
+        Feedback uses your painting when available. A sample guide is saved if
+        automatic feedback is unavailable.
       </Text>
     </Screen>
   );

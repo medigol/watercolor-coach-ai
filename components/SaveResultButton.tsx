@@ -62,7 +62,11 @@ export default function SaveResultButton({
   }
   return (
     <View style={{ gap: 12 }}>
-      <Button title={busy ? "Saving…" : title} onPress={save} disabled={busy} />
+      <Button
+        title={busy ? "Preparing…" : title}
+        onPress={save}
+        disabled={busy}
+      />
       {!!error && (
         <Text accessibilityRole="alert" style={styles.body}>
           {error}

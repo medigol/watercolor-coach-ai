@@ -32,6 +32,12 @@ jobs:
         run: npm test
       - name: Check TypeScript
         run: npm run typecheck
+      - name: Set up Deno for server TypeScript
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.5.6
+      - name: Check Edge Function TypeScript
+        run: npm run typecheck:edge
       - name: Export static web app
         run: npm run build:web
         env:

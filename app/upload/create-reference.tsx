@@ -23,7 +23,8 @@ export default function CreateReference() {
         title="Create Reference"
       />
       <Text style={styles.caption}>
-        Sample guide only. Your photo is not processed yet.
+        Create a plan from your photo. A sample guide is saved if automatic
+        feedback is unavailable.
       </Text>
     </Screen>
   );
