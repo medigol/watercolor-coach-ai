@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Watercolor Coach AI",
+    "slug": "watercolor-coach-ai",
+    "scheme": "watercolor-coach",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      ["expo-router"],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose a painting or photo for your watercolor practice."
+        }
+      ]
+    ],
+    "web": { "bundler": "metro" }
+  }
+}
