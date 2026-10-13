@@ -1,8 +1,11 @@
+import { useState } from "react";
+import SaveResultButton from "../../components/SaveResultButton";
 import { Text } from "react-native";
-import { router } from "expo-router";
 import ImageSelector from "../../components/ImageSelector";
-import { Button, Screen, styles } from "../../components/ui";
+import { Screen, styles } from "../../components/ui";
+import type { ArtworkImage } from "../../lib/artworks";
 export default function CreateReference() {
+  const [image, setImage] = useState<ArtworkImage>();
   return (
     <Screen>
       <Text style={styles.title}>Create painting reference</Text>
@@ -12,10 +15,12 @@ export default function CreateReference() {
       <ImageSelector
         sample="Coastal Town — sample photo placeholder"
         label="Choose photo"
+        onSelect={setImage}
       />
-      <Button
+      <SaveResultButton
+        mode="create_reference"
+        image={image}
         title="Create Reference"
-        onPress={() => router.push("/result/create-reference")}
       />
       <Text style={styles.caption}>
         Sample guide only. Your photo is not processed yet.

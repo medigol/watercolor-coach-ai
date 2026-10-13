@@ -1,21 +1,60 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { colors } from "../components/ui";
+import { ActivityIndicator, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AuthProvider, useAuth } from "../providers/AuthProvider";
+import { supabase } from "../lib/supabase";
+import { Screen, styles, colors } from "../components/ui";
 export const unstable_settings = { initialRouteName: "(tabs)" };
-export default function RootLayout() {
-  return (
-    <>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.ink,
-          headerBackTitle: "Back",
-          headerShadowVisible: false,
-          headerTitleAlign: "center",
-          contentStyle: { backgroundColor: colors.background },
+function AppRoutes() {
+  const { session, loading } = useAuth();
+  if (!supabase)
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <Screen>
+          <Text style={styles.title}>Account setup needed</Text>
+          <Text style={styles.body}>
+            This preview is waiting for its account connection. Set
+            EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY, then
+            restart or rebuild the app.
+          </Text>
+          <Text style={styles.caption}>
+            The repository README explains the setup. No private key is needed.
+          </Text>
+        </Screen>
+      </SafeAreaView>
+    );
+  if (loading)
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: colors.background,
         }}
       >
+        <ActivityIndicator color={colors.accent} />
+        <Text style={styles.caption}>Opening your account…</Text>
+      </SafeAreaView>
+    );
+  return (
+    <Stack
+      key={session?.user.id ?? "signed-out"}
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.ink,
+        headerBackTitle: "Back",
+        headerShadowVisible: false,
+        headerTitleAlign: "center",
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    >
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="auth/sign-in" options={{ title: "Sign in" }} />
+        <Stack.Screen name="auth/sign-up" options={{ title: "Sign up" }} />
+      </Stack.Protected>
+      <Stack.Protected guard={!!session}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="upload/improve-painting"
@@ -33,7 +72,16 @@ export default function RootLayout() {
           name="result/create-reference"
           options={{ title: "Painting reference" }}
         />
-      </Stack>
-    </>
+        <Stack.Screen name="account" options={{ title: "Account" }} />
+      </Stack.Protected>
+    </Stack>
+  );
+}
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <StatusBar style="dark" />
+      <AppRoutes />
+    </AuthProvider>
   );
 }

@@ -2,16 +2,20 @@ import { useState } from "react";
 import { Image, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Button, Placeholder, styles } from "./ui";
+import type { ArtworkImage } from "../lib/artworks";
 export default function ImageSelector({
   sample,
   label,
+  onSelect,
 }: {
   sample: string;
   label: string;
+  onSelect?: (image: ArtworkImage) => void;
 }) {
   const [uri, setUri] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const [failedUri, setFailedUri] = useState<string>();
   async function select() {
     setBusy(true);
     setError(undefined);
@@ -22,7 +26,10 @@ export default function ImageSelector({
         mediaTypes: ["images"],
         quality: 0.8,
       });
-      if (!result.canceled && result.assets[0]) setUri(result.assets[0].uri);
+      if (!result.canceled && result.assets[0]) {
+        setUri(result.assets[0].uri);
+        onSelect?.(result.assets[0]);
+      }
     } catch {
       setError("We could not open your photos. You can still use the sample.");
     } finally {
@@ -31,12 +38,18 @@ export default function ImageSelector({
   }
   return (
     <View style={styles.card}>
-      {uri ? (
+      {uri && failedUri !== uri ? (
         <Image
           source={{ uri }}
           accessibilityLabel="Selected image preview"
           style={{ width: "100%", height: 200, borderRadius: 14 }}
           resizeMode="contain"
+          onError={() => {
+            setFailedUri(uri);
+            setError(
+              "We could not preview this image. You can still use the sample.",
+            );
+          }}
         />
       ) : (
         <Placeholder label={sample} />
@@ -52,7 +65,8 @@ export default function ImageSelector({
         </Text>
       )}
       <Text style={styles.caption}>
-        Images stay on your device. This demo always shows the sample result.
+        Your image is saved privately with your feedback when you continue.
+        Results still use the sample guide.
       </Text>
     </View>
   );

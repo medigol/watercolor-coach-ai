@@ -1,15 +1,19 @@
-import { Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ArtworkThumbnail from "./ArtworkThumbnail";
 import type { Artwork } from "../types";
 import { colors, styles } from "./ui";
+import { useState } from "react";
 export default function ArtworkCard({
   artwork,
   onPress,
+  imageUri,
 }: {
   artwork: Artwork;
   onPress: () => void;
+  imageUri?: string;
 }) {
+  const [failedUri, setFailedUri] = useState<string>();
   return (
     <Pressable
       accessibilityRole="button"
@@ -19,7 +23,17 @@ export default function ArtworkCard({
         { padding: 18, opacity: pressed ? 0.85 : 1 },
       ]}
     >
-      <ArtworkThumbnail harbour={artwork.mode === "Create reference"} />
+      {imageUri && failedUri !== imageUri ? (
+        <Image
+          source={{ uri: imageUri }}
+          accessibilityLabel={artwork.title}
+          style={{ height: 180, width: "100%", borderRadius: 16 }}
+          resizeMode="contain"
+          onError={() => setFailedUri(imageUri)}
+        />
+      ) : (
+        <ArtworkThumbnail harbour={artwork.mode === "Create reference"} />
+      )}
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <Text style={[styles.heading, { flex: 1 }]}>{artwork.title}</Text>
         <Ionicons

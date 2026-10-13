@@ -16,6 +16,7 @@ export default function ActionCard({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={title}
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
