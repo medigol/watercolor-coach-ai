@@ -36,6 +36,7 @@ function fixture(options = {}) {
       ? load(path.join(root, "data/mockResults.ts")).referenceResult
       : load(path.join(root, "data/mockResults.ts")).improveResult;
   if (options.overlays) modelResult.overlays = options.overlays;
+  if (options.palette) modelResult.palette = options.palette;
   function json(data, status = 200) {
     return new Response(JSON.stringify(data), {
       status,
@@ -56,6 +57,7 @@ function fixture(options = {}) {
       "Every upstream request needs a deadline",
     );
     if (url.hostname === "api.openai.com") {
+      assert.equal(url.pathname, "/v1/chat/completions", "Only the existing text/vision analysis endpoint is used");
       assert.equal(headers.get("authorization"), `Bearer ${fakeOpenAI}`);
       assert.equal(body.response_format.json_schema.strict, true);
       assert.equal(
@@ -69,10 +71,28 @@ function fixture(options = {}) {
       const prompt = body.messages[0].content;
       assert(prompt.includes("visible locations"));
       assert(prompt.includes("never claim to have generated"));
+      assert(prompt.includes("Aim for 3–6 useful visual marks"));
+      assert(prompt.includes("preferably three distinct high-value notes"));
+      assert(prompt.includes("one practical sentence under 25 words for action"));
+      assert.equal(body.max_completion_tokens, 3000);
+      assert(prompt.includes("Omit any mark whose location or purpose is uncertain"));
+      assert(prompt.includes("never invent precise geometry"));
+      assert(prompt.includes("without another analysis or a new image"));
+      assert(prompt.includes("category is focal_point, composition, value_structure"));
       if (options.mode === "create_reference") {
         assert(prompt.includes("keep, simplify, remove, or merge"));
         assert(prompt.includes("3–5 useful watercolor pigments"));
         assert(prompt.includes("5–7 short, ordered actions"));
+        assert(prompt.includes("stage-named string"));
+        assert(prompt.includes("stage name followed by a colon and space"));
+        assert(prompt.includes("First wash: Use a tea-strength sky wash"));
+        assert(!prompt.includes("First wash —"));
+        assert(prompt.includes("30–45 words per step"));
+        assert(prompt.includes("moisture/timing cue"));
+        assert(prompt.includes("what to look for before moving on"));
+        assert(prompt.includes("common mistake to avoid"));
+        assert(prompt.includes("Do not identify pigments from the photo or invent manufacturer formulations"));
+        assert(prompt.includes("leave its code null"));
       } else {
         assert(prompt.includes("ONE main priority"));
         assert(prompt.includes("lost/found edges, and negative shapes"));
@@ -143,7 +163,8 @@ function fixture(options = {}) {
       if (url.pathname.endsWith("/claim_feedback_request"))
         return json({ status: "claimed" });
       if (url.pathname.endsWith("/complete_openai_feedback")) {
-        assert.deepEqual(body.p_result, modelResult);
+        assert.deepEqual(body.p_result,
+          load(path.join(root, "supabase/functions/_shared/contract.ts")).cleanOverlayFeedback(modelResult));
         return json({
           id,
           provider: options.badProvider ? ["openai"] : "openai",
@@ -298,3 +319,45 @@ for (const mode of ["improve_painting", "create_reference"])
       overlays,
     );
   });
+
+for (const mode of ["improve_painting", "create_reference"])
+  test(`actual Edge SDK runtime: ${mode} preserves useful rich marks when one geometry is invalid`, async () => {
+    const point = {
+      type: "point_marker", id: "detail", category: "reserve_light",
+      label: "Preserve this light", x: 38, y: 40, width: null, height: null,
+      points: null, styleHint: "preserve_light", valueGroup: "light", priority: "high",
+      shortInstruction: "Leave this shape as clean paper.",
+      reason: "It separates the focal form from its supporting shadow.",
+      action: "Paint the connected middle-value wash around it with one brush pass.",
+    };
+    const ring = { ...point, id: "focus", type: "focal_ring", category: "focal_point", x: 20, y: 25, width: 30, height: 25 };
+    const line = { ...point, id: "flow", type: "guide_line", category: "composition", valueGroup: null,
+      points: [{ x: 8, y: 70 }, { x: 42, y: 56 }, { x: 70, y: 51 }] };
+    const invalid = { ...line, id: "invalid", points: [{ x: 30, y: 30 }, { x: 30, y: 30 }] };
+    const f = fixture({ mode, overlays: [point, invalid, ring, line] });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).provider, "openai");
+    assert.equal(f.calls.filter((c) => c.path.startsWith("/v1/")).length, 1);
+    assert.deepEqual(f.calls.find((c) => c.path.endsWith("/complete_openai_feedback")).body.p_result.overlays, [point, ring, line]);
+  });
+test("actual Edge SDK runtime: reference palette metadata is stored without new calls", async () => {
+  const palette = [
+    { name: "Ultramarine", hex: "#57788b", use: "Cool distant sky; dilute for atmosphere", pigmentCode: "PB29" },
+    { name: "Burnt Sienna", hex: "#a87960", use: "Warm walls and tested neutral shadow mixes", pigmentCode: "PBr7" },
+    { name: "Yellow Ochre", hex: "#bd9b63", use: "Warm light planes", pigmentCode: "PY42" },
+  ];
+  const f = fixture({ mode: "create_reference", palette });
+  const response = await f.run();
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).provider, "openai");
+  assert.deepEqual(f.calls.find((c) => c.path.endsWith("/complete_openai_feedback")).body.p_result.palette, palette);
+  assert.equal(f.calls.filter((c) => c.path === "/v1/chat/completions").length, 1);
+});
+test("actual Edge SDK runtime: invented pigment code keeps the safe mock fallback", async () => {
+  const f = fixture({ mode: "create_reference", palette: [{ name: "Ultramarine", hex: "#57788b", use: "Sky", pigmentCode: "PB999" }] });
+  const response = await f.run();
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).provider, "mock");
+  assert(!f.calls.some((c) => c.path.endsWith("/complete_openai_feedback")));
+});

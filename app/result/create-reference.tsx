@@ -1,7 +1,8 @@
+import ReferencePreparation from "../../components/ReferencePreparation";
 import type { ReferenceData } from "../../lib/artworks";
 import { useSavedResult } from "../../hooks/useSavedResult";
 import { ResultState, SavedImage } from "../../components/SavedResultState";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 import CompositionSuggestionCard from "../../components/CompositionSuggestionCard";
 import SketchGuideCard from "../../components/SketchGuideCard";
 import ValueStudyCard from "../../components/ValueStudyCard";
@@ -28,19 +29,21 @@ export default function ReferenceResult() {
           ? "Sample painting plan"
           : "Photo-based coaching notes"}
       </Text>
-      <View style={styles.card}>
-        <Text style={styles.heading}>Painting plan</Text>
-        <Text style={styles.body}>
-          Coaching notes for a painting you create. No new image is generated.
-          The visual studies below are generic planning aids.
-        </Text>
-      </View>
+      <Text style={styles.caption}>PLAN · choose the big shapes</Text>
       <CompositionSuggestionCard
-        title="Composition plan"
+        title="Painting plan"
         text={result.composition}
       />
-      <SketchGuideCard title="Line sketch guide" description={result.sketch} />
+      <Text style={styles.caption}>
+        Coaching notes for a painting you create. No new image is generated.
+      </Text>
+      {!!image && <ReferencePreparation uri={image} />}
+      <Text style={styles.caption}>
+        PLAN · adapt these generic planning aids
+      </Text>
+      <SketchGuideCard description={result.sketch} />
       <ValueStudyCard description={result.values} harbour />
+      <Text style={styles.caption}>PAINT · fewer colours, clear washes</Text>
       <PaletteCard palette={result.palette} />
       <PaintingStepsCard steps={result.steps} />
     </Screen>

@@ -1,8 +1,8 @@
 import { Text, View } from "react-native";
-import MiniWatercolorScene from "./MiniWatercolorScene";
+import StudyAidVisual from "./StudyAidVisual";
 import { styles } from "./ui";
 export default function SketchStudyCard({
-  title = "Sketch guide",
+  title = "Planning sketch aid",
   description,
 }: {
   title?: string;
@@ -11,12 +11,9 @@ export default function SketchStudyCard({
   return (
     <View style={styles.card}>
       <Text style={styles.heading}>{title}</Text>
-      <MiniWatercolorScene
-        kind="sketch"
-        harbour={title === "Line sketch guide"}
-      />
+      <StudyAidVisual kind="sketch" />
       <Text style={styles.caption}>
-        Generic line-study aid · adapt it to your photo
+        Generic planning aid · adapt this to your image
       </Text>
       <Text style={styles.body}>{description}</Text>
     </View>

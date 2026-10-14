@@ -1,5 +1,5 @@
 import CoachingOverlay from "./CoachingOverlay";
-import { validOverlays } from "../lib/overlays";
+import { usableOverlays } from "../lib/overlays";
 import { ActivityIndicator, Text, Image } from "react-native";
 import { Button, Screen, styles, colors } from "./ui";
 import { useState } from "react";
@@ -40,7 +40,7 @@ export function SavedImage({
   overlays?: unknown;
 }) {
   const [failedUri, setFailedUri] = useState<string>();
-  if (uri && validOverlays(overlays) && overlays.length)
+  if (uri && usableOverlays(overlays).length)
     return <CoachingOverlay uri={uri} notes={overlays} label={label} />;
   if (uri && failedUri === uri)
     return (

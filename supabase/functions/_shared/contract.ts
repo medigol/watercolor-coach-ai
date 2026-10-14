@@ -1,4 +1,20 @@
-import { validOverlays, overlayTypes } from "./overlays.ts";
+import {
+  overlayCategories,
+  overlayStyleHints,
+  overlayTypes,
+  usableOverlays,
+  validOverlays,
+} from "./overlays.ts";
+export const safePigmentCodes = ["PB29", "PBr7", "PY43", "PY42"] as const;
+function safePigmentForName(name: string, code: unknown): boolean {
+  if (code == null) return true;
+  if (code === "PB29") return /\bultramarine\b/i.test(name);
+  if (code === "PBr7") return /\bburnt\s+sienna\b/i.test(name);
+  if (code === "PY43" || code === "PY42") {
+    return /\byellow\s+ochre\b/i.test(name) || /^ochre$/i.test(name.trim());
+  }
+  return false;
+}
 export type Mode = "improve_painting" | "create_reference";
 export type Provider = "mock" | "openai";
 export interface Input {
@@ -37,20 +53,23 @@ export function validInput(value: unknown, userId: string): value is Input {
           "expected_user_id",
         ].includes(k),
     )
-  )
+  ) {
     return false;
+  }
   if (
     !uuid(v.request_id) ||
     v.expected_user_id !== userId ||
     typeof v.mode !== "string" ||
     !["improve_painting", "create_reference"].includes(v.mode)
-  )
+  ) {
     return false;
+  }
   if (
     v.focus_area !== null &&
     (typeof v.focus_area !== "string" || !focuses.includes(v.focus_area))
-  )
+  ) {
     return false;
+  }
   return (
     v.image_path === null ||
     (typeof v.image_path === "string" &&
@@ -92,31 +111,35 @@ export function validFeedback(
     v.overlays !== undefined &&
     v.overlays !== null &&
     !validOverlays(v.overlays)
-  )
+  ) {
     return false;
+  }
   if (
     Object.keys(v).length !== fields.length ||
     Object.keys(v).some((k) => !fields.includes(k))
-  )
+  ) {
     return false;
+  }
   const text = (s: unknown, max = 700) =>
     typeof s === "string" && s.trim().length > 0 && s.length <= max;
   if (
     !text(v.title, 100) ||
     !["composition", "sketch", "values"].every((k) => text(v[k]))
-  )
+  ) {
     return false;
+  }
   const list = (a: unknown) =>
     Array.isArray(a) &&
     a.length >= 1 &&
     a.length <= 8 &&
     a.every((s) => text(s, 350));
-  if (mode === "improve_painting")
+  if (mode === "improve_painting") {
     return (
       ["mainAdvice", "practice", "prompt"].every((k) => text(v[k])) &&
       list(v.whatWorks) &&
       list(v.whatToFix)
     );
+  }
   return (
     list(v.steps) &&
     Array.isArray(v.palette) &&
@@ -126,10 +149,16 @@ export function validFeedback(
       (p) =>
         p &&
         typeof p === "object" &&
-        Object.keys(p).length === 2 &&
+        !Array.isArray(p) &&
+        Object.keys(p).every((key) =>
+          ["name", "hex", "use", "pigmentCode"].includes(key)
+        ) &&
         text(p.name, 60) &&
         typeof p.hex === "string" &&
-        /^#[0-9a-f]{6}$/i.test(p.hex),
+        /^#[0-9a-f]{6}$/i.test(p.hex) &&
+        (p.use == null || text(p.use, 180)) &&
+        (p.pigmentCode == null || safePigmentCodes.includes(p.pigmentCode)) &&
+        safePigmentForName(p.name, p.pigmentCode),
     )
   );
 }
@@ -138,11 +167,27 @@ export function feedbackSchema(mode: Mode) {
   const list = { type: "array", items: text };
   const overlayFields = {
     type: { type: "string", enum: [...overlayTypes] },
+    id: { type: ["string", "null"] },
+    category: { type: ["string", "null"], enum: [...overlayCategories, null] },
     label: text,
     x: { type: "number" },
     y: { type: "number" },
     width: { type: ["number", "null"] },
     height: { type: ["number", "null"] },
+    points: {
+      type: ["array", "null"],
+      items: {
+        type: "object",
+        properties: { x: { type: "number" }, y: { type: "number" } },
+        required: ["x", "y"],
+        additionalProperties: false,
+      },
+    },
+    styleHint: { type: ["string", "null"], enum: [...overlayStyleHints, null] },
+    valueGroup: {
+      type: ["string", "null"],
+      enum: ["light", "middle", "dark", null],
+    },
     priority: { type: "string", enum: ["high", "medium", "low"] },
     shortInstruction: text,
     reason: text,
@@ -163,29 +208,36 @@ export function feedbackSchema(mode: Mode) {
       },
     },
   };
-  const properties =
-    mode === "improve_painting"
-      ? {
-          ...common,
-          mainAdvice: text,
-          whatWorks: list,
-          whatToFix: list,
-          practice: text,
-          prompt: text,
-        }
-      : {
-          ...common,
-          palette: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: { name: text, hex: text },
-              required: ["name", "hex"],
-              additionalProperties: false,
+  const properties = mode === "improve_painting"
+    ? {
+      ...common,
+      mainAdvice: text,
+      whatWorks: list,
+      whatToFix: list,
+      practice: text,
+      prompt: text,
+    }
+    : {
+      ...common,
+      palette: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            name: text,
+            hex: text,
+            use: { type: ["string", "null"] },
+            pigmentCode: {
+              type: ["string", "null"],
+              enum: [...safePigmentCodes, null],
             },
           },
-          steps: list,
-        };
+          required: ["name", "hex", "use", "pigmentCode"],
+          additionalProperties: false,
+        },
+      },
+      steps: list,
+    };
   return {
     type: "object",
     properties,
@@ -228,15 +280,18 @@ export async function readLimited(
 }
 export function imageMime(bytes: Uint8Array): string | null {
   if (bytes.length > 10 * 1024 * 1024) return null;
-  if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255)
+  if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) {
     return "image/jpeg";
-  if ([137, 80, 78, 71, 13, 10, 26, 10].every((n, i) => bytes[i] === n))
+  }
+  if ([137, 80, 78, 71, 13, 10, 26, 10].every((n, i) => bytes[i] === n)) {
     return "image/png";
+  }
   if (
     [82, 73, 70, 70].every((n, i) => bytes[i] === n) &&
     [87, 69, 66, 80].every((n, i) => bytes[i + 8] === n)
-  )
+  ) {
     return "image/webp";
+  }
   return null;
 }
 
@@ -248,8 +303,10 @@ export function cleanOverlayFeedback(value: unknown): unknown {
     v.overlays === undefined ||
     v.overlays === null ||
     validOverlays(v.overlays)
-  )
+  ) {
     return value;
+  }
   const { overlays: _invalid, ...text } = v;
-  return text;
+  const overlays = usableOverlays(v.overlays);
+  return overlays.length ? { ...text, overlays } : text;
 }

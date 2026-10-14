@@ -1,22 +1,21 @@
 import { Text, View } from "react-native";
-import MiniWatercolorScene from "./MiniWatercolorScene";
+import StudyAidVisual from "./StudyAidVisual";
 import { colors, styles } from "./ui";
 export default function ValueStudyCard({
   description,
-  harbour = false,
 }: {
   description: string;
   harbour?: boolean;
 }) {
   return (
     <View style={styles.card}>
-      <Text style={styles.heading}>Three-value study</Text>
-      <MiniWatercolorScene kind="values" harbour={harbour} />
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <Text style={styles.heading}>Value grouping aid</Text>
+      <StudyAidVisual kind="values" />
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
         {[
-          ["#EAE6DA", "Light"],
-          ["#A4A399", "Middle"],
-          ["#4D514C", "Dark"],
+          ["#F7F5EC", "Light"],
+          ["#A4AAA0", "Middle"],
+          ["#475952", "Dark"],
         ].map(([color, label]) => (
           <View
             key={label}
@@ -26,6 +25,7 @@ export default function ValueStudyCard({
               style={{
                 width: 16,
                 height: 12,
+                borderRadius: 3,
                 backgroundColor: color,
                 borderWidth: 1,
                 borderColor: colors.border,
@@ -36,8 +36,7 @@ export default function ValueStudyCard({
         ))}
       </View>
       <Text style={styles.caption}>
-        Generic value-study aid · group your subject into light, middle, and
-        dark
+        Generic value-study aid · adapt this to your image
       </Text>
       <Text style={styles.body}>{description}</Text>
     </View>

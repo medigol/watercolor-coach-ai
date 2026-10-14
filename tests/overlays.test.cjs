@@ -23,6 +23,7 @@ function load(file, mocks = {}) {
   return exports;
 }
 const overlay = load("lib/overlays.ts");
+const drawing = load("lib/overlayDrawing.ts", { "./overlays": overlay });
 const contract = load("supabase/functions/_shared/contract.ts", {
   "./overlays.ts": overlay,
 });
@@ -63,8 +64,9 @@ test("bounded overlay contract accepts points/regions, empty array and strict kn
       !overlay.validOverlays([{ ...notes[0], ...patch }, ...notes.slice(1)]),
       JSON.stringify(patch),
     );
-  assert(!overlay.validOverlays(notes.slice(0, 2)));
-  assert(!overlay.validOverlays([...notes, ...notes]));
+  assert(overlay.validOverlays(notes.slice(0, 2)));
+  assert(overlay.validOverlays([...notes, ...notes]));
+  assert(!overlay.validOverlays([...notes, ...notes, notes[0]]));
 });
 test("legacy/mocks remain valid; valid overlays survive; malformed optional overlays retain text", () => {
   for (const [mode, sample] of [
@@ -79,7 +81,10 @@ test("legacy/mocks remain valid; valid overlays survive; malformed optional over
       overlays: [{ ...notes[0], x: 200 }, ...notes.slice(1)],
     };
     assert(!contract.validFeedback(bad, mode));
-    assert.deepEqual(contract.cleanOverlayFeedback(bad), sample);
+    assert.deepEqual(contract.cleanOverlayFeedback(bad), {
+      ...sample,
+      overlays: notes.slice(1),
+    });
     assert(contract.validFeedback(contract.cleanOverlayFeedback(bad), mode));
     const schema = contract.feedbackSchema(mode);
     assert(schema.required.includes("overlays"));
@@ -105,7 +110,7 @@ test("frontend and server overlay contracts remain identical; no image API or ne
     "utf8",
   );
   assert(prompt.includes("same JSON response"));
-  assert(prompt.includes("Never invent uncertain locations"));
+  assert(prompt.includes("never invent precise geometry"));
   assert(prompt.includes("never generate or edit the source image"));
 });
 function fixture(fail = false) {
@@ -149,6 +154,8 @@ function fixture(fail = false) {
       View: "View",
     },
     "../lib/overlays": overlay,
+    "../lib/overlayDrawing": drawing,
+    "./CoachingMarks": { default: "CoachingMarks" },
     "./ui": {
       colors: { accent: "teal", ink: "dark", border: "border" },
       styles: { card: {} },
@@ -192,6 +199,17 @@ test("overlay maps image dimensions, marker selection highlights and expands mat
     .filter((n) => n.props?.accessibilityState?.selected);
   assert.equal(selected.length, 2);
   assert(selected.some((n) => n.props.accessibilityState.expanded));
+  const marks = f.nodes(tree).find((n) => n.type === "CoachingMarks");
+  assert.equal(marks.props.width, 360);
+  assert.equal(marks.props.height, 240);
+  marks.props.onSelect(0);
+  tree = f.render();
+  const card = f.nodes(tree).find((n) => n.props?.accessibilityState?.expanded);
+  assert(card.props.accessibilityLabel.includes("Strengthen focal point"));
+  card.props.onPress();
+  assert(
+    !f.nodes(f.render()).some((n) => n.props?.accessibilityState?.expanded),
+  );
   image.props.onError();
   assert.equal(f.render(), null);
 });
@@ -204,4 +222,187 @@ test("unavailable image, invalid or missing overlays produce no overlay section"
   assert.equal(good.render("image", null), null);
   assert.equal(good.render("image", []), null);
   assert.equal(good.render("image", [{ x: 200 }]), null);
+});
+
+const richNote = (type, geometry = {}) => ({ ...notes[0], type, ...geometry });
+const box = { x: 10, y: 20, width: 30, height: 40 };
+const pathPoints = [
+  { x: 10, y: 20 },
+  { x: 30, y: 40 },
+  { x: 50, y: 20 },
+];
+test("every rich mark validates without inventing geometry; degenerate and malformed marks are discarded independently", () => {
+  for (const type of [
+    "focal_ring",
+    "crop_box",
+    "region_highlight",
+    "value_mass",
+  ])
+    assert(overlay.validOverlays([richNote(type, box)]));
+  for (const type of [
+    "guide_line",
+    "arrow",
+    "edge_mark",
+    "region_highlight",
+    "value_mass",
+  ])
+    assert(overlay.validOverlays([richNote(type, { points: pathPoints })]));
+  assert(overlay.validOverlays([richNote("point_marker")]));
+  for (const item of [
+    richNote("focal_ring"),
+    richNote("crop_box", { points: pathPoints }),
+    richNote("point_marker", box),
+    richNote("guide_line", box),
+    richNote("arrow", {
+      points: [
+        { x: 10, y: 20 },
+        { x: 10, y: 20 },
+      ],
+    }),
+    richNote("region_highlight", {
+      points: [
+        { x: 10, y: 20 },
+        { x: 20, y: 30 },
+        { x: 30, y: 40 },
+      ],
+    }),
+    richNote("value_mass", {
+      points: [
+        { x: 10, y: 20 },
+        { x: 30, y: 40 },
+      ],
+    }),
+    richNote("guide_line", {
+      points: [
+        { x: 0, y: 0 },
+        { x: 101, y: 30 },
+      ],
+    }),
+    richNote("guide_line", {
+      points: [
+        { x: 0, y: 0 },
+        { x: 20, y: 30, extra: true },
+      ],
+    }),
+    richNote("region_highlight", { ...box, points: pathPoints }),
+    richNote("point_marker", { category: "object_recognition" }),
+    richNote("point_marker", { styleHint: "neon" }),
+    richNote("point_marker", { valueGroup: "black" }),
+  ]) {
+    assert(!overlay.validOverlays([item]), JSON.stringify(item));
+    assert.deepEqual(overlay.usableOverlays([item, notes[1]]), [notes[1]]);
+  }
+  const sameId = richNote("point_marker", { id: "focus-1" });
+  assert(!overlay.validOverlays([sameId, sameId]));
+  assert.deepEqual(overlay.usableOverlays([sameId, sameId]), [sameId]);
+  assert.deepEqual(overlay.usableOverlays([{ x: 200 }]), []);
+  assert.equal(overlay.usableOverlays(Array(100).fill(notes[0])).length, 6);
+});
+test("responsive geometry aligns boxes and paths to the original image; old saved region types remain useful", () => {
+  const g = drawing.markGeometry(richNote("focal_ring", box), 360, 240);
+  assert.deepEqual(g, {
+    kind: "focal_ring",
+    x: 36,
+    y: 48,
+    width: 108,
+    height: 96,
+    points: [],
+  });
+  const path = richNote("arrow", { points: pathPoints });
+  assert.deepEqual(drawing.markGeometry(path, 200, 100).points, [
+    { x: 20, y: 20 },
+    { x: 60, y: 40 },
+    { x: 100, y: 20 },
+  ]);
+  assert.deepEqual(overlay.overlayAnchor(path), { x: 30, y: 30 });
+  assert.equal(overlay.overlayKind({ ...notes[0], ...box }), "focal_ring");
+  assert.equal(overlay.overlayKind({ ...notes[1], ...box }), "value_mass");
+  assert.equal(
+    overlay.overlayKind({ ...notes[0], type: "composition_crop", ...box }),
+    "crop_box",
+  );
+  assert.equal(drawing.arrowHead([]), "");
+  assert.match(
+    drawing.arrowHead([
+      { x: 10, y: 10 },
+      { x: 50, y: 20 },
+    ]),
+    /^M .+ L 50 20 L /,
+  );
+});
+test("overlapping number anchors remain tappable and bounded without changing supplied mark geometry", () => {
+  const marks = Array.from({length:6},()=>richNote("focal_ring",box));
+  const positions = drawing.markerPositions(marks,327,230);
+  for(const [i,p] of positions.entries()) {
+    assert.equal(p.target,44);assert(p.left>=0 && p.top>=0);
+    assert(p.left+44<=327 && p.top+44<=230);
+    for(const other of positions.slice(0,i)) assert(p.left>=other.left+44 || p.left+44<=other.left || p.top>=other.top+44 || p.top+44<=other.top);
+  }
+  assert.deepEqual(drawing.markGeometry(marks[0],327,230),drawing.markGeometry(marks[5],327,230));
+  const tiny = drawing.markerPositions(marks,16,8);
+  assert(tiny.every(p=>p.target===8 && p.top===0 && p.left>=0 && p.left<=8));
+});
+test("SVG renderer draws each rich shape and selects the matching card with restrained highlighted marks", () => {
+  const jsx = {
+    jsx: (type, props) => ({ type, props }),
+    jsxs: (type, props) => ({ type, props }),
+    Fragment: "Fragment",
+  };
+  const Marks = load("components/CoachingMarks.tsx", {
+    "react/jsx-runtime": jsx,
+    "react-native-svg": {
+      default: "Svg",
+      Ellipse: "Ellipse",
+      Rect: "Rect",
+      Polyline: "Polyline",
+      Polygon: "Polygon",
+      Path: "Path",
+      G: "G",
+    },
+    "../lib/overlayDrawing": drawing,
+  }).default;
+  const rich = [
+    richNote("focal_ring", box),
+    richNote("region_highlight", box),
+    richNote("value_mass", { points: pathPoints, valueGroup: "dark" }),
+    richNote("crop_box", box),
+    richNote("arrow", { points: pathPoints }),
+    richNote("edge_mark", { points: pathPoints, styleHint: "hard" }),
+  ];
+  let selection;
+  const tree = Marks({
+    notes: rich,
+    width: 360,
+    height: 240,
+    selected: 2,
+    onSelect: (i) => (selection = i),
+  });
+  const nodes = (tree) =>
+    !tree || typeof tree !== "object"
+      ? []
+      : [tree, ...[tree.props?.children].flat(Infinity).flatMap(nodes)];
+  const all = nodes(tree);
+  assert.equal(tree.props.viewBox, "0 0 360 240");
+  for (const type of ["Ellipse", "Rect", "Polygon", "Polyline", "Path"])
+    assert(all.some((n) => n.type === type));
+  const value = all.find((n) => n.type === "Polygon");
+  assert.equal(value.props.fillOpacity, 0.24);
+  assert.equal(value.props.strokeWidth, 3);
+  all.filter((n) => n.type === "G")[4].props.onPress();
+  assert.equal(selection, 4);
+  const hard = all.filter((n) => n.type === "Polyline").at(-1);
+  assert.equal(hard.props.strokeDasharray, undefined);
+  const simple = Marks({
+    notes: [richNote("point_marker")],
+    width: 100,
+    height: 100,
+    selected: null,
+    onSelect: () => {},
+  });
+  assert.equal(
+    nodes(simple).filter((n) =>
+      ["Rect", "Polygon", "Ellipse", "Polyline"].includes(n.type),
+    ).length,
+    0,
+  );
 });

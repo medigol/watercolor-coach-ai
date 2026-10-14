@@ -6,7 +6,7 @@ const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "..");
-function render(mode, provider, image, overlays) {
+function render(mode, provider, image, overlays, { expandedDetails = false } = {}) {
   const modules = new Map();
   function load(relative) {
     if (modules.has(relative)) return modules.get(relative);
@@ -24,12 +24,29 @@ function render(mode, provider, image, overlays) {
     ).outputText;
     new Function("exports", "require", code)(exports, (name) => {
       if (name === "@expo/vector-icons") return { Ionicons: () => null };
+      if (name === "react" && expandedDetails && relative.endsWith("FeedbackDetails.tsx"))
+        return { ...React, useState: () => [true, () => {}] };
       if (name === "react" || name === "react/jsx-runtime")
         return require(name);
+      if (name === "react-native-svg") {
+        const shape = (props) => React.createElement("svg", null, props.children);
+        return {
+          __esModule: true,
+          default: shape,
+          Ellipse: shape,
+          Rect: shape,
+          Polyline: shape,
+          Polygon: shape,
+          Path: shape,
+          G: shape,
+        };
+      }
       if (name === "react-native")
         return {
-          Text: (props) => React.createElement("span", null, props.children),
-          View: (props) => React.createElement("div", null, props.children),
+          Text: (props) =>
+            React.createElement("span", { role: props.accessibilityRole }, props.children),
+          View: (props) =>
+            React.createElement("div", { "aria-label": props.accessibilityLabel }, props.children),
           Image: (props) =>
             React.createElement("img", {
               src: props.source.uri,
@@ -37,7 +54,18 @@ function render(mode, provider, image, overlays) {
             }),
           ActivityIndicator: () => null,
           Pressable: (props) =>
-            React.createElement("button", null, props.children),
+            React.createElement(
+              "button",
+              {
+                "aria-label": props.accessibilityLabel,
+                "aria-expanded": props["aria-expanded"],
+                "aria-selected": props["aria-selected"],
+                disabled: props.disabled,
+              },
+              props.children,
+            ),
+          StyleSheet: { create: (value) => value },
+          Platform: { OS: "web", select: (choices) => choices.web ?? choices.default },
         };
       if (name.endsWith("/ui") || name === "./ui")
         return {
@@ -85,12 +113,11 @@ for (const provider of ["mock", "openai"])
         provider,
         "https://example.invalid/private-signed-image",
       );
-      assert(html.includes("Generic line-study aid · adapt it to your photo"));
-      assert(
-        html.includes(
-          "Generic value-study aid · group your subject into light, middle, and dark",
-        ),
-      );
+      assert(html.includes("Planning sketch aid"));
+      assert(html.includes("Value grouping aid"));
+      assert(html.includes("Generic planning aid · adapt this to your image"));
+      assert(html.includes("Generic value-study aid · adapt this to your image"));
+      assert(!html.includes("Visual coaching notes"));
       assert(
         !/simplified reference placeholder|Sample line study|Sample tonal plan/.test(
           html,
@@ -103,6 +130,11 @@ for (const provider of ["mock", "openai"])
         assert(html.includes("Painting steps"));
         assert(html.includes("Coastal Town"));
         assert(!html.includes("Simplified reference"));
+        assert(html.indexOf("Your photo") < html.indexOf("Painting plan"));
+        assert(html.indexOf("Painting plan") < html.indexOf("Reference preparation"));
+        assert(html.indexOf("Reference preparation") < html.indexOf("Planning sketch aid"));
+        assert(html.indexOf("Value grouping aid") < html.indexOf("Suggested palette"));
+        assert(html.indexOf("Suggested palette") < html.indexOf("Painting steps"));
         assert(
           html.includes(
             provider === "mock"
@@ -113,8 +145,12 @@ for (const provider of ["mock", "openai"])
       } else {
         assert(html.includes("Your painting"));
         assert(html.includes("Lake House"));
-        assert(html.indexOf("Main advice") < html.indexOf("What works"));
-        assert(html.includes("not studies generated"));
+        assert(html.indexOf("Your painting") < html.indexOf("Main advice"));
+        assert(html.indexOf("Main advice") < html.indexOf("What works &amp; what to fix"));
+        assert(html.includes('aria-expanded="false"'));
+        assert(!html.includes("The quiet blue-green palette creates a peaceful mood."));
+        assert(html.indexOf("Value grouping aid") < html.indexOf("Next 15-minute practice"));
+        assert(html.indexOf("Next 15-minute practice") < html.indexOf("Suggested next prompt"));
       }
     });
 test("reference without an uploaded image keeps sample plan and generic aids, without inventing a photo", () => {
@@ -123,6 +159,20 @@ test("reference without an uploaded image keeps sample plan and generic aids, wi
   assert(!html.includes("<img"));
   assert(html.includes("Sample painting plan"));
   assert(html.includes("generic planning aids"));
+  assert(!html.includes("Reference preparation"));
+});
+
+test("saved painting strengths and fixes render when compact details are expanded", () => {
+  for (const provider of ["mock", "openai"]) {
+    const html = render("improve_painting", provider, undefined, undefined, {
+      expandedDetails: true,
+    });
+    assert(html.includes('aria-expanded="true"'));
+    assert(html.includes("The quiet blue-green palette creates a peaceful mood."));
+    assert(html.includes("The trees and house have similar darkness, so the house gets lost."));
+    assert(html.indexOf("Main advice") < html.indexOf("What works"));
+    assert(html.indexOf("What to fix") < html.indexOf("Composition suggestion"));
+  }
 });
 test("painting sequence uses numbered markers with no scene thumbnails", () => {
   const source = fs.readFileSync(
@@ -146,7 +196,7 @@ test("saved overlay metadata without an uploaded image still renders normal text
   }));
   for (const mode of ["improve_painting", "create_reference"]) {
     const html = render(mode, "openai", undefined, notes);
-    assert(!html.includes("Coaching overlay"));
+    assert(!html.includes("Visual coaching notes"));
     assert(
       html.includes(
         mode === "improve_painting" ? "Main advice" : "Painting plan",
@@ -158,6 +208,8 @@ test("saved overlay metadata without an uploaded image still renders normal text
       "https://example.invalid/private-image",
       [{ x: 200 }],
     );
-    assert(!invalid.includes("Coaching overlay"));
+    assert(!invalid.includes("Visual coaching notes"));
+    assert(invalid.includes(mode === "create_reference" ? "Your photo" : "Your painting"));
+    assert(invalid.includes("Planning sketch aid"));
   }
 });

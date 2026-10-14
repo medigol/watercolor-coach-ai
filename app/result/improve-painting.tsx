@@ -1,3 +1,4 @@
+import FeedbackDetails from "../../components/FeedbackDetails";
 import type { ImproveData } from "../../lib/artworks";
 import { useSavedResult } from "../../hooks/useSavedResult";
 import { ResultState, SavedImage } from "../../components/SavedResultState";
@@ -21,21 +22,19 @@ export default function ImproveResult() {
           {warning}
         </Text>
       )}
-      <FeedbackSection title="Main advice" text={result.mainAdvice} highlight />
       <SavedImage overlays={result.overlays} uri={image} />
       <Text style={styles.caption}>
         {provider === "mock" ? "Sample feedback" : "Painting feedback"}
         {focus ? ` · Your selected focus: ${focus}` : ""}
       </Text>
-      <FeedbackSection title="What works" items={result.whatWorks} />
-      <FeedbackSection title="What to fix" items={result.whatToFix} />
+      <Text style={styles.caption}>IMPROVE · one painting decision</Text>
+      <FeedbackSection title="Main advice" text={result.mainAdvice} highlight />
+      <FeedbackDetails works={result.whatWorks} fixes={result.whatToFix} />
       <CompositionSuggestionCard text={result.composition} />
-      <Text style={styles.caption}>
-        The visual studies below are generic planning aids, not studies
-        generated from your painting.
-      </Text>
+      <Text style={styles.caption}>PLAN · think in big shapes</Text>
       <SketchGuideCard description={result.sketch} />
       <ValueStudyCard description={result.values} />
+      <Text style={styles.caption}>PRACTISE · one useful next step</Text>
       <FeedbackSection title="Next 15-minute practice" text={result.practice} />
       <FeedbackSection title="Suggested next prompt" text={result.prompt} />
     </Screen>
