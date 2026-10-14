@@ -314,3 +314,95 @@ test("invalid optional overlays keep validated OpenAI text instead of forcing mo
   assert(f.calls.includes("finish"));
   assert(!f.calls.includes("mock"));
 });
+
+const richNote = {
+  type: "focal_ring",
+  id: "note-1",
+  category: "focal_point",
+  label: "Keep the strongest contrast here",
+  x: 24,
+  y: 28,
+  width: 20,
+  height: 18,
+  points: null,
+  styleHint: "focal",
+  valueGroup: null,
+  priority: "high",
+  shortInstruction: "Keep one sharp dark beside this reserved light.",
+  reason: "This gives the eye one clear resting place.",
+  action: "After the wash dries, add one controlled dark accent and stop.",
+};
+test("rich geometry validates and malformed notes are discarded independently", () => {
+  const line = {
+    ...richNote, id: "note-2", type: "guide_line", category: "composition",
+    width: null, height: null, points: [{ x: 10, y: 65 }, { x: 85, y: 60 }],
+  };
+  const mass = {
+    ...richNote, id: "note-3", type: "value_mass", category: "value_structure",
+    width: null, height: null, valueGroup: "middle",
+    points: [{ x: 15, y: 55 }, { x: 75, y: 60 }, { x: 65, y: 88 }],
+  };
+  for (const mode of ["improve_painting", "create_reference"]) {
+    const sample = mode === "improve_painting" ? samples.improveResult : samples.referenceResult;
+    assert(contract.validFeedback({ ...sample, overlays: [richNote, line, mass] }, mode));
+    const raw = { ...sample, overlays: [richNote, { ...line, points: [{ x: 120, y: 0 }, { x: 2, y: 5 }] }, mass] };
+    assert(!contract.validFeedback(raw, mode));
+    const cleaned = contract.cleanOverlayFeedback(raw);
+    assert.deepEqual(cleaned.overlays, [richNote, mass]);
+    assert(contract.validFeedback(cleaned, mode));
+    assert.deepEqual(contract.cleanOverlayFeedback({ ...sample, overlays: [{ ...richNote, width: null }] }), sample);
+  }
+  for (const invalid of [
+    { ...richNote, type: "focal_ring", width: null, height: null },
+    { ...line, points: [{ x: 10, y: 10 }, { x: 10, y: 10 }] },
+    { ...mass, points: [{ x: 10, y: 10 }, { x: 20, y: 20 }, { x: 30, y: 30 }] },
+    { ...mass, points: [{ x: 10, y: 10 }, { x: 20, y: 20 }] },
+    { ...line, styleHint: "glowing" },
+    { ...richNote, category: "object_detection" },
+    { ...mass, valueGroup: "bright" },
+    { ...line, points: [{ x: 10, y: 10, extra: true }, { x: 15, y: 25 }] },
+    { ...richNote, width: 90 },
+  ]) assert(!overlayContract.validOverlays([invalid]), JSON.stringify(invalid));
+  assert(overlayContract.validOverlays([richNote]));
+  assert(!overlayContract.validOverlays([richNote, richNote]));
+  assert.deepEqual(overlayContract.usableOverlays([richNote, richNote]), [richNote]);
+});
+test("optional practical palette metadata stays compatible and rejects invented pigment codes", () => {
+  const palette = [
+    { name: "Ultramarine", hex: "#496983", use: "Cool sky and distant shadows", pigmentCode: "PB29" },
+    { name: "Burnt Sienna", hex: "#aa765c", use: "Warm building planes; test a neutral mix", pigmentCode: "PBr7" },
+    { name: "Yellow Ochre", hex: "#bf9b60", use: "Light warm walls", pigmentCode: "PY43" },
+    { name: "Payne's Gray", hex: "#45535e", use: "Optional convenience dark; use sparingly", pigmentCode: null },
+  ];
+  assert(contract.validFeedback({ ...samples.referenceResult, palette }, "create_reference"));
+  assert(contract.validFeedback(samples.referenceResult, "create_reference"));
+  for (const patch of [
+    { pigmentCode: "PB99" }, { pigmentCode: "PB29/PBk7" }, { manufacturer: "unverified" },
+    { pigmentCode: "PBr7" }, { use: "x".repeat(181) }, { use: true },
+  ]) assert(!contract.validFeedback({ ...samples.referenceResult, palette: [{ ...palette[0], ...patch }] }, "create_reference"));
+  for (const [name, pigmentCode] of [["Raw Sienna", "PBr7"], ["Red Ochre", "PY43"], ["Payne's Gray", "PB29"]])
+    assert(!contract.validFeedback({ ...samples.referenceResult, palette: [{ name, hex: "#808080", pigmentCode }] }, "create_reference"));
+  const schema = contract.feedbackSchema("create_reference");
+  assert.deepEqual(schema.properties.palette.items.required, ["name", "hex", "use", "pigmentCode"]);
+  assert.deepEqual(schema.properties.palette.items.properties.pigmentCode.enum, ["PB29", "PBr7", "PY43", "PY42", null]);
+});
+test("rich overlay cleanup preserves OpenAI result and calls the model only once", async () => {
+  let generated = 0;
+  let saved;
+  const f = fixture({
+    generate: async () => {
+      generated++;
+      return { ...samples.improveResult, overlays: [richNote, { ...richNote, x: -3 }] };
+    },
+    finish: async (_u, _i, result) => {
+      saved = result;
+      return { id, provider: "openai" };
+    },
+  });
+  const response = await f.run();
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).provider, "openai");
+  assert.equal(generated, 1);
+  assert.deepEqual(saved.overlays, [richNote]);
+  assert(!f.calls.includes("mock"));
+});

@@ -1,5 +1,6 @@
 import { requireSupabase } from "./supabase";
 import { improveResult, referenceResult } from "../data/mockResults";
+import type { PaletteColour } from "../types";
 export type ResultProvider = "mock" | "openai";
 export const freeLimitMessage =
   "You have used your 3 free AI feedback results. More feedback will be available after subscriptions are added.";
@@ -36,7 +37,8 @@ import type { CoachingOverlay } from "./overlays";
 export type ImproveData = typeof improveResult & {
   overlays?: CoachingOverlay[] | null;
 };
-export type ReferenceData = typeof referenceResult & {
+export type ReferenceData = Omit<typeof referenceResult, "palette"> & {
+  palette: PaletteColour[];
   overlays?: CoachingOverlay[] | null;
 };
 export interface ArtworkImage {

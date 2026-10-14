@@ -19,4 +19,6 @@ export interface Practice {
 export interface PaletteColour {
   name: string;
   hex: string;
+  pigmentCode?: string | null;
+  use?: string | null;
 }

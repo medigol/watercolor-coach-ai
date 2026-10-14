@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
-import { overlayAnchor, validOverlays } from "../lib/overlays";
+import { usableOverlays } from "../lib/overlays";
+import {
+  legendGroup,
+  markColors,
+  markerPositions,
+  type LegendGroup,
+} from "../lib/overlayDrawing";
+import CoachingMarks from "./CoachingMarks";
 import { colors, styles } from "./ui";
-
+const legend: LegendGroup[] = [
+  "Focus",
+  "Value",
+  "Simplify",
+  "Edge",
+  "Composition",
+];
 export default function CoachingOverlay({
   uri,
   notes,
@@ -28,7 +41,8 @@ export default function CoachingOverlay({
             Number.isFinite(w) &&
             Number.isFinite(h) &&
             w > 0 &&
-            h > 0
+            h > 0 &&
+            Number.isFinite(w / h)
           )
             setSize({ uri, ratio: w / h });
           else if (alive) setFailed(uri);
@@ -44,22 +58,13 @@ export default function CoachingOverlay({
       alive = false;
     };
   }, [uri]);
-  if (
-    !validOverlays(notes) ||
-    !notes.length ||
-    failed === uri ||
-    size?.uri !== uri
-  )
-    return null;
-  const imageWidth = Math.min(width, 480 * size.ratio);
-  const imageHeight = imageWidth / size.ratio;
+  const valid = usableOverlays(notes);
+  if (!valid.length || failed === uri || size?.uri !== uri) return null;
+  const imageWidth = Math.min(width, 420 * size.ratio),
+    imageHeight = imageWidth / size.ratio;
+  const markers = markerPositions(valid, imageWidth, imageHeight);
   return (
-    <View style={{ gap: 16 }}>
-      <Text style={styles.heading}>Coaching overlay</Text>
-      <Text style={styles.caption}>
-        Guidance marks on your original image. Tap a number to focus on its
-        note.
-      </Text>
+    <View style={{ gap: 18 }}>
       <Text style={styles.caption}>{label}</Text>
       <View
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
@@ -72,22 +77,21 @@ export default function CoachingOverlay({
               accessibilityLabel={label}
               resizeMode="contain"
               onError={() => setFailed(uri)}
-              style={{ width: "100%", height: "100%", borderRadius: 16 }}
+              style={{ width: "100%", height: "100%", borderRadius: 18 }}
             />
-            {notes.map((note, i) => {
-              const point = overlayAnchor(note);
-              // Keep 44px touch targets inside the frame, even at image boundaries.
-              const left = Math.max(
-                0,
-                Math.min(imageWidth - 44, (imageWidth * point.x) / 100 - 22),
-              );
-              const top = Math.max(
-                0,
-                Math.min(imageHeight - 44, (imageHeight * point.y) / 100 - 22),
-              );
+            <CoachingMarks
+              notes={valid}
+              width={imageWidth}
+              height={imageHeight}
+              selected={selected}
+              onSelect={setSelected}
+            />
+            {valid.map((note, i) => {
+              const { left, top, target } = markers[i];
+              const diameter = Math.min(28, target);
               return (
                 <Pressable
-                  key={i}
+                  key={`${note.id ?? "note"}-${i}`}
                   accessibilityRole="button"
                   accessibilityLabel={`Note ${i + 1}: ${note.label}`}
                   aria-selected={selected === i}
@@ -97,26 +101,34 @@ export default function CoachingOverlay({
                     position: "absolute",
                     left,
                     top,
-                    width: 44,
-                    height: 44,
+                    width: target,
+                    height: target,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
                   <View
                     style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 14,
-                      backgroundColor:
-                        selected === i ? colors.ink : colors.accent,
-                      borderWidth: 2,
+                      width: diameter,
+                      height: diameter,
+                      borderRadius: diameter / 2,
+                      backgroundColor: markColors[legendGroup(note)],
+                      borderWidth: selected === i ? 3 : 2,
                       borderColor: colors.paper,
                       alignItems: "center",
                       justifyContent: "center",
+                      shadowColor: colors.ink,
+                      shadowOpacity: 0.12,
+                      shadowRadius: 3,
                     }}
                   >
-                    <Text style={{ color: "white", fontWeight: "700" }}>
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "700",
+                        fontSize: Math.min(14, diameter / 2),
+                      }}
+                    >
                       {i + 1}
                     </Text>
                   </View>
@@ -126,38 +138,91 @@ export default function CoachingOverlay({
           </View>
         )}
       </View>
-      {notes.map((note, i) => (
-        <Pressable
-          key={i}
-          accessibilityRole="button"
-          accessibilityLabel={`Note ${i + 1}: ${note.label}. ${note.shortInstruction}. ${note.reason} ${note.action}`}
-          aria-selected={selected === i}
-          aria-expanded={selected === i}
-          accessibilityState={{
-            selected: selected === i,
-            expanded: selected === i,
-          }}
-          onPress={() => setSelected(i)}
-          style={[
-            styles.card,
-            {
-              borderColor: selected === i ? colors.accent : colors.border,
-              borderWidth: selected === i ? 2 : 1,
-            },
-          ]}
-        >
-          <Text style={styles.heading}>
-            {i + 1}. {note.label}
-          </Text>
-          <Text style={styles.body}>{note.shortInstruction}</Text>
-          {selected === i && (
-            <>
-              <Text style={styles.caption}>{note.reason}</Text>
-              <Text style={styles.body}>{note.action}</Text>
-            </>
-          )}
-        </Pressable>
-      ))}
+      <View style={{ gap: 6 }}>
+        <Text style={styles.heading}>Visual coaching notes</Text>
+        <Text style={styles.caption}>
+          Guidance marks on your original image. Use them as painting decisions,
+          not tracing instructions.
+        </Text>
+      </View>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+        {legend.map((group) => (
+          <View
+            key={group}
+            style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+          >
+            <View
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: markColors[group],
+              }}
+            />
+            <Text style={styles.caption}>{group}</Text>
+          </View>
+        ))}
+      </View>
+      {valid.map((note, i) => {
+        const active = selected === i,
+          group = legendGroup(note);
+        return (
+          <Pressable
+            key={`${note.id ?? "note"}-${i}`}
+            accessibilityRole="button"
+            accessibilityLabel={`Note ${i + 1}: ${note.label}. ${note.shortInstruction}. Why it matters: ${note.reason} Try this: ${note.action}`}
+            aria-selected={active}
+            aria-expanded={active}
+            accessibilityState={{ selected: active, expanded: active }}
+            onPress={() => setSelected(active ? null : i)}
+            style={[
+              styles.card,
+              {
+                padding: 18,
+                gap: 10,
+                borderColor: active ? markColors[group] : colors.border,
+                borderWidth: active ? 2 : 1,
+                backgroundColor: active ? colors.pale : colors.paper,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.caption,
+                { color: markColors[group], fontWeight: "600" },
+              ]}
+            >
+              {i + 1} · {group}
+            </Text>
+            <Text style={[styles.heading, { fontSize: 18, lineHeight: 25 }]}>
+              {note.label}
+            </Text>
+            <Text style={styles.body}>{note.shortInstruction}</Text>
+            {active && (
+              <>
+                <Text
+                  style={[
+                    styles.caption,
+                    { fontWeight: "600", color: colors.ink },
+                  ]}
+                >
+                  Why it matters
+                </Text>
+                <Text style={styles.body}>{note.reason}</Text>
+                <Text
+                  style={[
+                    styles.caption,
+                    { fontWeight: "600", color: colors.ink },
+                  ]}
+                >
+                  Try this
+                </Text>
+                <Text style={styles.body}>{note.action}</Text>
+              </>
+            )}
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
