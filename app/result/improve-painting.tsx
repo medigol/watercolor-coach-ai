@@ -29,6 +29,10 @@ export default function ImproveResult() {
       <FeedbackSection title="What works" items={result.whatWorks} />
       <FeedbackSection title="What to fix" items={result.whatToFix} />
       <CompositionSuggestionCard text={result.composition} />
+      <Text style={styles.caption}>
+        The visual studies below are generic planning aids, not studies
+        generated from your painting.
+      </Text>
       <SketchGuideCard description={result.sketch} />
       <ValueStudyCard description={result.values} />
       <FeedbackSection title="Next 15-minute practice" text={result.practice} />

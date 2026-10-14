@@ -35,7 +35,10 @@ export default function ValueStudyCard({
           </View>
         ))}
       </View>
-      <Text style={styles.caption}>Sample tonal plan</Text>
+      <Text style={styles.caption}>
+        Generic value-study aid · group your subject into light, middle, and
+        dark
+      </Text>
       <Text style={styles.body}>{description}</Text>
     </View>
   );

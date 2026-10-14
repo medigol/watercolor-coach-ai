@@ -65,6 +65,18 @@ function fixture(options = {}) {
       );
       assert.equal(body.messages[1].content[1].image_url.detail, "low");
       assert.equal(body.model, "gpt-4.1-mini");
+      const prompt = body.messages[0].content;
+      assert(prompt.includes("visible locations"));
+      assert(prompt.includes("never claim to have generated"));
+      if (options.mode === "create_reference") {
+        assert(prompt.includes("keep, simplify, remove, or merge"));
+        assert(prompt.includes("3–5 useful watercolor pigments"));
+        assert(prompt.includes("5–7 short, ordered actions"));
+      } else {
+        assert(prompt.includes("ONE main priority"));
+        assert(prompt.includes("lost/found edges, and negative shapes"));
+        assert(prompt.includes("without generic compliments"));
+      }
       if (options.modelError)
         return json({ error: { message: "private upstream error" } }, 429);
       if (options.badEnvelope) return json(null);

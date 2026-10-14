@@ -32,9 +32,11 @@ export function ResultState({
 export function SavedImage({
   uri,
   harbour = false,
+  label = "Your painting",
 }: {
   uri?: string;
   harbour?: boolean;
+  label?: string;
 }) {
   const [failedUri, setFailedUri] = useState<string>();
   if (uri && failedUri === uri)
@@ -42,17 +44,20 @@ export function SavedImage({
       <>
         <ArtworkThumbnail harbour={harbour} />
         <Text style={styles.caption}>
-          Your image is unavailable. Showing the sample study.
+          Your image is unavailable. Showing a generic study aid.
         </Text>
       </>
     );
   return uri ? (
-    <Image
-      source={{ uri }}
-      accessibilityLabel="Saved artwork"
-      style={{ height: 210, width: "100%", borderRadius: 18 }}
-      resizeMode="contain"
-      onError={() => setFailedUri(uri)}
-    />
+    <>
+      <Text style={styles.caption}>{label}</Text>
+      <Image
+        source={{ uri }}
+        accessibilityLabel={label}
+        style={{ height: 210, width: "100%", borderRadius: 18 }}
+        resizeMode="contain"
+        onError={() => setFailedUri(uri)}
+      />
+    </>
   ) : null;
 }
