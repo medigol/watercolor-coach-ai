@@ -1,3 +1,4 @@
+import { validOverlays, overlayTypes } from "./overlays.ts";
 export type Mode = "improve_painting" | "create_reference";
 export type Provider = "mock" | "openai";
 export interface Input {
@@ -83,7 +84,16 @@ export function validFeedback(
 ): value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const v = value as Record<string, unknown>;
-  const fields = mode === "improve_painting" ? improveFields : referenceFields;
+  const fields = [
+    ...(mode === "improve_painting" ? improveFields : referenceFields),
+    ...(Object.hasOwn(v, "overlays") ? ["overlays"] : []),
+  ];
+  if (
+    v.overlays !== undefined &&
+    v.overlays !== null &&
+    !validOverlays(v.overlays)
+  )
+    return false;
   if (
     Object.keys(v).length !== fields.length ||
     Object.keys(v).some((k) => !fields.includes(k))
@@ -126,7 +136,33 @@ export function validFeedback(
 export function feedbackSchema(mode: Mode) {
   const text = { type: "string" };
   const list = { type: "array", items: text };
-  const common = { title: text, composition: text, sketch: text, values: text };
+  const overlayFields = {
+    type: { type: "string", enum: [...overlayTypes] },
+    label: text,
+    x: { type: "number" },
+    y: { type: "number" },
+    width: { type: ["number", "null"] },
+    height: { type: ["number", "null"] },
+    priority: { type: "string", enum: ["high", "medium", "low"] },
+    shortInstruction: text,
+    reason: text,
+    action: text,
+  };
+  const common = {
+    title: text,
+    composition: text,
+    sketch: text,
+    values: text,
+    overlays: {
+      type: ["array", "null"],
+      items: {
+        type: "object",
+        properties: overlayFields,
+        required: Object.keys(overlayFields),
+        additionalProperties: false,
+      },
+    },
+  };
   const properties =
     mode === "improve_painting"
       ? {
@@ -202,4 +238,18 @@ export function imageMime(bytes: Uint8Array): string | null {
   )
     return "image/webp";
   return null;
+}
+
+// Discard malformed optional overlays while preserving valid text coaching.
+export function cleanOverlayFeedback(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const v = value as Record<string, unknown>;
+  if (
+    v.overlays === undefined ||
+    v.overlays === null ||
+    validOverlays(v.overlays)
+  )
+    return value;
+  const { overlays: _invalid, ...text } = v;
+  return text;
 }

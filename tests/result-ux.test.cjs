@@ -6,7 +6,7 @@ const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "..");
-function render(mode, provider, image) {
+function render(mode, provider, image, overlays) {
   const modules = new Map();
   function load(relative) {
     if (modules.has(relative)) return modules.get(relative);
@@ -36,6 +36,8 @@ function render(mode, provider, image) {
               alt: props.accessibilityLabel,
             }),
           ActivityIndicator: () => null,
+          Pressable: (props) =>
+            React.createElement("button", null, props.children),
         };
       if (name.endsWith("/ui") || name === "./ui")
         return {
@@ -47,7 +49,7 @@ function render(mode, provider, image) {
       if (name.endsWith("/useSavedResult"))
         return {
           useSavedResult: (sample) => ({
-            result: sample,
+            result: overlays === undefined ? sample : { ...sample, overlays },
             provider,
             image,
             focus: "Composition",
@@ -129,4 +131,33 @@ test("painting sequence uses numbered markers with no scene thumbnails", () => {
   );
   assert(!/MiniWatercolorScene|ArtworkThumbnail|Image\b/.test(source));
   assert(source.includes("{i + 1}"));
+});
+
+test("saved overlay metadata without an uploaded image still renders normal text guidance", () => {
+  const notes = Array.from({ length: 3 }, () => ({
+    type: "focal_point",
+    label: "Preserve this light",
+    x: 25,
+    y: 40,
+    priority: "high",
+    shortInstruction: "Keep this light shape open.",
+    reason: "It supports atmosphere.",
+    action: "Reserve the paper white.",
+  }));
+  for (const mode of ["improve_painting", "create_reference"]) {
+    const html = render(mode, "openai", undefined, notes);
+    assert(!html.includes("Coaching overlay"));
+    assert(
+      html.includes(
+        mode === "improve_painting" ? "Main advice" : "Painting plan",
+      ),
+    );
+    const invalid = render(
+      mode,
+      "openai",
+      "https://example.invalid/private-image",
+      [{ x: 200 }],
+    );
+    assert(!invalid.includes("Coaching overlay"));
+  }
 });

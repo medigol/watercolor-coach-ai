@@ -1,7 +1,8 @@
+import CoachingOverlay from "./CoachingOverlay";
+import { validOverlays } from "../lib/overlays";
 import { ActivityIndicator, Text, Image } from "react-native";
 import { Button, Screen, styles, colors } from "./ui";
 import { useState } from "react";
-import ArtworkThumbnail from "./ArtworkThumbnail";
 export function ResultState({
   loading,
   error,
@@ -31,20 +32,21 @@ export function ResultState({
 }
 export function SavedImage({
   uri,
-  harbour = false,
   label = "Your painting",
+  overlays,
 }: {
   uri?: string;
-  harbour?: boolean;
   label?: string;
+  overlays?: unknown;
 }) {
   const [failedUri, setFailedUri] = useState<string>();
+  if (uri && validOverlays(overlays) && overlays.length)
+    return <CoachingOverlay uri={uri} notes={overlays} label={label} />;
   if (uri && failedUri === uri)
     return (
       <>
-        <ArtworkThumbnail harbour={harbour} />
         <Text style={styles.caption}>
-          Your image is unavailable. Showing a generic study aid.
+          Your image is unavailable. Showing text guidance only.
         </Text>
       </>
     );

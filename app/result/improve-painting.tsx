@@ -1,3 +1,4 @@
+import type { ImproveData } from "../../lib/artworks";
 import { useSavedResult } from "../../hooks/useSavedResult";
 import { ResultState, SavedImage } from "../../components/SavedResultState";
 import { Text } from "react-native";
@@ -9,7 +10,7 @@ import { Screen, styles } from "../../components/ui";
 import { improveResult as sample } from "../../data/mockResults";
 export default function ImproveResult() {
   const { result, provider, focus, image, loading, error, warning, retry } =
-    useSavedResult(sample, "improve_painting");
+    useSavedResult<ImproveData>(sample, "improve_painting");
   if (loading || error)
     return <ResultState loading={loading} error={error} retry={retry} />;
   return (
@@ -20,12 +21,12 @@ export default function ImproveResult() {
           {warning}
         </Text>
       )}
-      <SavedImage uri={image} />
+      <FeedbackSection title="Main advice" text={result.mainAdvice} highlight />
+      <SavedImage overlays={result.overlays} uri={image} />
       <Text style={styles.caption}>
         {provider === "mock" ? "Sample feedback" : "Painting feedback"}
         {focus ? ` · Your selected focus: ${focus}` : ""}
       </Text>
-      <FeedbackSection title="Main advice" text={result.mainAdvice} highlight />
       <FeedbackSection title="What works" items={result.whatWorks} />
       <FeedbackSection title="What to fix" items={result.whatToFix} />
       <CompositionSuggestionCard text={result.composition} />

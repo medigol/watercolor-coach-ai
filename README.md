@@ -101,6 +101,16 @@ To test fallback, leave the function undeployed, leave its OpenAI secret unset, 
 
 Live automatic feedback requires a real configured Supabase project, the SQL migration, a deployed function, and an OpenAI API key with API credits. None of those credentials are included. No paid API call is needed to run the regression suite.
 
+## Coaching overlays
+
+New feedback in either mode can include 3–5 numbered coaching notes on your uploaded painting/photo. Tap a marker or its note card to highlight it and read the reason and practical action. The original image is shown at its own aspect ratio; overlay coordinates are percentages of that image. Optional region coordinates describe a top-left corner and width/height; this first version shows a number at the region centre rather than drawing filled regions or crop rectangles.
+
+These marks are drawn by the app over the existing uploaded image. They do not generate, edit, repaint, or replace the image. Guidance prioritizes focal point, tonal grouping, simplified secondary shapes, atmospheric edges, and preserved lights. All coaching comes from the same existing model request; no additional model call or image API is used.
+
+Overlays are an optional `result_json.overlays` field. Older saved results and unchanged mock samples work without it. Invalid/missing overlays or unavailable images hide the overlay section; valid text guidance still displays. The server strictly validates 0–100 coordinates, region bounds, categories, priorities, and text limits, and discards invalid optional overlays without losing valid feedback. Locations are approximate coaching suggestions, not precise measurements.
+
+After merging, redeploy Pages and run **Actions → Deploy Supabase Edge Function → Run workflow → main** to deploy the updated schema/prompt code. No database SQL migration, new secrets, or new environment variables are required.
+
 ## Validation and security checks
 
 `npm test` runs auth, credential preflight, persistence, strict response validation, Edge auth/request validation, fallback, idempotency, and quota regressions without live credentials. Runtime regressions execute the real Edge entrypoint with the installed Supabase SDK and controlled HTTP responses. `npm run typecheck` checks the frontend. With Deno 2.5.6 installed, `npm run typecheck:edge` separately checks the deployed server code. The Pages workflow runs both TypeScript checks before exporting. `supabase/tests/rls.sql` checks profile/counter provisioning, restrictive ownership guards even with older broad policies, isolated rows and storage paths, ownership-transfer denial, account-bound RPC calls, anonymous-save denial, and transactional rollback. [supabase/tests/feedback.sql](supabase/tests/feedback.sql) additionally checks provider forgery denial, server-only RPC privileges, reservations, atomic quota increments, three-result enforcement, counter-write denial even with legacy column grants/permissive policies, and retry/fallback races. Run both scripts after the schema in a disposable/local Supabase project or SQL Editor; fixture rows are rolled back. Review any pre-existing policies first.

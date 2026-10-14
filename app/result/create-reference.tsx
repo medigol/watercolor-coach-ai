@@ -1,3 +1,4 @@
+import type { ReferenceData } from "../../lib/artworks";
 import { useSavedResult } from "../../hooks/useSavedResult";
 import { ResultState, SavedImage } from "../../components/SavedResultState";
 import { Text, View } from "react-native";
@@ -10,7 +11,7 @@ import { Screen, styles } from "../../components/ui";
 import { referenceResult as sample } from "../../data/mockResults";
 export default function ReferenceResult() {
   const { result, provider, image, loading, error, warning, retry } =
-    useSavedResult(sample, "create_reference");
+    useSavedResult<ReferenceData>(sample, "create_reference");
   if (loading || error)
     return <ResultState loading={loading} error={error} retry={retry} />;
   return (
@@ -21,7 +22,7 @@ export default function ReferenceResult() {
           {warning}
         </Text>
       )}
-      <SavedImage uri={image} harbour label="Your photo" />
+      <SavedImage overlays={result.overlays} uri={image} label="Your photo" />
       <Text style={styles.caption}>
         {provider === "mock"
           ? "Sample painting plan"

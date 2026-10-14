@@ -1,6 +1,7 @@
 import {
   validInput,
   validFeedback,
+  cleanOverlayFeedback,
   uuid,
   readLimited,
   limitMessage,
@@ -123,7 +124,9 @@ export function createHandler(deps: Dependencies) {
       let data: Record<string, unknown> | null = null;
       try {
         const bytes = await deps.download(user, input.image_path);
-        const generated = await deps.generate(input, bytes);
+        const generated = cleanOverlayFeedback(
+          await deps.generate(input, bytes),
+        );
         if (validFeedback(generated, input.mode)) data = generated;
       } catch {
         /* Never expose upstream errors, keys, prompts, or image contents. */
