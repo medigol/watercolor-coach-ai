@@ -2,6 +2,7 @@ import { requireSupabase } from "./supabase";
 import { improveResult, referenceResult } from "../data/mockResults";
 import type {
   BrushWashStep,
+  CoachingDecision,
   CoachingMode,
   CompositionDecision,
   PaletteColour,
@@ -44,6 +45,7 @@ function validSave(
 export type SavedMode = "improve_painting" | "create_reference";
 import type { CoachingOverlay } from "./overlays";
 export type ImproveData = typeof improveResult & {
+  coachingDecision?: CoachingDecision | null;
   coachingMode?: CoachingMode | null;
   overlays?: CoachingOverlay[] | null;
   palette?: PaletteColour[] | null;
@@ -53,6 +55,7 @@ export type ImproveData = typeof improveResult & {
   brushPlan?: BrushWashStep[] | null;
 };
 export type ReferenceData = Omit<typeof referenceResult, "palette"> & {
+  coachingDecision?: CoachingDecision | null;
   palette: PaletteColour[];
   coachingMode?: CoachingMode | null;
   overlays?: CoachingOverlay[] | null;
@@ -62,6 +65,7 @@ export type ReferenceData = Omit<typeof referenceResult, "palette"> & {
   brushPlan?: BrushWashStep[] | null;
   whatWorks?: string[] | null;
   whatToFix?: string[] | null;
+  practice?: string | null;
 };
 export interface ArtworkImage {
   uri: string;

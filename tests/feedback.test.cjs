@@ -24,6 +24,7 @@ function load(file, imports = {}) {
 const overlayContract = load("supabase/functions/_shared/overlays.ts");
 const contract = load("supabase/functions/_shared/contract.ts", {
   "./overlays.ts": overlayContract,
+  "./coachingDecision.ts": load("shared/coachingDecision.ts"),
 });
 const samples = load("supabase/functions/_shared/mockResults.ts");
 const { createHandler } = load(
@@ -309,9 +310,10 @@ test("strict response schemas reject malformed fields, extra fields, unsafe pale
         "promising",
         "brushPlan",
         "coachingMode",
+        "coachingDecision",
         ...(mode === "improve_painting"
           ? ["palette"]
-          : ["whatWorks", "whatToFix"]),
+          : ["whatWorks", "whatToFix", "practice"]),
       ].sort(),
     );
   }
@@ -340,7 +342,7 @@ test("deployed server samples stay identical to existing mock flows", () => {
   assert.deepEqual(samples, load("data/mockResults.ts"));
 });
 test("frontend and Pages have no private-key reads or backend imports", () => {
-  const dirs = ["app", "components", "hooks", "lib", "providers", "data"];
+  const dirs = ["app", "components", "hooks", "lib", "providers", "data", "shared"];
   function files(dir) {
     return fs
       .readdirSync(dir, { withFileTypes: true })

@@ -135,7 +135,7 @@ const handler = createHandler({
         messages: [
           {
             role: "system",
-            content: coachingPrompt(input.mode),
+            content: coachingPrompt(input.mode, input.focus_area),
           },
           {
             role: "user",

@@ -8,12 +8,14 @@ export default function ResultLayout({
   guidance,
   planning,
   painting,
+  explore,
 }: {
   header: ReactNode;
   image: ReactNode;
   guidance: ReactNode;
-  planning: ReactNode;
-  painting: ReactNode;
+  planning?: ReactNode;
+  painting?: ReactNode;
+  explore?: ReactNode;
 }) {
   const { width } = useWindowDimensions();
   const wide = Platform.OS === "web" && width >= 960;
@@ -30,7 +32,7 @@ export default function ResultLayout({
     >
       <View
         testID="result-container"
-        style={{ width: "100%", maxWidth: wide ? 1040 : 430, gap: 20 }}
+        style={{ width: "100%", maxWidth: wide ? 1200 : 430, gap: 20 }}
       >
         <View style={{ gap: 14 }}>{header}</View>
         {wide ? (
@@ -44,6 +46,7 @@ export default function ResultLayout({
             </View>
             <View testID="result-advice-column" style={column}>
               {guidance}
+              {explore}
               {painting}
             </View>
           </View>
@@ -51,6 +54,7 @@ export default function ResultLayout({
           <View style={{ gap: 20 }}>
             {image}
             {guidance}
+            {explore}
             {planning}
             {painting}
           </View>

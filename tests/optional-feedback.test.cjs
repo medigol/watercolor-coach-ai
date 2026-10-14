@@ -24,6 +24,7 @@ const { cleanFeedback, cleanOverlayFeedback, validFeedback } = load(
   "supabase/functions/_shared/contract.ts",
   {
     "./overlays.ts": overlays,
+    "./coachingDecision.ts": load("shared/coachingDecision.ts"),
   },
 );
 const { improveResult, referenceResult } = load(

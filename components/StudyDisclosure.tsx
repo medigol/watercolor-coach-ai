@@ -13,16 +13,23 @@ export default function StudyDisclosure({
   helper,
   children,
   initiallyOpen,
+  open: controlledOpen,
+  onOpenChange,
 }: {
   title: string;
   helper?: string;
   children: ReactNode;
   initiallyOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const { width } = useWindowDimensions();
   const [choice, setChoice] = useState<boolean>();
   const open =
-    choice ?? initiallyOpen ?? (Platform.OS === "web" && width >= 960);
+    controlledOpen ??
+    choice ??
+    initiallyOpen ??
+    (Platform.OS === "web" && width >= 960);
   return (
     <View style={{ gap: 12 }}>
       <Pressable
@@ -30,7 +37,10 @@ export default function StudyDisclosure({
         accessibilityLabel={title}
         accessibilityState={{ expanded: open }}
         aria-expanded={open}
-        onPress={() => setChoice(!open)}
+        onPress={() => {
+          if (controlledOpen === undefined) setChoice(!open);
+          onOpenChange?.(!open);
+        }}
         style={[
           styles.card,
           {

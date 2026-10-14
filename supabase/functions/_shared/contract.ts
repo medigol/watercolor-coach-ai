@@ -6,6 +6,10 @@ import {
   usableOverlays,
   validOverlays,
 } from "./overlays.ts";
+import {
+  coherentFeedback,
+  usableCoachingDecision,
+} from "./coachingDecision.ts";
 export const coachingModes = ["constructive", "study"] as const;
 export type CoachingMode = (typeof coachingModes)[number];
 export const safePigmentCodes = ["PB29", "PBr7", "PY43", "PY42"] as const;
@@ -215,9 +219,10 @@ export function validFeedback(
       "promising",
       "brushPlan",
       "coachingMode",
+      "coachingDecision",
       ...(mode === "improve_painting"
         ? ["palette"]
-        : ["whatWorks", "whatToFix"]),
+        : ["whatWorks", "whatToFix", "practice"]),
     ].filter((key) => Object.hasOwn(v, key)),
   ];
   if (
@@ -238,8 +243,13 @@ export function validFeedback(
     !validBrushPlan(v.brushPlan) ||
     (v.coachingMode != null &&
       !coachingModes.includes(v.coachingMode as CoachingMode)) ||
+    (v.coachingDecision != null &&
+      !usableCoachingDecision(v.coachingDecision)) ||
     (v.promising != null && !boundedText(v.promising, 350)) ||
     (v.paletteStrategy != null && !boundedText(v.paletteStrategy, 350)) ||
+    (mode === "create_reference" &&
+      v.practice != null &&
+      !boundedText(v.practice, 700)) ||
     (mode === "improve_painting" &&
       v.palette != null &&
       !validPalette(v.palette))
@@ -344,6 +354,28 @@ export function feedbackSchema(mode: Mode) {
     tryNow: { type: ["string", "null"] },
     nextStudy: { type: ["string", "null"] },
   };
+  const nullableDecisionText = { type: ["string", "null"], maxLength: 350 };
+  const areaList = {
+    type: "array",
+    maxItems: 3,
+    items: { type: "string", maxLength: 100 },
+  };
+  const coachingDecisionFields = {
+    primaryGoal: { type: "string", maxLength: 350 },
+    primarySubjectOrArea: { type: "string", maxLength: 100 },
+    areasToEmphasize: areaList,
+    areasToQuiet: areaList,
+    currentPaintingAction: nullableDecisionText,
+    nextStudyAction: nullableDecisionText,
+    supportingObservations: {
+      type: "array",
+      maxItems: 3,
+      items: { type: "string", maxLength: 350 },
+    },
+    compositionImplication: nullableDecisionText,
+    colourImplication: nullableDecisionText,
+    techniqueImplication: nullableDecisionText,
+  };
   const brushFields = {
     stage: text,
     brush: text,
@@ -359,6 +391,12 @@ export function feedbackSchema(mode: Mode) {
     sketch: text,
     values: text,
     coachingMode: { type: ["string", "null"], enum: [...coachingModes, null] },
+    coachingDecision: {
+      type: ["object", "null"],
+      properties: coachingDecisionFields,
+      required: Object.keys(coachingDecisionFields),
+      additionalProperties: false,
+    },
     promising: { type: ["string", "null"] },
     brushPlan: {
       type: ["array", "null"],
@@ -403,6 +441,7 @@ export function feedbackSchema(mode: Mode) {
           steps: list,
           whatWorks: { ...list, type: ["array", "null"] },
           whatToFix: { ...list, type: ["array", "null"] },
+          practice: { type: ["string", "null"] },
         };
   return {
     type: "object",
@@ -482,7 +521,8 @@ export function cleanOverlayFeedback(value: unknown): unknown {
 export function cleanFeedback(value: unknown, mode: Mode): unknown {
   const withOverlays = cleanOverlayFeedback(value);
   if (
-    !withOverlays || typeof withOverlays !== "object" ||
+    !withOverlays ||
+    typeof withOverlays !== "object" ||
     Array.isArray(withOverlays)
   ) {
     return withOverlays;
@@ -502,8 +542,10 @@ export function cleanFeedback(value: unknown, mode: Mode): unknown {
 
   if (result.brushPlan != null && !validBrushPlan(result.brushPlan)) {
     const stages = Array.isArray(result.brushPlan)
-      ? result.brushPlan.slice(0, 32).filter((stage) => validBrushPlan([stage]))
-        .slice(0, 3)
+      ? result.brushPlan
+          .slice(0, 32)
+          .filter((stage) => validBrushPlan([stage]))
+          .slice(0, 3)
       : [];
     if (stages.length) result.brushPlan = stages;
     else delete result.brushPlan;
@@ -519,26 +561,30 @@ export function cleanFeedback(value: unknown, mode: Mode): unknown {
         if (
           ["mainIssue", "reason", "tryNow", "nextStudy"].includes(key) &&
           (item === null || boundedText(item, 350))
-        ) cleaned[key] = item;
+        )
+          cleaned[key] = item;
       }
     }
     if (Object.keys(cleaned).length) result.compositionDecision = cleaned;
     else delete result.compositionDecision;
   }
   if (mode === "create_reference") {
+    if (result.practice != null && !boundedText(result.practice, 700))
+      delete result.practice;
     for (const field of ["whatWorks", "whatToFix"]) {
       const value = result[field];
       if (value == null) continue;
       const items = Array.isArray(value)
-        ? value.slice(0, 32).filter((item) => boundedText(item, 350)).slice(
-          0,
-          8,
-        )
+        ? value
+            .slice(0, 32)
+            .filter((item) => boundedText(item, 350))
+            .slice(0, 8)
         : [];
       if (
         items.length ||
         (field === "whatToFix" && Array.isArray(value) && value.length === 0)
-      ) result[field] = items;
+      )
+        result[field] = items;
       else delete result[field];
     }
   }
@@ -560,28 +606,32 @@ export function cleanFeedback(value: unknown, mode: Mode): unknown {
                 field as (typeof safePigmentCodes)[number],
               ) ||
               !safePigmentForName(colour.name, field))
-          ) delete colour[key];
+          )
+            delete colour[key];
         } else if (key === "temperature") {
           if (
             field != null &&
             !["warm", "cool", "neutral"].includes(field as string)
-          ) delete colour[key];
+          )
+            delete colour[key];
         } else if (key === "tag") {
           if (
             field != null &&
             !paletteTags.includes(field as (typeof paletteTags)[number])
-          ) delete colour[key];
+          )
+            delete colour[key];
         } else delete colour[key];
       }
       return colour;
     });
   }
   if (
-    mode === "improve_painting" && result.palette != null &&
+    mode === "improve_painting" &&
+    result.palette != null &&
     !validPalette(result.palette)
   ) {
     delete result.palette;
   }
   // Unknown top-level fields remain here and are rejected by validFeedback.
-  return result;
+  return coherentFeedback(result, mode);
 }

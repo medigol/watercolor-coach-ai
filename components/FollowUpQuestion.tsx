@@ -23,11 +23,11 @@ export default function FollowUpQuestion({
       }}
     >
       {!hideHeading && (
-        <Text style={[styles.heading, { fontSize: 16 }]}>Follow-up question</Text>
+        <Text style={[styles.heading, { fontSize: 16 }]}>Ask a follow-up</Text>
       )}
       {!hideHeading && (
         <Text style={styles.caption}>
-          Use this if you want another coaching round.
+          Ask another coaching question about this painting.
         </Text>
       )}
       {study && (

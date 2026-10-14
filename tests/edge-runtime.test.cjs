@@ -87,7 +87,7 @@ function fixture(options = {}) {
       const prompt = body.messages[0].content;
       assert(prompt.includes("visible locations"));
       assert(prompt.includes("never claim to have generated"));
-      assert(prompt.includes("Aim for 3–6 useful visual marks"));
+      assert(prompt.includes("Aim for 2–3 useful visual marks"));
       assert(prompt.includes("preferably three distinct high-value notes"));
       assert(
         prompt.includes("one practical sentence under 25 words for action"),
@@ -99,9 +99,7 @@ function fixture(options = {}) {
       assert(prompt.includes("never invent precise geometry"));
       assert(prompt.includes("without another analysis or a new image"));
       assert(
-        prompt.includes(
-          "category is focal_point, composition, value_structure",
-        ),
+        prompt.includes("category focal_point/composition/value_structure"),
       );
       if (options.mode === "create_reference") {
         assert(prompt.includes("keep, simplify, remove, or merge"));
@@ -117,7 +115,7 @@ function fixture(options = {}) {
         assert(prompt.includes("common mistake to avoid"));
         assert(
           prompt.includes(
-            "Do not identify pigments from the photo or invent manufacturer formulations",
+            "Never identify original pigments or invent manufacturer/purchase claims",
           ),
         );
         assert(prompt.includes("leave its code null"));
@@ -827,9 +825,7 @@ for (const mode of ["improve_painting", "create_reference"])
     const prompt = f.calls.find((c) => c.path === "/v1/chat/completions").body
       .messages[0].content;
     assert(
-      prompt.includes(
-        "Never tell someone to physically move an already-painted object",
-      ),
+      prompt.includes("Current actions must not reposition painted objects"),
     );
     assert(prompt.includes("current_painting, next_study, or both"));
     assert(prompt.includes("eye_flow_arrow"));
@@ -895,16 +891,14 @@ for (const mode of ["improve_painting", "create_reference"])
     assert(prompt.includes("promising is one evidence-based sentence"));
     assert(prompt.includes("up to three short stages"));
     assert(
-      prompt.includes(
-        "Avoid casual lifting/scrubbing or repeated rewetting of dry glazes",
-      ),
+      prompt.includes("Avoid casual lifting/scrubbing/repeated rewetting"),
     );
-    assert(prompt.includes("Prefer 3–4 useful colors"));
+    assert(prompt.includes("prefer 3–4 useful colors"));
     assert(prompt.includes("dominant temperature"));
     if (mode === "create_reference")
       assert(
         prompt.includes(
-          "never praise a sky wash, brushwork or painted technique in a photograph",
+          "If the image is a photograph, do not praise washes or painted handling",
         ),
       );
   });
@@ -953,7 +947,7 @@ for (const mode of ["improve_painting", "create_reference"]) {
     assert.equal(response.status, 200);
     assert.equal((await response.json()).provider, "openai");
     const completion = f.calls.find((call) =>
-      call.path.endsWith("/complete_openai_feedback")
+      call.path.endsWith("/complete_openai_feedback"),
     );
     assert.deepEqual(completion.body.p_result.whatToFix, []);
     assert.equal(completion.body.p_result.coachingMode, "study");
@@ -965,8 +959,8 @@ for (const mode of ["improve_painting", "create_reference"]) {
       f.calls.filter((call) => call.path === "/v1/chat/completions").length,
       1,
     );
-    const request = f.calls.find((call) =>
-      call.path === "/v1/chat/completions"
+    const request = f.calls.find(
+      (call) => call.path === "/v1/chat/completions",
     ).body;
     assert.equal(request.max_completion_tokens, 3000);
     assert(request.messages[0].content.includes("do not force criticism"));
@@ -979,12 +973,97 @@ for (const mode of ["improve_painting", "create_reference"]) {
     assert.equal(response.status, 200);
     assert.equal((await response.json()).provider, "openai");
     const result = f.calls.find((call) =>
-      call.path.endsWith("/complete_openai_feedback")
+      call.path.endsWith("/complete_openai_feedback"),
     ).body.p_result;
     assert(!Object.hasOwn(result, "coachingMode"));
     assert.equal(
       f.calls.filter((call) => call.path === "/v1/chat/completions").length,
       1,
     );
+  });
+}
+
+for (const focus of [
+  "Overall feedback",
+  "Composition",
+  "Colour & contrast",
+  "Watercolor technique",
+]) {
+  test(`actual Edge SDK runtime: ${focus} reaches its distinct system prompt through validated input`, async () => {
+    const f = fixture();
+    const response = await f.run({ ...input, focus_area: focus });
+    assert.equal(response.status, 200);
+    const calls = f.calls.filter(
+      (call) => call.path === "/v1/chat/completions",
+    );
+    assert.equal(calls.length, 1);
+    assert(
+      calls[0].body.messages[0].content.includes(`Selected focus: ${focus}.`),
+    );
+    assert.equal(calls[0].body.max_completion_tokens, 3000);
+    assert.equal(
+      f.calls.filter((call) => call.path.endsWith("/complete_openai_feedback"))
+        .length,
+      1,
+    );
+  });
+}
+for (const mode of ["improve_painting", "create_reference"]) {
+  test(`actual Edge SDK runtime: ${mode} saves a coherent optional decision and rejects no valid core data`, async () => {
+    const coachingDecision = {
+      primaryGoal: "Keep the pavilion crisp and quiet the pier.",
+      primarySubjectOrArea: "pavilion",
+      areasToEmphasize: ["pavilion"],
+      areasToQuiet: ["pier"],
+      currentPaintingAction: "Move the pavilion lower.",
+      nextStudyAction: null,
+      supportingObservations: [
+        "The light pavilion separates clearly from the distance.",
+      ],
+      compositionImplication: "The quiet pier supports the focal path.",
+      colourImplication: "Reserve warm contrast for the pavilion.",
+      techniqueImplication:
+        "Practise crisp pavilion accents against a soft pier.",
+    };
+    for (const value of [coachingDecision, { malformed: true }]) {
+      const f = fixture({
+        mode,
+        feedback: {
+          coachingDecision: value,
+          whatToFix: ["Sharpen the pier.", "Keep the pier soft."],
+          practice: "Sharpen the pier.",
+        },
+      });
+      const response = await f.run();
+      assert.equal(response.status, 200);
+      assert.equal((await response.json()).provider, "openai");
+      const result = f.calls.find((call) =>
+        call.path.endsWith("/complete_openai_feedback"),
+      ).body.p_result;
+      if (value === coachingDecision) {
+        assert.equal(result.coachingDecision.currentPaintingAction, null);
+        assert.equal(
+          result.coachingDecision.nextStudyAction,
+          "Move the pavilion lower.",
+        );
+        assert.deepEqual(result.whatToFix, ["Keep the pier soft."]);
+        if (mode === "improve_painting")
+          assert.equal(result.mainAdvice, coachingDecision.primaryGoal);
+        else assert(!Object.hasOwn(result, "practice"));
+      } else assert(!Object.hasOwn(result, "coachingDecision"));
+      assert.equal(
+        f.calls.filter((call) => call.path === "/v1/chat/completions").length,
+        1,
+      );
+      assert.equal(
+        f.calls.filter((call) =>
+          call.path.endsWith("/complete_openai_feedback"),
+        ).length,
+        1,
+      );
+      assert(
+        !f.calls.some((call) => call.path.endsWith("/save_mock_feedback")),
+      );
+    }
   });
 }
