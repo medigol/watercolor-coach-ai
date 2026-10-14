@@ -22,6 +22,9 @@ const fakeOpenAI = "test-only-openai-placeholder";
 function fixture(options = {}) {
   const calls = [];
   const boundaryErrors = [];
+  let stored = options.existingProvider
+    ? { artwork_id: id, provider: options.existingProvider, mode: options.mode ?? input.mode }
+    : null;
   let handler;
   const modules = new Map();
   const user = {
@@ -129,7 +132,8 @@ function fixture(options = {}) {
       assert.equal(headers.get("authorization"), "Bearer user-session");
       assert.equal(headers.get("apikey"), fakePublic);
       assert.equal(url.searchParams.get("user_id"), `eq.${uid}`);
-      return json(null);
+      assert.equal(url.searchParams.get("artwork_id"), `eq.${id}`);
+      return json(stored);
     }
     if (url.pathname === "/rest/v1/usage_counters") {
       assert.equal(headers.get("authorization"), "Bearer user-session");
@@ -156,17 +160,23 @@ function fixture(options = {}) {
         assert.equal(headers.get("apikey"), fakePublic);
         assert.equal(body.p_expected_user_id, uid);
         assert.equal(body.p_request_id, id);
-        return json({ id, provider: "mock" });
+        stored ??= { artwork_id: id, provider: "mock", mode: body.p_mode };
+        return json({ id, provider: stored.provider });
       }
       assert.equal(headers.get("apikey"), fakeServer);
       assert.equal(headers.get("authorization"), `Bearer ${fakeServer}`);
       assert.equal(body.p_user_id, uid);
       assert.equal(body.p_request_id, id);
       if (url.pathname.endsWith("/claim_feedback_request"))
-        return json({ status: "claimed" });
+        return json(options.claimStatus === "existing"
+          ? { status: "existing", id, provider: options.claimProvider ?? "openai" }
+          : { status: options.claimStatus ?? "claimed" });
       if (url.pathname.endsWith("/complete_openai_feedback")) {
         assert.deepEqual(body.p_result,
           load(path.join(root, "supabase/functions/_shared/contract.ts")).cleanOverlayFeedback(modelResult));
+        stored ??= { artwork_id: id, provider: "openai", mode: body.p_mode };
+        if (options.lostCommitResponse)
+          return json({ message: "Connection lost after commit" }, 503);
         return json({
           id,
           provider: options.badProvider ? ["openai"] : "openai",
@@ -286,6 +296,57 @@ test("actual Edge SDK runtime: quota stops all paid/storage/save calls", async (
   assert.equal((await r.json()).code, "usage_limit");
   assert.equal(f.calls.length, 3);
 });
+for (const provider of ["openai", "mock"])
+  test(`actual Edge SDK runtime: an existing ${provider} result returns before quota/model/save even at the limit`, async () => {
+    const f = fixture({ existingProvider: provider, quota: true });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { id, provider });
+    assert.deepEqual(f.calls.map((call) => call.path), ["/auth/v1/user", "/rest/v1/ai_results"]);
+  });
+for (const mode of ["improve_painting", "create_reference"])
+  test(`actual Edge SDK runtime: duplicate ${mode} request IDs do not repeat a paid call or completion`, async () => {
+    const f = fixture({ mode });
+    for (let retry = 0; retry < 3; retry++) {
+      const response = await f.run();
+      assert.equal(response.status, 200);
+      assert.deepEqual(await response.json(), { id, provider: "openai" });
+    }
+    assert.equal(f.calls.filter((call) => call.path === "/v1/chat/completions").length, 1);
+    assert.equal(f.calls.filter((call) => call.path.endsWith("/complete_openai_feedback")).length, 1);
+    assert.equal(f.calls.filter((call) => call.path.endsWith("/claim_feedback_request")).length, 1);
+    assert.equal(f.calls.filter((call) => call.path === "/rest/v1/usage_counters").length, 1);
+    assert.equal(f.calls.filter((call) => call.path.endsWith("/save_mock_feedback")).length, 0);
+  });
+test("actual Edge SDK runtime: a committed result with a lost completion response is recovered without another paid call", async () => {
+  const f = fixture({ lostCommitResponse: true });
+  assert.equal((await f.run()).status, 503);
+  const retry = await f.run();
+  assert.equal(retry.status, 200);
+  assert.deepEqual(await retry.json(), { id, provider: "openai" });
+  assert.equal(f.calls.filter((call) => call.path === "/v1/chat/completions").length, 1);
+  assert.equal(f.calls.filter((call) => call.path.endsWith("/complete_openai_feedback")).length, 1);
+});
+test("actual Edge SDK runtime: retrying a saved mock fallback never repeats the failed model call or consumes a real completion", async () => {
+  const f = fixture({ modelError: true });
+  assert.equal((await (await f.run()).json()).provider, "mock");
+  assert.deepEqual(await (await f.run()).json(), { id, provider: "mock" });
+  assert.equal(f.calls.filter((call) => call.path === "/v1/chat/completions").length, 1);
+  assert.equal(f.calls.filter((call) => call.path.endsWith("/save_mock_feedback")).length, 1);
+  assert.equal(f.calls.filter((call) => call.path.endsWith("/complete_openai_feedback")).length, 0);
+});
+for (const status of ["busy", "limit", "existing"])
+  test(`actual Edge SDK runtime: atomic claim ${status} stops download/model/completion`, async () => {
+    const f = fixture({ claimStatus: status });
+    const response = await f.run();
+    assert.equal(response.status, status === "busy" ? 409 : status === "limit" ? 403 : 200);
+    assert.deepEqual(await response.json(), status === "existing"
+      ? { id, provider: "openai" }
+      : status === "limit"
+        ? { code: "usage_limit", message: "You have used your 3 free AI feedback results. More feedback will be available after subscriptions are added." }
+        : { code: "busy", message: "Feedback is already being prepared. Check My Artworks in a moment." });
+    assert(!f.calls.some((call) => /storage|chat\/completions|complete_openai_feedback|save_mock_feedback|release_feedback_request/.test(call.path)));
+  });
 test("actual Edge SDK runtime: malformed saved provider is not accepted as success", async () => {
   const f = fixture({ badProvider: true });
   const r = await f.run();
