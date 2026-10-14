@@ -16,6 +16,7 @@ import {
   type ThumbnailPlanningInput,
 } from "../lib/thumbnailPlanning";
 import { colors, styles } from "./ui";
+import ImageStudyThumbnail from "./ImageStudyThumbnail";
 
 const tone = {
   paper: "#F6F4EB",
@@ -248,9 +249,11 @@ function Diagram({
             </SvgText>
           </>
         )}
-        {(kind === "big_shapes" || kind === "value_mass") && (
+        {(kind === "big_shapes" ||
+          kind === "value_mass" ||
+          kind === "focal_point") && (
           <>
-            {kind === "big_shapes" && <FocusRing />}
+            {(kind === "big_shapes" || kind === "focal_point") && <FocusRing />}
             <Rect
               x={16}
               y={165}
@@ -416,7 +419,28 @@ export default function ThumbnailPlanning(props: ThumbnailPlanningInput) {
           <Text style={{ ...styles.heading, fontSize: 17, lineHeight: 23 }}>
             {study.title}
           </Text>
-          <Diagram kind={study.kind} layout={study.layout} />
+          {props.uri && study.marks.length ? (
+            <ImageStudyThumbnail
+              uri={props.uri}
+              kind={study.kind}
+              notes={study.marks}
+              fallback={
+                <View style={{ gap: 8 }}>
+                  <Diagram kind={study.kind} layout={study.layout} />
+                  <Text style={styles.caption}>
+                    Generic planning diagram · Adapt this to your image
+                  </Text>
+                </View>
+              }
+            />
+          ) : (
+            <>
+              <Diagram kind={study.kind} layout={study.layout} />
+              <Text style={styles.caption}>
+                Generic planning diagram · Adapt this to your image
+              </Text>
+            </>
+          )}
           <Text
             style={{ ...styles.caption, color: colors.ink, fontWeight: "600" }}
           >
@@ -425,9 +449,12 @@ export default function ThumbnailPlanning(props: ThumbnailPlanningInput) {
           <Text style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}>
             {study.action}
           </Text>
-          <Text style={styles.caption}>
-            Generic planning diagram · Adapt this to your image
-          </Text>
+          <Text style={styles.caption}>{study.timing}</Text>
+          {study.kind === "crop" && (
+            <Text style={styles.caption}>
+              Do not try to move already-painted objects.
+            </Text>
+          )}
         </View>
       ))}
       {(hasSketch || hasValues) && (

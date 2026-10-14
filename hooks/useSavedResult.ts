@@ -101,6 +101,7 @@ export function useSavedResult<T extends ImproveData | ReferenceData>(
     };
   }, [id, mode, sample, userId, requestKey]);
   return {
+    isSaved: !!id,
     result: id ? result : sample,
     provider: id ? provider : "mock",
     image: id ? image : undefined,

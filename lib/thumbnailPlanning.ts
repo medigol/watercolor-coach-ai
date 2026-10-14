@@ -4,6 +4,7 @@ import {
   usableOverlays,
   type CoachingOverlay,
 } from "./overlays";
+import { timingLabel } from "./coachingPresentation";
 
 export type ThumbnailKind =
   | "crop"
@@ -11,7 +12,8 @@ export type ThumbnailKind =
   | "big_shapes"
   | "value_mass"
   | "simplification"
-  | "horizon";
+  | "horizon"
+  | "focal_point";
 export type ThumbnailLayout = "landscape" | "street" | "abstract";
 export type ThumbnailPlanningInput = {
   overlays?: unknown;
@@ -19,6 +21,7 @@ export type ThumbnailPlanningInput = {
   sketch: string;
   values: string;
   title?: string;
+  uri?: string;
 };
 export type ThumbnailStudy = {
   kind: ThumbnailKind;
@@ -26,11 +29,13 @@ export type ThumbnailStudy = {
   title: string;
   purpose: string;
   action: string;
+  timing: string;
+  marks: CoachingOverlay[];
 };
 
 const studies: Record<
   ThumbnailKind,
-  Omit<ThumbnailStudy, "kind" | "layout">
+  Omit<ThumbnailStudy, "kind" | "layout" | "timing" | "marks">
 > = {
   crop: {
     title: "Crop study",
@@ -68,6 +73,12 @@ const studies: Record<
     action:
       "Compare a lower and a higher horizon in tiny studies. Give more space to the light or shape that carries the painting.",
   },
+  focal_point: {
+    title: "Focal point study",
+    purpose: "Give the viewer one clear place to look first.",
+    action:
+      "Keep the strongest small darks and sharpest edges near the focal area. Let supporting shapes stay quieter.",
+  },
 };
 
 const safeText = (value: unknown) =>
@@ -93,6 +104,84 @@ export function thumbnailLayout(
   return "abstract";
 }
 
+// Image studies draw only geometry already supplied with the saved guidance.
+// Point-only notes can guide the text, but never become invented boxes or paths.
+export function imageStudyMarks(
+  kind: ThumbnailKind,
+  value: unknown,
+): CoachingOverlay[] {
+  const notes = [...usableOverlays(value)].sort(
+    (a, b) =>
+      ({ high: 3, medium: 2, low: 1 })[b.priority] -
+      { high: 3, medium: 2, low: 1 }[a.priority],
+  );
+  const primary = notes.filter((note) => {
+    const geometry = overlayKind(note),
+      category = overlayCategory(note);
+    if (geometry === "point_marker") return false;
+    switch (kind) {
+      case "crop":
+        return geometry === "crop_box";
+      case "eye_flow":
+        return (
+          geometry === "arrow" ||
+          (geometry === "guide_line" &&
+            category === "composition" &&
+            note.styleHint !== "horizon" &&
+            (note.styleHint === "eye_flow" ||
+              /\b(eye|path|leading|shoreline|road|street|perspective)\b/i.test(
+                `${note.label} ${note.shortInstruction}`,
+              )))
+        );
+      case "value_mass":
+        return (
+          geometry === "value_mass" ||
+          (geometry === "region_highlight" && category === "value_structure")
+        );
+      case "simplification":
+        return (
+          ["region_highlight", "value_mass"].includes(geometry) &&
+          (category === "simplification" ||
+            category === "atmosphere" ||
+            note.styleHint === "simplify")
+        );
+      case "horizon":
+        return (
+          geometry === "guide_line" &&
+          (category === "composition" || note.styleHint === "horizon")
+        );
+      case "focal_point":
+        return geometry === "focal_ring" && category === "focal_point";
+      default:
+        return false;
+    }
+  });
+  if (!primary.length) return [];
+  if (kind === "value_mass") return primary.slice(0, 3);
+  const first =
+    kind === "eye_flow"
+      ? (primary.find((note) => overlayKind(note) === "arrow") ?? primary[0])
+      : primary[0];
+  const result = [first];
+  if (kind === "crop" || kind === "eye_flow") {
+    const focal = notes.find(
+      (note) =>
+        overlayKind(note) === "focal_ring" &&
+        overlayCategory(note) === "focal_point",
+    );
+    if (focal) result.push(focal);
+  }
+  if (kind === "eye_flow") {
+    const quiet = notes.find(
+      (note) =>
+        overlayKind(note) === "region_highlight" &&
+        overlayCategory(note) === "simplification",
+    );
+    if (quiet) result.push(quiet);
+  }
+  return result;
+}
+
 export function planThumbnailStudies(
   input: ThumbnailPlanningInput,
 ): ThumbnailStudy[] {
@@ -105,13 +194,21 @@ export function planThumbnailStudies(
     ThumbnailKind,
     { score: number; note?: CoachingOverlay }
   >();
+  const hasImage = typeof input.uri === "string" && !!input.uri.trim();
+  const geometry = new Map<ThumbnailKind, CoachingOverlay[]>();
+  function marksFor(kind: ThumbnailKind) {
+    if (!hasImage) return [];
+    if (!geometry.has(kind)) geometry.set(kind, imageStudyMarks(kind, notes));
+    return geometry.get(kind)!;
+  }
   function consider(
     kind: ThumbnailKind,
     score: number,
     note?: CoachingOverlay,
   ) {
-    if (score > (candidates.get(kind)?.score ?? -1))
-      candidates.set(kind, { score, note });
+    const rankedScore = score + (marksFor(kind).length ? 200 : 0);
+    if (rankedScore > (candidates.get(kind)?.score ?? -1))
+      candidates.set(kind, { score: rankedScore, note });
   }
   consider("big_shapes", 10);
   consider("value_mass", 9);
@@ -142,6 +239,8 @@ export function planThumbnailStudies(
       consider("value_mass", 96 + weight, note);
     if (category === "simplification" || note.styleHint === "simplify")
       consider("simplification", 90 + weight, note);
+    if (kind === "focal_ring" && category === "focal_point")
+      consider("focal_point", 88 + weight, note);
   }
   if (/\b(crop|cropping|framing)\b/i.test(text)) consider("crop", 80);
   if (
@@ -168,10 +267,27 @@ export function planThumbnailStudies(
   );
   const count =
     ranked.filter(([, item]) => item.score >= 50).length >= 3 ? 3 : 2;
-  return ranked.slice(0, count).map(([kind, candidate]) => ({
-    kind,
-    layout,
-    ...studies[kind],
-    action: candidate.note?.action ?? studies[kind].action,
-  }));
+  return ranked.slice(0, count).map(([kind, candidate]) => {
+    const marks = marksFor(kind);
+    const source = marks[0] ?? candidate.note;
+    return {
+      kind,
+      layout,
+      ...studies[kind],
+      ...(kind === "horizon" && marks.length
+        ? { title: "Horizon / structure study" }
+        : {}),
+      purpose: source?.reason ?? studies[kind].purpose,
+      action: source?.action ?? studies[kind].action,
+      timing:
+        kind === "crop"
+          ? "Try this crop in the next study"
+          : kind === "horizon" && !marks.length
+            ? "Try in the next study"
+            : source
+              ? timingLabel(source)
+              : "Test in a small study first",
+      marks,
+    };
+  });
 }

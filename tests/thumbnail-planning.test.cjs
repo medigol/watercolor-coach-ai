@@ -26,7 +26,13 @@ function load(relative, mocks = {}) {
   return exports;
 }
 const overlay = load("lib/overlays.ts");
-const planning = load("lib/thumbnailPlanning.ts", { "./overlays": overlay });
+const presentation = load("lib/coachingPresentation.ts", {
+  "./overlays": overlay,
+});
+const planning = load("lib/thumbnailPlanning.ts", {
+  "./overlays": overlay,
+  "./coachingPresentation": presentation,
+});
 const empty = { composition: "", sketch: "", values: "" };
 const note = (patch = {}) => ({
   type: "point_marker",
@@ -251,6 +257,7 @@ const Component = load("components/ThumbnailPlanning.tsx", {
     Text: element("text"),
   },
   "../lib/thumbnailPlanning": planning,
+  "./ImageStudyThumbnail": { default: () => null },
   "./ui": { colors: { accent: "#236963", ink: "#253C3C" }, styles: {} },
 }).default;
 const render = (input) =>
@@ -289,6 +296,7 @@ test("full legacy and saved sketch/value guidance stays available in the expanda
       "react-native": { View: "View", Text: "Text", Pressable: "Pressable" },
       "react-native-svg": {},
       "../lib/thumbnailPlanning": planning,
+      "./ImageStudyThumbnail": { default: "ImageStudyThumbnail" },
       "./ui": { colors: {}, styles: {} },
     }).default;
     function nodes(tree) {
@@ -388,14 +396,14 @@ test("all template types render meaningful frame, arrow, value, merge and horizo
   assert(html.includes("One clear path toward the focal area"));
 });
 
-test("planning is local SVG rendering with no images, extra analysis requests or secrets", () => {
+test("planning is local SVG rendering without extra analysis requests or secrets", () => {
   for (const file of [
     "lib/thumbnailPlanning.ts",
     "components/ThumbnailPlanning.tsx",
   ]) {
     const source = fs.readFileSync(path.join(root, file), "utf8");
     assert(
-      !/fetch\s*\(|functions\.invoke|api\.openai|canvas|process\.env|Image\b|image\/|\/images\//.test(
+      !/fetch\s*\(|functions\.invoke|api\.openai|canvas|process\.env|image\/|\/images\//.test(
         source,
       ),
     );

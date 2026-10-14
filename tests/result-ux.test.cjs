@@ -11,7 +11,7 @@ function render(
   provider,
   image,
   overlays,
-  { expandedDetails = false, focus = "Composition", saved = {} } = {},
+  { expandedDetails = false, focus = "Composition", saved = {}, viewportWidth = 375, isSaved = true } = {},
 ) {
   const modules = new Map();
   function load(relative) {
@@ -66,7 +66,7 @@ function render(
           View: (props) =>
             React.createElement(
               "div",
-              { "aria-label": props.accessibilityLabel },
+              { "aria-label": props.accessibilityLabel, "data-testid": props.testID },
               props.children,
             ),
           Image: (props) =>
@@ -87,6 +87,8 @@ function render(
               props.children,
             ),
           StyleSheet: { create: (value) => value },
+          ScrollView: (props) => React.createElement("main",null,props.children),
+          useWindowDimensions: () => ({width:viewportWidth,height:900}),
           Platform: {
             OS: "web",
             select: (choices) => choices.web ?? choices.default,
@@ -108,6 +110,7 @@ function render(
               ...saved,
             },
             provider,
+            isSaved,
             image,
             focus,
             loading: false,
@@ -177,8 +180,8 @@ for (const provider of ["mock", "openai"])
         assert(
           html.includes(
             provider === "mock"
-              ? "Sample painting plan"
-              : "Photo-based coaching notes",
+              ? "Sample guide shown — live AI feedback was unavailable."
+              : "AI feedback",
           ),
         );
       } else {
@@ -206,7 +209,7 @@ for (const provider of ["mock", "openai"])
         );
         assert(
           html.indexOf("Next 15-minute practice") <
-            html.indexOf("Suggested next prompt"),
+            html.indexOf("Follow-up question"),
         );
       }
     });
@@ -214,7 +217,7 @@ test("reference without an uploaded image keeps sample plan and generic aids, wi
   const html = render("create_reference", "mock");
   assert(!html.includes("Your photo"));
   assert(!html.includes("<img"));
-  assert(html.includes("Sample painting plan"));
+  assert(html.includes("Sample guide shown — live AI feedback was unavailable."));
   assert(html.includes("Generic planning diagram"));
   assert(!html.includes("Reference preparation"));
 });
@@ -349,4 +352,23 @@ test("malformed optional decisions and painting palettes preserve legacy guidanc
   );
   assert(html.includes("Thumbnail planning"));
   assert(!html.includes("Watercolor palette"));
+});
+
+test("provider and saved state are clear; follow-up is separate from painting instructions",()=>{
+  for(const mode of ["improve_painting","create_reference"]) {
+    const mock=render(mode,"mock");const live=render(mode,"openai");
+    assert(mock.includes("Sample guide shown — live AI feedback was unavailable."));
+    assert(live.includes("AI feedback"));assert(!live.includes("Sample guide shown"));
+    assert(mock.includes("Saved result"));assert(live.includes("Saved result"));
+    assert(!render(mode,"mock",undefined,undefined,{isSaved:false}).includes("Saved result"));
+  }
+  const html=render("improve_painting","openai");
+  assert(html.includes("Follow-up question"));assert(html.includes("Use this if you want another coaching round."));
+  assert(!html.includes("Suggested next prompt"));
+});
+test("desktop results use separate visual/advice columns while mobile keeps advice before planning",()=>{
+  const desktop=render("improve_painting","openai",undefined,undefined,{viewportWidth:1280});
+  for(const id of ["result-container","result-columns","result-visual-column","result-advice-column"]) assert(desktop.includes(`data-testid="${id}"`));
+  const mobile=render("improve_painting","openai");assert(!mobile.includes('data-testid="result-columns"'));
+  assert(mobile.indexOf("Main advice")<mobile.indexOf("Thumbnail planning"));
 });
