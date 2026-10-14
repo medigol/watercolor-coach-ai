@@ -5,8 +5,10 @@ import { ResultState, SavedImage } from "../../components/SavedResultState";
 import { Text } from "react-native";
 import FeedbackSection from "../../components/FeedbackSection";
 import CompositionSuggestionCard from "../../components/CompositionSuggestionCard";
-import SketchGuideCard from "../../components/SketchGuideCard";
-import ValueStudyCard from "../../components/ValueStudyCard";
+import CompositionDecisionCard from "../../components/CompositionDecisionCard";
+import ThumbnailPlanning from "../../components/ThumbnailPlanning";
+import PaletteCard from "../../components/PaletteCard";
+import { requiresNewStudy } from "../../lib/coachingPresentation";
 import { Screen, styles } from "../../components/ui";
 import { improveResult as sample } from "../../data/mockResults";
 export default function ImproveResult() {
@@ -14,6 +16,7 @@ export default function ImproveResult() {
     useSavedResult<ImproveData>(sample, "improve_painting");
   if (loading || error)
     return <ResultState loading={loading} error={error} retry={retry} />;
+  const compositionFocus = focus === "Composition";
   return (
     <Screen>
       <Text style={styles.title}>{result.title}</Text>
@@ -28,12 +31,38 @@ export default function ImproveResult() {
         {focus ? ` · Your selected focus: ${focus}` : ""}
       </Text>
       <Text style={styles.caption}>IMPROVE · one painting decision</Text>
-      <FeedbackSection title="Main advice" text={result.mainAdvice} highlight />
+      {compositionFocus && (
+        <CompositionDecisionCard
+          decision={result.compositionDecision}
+          overlays={result.overlays}
+          mainAdvice={result.mainAdvice}
+          composition={result.composition}
+        />
+      )}
+      <FeedbackSection
+        title="Main advice"
+        text={
+          requiresNewStudy(result.mainAdvice)
+            ? `For the next study: ${result.mainAdvice}`
+            : result.mainAdvice
+        }
+        highlight
+      />
       <FeedbackDetails works={result.whatWorks} fixes={result.whatToFix} />
-      <CompositionSuggestionCard text={result.composition} />
-      <Text style={styles.caption}>PLAN · think in big shapes</Text>
-      <SketchGuideCard description={result.sketch} />
-      <ValueStudyCard description={result.values} />
+      {!compositionFocus && (
+        <CompositionSuggestionCard
+          title="Try in the next study"
+          text={result.composition}
+        />
+      )}
+      <ThumbnailPlanning
+        overlays={result.overlays}
+        title={result.title}
+        composition={result.composition}
+        sketch={result.sketch}
+        values={result.values}
+      />
+      <PaletteCard palette={result.palette} strategy={result.paletteStrategy} />
       <Text style={styles.caption}>PRACTISE · one useful next step</Text>
       <FeedbackSection title="Next 15-minute practice" text={result.practice} />
       <FeedbackSection title="Suggested next prompt" text={result.prompt} />

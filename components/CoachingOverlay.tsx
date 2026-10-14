@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { usableOverlays } from "../lib/overlays";
+import { markMeaning, timingLabel } from "../lib/coachingPresentation";
 import {
   legendGroup,
   markColors,
@@ -42,7 +44,8 @@ export default function CoachingOverlay({
             Number.isFinite(h) &&
             w > 0 &&
             h > 0 &&
-            Number.isFinite(w / h)
+            Number.isFinite(w / h) &&
+            w / h > 0
           )
             setSize({ uri, ratio: w / h });
           else if (alive) setFailed(uri);
@@ -88,7 +91,7 @@ export default function CoachingOverlay({
             />
             {valid.map((note, i) => {
               const { left, top, target } = markers[i];
-              const diameter = Math.min(28, target);
+              const diameter = Math.min(selected === i ? 32 : 26, target);
               return (
                 <Pressable
                   key={`${note.id ?? "note"}-${i}`}
@@ -151,14 +154,39 @@ export default function CoachingOverlay({
             key={group}
             style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
           >
-            <View
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: markColors[group],
-              }}
-            />
+            {group === "Composition" ? (
+              <Svg
+                width={12}
+                height={12}
+                viewBox="0 0 12 12"
+                accessible={false}
+              >
+                <Path
+                  d="M1 11 L11 1 M5 1 L11 1 L11 7"
+                  fill="none"
+                  stroke={markColors[group]}
+                  strokeWidth={1.4}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            ) : (
+              <View
+                style={{
+                  width: 12,
+                  height: group === "Edge" ? 2 : 10,
+                  borderRadius: group === "Focus" ? 6 : 2,
+                  backgroundColor:
+                    group === "Value" ? markColors[group] : "transparent",
+                  borderWidth: group === "Value" ? 0 : 1.5,
+                  borderColor: markColors[group],
+                  borderStyle:
+                    group === "Simplify" || group === "Edge"
+                      ? "dotted"
+                      : "solid",
+                }}
+              />
+            )}
             <Text style={styles.caption}>{group}</Text>
           </View>
         ))}
@@ -170,7 +198,7 @@ export default function CoachingOverlay({
           <Pressable
             key={`${note.id ?? "note"}-${i}`}
             accessibilityRole="button"
-            accessibilityLabel={`Note ${i + 1}: ${note.label}. ${note.shortInstruction}. Why it matters: ${note.reason} Try this: ${note.action}`}
+            accessibilityLabel={`Note ${i + 1}: ${note.label}. ${note.shortInstruction}. ${markMeaning(note)} Why it matters: ${note.reason} ${timingLabel(note)}: ${note.action}`}
             aria-selected={active}
             aria-expanded={active}
             accessibilityState={{ selected: active, expanded: active }}
@@ -186,20 +214,51 @@ export default function CoachingOverlay({
               },
             ]}
           >
-            <Text
-              style={[
-                styles.caption,
-                { color: markColors[group], fontWeight: "600" },
-              ]}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
+              }}
             >
-              {i + 1} · {group}
-            </Text>
+              <Text
+                style={[
+                  styles.caption,
+                  { color: markColors[group], fontWeight: "600" },
+                ]}
+              >
+                {i + 1} · {group}
+              </Text>
+              <Text
+                style={[styles.caption, { color: colors.accent, fontSize: 18 }]}
+              >
+                {active ? "−" : "+"}
+              </Text>
+            </View>
             <Text style={[styles.heading, { fontSize: 18, lineHeight: 25 }]}>
               {note.label}
             </Text>
             <Text style={styles.body}>{note.shortInstruction}</Text>
+            <Text
+              style={[
+                styles.caption,
+                { fontWeight: "600", color: colors.accent },
+              ]}
+            >
+              {timingLabel(note)}
+            </Text>
             {active && (
               <>
+                <Text
+                  style={[
+                    styles.caption,
+                    { fontWeight: "600", color: colors.ink },
+                  ]}
+                >
+                  What this mark means
+                </Text>
+                <Text style={styles.body}>{markMeaning(note)}</Text>
                 <Text
                   style={[
                     styles.caption,
@@ -215,7 +274,7 @@ export default function CoachingOverlay({
                     { fontWeight: "600", color: colors.ink },
                   ]}
                 >
-                  Try this
+                  {timingLabel(note)}
                 </Text>
                 <Text style={styles.body}>{note.action}</Text>
               </>

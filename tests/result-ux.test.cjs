@@ -6,7 +6,13 @@ const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "..");
-function render(mode, provider, image, overlays, { expandedDetails = false } = {}) {
+function render(
+  mode,
+  provider,
+  image,
+  overlays,
+  { expandedDetails = false, focus = "Composition", saved = {} } = {},
+) {
   const modules = new Map();
   function load(relative) {
     if (modules.has(relative)) return modules.get(relative);
@@ -24,12 +30,17 @@ function render(mode, provider, image, overlays, { expandedDetails = false } = {
     ).outputText;
     new Function("exports", "require", code)(exports, (name) => {
       if (name === "@expo/vector-icons") return { Ionicons: () => null };
-      if (name === "react" && expandedDetails && relative.endsWith("FeedbackDetails.tsx"))
+      if (
+        name === "react" &&
+        expandedDetails &&
+        relative.endsWith("FeedbackDetails.tsx")
+      )
         return { ...React, useState: () => [true, () => {}] };
       if (name === "react" || name === "react/jsx-runtime")
         return require(name);
       if (name === "react-native-svg") {
-        const shape = (props) => React.createElement("svg", null, props.children);
+        const shape = (props) =>
+          React.createElement("svg", null, props.children);
         return {
           __esModule: true,
           default: shape,
@@ -39,14 +50,25 @@ function render(mode, provider, image, overlays, { expandedDetails = false } = {
           Polygon: shape,
           Path: shape,
           G: shape,
+          Line: shape,
+          Text: shape,
+          Circle: shape,
         };
       }
       if (name === "react-native")
         return {
           Text: (props) =>
-            React.createElement("span", { role: props.accessibilityRole }, props.children),
+            React.createElement(
+              "span",
+              { role: props.accessibilityRole },
+              props.children,
+            ),
           View: (props) =>
-            React.createElement("div", { "aria-label": props.accessibilityLabel }, props.children),
+            React.createElement(
+              "div",
+              { "aria-label": props.accessibilityLabel },
+              props.children,
+            ),
           Image: (props) =>
             React.createElement("img", {
               src: props.source.uri,
@@ -65,7 +87,10 @@ function render(mode, provider, image, overlays, { expandedDetails = false } = {
               props.children,
             ),
           StyleSheet: { create: (value) => value },
-          Platform: { OS: "web", select: (choices) => choices.web ?? choices.default },
+          Platform: {
+            OS: "web",
+            select: (choices) => choices.web ?? choices.default,
+          },
         };
       if (name.endsWith("/ui") || name === "./ui")
         return {
@@ -77,10 +102,14 @@ function render(mode, provider, image, overlays, { expandedDetails = false } = {
       if (name.endsWith("/useSavedResult"))
         return {
           useSavedResult: (sample) => ({
-            result: overlays === undefined ? sample : { ...sample, overlays },
+            result: {
+              ...sample,
+              ...(overlays === undefined ? {} : { overlays }),
+              ...saved,
+            },
             provider,
             image,
-            focus: "Composition",
+            focus,
             loading: false,
             error: "",
             retry: () => {},
@@ -113,10 +142,11 @@ for (const provider of ["mock", "openai"])
         provider,
         "https://example.invalid/private-signed-image",
       );
-      assert(html.includes("Planning sketch aid"));
-      assert(html.includes("Value grouping aid"));
-      assert(html.includes("Generic planning aid · adapt this to your image"));
-      assert(html.includes("Generic value-study aid · adapt this to your image"));
+      assert(html.includes("Thumbnail planning"));
+      assert(html.includes("Value mass study"));
+      assert(
+        html.includes("Generic planning diagram · Adapt this to your image"),
+      );
       assert(!html.includes("Visual coaching notes"));
       assert(
         !/simplified reference placeholder|Sample line study|Sample tonal plan/.test(
@@ -126,15 +156,24 @@ for (const provider of ["mock", "openai"])
       if (mode === "create_reference") {
         assert(html.includes("Your photo"));
         assert(html.includes("No new image is generated."));
-        assert(html.includes("generic planning aids"));
+        assert(html.includes("Generic planning diagram"));
         assert(html.includes("Painting steps"));
         assert(html.includes("Coastal Town"));
         assert(!html.includes("Simplified reference"));
         assert(html.indexOf("Your photo") < html.indexOf("Painting plan"));
-        assert(html.indexOf("Painting plan") < html.indexOf("Reference preparation"));
-        assert(html.indexOf("Reference preparation") < html.indexOf("Planning sketch aid"));
-        assert(html.indexOf("Value grouping aid") < html.indexOf("Suggested palette"));
-        assert(html.indexOf("Suggested palette") < html.indexOf("Painting steps"));
+        assert(
+          html.indexOf("Painting plan") < html.indexOf("Reference preparation"),
+        );
+        assert(
+          html.indexOf("Reference preparation") <
+            html.indexOf("Thumbnail planning"),
+        );
+        assert(
+          html.indexOf("Value mass study") < html.indexOf("Watercolor palette"),
+        );
+        assert(
+          html.indexOf("Watercolor palette") < html.indexOf("Painting steps"),
+        );
         assert(
           html.includes(
             provider === "mock"
@@ -146,11 +185,29 @@ for (const provider of ["mock", "openai"])
         assert(html.includes("Your painting"));
         assert(html.includes("Lake House"));
         assert(html.indexOf("Your painting") < html.indexOf("Main advice"));
-        assert(html.indexOf("Main advice") < html.indexOf("What works &amp; what to fix"));
+        assert(
+          html.indexOf("Composition decision") < html.indexOf("Main advice"),
+        );
+        assert(html.includes("Try now on this painting"));
+        assert(html.includes("Try in the next study"));
+        assert(
+          html.indexOf("Main advice") <
+            html.indexOf("What works &amp; what to fix"),
+        );
         assert(html.includes('aria-expanded="false"'));
-        assert(!html.includes("The quiet blue-green palette creates a peaceful mood."));
-        assert(html.indexOf("Value grouping aid") < html.indexOf("Next 15-minute practice"));
-        assert(html.indexOf("Next 15-minute practice") < html.indexOf("Suggested next prompt"));
+        assert(
+          !html.includes(
+            "The quiet blue-green palette creates a peaceful mood.",
+          ),
+        );
+        assert(
+          html.indexOf("Value mass study") <
+            html.indexOf("Next 15-minute practice"),
+        );
+        assert(
+          html.indexOf("Next 15-minute practice") <
+            html.indexOf("Suggested next prompt"),
+        );
       }
     });
 test("reference without an uploaded image keeps sample plan and generic aids, without inventing a photo", () => {
@@ -158,7 +215,7 @@ test("reference without an uploaded image keeps sample plan and generic aids, wi
   assert(!html.includes("Your photo"));
   assert(!html.includes("<img"));
   assert(html.includes("Sample painting plan"));
-  assert(html.includes("generic planning aids"));
+  assert(html.includes("Generic planning diagram"));
   assert(!html.includes("Reference preparation"));
 });
 
@@ -168,10 +225,16 @@ test("saved painting strengths and fixes render when compact details are expande
       expandedDetails: true,
     });
     assert(html.includes('aria-expanded="true"'));
-    assert(html.includes("The quiet blue-green palette creates a peaceful mood."));
-    assert(html.includes("The trees and house have similar darkness, so the house gets lost."));
+    assert(
+      html.includes("The quiet blue-green palette creates a peaceful mood."),
+    );
+    assert(
+      html.includes(
+        "The trees and house have similar darkness, so the house gets lost.",
+      ),
+    );
     assert(html.indexOf("Main advice") < html.indexOf("What works"));
-    assert(html.indexOf("What to fix") < html.indexOf("Composition suggestion"));
+    assert(html.indexOf("What to fix") < html.indexOf("Thumbnail planning"));
   }
 });
 test("painting sequence uses numbered markers with no scene thumbnails", () => {
@@ -209,7 +272,81 @@ test("saved overlay metadata without an uploaded image still renders normal text
       [{ x: 200 }],
     );
     assert(!invalid.includes("Visual coaching notes"));
-    assert(invalid.includes(mode === "create_reference" ? "Your photo" : "Your painting"));
-    assert(invalid.includes("Planning sketch aid"));
+    assert(
+      invalid.includes(
+        mode === "create_reference" ? "Your photo" : "Your painting",
+      ),
+    );
+    assert(invalid.includes("Thumbnail planning"));
   }
+});
+
+test("composition focus shows supplied decisions with safe now/next wording and retains optional painting palettes", () => {
+  const saved = {
+    compositionDecision: {
+      mainIssue: "The foreground competes with the figures.",
+      reason: "The eye needs one clear light/dark meeting.",
+      tryNow: "Soften the outer foreground marks after testing the wash.",
+      nextStudy: "Move the figures slightly right in a new thumbnail.",
+    },
+    palette: [
+      {
+        name: "Ultramarine",
+        hex: "#526B89",
+        temperature: "cool",
+        pigmentCode: "PB29",
+        use: "Distance and soft shadows",
+        mix: "Test with Burnt Sienna for a quiet grey.",
+        tag: "main_wash",
+      },
+    ],
+    paletteStrategy:
+      "Keep the background muted; save a dark accent for the figures.",
+  };
+  const html = render("improve_painting", "openai", undefined, undefined, {
+    saved,
+  });
+  for (const copy of [
+    "Composition decision",
+    "Main issue",
+    "Why it matters",
+    "Try now on this painting",
+    "Try in the next study",
+    saved.compositionDecision.tryNow,
+    saved.compositionDecision.nextStudy,
+    "Watercolor palette",
+    "Palette strategy",
+    "Use in this painting",
+    "Mix idea",
+  ])
+    assert(html.includes(copy));
+  assert(html.indexOf("Composition decision") < html.indexOf("Main advice"));
+  const overall = render("improve_painting", "mock", undefined, undefined, {
+    focus: "Overall feedback",
+  });
+  assert(!overall.includes("Composition decision"));
+  assert(overall.includes("Try in the next study"));
+});
+test("malformed optional decisions and painting palettes preserve legacy guidance; structural fixes are framed as next-study", () => {
+  const html = render("improve_painting", "openai", undefined, undefined, {
+    saved: {
+      compositionDecision: {
+        mainIssue: 55,
+        reason: { bad: true },
+        tryNow: "Place the figures farther right.",
+        nextStudy: null,
+      },
+      palette: [null, { hex: "bad" }],
+      paletteStrategy: { bad: true },
+      mainAdvice: "Make the house smaller.",
+    },
+  });
+  assert(html.includes("For the next study: Make the house smaller."));
+  assert(html.includes("Keep the existing placement."));
+  assert(
+    html.indexOf("Try in the next study") <
+      html.indexOf("Place the figures farther right."),
+  );
+  assert(html.includes("Thumbnail planning"));
+  assert(!html.includes("Watercolor palette"));
 });

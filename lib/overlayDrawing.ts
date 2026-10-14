@@ -99,8 +99,12 @@ export function markGeometry(
 }
 export function arrowHead(points: { x: number; y: number }[], length = 10) {
   if (points.length < 2) return "";
-  const a = points[points.length - 2],
-    b = points[points.length - 1];
+  const b = points[points.length - 1];
+  const a = points
+    .slice(0, -1)
+    .reverse()
+    .find((p) => Math.abs(p.x - b.x) + Math.abs(p.y - b.y) > 0.000001);
+  if (!a) return "";
   const angle = Math.atan2(b.y - a.y, b.x - a.x);
   const left = {
     x: b.x - length * Math.cos(angle - Math.PI / 6),
