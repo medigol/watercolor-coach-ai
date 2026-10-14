@@ -29,6 +29,7 @@ const presentation = load("lib/coachingPresentation.ts", {
 });
 const contract = load("supabase/functions/_shared/contract.ts", {
   "./overlays.ts": overlay,
+  "./coachingDecision.ts": load("shared/coachingDecision.ts"),
 });
 const samples = load("data/mockResults.ts");
 const notes = Array.from({ length: 3 }, (_, i) => ({
@@ -147,7 +148,7 @@ function fixture(fail = false) {
     jsxs: (type, props) => ({ type, props }),
     Fragment: "Fragment",
   };
-  const Component = load("components/CoachingOverlay.tsx", {
+  const overlayComponents = load("components/CoachingOverlay.tsx", {
     react,
     "react/jsx-runtime": jsx,
     "react-native": {
@@ -165,11 +166,30 @@ function fixture(fail = false) {
       colors: { accent: "teal", ink: "dark", border: "border" },
       styles: { card: {} },
     },
-  }).default;
-  const render = (uri = currentUri ?? "image", data = notes, study = false) => {
+  });
+  const Component = overlayComponents.default;
+  function expandPanel(tree) {
+    if (!tree || typeof tree !== "object") return tree;
+    if (tree.type === overlayComponents.VisualCoachingNotes)
+      return expandPanel(tree.type(tree.props));
+    const children = tree.props?.children;
+    if (children !== undefined)
+      tree.props.children = Array.isArray(children)
+        ? children.map(expandPanel)
+        : expandPanel(children);
+    return tree;
+  }
+  const render = (
+    uri = currentUri ?? "image",
+    data = notes,
+    study = false,
+    props = {},
+  ) => {
     index = 0;
     currentUri = uri;
-    return Component({ uri, notes: data, label: "Your photo", study });
+    return expandPanel(
+      Component({ uri, notes: data, label: "Your photo", study, ...props }),
+    );
   };
   function nodes(tree) {
     if (!tree) return [];
@@ -181,7 +201,12 @@ function fixture(fail = false) {
         .flatMap((child) => (typeof child === "object" ? nodes(child) : [])),
     ];
   }
-  return { render, nodes, Image };
+  return {
+    render,
+    nodes,
+    Image,
+    curated: overlayComponents.curatedCoachingNotes,
+  };
 }
 test("overlay maps image dimensions, marker selection highlights and expands matching note", () => {
   const f = fixture();
@@ -217,15 +242,21 @@ test("overlay maps image dimensions, marker selection highlights and expands mat
         n.props?.accessibilityState?.selected,
     );
   assert(card.props.accessibilityLabel.includes("Strengthen focal point"));
-  card.props.onPress();
-  assert(
-    !f
-      .nodes(f.render())
-      .some(
+  assert.equal(
+    f
+      .nodes(tree)
+      .filter(
         (n) =>
           n.props?.accessibilityState?.expanded &&
-          n.props?.accessibilityState?.selected,
-      ),
+          n.props?.accessibilityLabel?.startsWith("Note "),
+      ).length,
+    1,
+  );
+  f.nodes(tree)
+    .find((n) => n.props?.accessibilityLabel === "Visual coaching notes")
+    .props.onPress();
+  assert(
+    !f.nodes(f.render()).some((n) => n.props?.accessibilityState?.expanded),
   );
   image.props.onError();
   assert.equal(f.render(), null);
@@ -663,4 +694,157 @@ test("timing and action cards separate safe adjustments from structural next-stu
     drawing.arrowHead(arrow),
   );
   assert.equal(drawing.arrowHead([arrow[0], arrow[0]]), "");
+});
+
+test("displayed overlays are priority-ranked and limited to three supplied marks", () => {
+  const f = fixture();
+  const data = [
+    { ...notes[0], id: "low", priority: "low", label: "Low priority mark" },
+    { ...notes[0], id: "medium", priority: "medium", label: "Supporting mark" },
+    { ...notes[0], id: "high-a", priority: "high", label: "Primary decision" },
+    {
+      ...notes[0],
+      id: "high-b",
+      priority: "high",
+      label: "Second primary mark",
+    },
+    { ...notes[0], id: "low-b", priority: "low", label: "Another low mark" },
+  ];
+  assert.deepEqual(
+    f.curated(data).map((n) => n.id),
+    ["high-a", "high-b", "medium"],
+  );
+  assert.equal(f.curated(data)[0].x, data[2].x);
+  f.render("image", data);
+  let tree = f.render("image", data);
+  f.nodes(tree)
+    .find((n) => n.props?.onLayout)
+    .props.onLayout({ nativeEvent: { layout: { width: 360 } } });
+  tree = f.render("image", data);
+  const marks = f.nodes(tree).find((n) => n.type === "CoachingMarks");
+  assert.equal(marks.props.notes.length, 3);
+  const text = f
+    .nodes(tree)
+    .filter((n) => n.type === "Text")
+    .flatMap((n) => [n.props.children].flat(Infinity))
+    .join(" ")
+    .replace(/\s+/g, " ");
+  assert(text.includes("3 coaching notes · tap a marker or open notes"));
+  assert(!text.includes("Primary decision"));
+});
+
+test("marker selection opens only its relevant note; showing every card is explicit", () => {
+  const f = fixture();
+  f.render();
+  let tree = f.render();
+  f.nodes(tree)
+    .find((n) => n.props?.onLayout)
+    .props.onLayout({ nativeEvent: { layout: { width: 360 } } });
+  tree = f.render();
+  f.nodes(tree)
+    .find((n) => n.type === "CoachingMarks")
+    .props.onSelect(1);
+  tree = f.render();
+  const cards = (value) =>
+    f
+      .nodes(value)
+      .filter(
+        (n) =>
+          n.props?.accessibilityLabel?.startsWith("Note ") &&
+          "expanded" in (n.props.accessibilityState || {}),
+      );
+  assert.equal(cards(tree).length, 1);
+  assert(cards(tree)[0].props.accessibilityLabel.includes("Group this shadow"));
+  const all = f
+    .nodes(tree)
+    .find((n) => n.props?.accessibilityLabel === "Show all notes");
+  assert(all);
+  all.props.onPress();
+  tree = f.render();
+  assert.equal(cards(tree).length, 3);
+  assert.equal(
+    cards(tree).filter((n) => n.props.accessibilityState.expanded).length,
+    1,
+  );
+  f.nodes(tree)
+    .find((n) => n.props?.accessibilityLabel === "Show selected note only")
+    .props.onPress();
+  assert.equal(cards(f.render()).length, 1);
+  tree = f.render();
+  f.nodes(tree)
+    .find((n) => n.props?.accessibilityLabel === "Show all notes")
+    .props.onPress();
+  assert.equal(cards(f.render()).length, 3);
+  tree = f.render();
+  f.nodes(tree)
+    .find((n) => n.type === "CoachingMarks")
+    .props.onSelect(0);
+  assert.equal(cards(f.render()).length, 1);
+});
+
+test("compact image delegates note opening to Explore without rendering long note cards", () => {
+  const f = fixture();
+  let selected,
+    opened = 0;
+  const props = {
+    hideNotes: true,
+    selectedNote: null,
+    onSelectNote: (index) => {
+      selected = index;
+    },
+    onOpenNotes: () => {
+      opened++;
+    },
+  };
+  f.render("image", notes, false, props);
+  let tree = f.render("image", notes, false, props);
+  f.nodes(tree)
+    .find((n) => n.props?.onLayout)
+    .props.onLayout({ nativeEvent: { layout: { width: 360 } } });
+  tree = f.render("image", notes, false, props);
+  assert(!f.nodes(tree).some((n) => n.props?.accessibilityState?.expanded));
+  f.nodes(tree)
+    .find((n) => n.type === "CoachingMarks")
+    .props.onSelect(2);
+  assert.equal(selected, 2);
+  tree = f.render("image", notes, false, { ...props, selectedNote: selected });
+  assert.equal(
+    f.nodes(tree).find((n) => n.type === "CoachingMarks").props.selected,
+    2,
+  );
+  assert(!f.nodes(tree).some((n) => n.props?.accessibilityState?.expanded));
+  f.nodes(tree)
+    .find((n) => n.props?.accessibilityLabel === "Open visual coaching notes")
+    .props.onPress();
+  assert.equal(opened, 1);
+});
+
+test("image sizing and render failures notify text-only image fallback", () => {
+  let errors = 0;
+  const missing = fixture(true);
+  missing.render("bad", notes, false, {
+    onImageError: () => {
+      errors++;
+    },
+  });
+  assert.equal(errors, 1);
+  assert.equal(missing.render("bad", notes), null);
+  const good = fixture();
+  good.render();
+  let tree = good.render();
+  good
+    .nodes(tree)
+    .find((n) => n.props?.onLayout)
+    .props.onLayout({ nativeEvent: { layout: { width: 360 } } });
+  tree = good.render("image", notes, false, {
+    onImageError: () => {
+      errors++;
+    },
+  });
+  good
+    .nodes(tree)
+    .find((n) => n.type === good.Image)
+    .props.onError();
+  assert.equal(errors, 2);
+  assert.equal(good.render(), null);
 });

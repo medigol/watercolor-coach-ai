@@ -5,6 +5,7 @@ import {
   selectCompositionModels,
   type CompositionModelId,
   type CompositionModelsInput,
+  type CompositionModel,
 } from "../lib/compositionModels";
 import { colors, styles } from "./ui";
 import { studyText, conciseText } from "../lib/coachingPresentation";
@@ -461,6 +462,43 @@ export default function CompositionModels(
           </Text>
         </View>
       ))}
+    </View>
+  );
+}
+
+export function CompositionTeachingCard({
+  model,
+  study = false,
+}: {
+  model: CompositionModel;
+  study?: boolean;
+}) {
+  return (
+    <View style={[styles.card, { padding: 16, gap: 10 }]}>
+      <Text style={{ ...styles.heading, fontSize: 17, lineHeight: 23 }}>
+        {model.name}
+      </Text>
+      {study && (
+        <Text style={{ ...styles.caption, color: colors.accent }}>
+          Optional study variation
+        </Text>
+      )}
+      <CompositionModelDiagram model={model.id} />
+      <Text style={styles.caption}>
+        Teaching model · not an exact copy of your painting.
+      </Text>
+      <Text style={{ ...styles.caption, color: colors.ink, fontWeight: "600" }}>
+        {conciseText(model.description)}
+      </Text>
+      <Text style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}>
+        {study
+          ? studyText(
+              model.action,
+              "If useful, compare this arrangement in a separate small study.",
+            )
+          : conciseText(model.action)}
+      </Text>
+      {!study && <Text style={styles.caption}>Test in a separate study.</Text>}
     </View>
   );
 }

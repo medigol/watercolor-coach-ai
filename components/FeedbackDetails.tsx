@@ -1,7 +1,11 @@
 import { Text, View } from "react-native";
 import FeedbackSection from "./FeedbackSection";
 import { styles } from "./ui";
-import { requiresNewStudy, studyText, uniqueGuidance } from "../lib/coachingPresentation";
+import {
+  requiresNewStudy,
+  studyText,
+  uniqueGuidance,
+} from "../lib/coachingPresentation";
 
 function feedbackItems(value: unknown): string[] {
   return Array.isArray(value)
@@ -30,12 +34,17 @@ export default function FeedbackDetails({
   const originalStrengths = feedbackItems(works)
     .map((item) => (study ? studyText(item, "") : item))
     .filter(Boolean);
-  let strengths = uniqueGuidance(originalStrengths, omit);
+  let strengths = uniqueGuidance(originalStrengths, omit).slice(0, 3);
   // A supplied positive observation stays visible even when the summary quotes it.
   if (!strengths.length && originalStrengths.length)
     strengths = uniqueGuidance(originalStrengths).slice(0, 1);
   const suppliedPotential =
-    typeof promising === "string" && promising.trim() && promising.length <= 350
+    typeof promising === "string" &&
+    promising.trim().length >= 24 &&
+    promising.length <= 350 &&
+    !/^(?:great|beautiful|excellent|lovely|nice|wonderful|good) (?:work|painting|job)[.! ]*$/i.test(
+      promising.trim(),
+    )
       ? promising
       : undefined;
   const potential = suppliedPotential
@@ -59,11 +68,22 @@ export default function FeedbackDetails({
           items={strengths}
         >
           {!!potential && (
-            <View style={{ gap: 6 }}>
-              <Text style={[styles.heading, { fontSize: 16 }]}>
-                {study ? "Advanced learning notes" : "What is promising"}
+            <View
+              style={{
+                gap: 4,
+                borderTopWidth: 1,
+                borderTopColor: "#E3E8E5",
+                paddingTop: 10,
+              }}
+            >
+              <Text style={[styles.caption, { fontWeight: "600" }]}>
+                {study
+                  ? "Advanced observations"
+                  : "Why this is worth developing"}
               </Text>
-              <Text style={styles.body}>{potential}</Text>
+              <Text style={[styles.body, { fontSize: 14, lineHeight: 21 }]}>
+                {potential}
+              </Text>
             </View>
           )}
         </FeedbackSection>
@@ -71,13 +91,18 @@ export default function FeedbackDetails({
       {!!improvements.length && (
         <FeedbackSection
           title={study ? "Optional refinements" : "What to improve"}
-          items={study
-            ? improvements.map((item) => `Optional next study: ${item}`)
-            : improvements.map((item) =>
-                requiresNewStudy(item) &&
-                !/^(?:next study|(?:in|for) (?:a|the|your) (?:next|new|separate) study)\b/i.test(item)
-                  ? `Next study: ${item}`
-                  : item)}
+          items={
+            study
+              ? improvements.map((item) => `Optional next study: ${item}`)
+              : improvements.map((item) =>
+                  requiresNewStudy(item) &&
+                  !/^(?:next study|(?:in|for) (?:a|the|your) (?:next|new|separate) study)\b/i.test(
+                    item,
+                  )
+                    ? `Next study: ${item}`
+                    : item,
+                )
+          }
         />
       )}
     </View>

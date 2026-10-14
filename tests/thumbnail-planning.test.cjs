@@ -303,7 +303,12 @@ test("full legacy and saved sketch/value guidance stays available in the expanda
     }).default;
     function nodes(tree) {
       if (!tree || typeof tree !== "object") return [];
-      return [tree, ...[tree.props?.children].flat(Infinity).flatMap(nodes)];
+      const expandedTree =
+        typeof tree.type === "function" ? tree.type(tree.props) : tree;
+      return [
+        expandedTree,
+        ...[expandedTree.props?.children].flat(Infinity).flatMap(nodes),
+      ];
     }
     function text(tree) {
       return nodes(tree)
@@ -316,7 +321,9 @@ test("full legacy and saved sketch/value guidance stays available in the expanda
         (node) => node.props?.accessibilityLabel === "Sketch & value notes",
       );
     let tree = Notes(input);
-    const diagramCount = nodes(tree).filter((node) => node.props?.kind).length;
+    const diagramCount = nodes(tree).filter(
+      (node) => node.props?.accessibilityRole === "image",
+    ).length;
     assert(diagramCount >= 2 && diagramCount <= 3);
     assert.equal(button(tree).props["aria-expanded"], false);
     assert.equal(button(tree).props.accessibilityState.expanded, false);
@@ -330,7 +337,8 @@ test("full legacy and saved sketch/value guidance stays available in the expanda
     assert(text(tree).includes(input.sketch));
     assert(text(tree).includes(input.values));
     assert.equal(
-      nodes(tree).filter((node) => node.props?.kind).length,
+      nodes(tree).filter((node) => node.props?.accessibilityRole === "image")
+        .length,
       diagramCount,
     );
     button(tree).props.onPress();

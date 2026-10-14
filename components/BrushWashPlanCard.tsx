@@ -1,7 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { BrushWashStep } from "../types";
 import { colors, styles } from "./ui";
-import { studyText, uniqueGuidance } from "../lib/coachingPresentation";
+import {
+  conciseText,
+  studyText,
+  uniqueGuidance,
+} from "../lib/coachingPresentation";
 
 const fields = [
   "stage",
@@ -21,10 +25,27 @@ function shortText(value: unknown, limit: number): value is string {
   return typeof value === "string" && !!value.trim() && value.length <= limit;
 }
 
+function suggestedMethod(value: string): string {
+  // A finished image supports appearance observations, not a known original
+  // brush, moisture state, pigment or sequence. Keep supplied practice cues.
+  const originalProcess =
+    /\b(?:artist|painter|you|they)\s+(?:(?:clearly|definitely|originally)\s+)?(?:used|chose|painted|worked|applied|mixed|began|finished|soaked|glazed|layered)\b|\b(?:was|were|had been|has been|must have been)\s+(?:(?:clearly|definitely|originally|fully|still|evenly)\s+)?(?:painted|applied|used|mixed|laid|brushed|wet|wetted|damp|dry|soaked|glazed|layered|added)\b|\b(?:original|actual|exact)\s+(?:brush|pigment|paper moisture|wash sequence|process)\b.{0,40}\b(?:is|was|were|used|must be)\b/i;
+  return conciseText(
+    value
+      .trim()
+      .split(/(?<=[.!?])\s+|\r?\n+/)
+      .filter((sentence) => !originalProcess.test(sentence))
+      .join(" "),
+    2,
+  );
+}
+
 function studyInstruction(value: string): string {
   // The card explicitly frames execution as a new study, never a correction.
   const prefix = "In a separate study, ";
-  return value.trim().split(/(?<=[.!?])\s+|\r?\n+/)
+  return value
+    .trim()
+    .split(/(?<=[.!?])\s+|\r?\n+/)
     .map((sentence) => {
       // A preventative stop cue describes a limit for the new study, not a
       // diagnosis of the uploaded work. Other harsh wording stays guarded.
@@ -73,7 +94,8 @@ export function isConciseBrushPlan(value: unknown): boolean {
   const steps = usableBrushPlan(value);
   return (
     steps.length === 1 &&
-    Object.values(steps[0]).reduce((length, text) => length + text.length, 0) <= 300
+    Object.values(steps[0]).reduce((length, text) => length + text.length, 0) <=
+      300
   );
 }
 
@@ -97,25 +119,35 @@ export default function BrushWashPlanCard({
   hideHeading?: boolean;
   omit?: string[];
 }) {
-  const steps = usableBrushPlan(plan).filter((step) =>
-    !study || [step.brush, step.wash, step.timing, step.edges, step.stop]
-      .some((text) => !!studyInstruction(text)),
-  );
+  const seenSteps: string[] = [];
+  const steps = usableBrushPlan(plan).filter((step) => {
+    const notes = [step.brush, step.wash, step.timing, step.edges, step.stop]
+      .map(suggestedMethod)
+      .map((text) => (study ? studyInstruction(text) : text));
+    if (!notes.some(Boolean)) return false;
+    const signature = [step.technique, ...notes].join(" ");
+    if (!uniqueGuidance([signature], seenSteps).length) return false;
+    seenSteps.push(signature);
+    return true;
+  });
   if (!steps.length) return null;
   return (
     <View style={hideHeading ? { gap: 16 } : styles.card}>
       {!hideHeading && (
         <Text style={styles.heading}>
-          {study ? "How to study this handling" : "Brush & wash plan"}
+          {study ? "How to practise this handling" : "Brush & wash plan"}
         </Text>
       )}
       <Text style={styles.caption}>
         {study
-          ? "Observe the handling; test it on a small new study."
-          : "Let the paper’s moisture guide your next mark."}
+          ? "For a separate study: a suggested way to practise this effect."
+          : "A suggested practice method, not a reconstruction of the original process."}
       </Text>
       {steps.map((step, index) => {
-        const stage = study ? studyText(step.stage, "Handling study") : step.stage;
+        const stageText = suggestedMethod(step.stage);
+        const stage = study
+          ? studyText(stageText, "Handling study")
+          : stageText || "Handling practice";
         const seen = [stage, ...omit];
         const notes = [
           ["Brush", step.brush],
@@ -124,7 +156,8 @@ export default function BrushWashPlanCard({
           ["Edges", step.edges],
           ["Stop", step.stop],
         ].flatMap(([label, supplied]) => {
-          const text = study ? studyInstruction(supplied) : supplied;
+          const method = suggestedMethod(supplied);
+          const text = study ? studyInstruction(method) : method;
           if (!uniqueGuidance([text], seen).length) return [];
           seen.push(text);
           return [{ label, text }];
@@ -150,7 +183,11 @@ export default function BrushWashPlanCard({
               {notes
                 .filter((note) => note.label !== "Stop")
                 .map((note) => (
-                  <PlanNote key={note.label} label={note.label} text={note.text} />
+                  <PlanNote
+                    key={note.label}
+                    label={note.label}
+                    text={note.text}
+                  />
                 ))}
             </View>
             {!!stop && (

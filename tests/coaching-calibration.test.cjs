@@ -6,13 +6,15 @@ const ts = require("typescript");
 const root = path.resolve(__dirname, "..");
 function load(file, imports = {}) {
   const exports = {};
-  const code =
-    ts.transpileModule(fs.readFileSync(path.join(root, file), "utf8"), {
+  const code = ts.transpileModule(
+    fs.readFileSync(path.join(root, file), "utf8"),
+    {
       compilerOptions: {
         module: ts.ModuleKind.CommonJS,
         target: ts.ScriptTarget.ES2022,
       },
-    }).outputText;
+    },
+  ).outputText;
   new Function("exports", "require", code)(exports, (name) => {
     if (!(name in imports)) throw new Error(`Unexpected import: ${name}`);
     return imports[name];
@@ -22,6 +24,7 @@ function load(file, imports = {}) {
 const overlays = load("supabase/functions/_shared/overlays.ts");
 const contract = load("supabase/functions/_shared/contract.ts", {
   "./overlays.ts": overlays,
+  "./coachingDecision.ts": load("shared/coachingDecision.ts"),
 });
 const samples = load("data/mockResults.ts");
 const { validResult } = load("lib/artworks.ts", {
@@ -34,9 +37,10 @@ const { validResult } = load("lib/artworks.ts", {
 });
 const { coachingPrompt } = load("supabase/functions/_shared/prompts.ts");
 for (const mode of ["improve_painting", "create_reference"]) {
-  const sample = mode === "improve_painting"
-    ? samples.improveResult
-    : samples.referenceResult;
+  const sample =
+    mode === "improve_painting"
+      ? samples.improveResult
+      : samples.referenceResult;
   test(`${mode}: study notes permit zero refinements without weakening other core fields`, () => {
     const study = {
       ...sample,
@@ -90,21 +94,20 @@ for (const mode of ["improve_painting", "create_reference"]) {
   });
   test(`${mode}: prompt privately calibrates confidence with modest independent study guidance`, () => {
     const prompt = coachingPrompt(mode);
-    for (
-      const phrase of [
-        "First privately calibrate how resolved this single image appears",
-        "never infer or label the user's skill level",
-        "use study for strong/highly resolved work or when critique confidence is uncertain",
-        "do not force criticism",
-        "0–2 modest conditional optional variations",
-        "empty array when no useful refinement is supported",
-        "current actions must be safe, conditional and tested on scrap first",
-        "big-shape proportions or value-mass redesign belong only to next_study",
-        "practice gives one short exercise",
-        "neither repeats mainAdvice or composition paragraphs",
-        "neutral labels and next_study timing for experiments",
-      ]
-    ) assert(prompt.includes(phrase), phrase);
+    for (const phrase of [
+      "First privately calibrate how resolved this single image appears",
+      "never infer or label the user's skill level",
+      "use study for strong/highly resolved work or when critique confidence is uncertain",
+      "do not force criticism",
+      "0–2 modest conditional optional variations",
+      "empty array when no useful refinement is supported",
+      "current actions must be safe, conditional and tested on scrap first",
+      "big-shape proportions or value-mass redesign belong only to next_study",
+      "practice gives one short exercise",
+      "neither repeats mainAdvice or composition paragraphs",
+      "neutral labels and next_study timing for experiments",
+    ])
+      assert(prompt.includes(phrase), phrase);
     if (mode === "improve_painting") {
       assert(prompt.includes("mainAdvice is one sentence"));
       assert(
@@ -115,10 +118,14 @@ for (const mode of ["improve_painting", "create_reference"]) {
     } else {
       assert(
         prompt.includes(
-          "never praise a sky wash, brushwork or painted technique in a photograph",
+          "If the image is a photograph, do not praise washes or painted handling",
         ),
       );
-      assert(prompt.includes("not a watercolor painting needing repair"));
+      assert(
+        prompt.includes(
+          "not a generated reference image or a watercolor painting needing repair",
+        ),
+      );
     }
   });
 }

@@ -14,6 +14,7 @@ import {
   type ThumbnailKind,
   type ThumbnailLayout,
   type ThumbnailPlanningInput,
+  type ThumbnailStudy,
 } from "../lib/thumbnailPlanning";
 import { colors, styles } from "./ui";
 import ImageStudyThumbnail from "./ImageStudyThumbnail";
@@ -136,7 +137,7 @@ function FocusRing({ x = 221, y = 87 }: { x?: number; y?: number }) {
   );
 }
 
-function Diagram({
+export function GenericPlanningDiagram({
   kind,
   layout,
 }: {
@@ -253,6 +254,27 @@ function Diagram({
             <FocusRing />
             <SvgText x={14} y={173} fill={tone.dark} fontSize={11}>
               One clear path toward the focal area
+            </SvgText>
+          </>
+        )}
+        {kind === "edge_control" && (
+          <>
+            <Path
+              d="M43 113 Q93 91 141 110"
+              fill="none"
+              stroke={tone.line}
+              strokeWidth={12}
+              strokeOpacity={0.22}
+              strokeLinecap="round"
+            />
+            <Path
+              d="M152 112 Q186 99 219 107"
+              fill="none"
+              stroke={tone.dark}
+              strokeWidth={2}
+            />
+            <SvgText x={14} y={173} fill={tone.dark} fontSize={11}>
+              Soft support · selective crisp accent
             </SvgText>
           </>
         )}
@@ -410,6 +432,107 @@ function Diagram({
   );
 }
 
+export function ThumbnailStudyCard({
+  study,
+  uri,
+  provider,
+  optional = false,
+  unified = false,
+}: {
+  study: ThumbnailStudy;
+  uri?: string;
+  provider?: ThumbnailPlanningInput["provider"];
+  optional?: boolean;
+  unified?: boolean;
+}) {
+  const generic = (
+    <View style={{ gap: 8 }}>
+      <GenericPlanningDiagram kind={study.kind} layout={study.layout} />
+      <Text style={styles.caption}>
+        {unified
+          ? "Generic study aid · adapt it to your painting."
+          : "Generic planning diagram · use when image overlay is unavailable"}
+      </Text>
+    </View>
+  );
+  return (
+    <View style={[styles.card, { padding: 16, gap: 10 }]}>
+      <Text style={{ ...styles.heading, fontSize: 17, lineHeight: 23 }}>
+        {study.title}
+      </Text>
+      {optional && unified && (
+        <Text style={{ ...styles.caption, color: colors.accent }}>
+          Optional study variation
+        </Text>
+      )}
+      {provider === "openai" && uri?.trim() && study.marks.length ? (
+        <ImageStudyThumbnail
+          uri={uri}
+          kind={study.kind}
+          notes={study.marks}
+          fallback={generic}
+        />
+      ) : (
+        generic
+      )}
+      <Text style={{ ...styles.caption, color: colors.ink, fontWeight: "600" }}>
+        {conciseText(study.purpose)}
+      </Text>
+      <Text style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}>
+        {conciseText(study.action)}
+      </Text>
+      {!(optional && unified) && (
+        <Text style={styles.caption}>{study.timing}</Text>
+      )}
+      {study.kind === "crop" && !optional && (
+        <Text style={styles.caption}>
+          Do not try to move already-painted objects.
+        </Text>
+      )}
+    </View>
+  );
+}
+
+// Full saved guidance remains available separately, without duplicating it in
+// the curated planning cards. No new analysis runs when these notes are opened.
+export function SketchValueNotes({
+  sketch,
+  values,
+  study = false,
+}: Pick<ThumbnailPlanningInput, "sketch" | "values" | "study">) {
+  const hasSketch = typeof sketch === "string" && !!sketch.trim();
+  const hasValues = typeof values === "string" && !!values.trim();
+  if (!hasSketch && !hasValues) return null;
+  return (
+    <View style={[styles.card, { padding: 16, gap: 14 }]}>
+      {hasSketch && (
+        <View style={{ gap: 4 }}>
+          <Text
+            style={{ ...styles.caption, color: colors.ink, fontWeight: "600" }}
+          >
+            {study ? "Sketch study notes" : "Your sketch plan"}
+          </Text>
+          <Text style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}>
+            {study ? studyText(sketch) : sketch}
+          </Text>
+        </View>
+      )}
+      {hasValues && (
+        <View style={{ gap: 4 }}>
+          <Text
+            style={{ ...styles.caption, color: colors.ink, fontWeight: "600" }}
+          >
+            {study ? "Value study notes" : "Your value plan"}
+          </Text>
+          <Text style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}>
+            {study ? studyText(values) : values}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
 export default function ThumbnailPlanning(
   props: ThumbnailPlanningInput & { hideHeading?: boolean },
 ) {
@@ -428,48 +551,13 @@ export default function ThumbnailPlanning(
         Use these small studies to test composition and values before painting.
       </Text>
       {studies.map((study) => (
-        <View key={study.kind} style={[styles.card, { padding: 16, gap: 10 }]}>
-          <Text style={{ ...styles.heading, fontSize: 17, lineHeight: 23 }}>
-            {study.title}
-          </Text>
-          {props.provider === "openai" && props.uri && study.marks.length ? (
-            <ImageStudyThumbnail
-              uri={props.uri}
-              kind={study.kind}
-              notes={study.marks}
-              fallback={
-                <View style={{ gap: 8 }}>
-                  <Diagram kind={study.kind} layout={study.layout} />
-                  <Text style={styles.caption}>
-                    Generic planning diagram · use when image overlay is
-                    unavailable
-                  </Text>
-                </View>
-              }
-            />
-          ) : (
-            <>
-              <Diagram kind={study.kind} layout={study.layout} />
-              <Text style={styles.caption}>
-                Generic planning diagram · use when image overlay is unavailable
-              </Text>
-            </>
-          )}
-          <Text
-            style={{ ...styles.caption, color: colors.ink, fontWeight: "600" }}
-          >
-            {conciseText(study.purpose)}
-          </Text>
-          <Text style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}>
-            {conciseText(study.action)}
-          </Text>
-          <Text style={styles.caption}>{study.timing}</Text>
-          {study.kind === "crop" && !props.study && (
-            <Text style={styles.caption}>
-              Do not try to move already-painted objects.
-            </Text>
-          )}
-        </View>
+        <ThumbnailStudyCard
+          key={study.kind}
+          study={study}
+          uri={props.uri}
+          provider={props.provider}
+          optional={props.study}
+        />
       ))}
       {(hasSketch || hasValues) && (
         <View style={{ gap: 10 }}>
@@ -503,44 +591,11 @@ export default function ThumbnailPlanning(
             </Text>
           </Pressable>
           {notesExpanded && (
-            <View style={[styles.card, { padding: 16, gap: 14 }]}>
-              {hasSketch && (
-                <View style={{ gap: 4 }}>
-                  <Text
-                    style={{
-                      ...styles.caption,
-                      color: colors.ink,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {props.study ? "Sketch study notes" : "Your sketch plan"}
-                  </Text>
-                  <Text
-                    style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}
-                  >
-                    {props.study ? studyText(props.sketch) : props.sketch}
-                  </Text>
-                </View>
-              )}
-              {hasValues && (
-                <View style={{ gap: 4 }}>
-                  <Text
-                    style={{
-                      ...styles.caption,
-                      color: colors.ink,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {props.study ? "Value study notes" : "Your value plan"}
-                  </Text>
-                  <Text
-                    style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}
-                  >
-                    {props.study ? studyText(props.values) : props.values}
-                  </Text>
-                </View>
-              )}
-            </View>
+            <SketchValueNotes
+              sketch={props.sketch}
+              values={props.values}
+              study={props.study}
+            />
           )}
         </View>
       )}

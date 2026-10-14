@@ -14,7 +14,8 @@ export type ThumbnailKind =
   | "value_mass"
   | "simplification"
   | "horizon"
-  | "focal_point";
+  | "focal_point"
+  | "edge_control";
 export type ThumbnailLayout = "landscape" | "street" | "abstract";
 export type ThumbnailPlanningInput = {
   overlays?: unknown;
@@ -25,6 +26,7 @@ export type ThumbnailPlanningInput = {
   uri?: string;
   provider?: ResultProvider;
   study?: boolean;
+  focus?: string;
 };
 export type ThumbnailStudy = {
   kind: ThumbnailKind;
@@ -81,6 +83,12 @@ const studies: Record<
     purpose: "Give the viewer one clear place to look first.",
     action:
       "Keep the strongest small darks and sharpest edges near the focal area. Let supporting shapes stay quieter.",
+  },
+  edge_control: {
+    title: "Edge handling study",
+    purpose: "Compare soft supporting edges with one crisp focal accent.",
+    action:
+      "On a separate scrap, practise one soft-to-sharp transition. Stop while the supporting wash still feels simple.",
   },
 };
 
@@ -155,6 +163,8 @@ export function imageStudyMarks(
         );
       case "focal_point":
         return geometry === "focal_ring" && category === "focal_point";
+      case "edge_control":
+        return geometry === "edge_mark" && category === "edge_control";
       default:
         return false;
     }
@@ -212,7 +222,26 @@ export function planThumbnailStudies(
     score: number,
     note?: CoachingOverlay,
   ) {
-    const rankedScore = score + (marksFor(kind).length ? 200 : 0);
+    // A selected focus changes which saved planning geometry is useful, while
+    // genuine image-backed studies remain ahead of generic text worksheets.
+    const priorities: Record<string, Partial<Record<ThumbnailKind, number>>> = {
+      Composition: { eye_flow: 75, focal_point: 70, crop: 65, horizon: 50 },
+      "Colour & contrast": {
+        value_mass: 80,
+        focal_point: 70,
+        simplification: 25,
+      },
+      "Watercolor technique": {
+        edge_control: 85,
+        value_mass: 60,
+        simplification: 50,
+        focal_point: 20,
+      },
+    };
+    const rankedScore =
+      score +
+      (marksFor(kind).length ? 200 : 0) +
+      (priorities[input.focus ?? ""]?.[kind] ?? 0);
     if (rankedScore > (candidates.get(kind)?.score ?? -1))
       candidates.set(kind, { score: rankedScore, note });
   }
@@ -221,8 +250,17 @@ export function planThumbnailStudies(
   for (const note of notes) {
     const kind = overlayKind(note),
       category = overlayCategory(note);
-    const weight =
-      note.priority === "high" ? 3 : note.priority === "medium" ? 2 : 1;
+    const weight = input.focus
+      ? note.priority === "high"
+        ? 24
+        : note.priority === "medium"
+          ? 12
+          : 0
+      : note.priority === "high"
+        ? 3
+        : note.priority === "medium"
+          ? 2
+          : 1;
     if (
       kind === "crop_box" ||
       note.type === "composition_crop" ||
@@ -247,6 +285,8 @@ export function planThumbnailStudies(
       consider("simplification", 90 + weight, note);
     if (kind === "focal_ring" && category === "focal_point")
       consider("focal_point", 88 + weight, note);
+    if (category === "edge_control")
+      consider("edge_control", 91 + weight, note);
   }
   if (/\b(crop|cropping|framing)\b/i.test(text)) consider("crop", 80);
   if (
@@ -257,6 +297,12 @@ export function planThumbnailStudies(
     consider("eye_flow", 79);
   if (/\b(value|values|shadows?|light|middle|dark)\b/i.test(text))
     consider("value_mass", 70);
+  if (
+    /\b(soft[ -]to[ -]sharp|lost[ -]and[ -]found|edge control|edge handling)\b/i.test(
+      text,
+    )
+  )
+    consider("edge_control", 73);
   if (
     /\b(simplif\w*|reduce\s+(?:competing\s+)?detail|quiet\s+(?:the\s+)?background|one\s+(?:connected\s+)?wash)\b/i.test(
       text,

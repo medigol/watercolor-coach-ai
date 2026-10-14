@@ -69,8 +69,20 @@ const render = (props) =>
   );
 
 test("study palette labels colours for a separate study and omits forceful correction wording", () => {
-  const html=render({study:true,strategy:"You should fix the palette.",palette:[{name:"Ultramarine",hex:"#526DA6",use:"Correct this sky.",mix:"The blue and earth pair gives a muted neutral."}]});
-  assert(html.includes("Use in your study"));
+  const html = render({
+    study: true,
+    strategy: "You should fix the palette.",
+    palette: [
+      {
+        name: "Ultramarine",
+        hex: "#526DA6",
+        use: "Correct this sky.",
+        mix: "The blue and earth pair gives a muted neutral.",
+      },
+    ],
+  });
+  assert(html.includes("Suggested palette"));
+  assert(html.includes("Suggested colour options for a study"));
   assert(!html.includes("Use in this painting"));
   assert(!/you should fix|correct this/i.test(html));
   assert(html.includes("The blue and earth pair gives a muted neutral."));
@@ -78,7 +90,7 @@ test("study palette labels colours for a separate study and omits forceful corre
 
 test("palette renders large translucent wash swatches rather than flat color blocks", () => {
   const html = render({ palette: [{ name: "Ultramarine", hex: "#526DA6" }] });
-  assert(html.includes("Watercolor palette"));
+  assert(html.includes("Suggested palette"));
   assert(html.includes('role="image"'));
   assert(html.includes("Ultramarine · approximate watercolor wash"));
   assert(html.includes('data-width="88"'));
@@ -115,7 +127,7 @@ test("supplied palette strategy, uses, temperature, mix and painting tags render
   for (const text of [
     "Palette strategy",
     "Keep earth colours quiet",
-    "Use in this painting:",
+    "Suggested role:",
     "Cool sky wash and distant shadows.",
     "Mix idea:",
     "Mix with Burnt Sienna",
@@ -129,6 +141,56 @@ test("supplied palette strategy, uses, temperature, mix and painting tags render
     assert(html.includes(text));
   assert(html.includes("paint formulations vary"));
   assert(!/buy|purchase|brand|manufacturer/i.test(html));
+});
+
+test("palette presents options rather than original pigment identification", () => {
+  const html = render({
+    strategy:
+      "The artist used ultramarine. A blue and earth pair is a suggested option for a cool study.",
+    palette: [
+      {
+        name: "Ultramarine",
+        hex: "#526DA6",
+        pigmentCode: "PB29",
+        use: "The original pigment is PB29. Cool sky and distance in a separate study.",
+        mix: "The painter mixed burnt sienna. Try a blue-earth neutral on scrap paper.",
+      },
+    ],
+  });
+  assert(
+    html.includes(
+      "Suggested colour options for a study, not identified original pigments.",
+    ),
+  );
+  assert(html.includes("Optional pigment suggestions"));
+  assert(html.includes("A blue and earth pair is a suggested option"));
+  assert(html.includes("Cool sky and distance in a separate study."));
+  assert(html.includes("Try a blue-earth neutral on scrap paper."));
+  assert(
+    !/The artist used|The original pigment is|The painter mixed/.test(html),
+  );
+});
+
+test("palette omits repeated detail while retaining distinct supplied colour roles", () => {
+  const repeated = "Keep the warm accents around the focal area.";
+  const html = render({
+    strategy: repeated,
+    palette: [
+      {
+        name: "Burnt Sienna",
+        hex: "#AE6F50",
+        use: repeated.toUpperCase(),
+        mix: "An earth-blue pair can make a muted shadow.",
+      },
+    ],
+    omit: [repeated],
+    hideHeading: true,
+  });
+  assert(!html.includes("Suggested palette"));
+  assert(!html.includes("Palette strategy"));
+  assert(!html.includes(repeated.toUpperCase()));
+  assert(html.includes("Burnt Sienna"));
+  assert(html.includes("An earth-blue pair can make a muted shadow."));
 });
 
 test("shadow, focal and distance roles render as friendly painting tags without invented metadata", () => {

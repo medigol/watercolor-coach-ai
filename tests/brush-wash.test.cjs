@@ -11,32 +11,43 @@ function load(relative) {
   if (modules.has(relative)) return modules.get(relative);
   const exports = {};
   modules.set(relative, exports);
-  const code = ts.transpileModule(fs.readFileSync(path.join(root, relative), "utf8"), {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      jsx: ts.JsxEmit.ReactJSX,
-      target: ts.ScriptTarget.ES2022,
+  const code = ts.transpileModule(
+    fs.readFileSync(path.join(root, relative), "utf8"),
+    {
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        jsx: ts.JsxEmit.ReactJSX,
+        target: ts.ScriptTarget.ES2022,
+      },
     },
-  }).outputText;
+  ).outputText;
   new Function("exports", "require", code)(exports, (name) => {
     if (name === "react" || name === "react/jsx-runtime") return require(name);
-    if (name === "react-native") return {
-      Text: (props) => React.createElement("span", null, props.children),
-      View: (props) => React.createElement("div", null, props.children),
-      StyleSheet: { create: (value) => value },
-    };
+    if (name === "react-native")
+      return {
+        Text: (props) => React.createElement("span", null, props.children),
+        View: (props) => React.createElement("div", null, props.children),
+        StyleSheet: { create: (value) => value },
+      };
     if (name === "./ui") return { styles: {}, colors: {} };
     const full = path.resolve(root, path.dirname(relative), name);
-    const file = [".tsx", ".ts"].map((ext) => full + ext).find((f) => fs.existsSync(f));
+    const file = [".tsx", ".ts"]
+      .map((ext) => full + ext)
+      .find((f) => fs.existsSync(f));
     if (!file) throw new Error(`Unexpected import ${name}`);
     return load(path.relative(root, file));
   });
   return exports;
 }
-const { usableBrushPlan, isConciseBrushPlan, default: BrushWashPlanCard } =
-  load("components/BrushWashPlanCard.tsx");
+const {
+  usableBrushPlan,
+  isConciseBrushPlan,
+  default: BrushWashPlanCard,
+} = load("components/BrushWashPlanCard.tsx");
 const render = (plan, props = {}) =>
-  renderToStaticMarkup(React.createElement(BrushWashPlanCard, { plan, ...props }));
+  renderToStaticMarkup(
+    React.createElement(BrushWashPlanCard, { plan, ...props }),
+  );
 const stage = {
   stage: "First sky wash",
   brush: "Large soft brush.",
@@ -116,21 +127,37 @@ test("brush plan bounds rendering to three supplied stages and trims safe text",
   assert.equal(clean[0].stage, stage.stage);
 });
 
-test("one concise handling stage can stay visible while longer plans are secondary", () => {
+test("one concise handling stage remains detectable for compact accordion summaries", () => {
   const brief = {
-    stage: "Small wash study", brush: "Soft round brush", wash: "Tea-strength wash",
-    technique: "wet_on_wet", timing: "Even paper sheen", edges: "Soft distance",
+    stage: "Small wash study",
+    brush: "Soft round brush",
+    wash: "Tea-strength wash",
+    technique: "wet_on_wet",
+    timing: "Even paper sheen",
+    edges: "Soft distance",
     stop: "Leave the light open",
   };
   assert.equal(isConciseBrushPlan([brief]), true);
   assert.equal(isConciseBrushPlan([brief, brief]), false);
-  assert.equal(isConciseBrushPlan([{ ...brief, brush: "x".repeat(120), wash: "x".repeat(120) }]), false);
+  assert.equal(
+    isConciseBrushPlan([
+      { ...brief, brush: "x".repeat(120), wash: "x".repeat(120) },
+    ]),
+    false,
+  );
   assert.equal(isConciseBrushPlan(undefined), false);
 });
 
 test("repeated handling notes render once without rewriting the surviving instruction", () => {
   const repeated = "Wait for the wash to dry.";
-  const html = render([{ ...stage, timing: repeated, edges: repeated.toUpperCase(), stop: repeated }]);
+  const html = render([
+    {
+      ...stage,
+      timing: repeated,
+      edges: repeated.toUpperCase(),
+      stop: repeated,
+    },
+  ]);
   assert.equal((html.match(/Wait for the wash to dry\./g) || []).length, 1);
   assert(!html.includes("WAIT FOR THE WASH TO DRY."));
   assert(html.includes("Timing"));
@@ -140,9 +167,10 @@ test("repeated handling notes render once without rewriting the surviving instru
 test("brush execution omits exact repeated main advice or practice while retaining distinct handling", () => {
   const advice = "Keep the sharpest marks near the small focal group.";
   const practice = "Test one connected wash on a separate sheet.";
-  const html = render([
-    { ...stage, timing: advice, edges: advice.toUpperCase(), stop: practice },
-  ], { omit: [advice, practice] });
+  const html = render(
+    [{ ...stage, timing: advice, edges: advice.toUpperCase(), stop: practice }],
+    { omit: [advice, practice] },
+  );
   assert(!html.includes(advice));
   assert(!html.includes(advice.toUpperCase()));
   assert(!html.includes(practice));
@@ -151,9 +179,16 @@ test("brush execution omits exact repeated main advice or practice while retaini
 });
 
 test("study handling uses learning framing and suppresses supplied harsh correction notes", () => {
-  const html = render([{ ...stage, edges: "Correct this weak edge on the current painting." }], { study: true });
-  assert(html.includes("How to study this handling"));
-  assert(html.includes("test it on a small new study"));
+  const html = render(
+    [{ ...stage, edges: "Correct this weak edge on the current painting." }],
+    { study: true },
+  );
+  assert(html.includes("How to practise this handling"));
+  assert(
+    html.includes(
+      "For a separate study: a suggested way to practise this effect.",
+    ),
+  );
   assert(html.includes(stage.brush));
   assert(html.includes(stage.wash));
   assert(!html.includes("Correct this weak edge"));
@@ -166,17 +201,26 @@ test("study handling uses learning framing and suppresses supplied harsh correct
 test("explicit new-study handling keeps useful supplied timing, edge and stop instructions", () => {
   const supplied = {
     ...stage,
-    timing: "Wait until the first wash is dry. Let the paper settle before another layer.",
-    edges: "Keep background edges soft; reserve firm marks for the focal group.",
+    timing:
+      "Wait until the first wash is dry. Let the paper settle before another layer.",
+    edges:
+      "Keep background edges soft; reserve firm marks for the focal group.",
     stop: "Stop after one small focal accent.",
   };
   const html = render([supplied], { study: true });
-  assert(html.includes("test it on a small new study"));
+  assert(
+    html.includes(
+      "For a separate study: a suggested way to practise this effect.",
+    ),
+  );
   assert(html.includes(supplied.timing));
   assert(html.includes(supplied.edges));
   assert(html.includes(supplied.stop));
   assert(!html.includes("In a separate study,"));
-  const guarded = render([{ ...supplied, edges: "You should fix this weak edge." }], { study: true });
+  const guarded = render(
+    [{ ...supplied, edges: "You should fix this weak edge." }],
+    { study: true },
+  );
   assert(!guarded.includes("You should fix this weak edge"));
   assert(guarded.includes(supplied.timing));
 });
@@ -197,4 +241,57 @@ test("study handling retains preventive overworking stop cues without accepting 
   ]) {
     assert(!render([{ ...stage, stop }], { study: true }).includes(stop));
   }
+});
+
+test("brush plan describes a recommended method without claiming the original process", () => {
+  const html = render([
+    {
+      ...stage,
+      brush: "The artist used a size 8 round. Try a soft round brush.",
+      timing:
+        "The paper was fully wet. Work while your test sheet has an even sheen.",
+      wash: "Tea-strength blue-grey.",
+    },
+  ]);
+  assert(
+    html.includes(
+      "A suggested practice method, not a reconstruction of the original process.",
+    ),
+  );
+  assert(html.includes("Try a soft round brush."));
+  assert(html.includes("Work while your test sheet has an even sheen."));
+  assert(html.includes("Tea-strength blue-grey."));
+  assert(!html.includes("The artist used a size 8 round"));
+  assert(!html.includes("The paper was fully wet"));
+});
+
+test("old original-process assertions are omitted without inventing replacement facts", () => {
+  const html = render([
+    {
+      ...stage,
+      brush: "A size 8 brush was used.",
+      wash: "The painter used ultramarine.",
+      timing: "The first wash was applied on wet paper.",
+    },
+  ]);
+  assert(!html.includes("A size 8 brush was used"));
+  assert(!html.includes("The painter used ultramarine"));
+  assert(!html.includes("The first wash was applied"));
+  assert(html.includes(stage.edges));
+  assert(html.includes(stage.stop));
+  assert(!html.includes("Soft round brush"));
+});
+
+test("brush density omits duplicate stages and repeated cross-section text", () => {
+  const html = render(Array.from({ length: 10 }, () => stage));
+  assert.equal((html.match(/First sky wash/g) || []).length, 1);
+  const distinct = render(
+    Array.from({ length: 5 }, (_, index) => ({
+      ...stage,
+      stage: `Stage ${index + 1}`,
+      brush: `Soft brush for stage ${index + 1}.`,
+    })),
+  );
+  assert.equal((distinct.match(/>Stage \d</g) || []).length, 3);
+  assert(!distinct.includes("Stage 4"));
 });

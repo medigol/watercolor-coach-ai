@@ -2,7 +2,11 @@ import WatercolorSwatch from "./WatercolorSwatch";
 import { StyleSheet, Text, View } from "react-native";
 import type { PaletteColour } from "../types";
 import { colors, styles } from "./ui";
-import { studyText } from "../lib/coachingPresentation";
+import {
+  conciseText,
+  studyText,
+  uniqueGuidance,
+} from "../lib/coachingPresentation";
 
 const safePigmentCodes = new Set(["PB29", "PBr7", "PY43", "PY42"]);
 const temperatures = ["warm", "cool", "neutral"] as const;
@@ -18,6 +22,20 @@ function optionalText(value: unknown, limit: number): string | null {
   return typeof value === "string" && value.trim() && value.length <= limit
     ? value.trim()
     : null;
+}
+
+function suggestedPaletteText(value: string): string {
+  // Retain suggested options; omit legacy claims about original materials.
+  const originalMaterial =
+    /\b(?:artist|painter|you|they)\s+(?:(?:clearly|definitely|originally)\s+)?(?:used|chose|mixed|painted with)\b|\b(?:was|were|had been|has been)\s+(?:(?:clearly|definitely|originally)\s+)?(?:used|mixed|painted with)\b|\b(?:original|actual|exact)\s+(?:pigment|paint|colou?r|palette)\b.{0,40}\b(?:is|was|were|used|must be)\b|\b(?:must|clearly|definitely)\s+(?:have\s+)?(?:used|mixed)\b/i;
+  return conciseText(
+    value
+      .trim()
+      .split(/(?<=[.!?])\s+|\r?\n+/)
+      .filter((sentence) => !originalMaterial.test(sentence))
+      .join(" "),
+    2,
+  );
 }
 export function paletteGuidance(color: PaletteColour) {
   const name = typeof color.name === "string" ? color.name.toLowerCase() : "";
@@ -78,33 +96,55 @@ export default function PaletteCard({
   palette,
   strategy,
   study = false,
+  hideHeading = false,
+  omit = [],
 }: {
   palette: unknown;
   strategy?: string | null;
   study?: boolean;
+  hideHeading?: boolean;
+  omit?: string[];
 }) {
-  const colours = usablePalette(palette);
+  const colours = usablePalette(palette).filter(
+    (colour) => !!suggestedPaletteText(colour.name),
+  );
   if (!colours.length) return null;
-  const paletteStrategy = optionalText(strategy, 350);
+  const suppliedStrategy = optionalText(strategy, 350);
+  const safeStrategy = suppliedStrategy
+    ? suggestedPaletteText(suppliedStrategy)
+    : "";
+  const paletteStrategy = study ? studyText(safeStrategy, "") : safeStrategy;
+  const seen = [...omit];
+  const showStrategy = uniqueGuidance([paletteStrategy], seen).length > 0;
+  if (showStrategy) seen.push(paletteStrategy);
   const hasCodes = colours.some((color) => color.pigmentCode);
   return (
-    <View style={styles.card}>
-      <Text style={styles.heading}>Watercolor palette</Text>
+    <View style={hideHeading ? { gap: 16 } : styles.card}>
+      {!hideHeading && <Text style={styles.heading}>Suggested palette</Text>}
       <Text style={styles.caption}>
-        Start with fewer colours. Add only what your subject needs.
+        Suggested colour options for a study, not identified original pigments.
       </Text>
-      {paletteStrategy && (
+      {showStrategy && (
         <View style={paletteStyles.strategy}>
           <Text style={paletteStyles.smallHeading}>Palette strategy</Text>
-          <Text style={styles.body}>
-            {study ? studyText(paletteStrategy) : paletteStrategy}
-          </Text>
+          <Text style={styles.body}>{paletteStrategy}</Text>
         </View>
       )}
       <View style={{ gap: 20 }}>
         {colours.map((color, index) => {
           const { pigmentCode, use, mix, temperature, tag } =
             paletteGuidance(color);
+          const notes = [
+            ["Suggested role", use],
+            ["Mix idea", mix],
+          ].flatMap(([label, supplied]) => {
+            if (!supplied) return [];
+            const option = suggestedPaletteText(supplied);
+            const text = study ? studyText(option, "") : option;
+            if (!uniqueGuidance([text], seen).length) return [];
+            seen.push(text);
+            return [{ label, text }];
+          });
           return (
             <View
               key={`${color.name}-${index}`}
@@ -127,20 +167,12 @@ export default function PaletteCard({
                   </View>
                 </View>
               </View>
-              {use && (
-                <Text style={paletteStyles.detail}>
-                  <Text style={paletteStyles.detailLabel}>
-                    {study ? "Use in your study: " : "Use in this painting: "}
-                  </Text>
-                  {study ? studyText(use) : use}
+              {notes.map(({ label, text }) => (
+                <Text key={label} style={paletteStyles.detail}>
+                  <Text style={paletteStyles.detailLabel}>{label}: </Text>
+                  {text}
                 </Text>
-              )}
-              {mix && (
-                <Text style={paletteStyles.detail}>
-                  <Text style={paletteStyles.detailLabel}>Mix idea: </Text>
-                  {study ? studyText(mix) : mix}
-                </Text>
-              )}
+              ))}
             </View>
           );
         })}
@@ -151,7 +183,7 @@ export default function PaletteCard({
         </Text>
         {hasCodes && (
           <Text style={styles.caption}>
-            Pigment codes are common guides; paint formulations vary.
+            Optional pigment suggestions · paint formulations vary.
           </Text>
         )}
       </View>

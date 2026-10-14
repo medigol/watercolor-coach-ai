@@ -3,7 +3,12 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
-function fixture(width = 375, platform = "web", initiallyOpen) {
+function fixture(
+  width = 375,
+  platform = "web",
+  initiallyOpen,
+  controlled = {},
+) {
   let choice,
     currentWidth = width;
   const exports = {};
@@ -51,9 +56,13 @@ function fixture(width = 375, platform = "web", initiallyOpen) {
         helper: "General teaching ideas.",
         children: "Study contents",
         initiallyOpen,
+        ...controlled,
       }),
     resize: (width) => {
       currentWidth = width;
+    },
+    update: (props) => {
+      controlled = { ...controlled, ...props };
     },
   };
 }
@@ -86,4 +95,22 @@ test("desktop defaults open while learner choice survives resizing", () => {
 test("explicitly secondary follow-up and native tablet details remain folded", () => {
   assert.equal(content(fixture(1440, "web", false).render()), false);
   assert.equal(content(fixture(1200, "ios").render()), false);
+});
+
+test("controlled Explore rows notify the parent and cannot open independently", () => {
+  const changes = [];
+  const f = fixture(1440, "web", undefined, {
+    open: false,
+    onOpenChange: (open) => changes.push(open),
+  });
+  assert.equal(content(f.render()), false);
+  button(f.render()).onPress();
+  assert.deepEqual(changes, [true]);
+  assert.equal(content(f.render()), false);
+  f.update({ open: true });
+  assert.equal(content(f.render()), "Study contents");
+  f.resize(375);
+  assert.equal(content(f.render()), "Study contents");
+  button(f.render()).onPress();
+  assert.deepEqual(changes, [true, false]);
 });

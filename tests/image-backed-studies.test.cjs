@@ -92,6 +92,14 @@ const horizon = note({
     { x: 90, y: 40 },
   ],
 });
+const edge = note({
+  type: "edge_mark",
+  category: "edge_control",
+  points: [
+    { x: 20, y: 40 },
+    { x: 55, y: 45 },
+  ],
+});
 const input = {
   composition: "Test the crop and eye path.",
   sketch: "Keep the large shapes connected.",
@@ -113,6 +121,7 @@ test("crop/flow/value/simplify/structure/focal study marks preserve validated sa
   assert.deepEqual(planning.imageStudyMarks("simplification", notes), [quiet]);
   assert.deepEqual(planning.imageStudyMarks("horizon", notes), [horizon]);
   assert.deepEqual(planning.imageStudyMarks("focal_point", notes), [focal]);
+  assert.deepEqual(planning.imageStudyMarks("edge_control", [edge]), [edge]);
   assert.deepEqual(planning.imageStudyMarks("big_shapes", notes), []);
   assert.equal(JSON.stringify(notes), before);
 });
@@ -137,6 +146,7 @@ test("point-only, degenerate or malformed geometry never becomes an invented ima
     ],
     ["horizon", note({ type: "composition_line", styleHint: "horizon" })],
     ["focal_point", note({ type: "focal_ring", category: "focal_point" })],
+    ["edge_control", note({ type: "edge_mark", category: "edge_control" })],
   ]) {
     assert.deepEqual(planning.imageStudyMarks(kind, [invalid]), [], kind);
   }
@@ -315,6 +325,7 @@ for (const [kind, marks] of [
   ["simplification", [quiet]],
   ["horizon", [horizon]],
   ["focal_point", [focal]],
+  ["edge_control", [edge]],
 ])
   test(`${kind}: original image renders with aligned meaningful marks, no fake image output`, () => {
     const f = fixture();

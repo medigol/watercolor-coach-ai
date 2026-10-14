@@ -1,4 +1,5 @@
 export type CoachingMode = "constructive" | "study";
+export type { CoachingDecision } from "../shared/coachingDecision";
 export type ArtworkMode = "Improve painting" | "Create reference";
 export type FeedbackFocus =
   | "Overall feedback"

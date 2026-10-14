@@ -35,17 +35,21 @@ export function SavedImage({
   label = "Your painting",
   overlays,
   study = false,
+  hideNotes = false,
+  selectedNote,
+  onSelectNote,
+  onOpenNotes,
 }: {
   uri?: string;
   label?: string;
   overlays?: unknown;
   study?: boolean;
+  hideNotes?: boolean;
+  selectedNote?: number | null;
+  onSelectNote?: (index: number) => void;
+  onOpenNotes?: () => void;
 }) {
   const [failedUri, setFailedUri] = useState<string>();
-  if (uri && usableOverlays(overlays).length)
-    return (
-      <CoachingOverlay uri={uri} notes={overlays} label={label} study={study} />
-    );
   if (uri && failedUri === uri)
     return (
       <>
@@ -53,6 +57,20 @@ export function SavedImage({
           Your image is unavailable. Showing text guidance only.
         </Text>
       </>
+    );
+  if (uri && usableOverlays(overlays).length)
+    return (
+      <CoachingOverlay
+        uri={uri}
+        notes={overlays}
+        label={label}
+        study={study}
+        hideNotes={hideNotes}
+        selectedNote={selectedNote}
+        onSelectNote={onSelectNote}
+        onOpenNotes={onOpenNotes}
+        onImageError={() => setFailedUri(uri)}
+      />
     );
   return uri ? (
     <>
