@@ -2,6 +2,7 @@ import WatercolorSwatch from "./WatercolorSwatch";
 import { StyleSheet, Text, View } from "react-native";
 import type { PaletteColour } from "../types";
 import { colors, styles } from "./ui";
+import { studyText } from "../lib/coachingPresentation";
 
 const safePigmentCodes = new Set(["PB29", "PBr7", "PY43", "PY42"]);
 const temperatures = ["warm", "cool", "neutral"] as const;
@@ -54,10 +55,13 @@ export function usablePalette(value: unknown): PaletteColour[] {
     if (!item || typeof item !== "object" || Array.isArray(item)) continue;
     const color = item as Record<string, unknown>;
     if (
-      typeof color.name !== "string" || !color.name.trim() ||
-      color.name.length > 60 || typeof color.hex !== "string" ||
+      typeof color.name !== "string" ||
+      !color.name.trim() ||
+      color.name.length > 60 ||
+      typeof color.hex !== "string" ||
       !/^#[0-9a-f]{6}$/i.test(color.hex)
-    ) continue;
+    )
+      continue;
     const safe: PaletteColour = { name: color.name.trim(), hex: color.hex };
     const guidance = paletteGuidance(color as unknown as PaletteColour);
     if (guidance.pigmentCode) safe.pigmentCode = guidance.pigmentCode;
@@ -73,9 +77,11 @@ export function usablePalette(value: unknown): PaletteColour[] {
 export default function PaletteCard({
   palette,
   strategy,
+  study = false,
 }: {
   palette: unknown;
   strategy?: string | null;
+  study?: boolean;
 }) {
   const colours = usablePalette(palette);
   if (!colours.length) return null;
@@ -90,7 +96,9 @@ export default function PaletteCard({
       {paletteStrategy && (
         <View style={paletteStyles.strategy}>
           <Text style={paletteStyles.smallHeading}>Palette strategy</Text>
-          <Text style={styles.body}>{paletteStrategy}</Text>
+          <Text style={styles.body}>
+            {study ? studyText(paletteStrategy) : paletteStrategy}
+          </Text>
         </View>
       )}
       <View style={{ gap: 20 }}>
@@ -122,15 +130,15 @@ export default function PaletteCard({
               {use && (
                 <Text style={paletteStyles.detail}>
                   <Text style={paletteStyles.detailLabel}>
-                    Use in this painting:{" "}
+                    {study ? "Use in your study: " : "Use in this painting: "}
                   </Text>
-                  {use}
+                  {study ? studyText(use) : use}
                 </Text>
               )}
               {mix && (
                 <Text style={paletteStyles.detail}>
                   <Text style={paletteStyles.detailLabel}>Mix idea: </Text>
-                  {mix}
+                  {study ? studyText(mix) : mix}
                 </Text>
               )}
             </View>

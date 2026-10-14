@@ -7,6 +7,7 @@ import {
   type CompositionModelsInput,
 } from "../lib/compositionModels";
 import { colors, styles } from "./ui";
+import { studyText, conciseText } from "../lib/coachingPresentation";
 
 const paper = "#F7F5EC",
   light = "#FDFCFA",
@@ -385,13 +386,17 @@ export function CompositionModelDiagram({
   );
 }
 
-export default function CompositionModels(props: CompositionModelsInput) {
+export default function CompositionModels(
+  props: CompositionModelsInput & { study?: boolean; hideHeading?: boolean },
+) {
   const models = selectCompositionModels(props);
   return (
     <View style={{ gap: 14 }}>
-      <Text style={styles.heading}>Composition model</Text>
+      {!props.hideHeading && (
+        <Text style={styles.heading}>Composition model</Text>
+      )}
       <Text style={styles.caption}>
-        Small design ideas to test before your next painting.
+        This is a general teaching model, not an exact copy of your image.
       </Text>
       {models.map((model) => (
         <View key={model.id} style={[styles.card, { padding: 16, gap: 10 }]}>
@@ -410,9 +415,11 @@ export default function CompositionModels(props: CompositionModelsInput) {
                 fontWeight: "600",
               }}
             >
-              When to use it
+              {props.study ? "What this model shows" : "When to use it"}
             </Text>
-            <Text style={styles.caption}>{model.whenToUse}</Text>
+            <Text style={styles.caption}>
+              {props.study ? model.description : model.whenToUse}
+            </Text>
           </View>
           <View style={{ gap: 3 }}>
             <Text
@@ -422,12 +429,35 @@ export default function CompositionModels(props: CompositionModelsInput) {
                 fontWeight: "600",
               }}
             >
-              Relate to your study
+              {props.study ? "Study this idea" : "Relate to your study"}
             </Text>
-            <Text style={styles.caption}>{model.application}</Text>
+            <Text style={styles.caption}>
+              {props.study
+                ? studyText(
+                    model.application,
+                    "Compare this model with the decisions you want to understand.",
+                  )
+                : conciseText(model.application)}
+            </Text>
           </View>
+          {props.study && (
+            <Text
+              style={{
+                ...styles.caption,
+                color: colors.accent,
+                fontWeight: "600",
+              }}
+            >
+              Optional next study variation
+            </Text>
+          )}
           <Text style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}>
-            {model.action}
+            {props.study
+              ? studyText(
+                  model.action,
+                  "If useful, test this arrangement in a separate small study.",
+                )
+              : conciseText(model.action)}
           </Text>
         </View>
       ))}

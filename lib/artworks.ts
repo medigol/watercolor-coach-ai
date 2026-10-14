@@ -2,6 +2,7 @@ import { requireSupabase } from "./supabase";
 import { improveResult, referenceResult } from "../data/mockResults";
 import type {
   BrushWashStep,
+  CoachingMode,
   CompositionDecision,
   PaletteColour,
 } from "../types";
@@ -43,6 +44,7 @@ function validSave(
 export type SavedMode = "improve_painting" | "create_reference";
 import type { CoachingOverlay } from "./overlays";
 export type ImproveData = typeof improveResult & {
+  coachingMode?: CoachingMode | null;
   overlays?: CoachingOverlay[] | null;
   palette?: PaletteColour[] | null;
   paletteStrategy?: string | null;
@@ -52,6 +54,7 @@ export type ImproveData = typeof improveResult & {
 };
 export type ReferenceData = Omit<typeof referenceResult, "palette"> & {
   palette: PaletteColour[];
+  coachingMode?: CoachingMode | null;
   overlays?: CoachingOverlay[] | null;
   paletteStrategy?: string | null;
   compositionDecision?: CompositionDecision | null;
@@ -339,7 +342,7 @@ export function validResult(
     !arrays.every(
       (key) =>
         Array.isArray(v[key]) &&
-        v[key].length > 0 &&
+        (key === "whatToFix" || v[key].length > 0) &&
         (v[key] as unknown[]).every(
           (item) => typeof item === "string" && item.trim(),
         ),

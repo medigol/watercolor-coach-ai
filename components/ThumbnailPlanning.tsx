@@ -17,6 +17,7 @@ import {
 } from "../lib/thumbnailPlanning";
 import { colors, styles } from "./ui";
 import ImageStudyThumbnail from "./ImageStudyThumbnail";
+import { conciseText, studyText } from "../lib/coachingPresentation";
 
 const tone = {
   paper: "#F6F4EB",
@@ -409,14 +410,20 @@ function Diagram({
   );
 }
 
-export default function ThumbnailPlanning(props: ThumbnailPlanningInput) {
+export default function ThumbnailPlanning(
+  props: ThumbnailPlanningInput & { hideHeading?: boolean },
+) {
   const studies = planThumbnailStudies(props);
   const [notesExpanded, setNotesExpanded] = useState(false);
   const hasSketch = typeof props.sketch === "string" && !!props.sketch.trim();
   const hasValues = typeof props.values === "string" && !!props.values.trim();
   return (
     <View style={{ gap: 14 }}>
-      <Text style={styles.heading}>Thumbnail planning</Text>
+      {!props.hideHeading && (
+        <Text style={styles.heading}>
+          {props.study ? "Study variation" : "Thumbnail planning"}
+        </Text>
+      )}
       <Text style={styles.caption}>
         Use these small studies to test composition and values before painting.
       </Text>
@@ -451,13 +458,13 @@ export default function ThumbnailPlanning(props: ThumbnailPlanningInput) {
           <Text
             style={{ ...styles.caption, color: colors.ink, fontWeight: "600" }}
           >
-            {study.purpose}
+            {conciseText(study.purpose)}
           </Text>
           <Text style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}>
-            {study.action}
+            {conciseText(study.action)}
           </Text>
           <Text style={styles.caption}>{study.timing}</Text>
-          {study.kind === "crop" && (
+          {study.kind === "crop" && !props.study && (
             <Text style={styles.caption}>
               Do not try to move already-painted objects.
             </Text>
@@ -506,12 +513,12 @@ export default function ThumbnailPlanning(props: ThumbnailPlanningInput) {
                       fontWeight: "600",
                     }}
                   >
-                    Your sketch plan
+                    {props.study ? "Sketch study notes" : "Your sketch plan"}
                   </Text>
                   <Text
                     style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}
                   >
-                    {props.sketch}
+                    {props.study ? studyText(props.sketch) : props.sketch}
                   </Text>
                 </View>
               )}
@@ -524,12 +531,12 @@ export default function ThumbnailPlanning(props: ThumbnailPlanningInput) {
                       fontWeight: "600",
                     }}
                   >
-                    Your value plan
+                    {props.study ? "Value study notes" : "Your value plan"}
                   </Text>
                   <Text
                     style={{ ...styles.body, fontSize: 14, lineHeight: 22 }}
                   >
-                    {props.values}
+                    {props.study ? studyText(props.values) : props.values}
                   </Text>
                 </View>
               )}

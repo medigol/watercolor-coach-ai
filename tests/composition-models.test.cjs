@@ -27,6 +27,9 @@ function load(file, mocks = {}) {
 }
 const overlays = load("lib/overlays.ts");
 const models = load("lib/compositionModels.ts", { "./overlays": overlays });
+const presentation = load("lib/coachingPresentation.ts", {
+  "./overlays": overlays,
+});
 const input = { composition: "", values: "" };
 const note = (patch = {}) => ({
   type: "point_marker",
@@ -238,6 +241,7 @@ const component = load("components/CompositionModels.tsx", {
     Rect: element("rect"),
   },
   "../lib/compositionModels": models,
+  "../lib/coachingPresentation": presentation,
   "./ui": {
     styles: {},
     colors: { accent: "#236963", ochre: "#B38A50", ink: "#253C3C" },

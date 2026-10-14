@@ -68,6 +68,14 @@ const render = (props) =>
     React.createElement(load("components/PaletteCard.tsx").default, props),
   );
 
+test("study palette labels colours for a separate study and omits forceful correction wording", () => {
+  const html=render({study:true,strategy:"You should fix the palette.",palette:[{name:"Ultramarine",hex:"#526DA6",use:"Correct this sky.",mix:"The blue and earth pair gives a muted neutral."}]});
+  assert(html.includes("Use in your study"));
+  assert(!html.includes("Use in this painting"));
+  assert(!/you should fix|correct this/i.test(html));
+  assert(html.includes("The blue and earth pair gives a muted neutral."));
+});
+
 test("palette renders large translucent wash swatches rather than flat color blocks", () => {
   const html = render({ palette: [{ name: "Ultramarine", hex: "#526DA6" }] });
   assert(html.includes("Watercolor palette"));

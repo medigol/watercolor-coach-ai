@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { usableOverlays } from "../lib/overlays";
-import { markMeaning, timingLabel } from "../lib/coachingPresentation";
+import {
+  markMeaning,
+  timingLabel,
+  studyText,
+  conciseText,
+} from "../lib/coachingPresentation";
 import {
   legendGroup,
   markColors,
@@ -22,18 +27,22 @@ export default function CoachingOverlay({
   uri,
   notes,
   label,
+  study = false,
 }: {
   uri: string;
   notes: unknown;
   label: string;
+  study?: boolean;
 }) {
   const [size, setSize] = useState<{ uri: string; ratio: number }>();
   const [failed, setFailed] = useState<string>();
   const [width, setWidth] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
+  const [notesOpen, setNotesOpen] = useState(false);
   useEffect(() => {
     let alive = true;
     setSelected(null);
+    setNotesOpen(false);
     try {
       Image.getSize(
         uri,
@@ -66,6 +75,34 @@ export default function CoachingOverlay({
   const imageWidth = Math.min(width, 420 * size.ratio),
     imageHeight = imageWidth / size.ratio;
   const markers = markerPositions(valid, imageWidth, imageHeight);
+  const displayed = valid.map((note) =>
+    study
+      ? {
+          ...note,
+          label: studyText(
+            note.label,
+            `${legendGroup(note) === "Simplify" ? "Shape" : legendGroup(note)} study`,
+          ),
+          shortInstruction: studyText(
+            note.shortInstruction,
+            "Observe this mark within the wider painting.",
+          ),
+          reason: studyText(
+            note.reason,
+            "Compare its relationship with neighbouring shapes, values, and edges.",
+          ),
+          action: studyText(
+            note.action,
+            "If useful, test a modest variation on a separate study sheet.",
+          ),
+        }
+      : note,
+  );
+  const selectNote = (index: number) => {
+    if (!Number.isInteger(index) || index < 0 || index >= valid.length) return;
+    setSelected(index);
+    setNotesOpen(true);
+  };
   return (
     <View style={{ gap: 18 }}>
       <Text style={styles.caption}>{label}</Text>
@@ -87,7 +124,7 @@ export default function CoachingOverlay({
               width={imageWidth}
               height={imageHeight}
               selected={selected}
-              onSelect={setSelected}
+              onSelect={selectNote}
             />
             {valid.map((note, i) => {
               const { left, top, target } = markers[i];
@@ -96,10 +133,10 @@ export default function CoachingOverlay({
                 <Pressable
                   key={`${note.id ?? "note"}-${i}`}
                   accessibilityRole="button"
-                  accessibilityLabel={`Note ${i + 1}: ${note.label}`}
+                  accessibilityLabel={`Note ${i + 1}: ${displayed[i].label}`}
                   aria-selected={selected === i}
                   accessibilityState={{ selected: selected === i }}
-                  onPress={() => setSelected(i)}
+                  onPress={() => selectNote(i)}
                   style={{
                     position: "absolute",
                     left,
@@ -144,145 +181,175 @@ export default function CoachingOverlay({
       <View style={{ gap: 6 }}>
         <Text style={styles.heading}>Visual coaching notes</Text>
         <Text style={styles.caption}>
-          Guidance marks on your original image. Use them as painting decisions,
-          not tracing instructions.
+          {study
+            ? "Study marks on your original image. Explore painting decisions without tracing them."
+            : "Guidance marks on your original image. Use them as painting decisions, not tracing instructions."}
+        </Text>
+        <Text style={styles.caption}>
+          {valid.length} marks · tap a number to open its note
         </Text>
       </View>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
-        {legend.map((group) => (
-          <View
-            key={group}
-            style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
-          >
-            {group === "Composition" ? (
-              <Svg
-                width={12}
-                height={12}
-                viewBox="0 0 12 12"
-                accessible={false}
-                aria-hidden={true}
-              >
-                <Path
-                  d="M1 11 L11 1 M5 1 L11 1 L11 7"
-                  fill="none"
-                  stroke={markColors[group]}
-                  strokeWidth={1.4}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            ) : (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Visual coaching notes"
+        accessibilityState={{ expanded: notesOpen }}
+        aria-expanded={notesOpen}
+        onPress={() => setNotesOpen((open) => !open)}
+        style={{
+          minHeight: 44,
+          justifyContent: "center",
+          paddingHorizontal: 14,
+          backgroundColor: colors.pale,
+          borderRadius: 12,
+        }}
+      >
+        <Text
+          style={{ ...styles.caption, color: colors.accent, fontWeight: "600" }}
+        >
+          {notesOpen ? "Hide notes" : "View notes"}
+        </Text>
+      </Pressable>
+      {notesOpen && (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+          {legend
+            .filter((group) =>
+              valid.some((note) => legendGroup(note) === group),
+            )
+            .map((group) => (
               <View
-                style={{
-                  width: 12,
-                  height: group === "Edge" ? 2 : 10,
-                  borderRadius: group === "Focus" ? 6 : 2,
-                  backgroundColor:
-                    group === "Value" ? markColors[group] : "transparent",
-                  borderWidth: group === "Value" ? 0 : 1.5,
-                  borderColor: markColors[group],
-                  borderStyle:
-                    group === "Simplify" || group === "Edge"
-                      ? "dotted"
-                      : "solid",
-                }}
-              />
-            )}
-            <Text style={styles.caption}>{group}</Text>
-          </View>
-        ))}
-      </View>
-      {valid.map((note, i) => {
-        const active = selected === i,
-          group = legendGroup(note);
-        return (
-          <Pressable
-            key={`${note.id ?? "note"}-${i}`}
-            accessibilityRole="button"
-            accessibilityLabel={`Note ${i + 1}: ${note.label}. ${note.shortInstruction}. ${markMeaning(note)} Why it matters: ${note.reason} ${timingLabel(note)}: ${note.action}`}
-            aria-selected={active}
-            aria-expanded={active}
-            accessibilityState={{ selected: active, expanded: active }}
-            onPress={() => setSelected(active ? null : i)}
-            style={[
-              styles.card,
-              {
-                padding: 18,
-                gap: 10,
-                borderColor: active ? markColors[group] : colors.border,
-                borderWidth: active ? 2 : 1,
-                backgroundColor: active ? colors.pale : colors.paper,
-              },
-            ]}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 8,
-              }}
-            >
-              <Text
-                style={[
-                  styles.caption,
-                  { color: markColors[group], fontWeight: "600" },
-                ]}
+                key={group}
+                style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
               >
-                {i + 1} · {group}
-              </Text>
-              <Text
-                style={[styles.caption, { color: colors.accent, fontSize: 18 }]}
-              >
-                {active ? "−" : "+"}
-              </Text>
-            </View>
-            <Text style={[styles.heading, { fontSize: 18, lineHeight: 25 }]}>
-              {note.label}
-            </Text>
-            <Text style={styles.body}>{note.shortInstruction}</Text>
-            <Text
+                {group === "Composition" ? (
+                  <Svg
+                    width={12}
+                    height={12}
+                    viewBox="0 0 12 12"
+                    accessible={false}
+                    aria-hidden={true}
+                  >
+                    <Path
+                      d="M1 11 L11 1 M5 1 L11 1 L11 7"
+                      fill="none"
+                      stroke={markColors[group]}
+                      strokeWidth={1.4}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </Svg>
+                ) : (
+                  <View
+                    style={{
+                      width: 12,
+                      height: group === "Edge" ? 2 : 10,
+                      borderRadius: group === "Focus" ? 6 : 2,
+                      backgroundColor:
+                        group === "Value" ? markColors[group] : "transparent",
+                      borderWidth: group === "Value" ? 0 : 1.5,
+                      borderColor: markColors[group],
+                      borderStyle:
+                        group === "Simplify" || group === "Edge"
+                          ? "dotted"
+                          : "solid",
+                    }}
+                  />
+                )}
+                <Text style={styles.caption}>
+                  {study && group === "Simplify" ? "Shapes" : group}
+                </Text>
+              </View>
+            ))}
+        </View>
+      )}
+      {notesOpen &&
+        displayed.map((note, i) => {
+          const active = selected === i,
+            group = legendGroup(note);
+          return (
+            <Pressable
+              key={`${note.id ?? "note"}-${i}`}
+              accessibilityRole="button"
+              accessibilityLabel={`Note ${i + 1}: ${note.label}. ${note.shortInstruction}${active ? `. ${markMeaning(note, study)} ${study ? "Study this effect" : "Why it matters"}: ${note.reason} ${timingLabel(note, study)}: ${note.action}` : ""}`}
+              aria-selected={active}
+              aria-expanded={active}
+              accessibilityState={{ selected: active, expanded: active }}
+              onPress={() => setSelected(active ? null : i)}
               style={[
-                styles.caption,
-                { fontWeight: "600", color: colors.accent },
+                styles.card,
+                {
+                  padding: 18,
+                  gap: 10,
+                  borderColor: active ? markColors[group] : colors.border,
+                  borderWidth: active ? 2 : 1,
+                  backgroundColor: active ? colors.pale : colors.paper,
+                },
               ]}
             >
-              {timingLabel(note)}
-            </Text>
-            {active && (
-              <>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                }}
+              >
                 <Text
                   style={[
                     styles.caption,
-                    { fontWeight: "600", color: colors.ink },
+                    { color: markColors[group], fontWeight: "600" },
                   ]}
                 >
-                  What this mark means
+                  {i + 1} · {group}
                 </Text>
-                <Text style={styles.body}>{markMeaning(note)}</Text>
                 <Text
                   style={[
                     styles.caption,
-                    { fontWeight: "600", color: colors.ink },
+                    { color: colors.accent, fontSize: 18 },
                   ]}
                 >
-                  Why it matters
+                  {active ? "−" : "+"}
                 </Text>
-                <Text style={styles.body}>{note.reason}</Text>
-                <Text
-                  style={[
-                    styles.caption,
-                    { fontWeight: "600", color: colors.ink },
-                  ]}
-                >
-                  {timingLabel(note)}
-                </Text>
-                <Text style={styles.body}>{note.action}</Text>
-              </>
-            )}
-          </Pressable>
-        );
-      })}
+              </View>
+              <Text style={[styles.heading, { fontSize: 18, lineHeight: 25 }]}>
+                {note.label}
+              </Text>
+              <Text style={styles.body}>
+                {conciseText(note.shortInstruction)}
+              </Text>
+              {active && (
+                <>
+                  <Text
+                    style={[
+                      styles.caption,
+                      { fontWeight: "600", color: colors.ink },
+                    ]}
+                  >
+                    {study ? "Observe this decision" : "What this mark means"}
+                  </Text>
+                  <Text style={styles.body}>{markMeaning(note, study)}</Text>
+                  <Text
+                    style={[
+                      styles.caption,
+                      { fontWeight: "600", color: colors.ink },
+                    ]}
+                  >
+                    {study ? "Study this effect" : "Why it matters"}
+                  </Text>
+                  <Text style={styles.body}>{note.reason}</Text>
+                  <Text
+                    style={[
+                      styles.caption,
+                      { fontWeight: "600", color: colors.ink },
+                    ]}
+                  >
+                    {timingLabel(note, study)}
+                  </Text>
+                  <Text style={styles.body}>{note.action}</Text>
+                </>
+              )}
+            </Pressable>
+          );
+        })}
     </View>
   );
 }

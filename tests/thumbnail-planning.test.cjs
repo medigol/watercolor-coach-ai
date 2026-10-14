@@ -257,6 +257,7 @@ const Component = load("components/ThumbnailPlanning.tsx", {
     Text: element("text"),
   },
   "../lib/thumbnailPlanning": planning,
+  "../lib/coachingPresentation": presentation,
   "./ImageStudyThumbnail": { default: () => null },
   "./ui": { colors: { accent: "#236963", ink: "#253C3C" }, styles: {} },
 }).default;
@@ -296,6 +297,7 @@ test("full legacy and saved sketch/value guidance stays available in the expanda
       "react-native": { View: "View", Text: "Text", Pressable: "Pressable" },
       "react-native-svg": {},
       "../lib/thumbnailPlanning": planning,
+      "../lib/coachingPresentation": presentation,
       "./ImageStudyThumbnail": { default: "ImageStudyThumbnail" },
       "./ui": { colors: {}, styles: {} },
     }).default;

@@ -1,3 +1,4 @@
+export type CoachingMode = "constructive" | "study";
 export type ArtworkMode = "Improve painting" | "Create reference";
 export type FeedbackFocus =
   | "Overall feedback"

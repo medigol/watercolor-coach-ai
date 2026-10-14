@@ -177,7 +177,7 @@ for (const mode of ["improve_painting", "create_reference"]) {
         { values: "x".repeat(701) },
         { unexpected: "not allowed" },
         ...(mode === "improve_painting"
-          ? [{ mainAdvice: "" }, { whatWorks: [null] }, { whatToFix: [] }, {
+          ? [{ mainAdvice: "" }, { whatWorks: [null] }, { whatToFix: [null] }, {
             practice: [],
           }, { prompt: "" }]
           : [{ steps: [] }, { steps: [null] }]),
