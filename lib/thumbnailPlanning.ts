@@ -4,7 +4,7 @@ import {
   usableOverlays,
   type CoachingOverlay,
 } from "./overlays";
-import { timingLabel } from "./coachingPresentation";
+import { timingLabel, studyText } from "./coachingPresentation";
 import type { ResultProvider } from "./artworks";
 
 export type ThumbnailKind =
@@ -24,6 +24,7 @@ export type ThumbnailPlanningInput = {
   title?: string;
   uri?: string;
   provider?: ResultProvider;
+  study?: boolean;
 };
 export type ThumbnailStudy = {
   kind: ThumbnailKind;
@@ -282,10 +283,21 @@ export function planThumbnailStudies(
       ...(kind === "horizon" && marks.length
         ? { title: "Horizon / structure study" }
         : {}),
-      purpose: source?.reason ?? studies[kind].purpose,
-      action: source?.action ?? studies[kind].action,
-      timing:
-        kind === "crop"
+      purpose: input.study
+        ? studyText(
+            source?.reason,
+            "Compare this planning idea with the wider composition.",
+          )
+        : (source?.reason ?? studies[kind].purpose),
+      action: input.study
+        ? studyText(
+            source?.action,
+            "If useful, test one small variation on a separate sheet.",
+          )
+        : (source?.action ?? studies[kind].action),
+      timing: input.study
+        ? "Optional next study variation"
+        : kind === "crop"
           ? "Try this crop in the next study"
           : kind === "horizon" && !marks.length
             ? "Try in the next study"

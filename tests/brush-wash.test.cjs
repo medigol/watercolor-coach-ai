@@ -6,32 +6,37 @@ const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "..");
-const source = fs.readFileSync(
-  path.join(root, "components/BrushWashPlanCard.tsx"),
-  "utf8",
-);
-const exportsForTest = {};
-const code = ts.transpileModule(source, {
-  compilerOptions: {
-    module: ts.ModuleKind.CommonJS,
-    jsx: ts.JsxEmit.ReactJSX,
-    target: ts.ScriptTarget.ES2022,
-  },
-}).outputText;
-new Function("exports", "require", code)(exportsForTest, (name) => {
-  if (name === "react" || name === "react/jsx-runtime") return require(name);
-  if (name === "react-native")
-    return {
+const modules = new Map();
+function load(relative) {
+  if (modules.has(relative)) return modules.get(relative);
+  const exports = {};
+  modules.set(relative, exports);
+  const code = ts.transpileModule(fs.readFileSync(path.join(root, relative), "utf8"), {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      jsx: ts.JsxEmit.ReactJSX,
+      target: ts.ScriptTarget.ES2022,
+    },
+  }).outputText;
+  new Function("exports", "require", code)(exports, (name) => {
+    if (name === "react" || name === "react/jsx-runtime") return require(name);
+    if (name === "react-native") return {
       Text: (props) => React.createElement("span", null, props.children),
       View: (props) => React.createElement("div", null, props.children),
       StyleSheet: { create: (value) => value },
     };
-  if (name === "./ui") return { styles: {}, colors: {} };
-  throw new Error(`Unexpected import ${name}`);
-});
-const { usableBrushPlan, default: BrushWashPlanCard } = exportsForTest;
-const render = (plan) =>
-  renderToStaticMarkup(React.createElement(BrushWashPlanCard, { plan }));
+    if (name === "./ui") return { styles: {}, colors: {} };
+    const full = path.resolve(root, path.dirname(relative), name);
+    const file = [".tsx", ".ts"].map((ext) => full + ext).find((f) => fs.existsSync(f));
+    if (!file) throw new Error(`Unexpected import ${name}`);
+    return load(path.relative(root, file));
+  });
+  return exports;
+}
+const { usableBrushPlan, isConciseBrushPlan, default: BrushWashPlanCard } =
+  load("components/BrushWashPlanCard.tsx");
+const render = (plan, props = {}) =>
+  renderToStaticMarkup(React.createElement(BrushWashPlanCard, { plan, ...props }));
 const stage = {
   stage: "First sky wash",
   brush: "Large soft brush.",
@@ -109,4 +114,87 @@ test("brush plan bounds rendering to three supplied stages and trims safe text",
   const clean = usableBrushPlan([{ ...stage, brush: "  Large soft brush.  " }]);
   assert.equal(clean[0].brush, stage.brush);
   assert.equal(clean[0].stage, stage.stage);
+});
+
+test("one concise handling stage can stay visible while longer plans are secondary", () => {
+  const brief = {
+    stage: "Small wash study", brush: "Soft round brush", wash: "Tea-strength wash",
+    technique: "wet_on_wet", timing: "Even paper sheen", edges: "Soft distance",
+    stop: "Leave the light open",
+  };
+  assert.equal(isConciseBrushPlan([brief]), true);
+  assert.equal(isConciseBrushPlan([brief, brief]), false);
+  assert.equal(isConciseBrushPlan([{ ...brief, brush: "x".repeat(120), wash: "x".repeat(120) }]), false);
+  assert.equal(isConciseBrushPlan(undefined), false);
+});
+
+test("repeated handling notes render once without rewriting the surviving instruction", () => {
+  const repeated = "Wait for the wash to dry.";
+  const html = render([{ ...stage, timing: repeated, edges: repeated.toUpperCase(), stop: repeated }]);
+  assert.equal((html.match(/Wait for the wash to dry\./g) || []).length, 1);
+  assert(!html.includes("WAIT FOR THE WASH TO DRY."));
+  assert(html.includes("Timing"));
+  assert(!html.includes(">Stop<"));
+});
+
+test("brush execution omits exact repeated main advice or practice while retaining distinct handling", () => {
+  const advice = "Keep the sharpest marks near the small focal group.";
+  const practice = "Test one connected wash on a separate sheet.";
+  const html = render([
+    { ...stage, timing: advice, edges: advice.toUpperCase(), stop: practice },
+  ], { omit: [advice, practice] });
+  assert(!html.includes(advice));
+  assert(!html.includes(advice.toUpperCase()));
+  assert(!html.includes(practice));
+  assert(html.includes(stage.brush));
+  assert(html.includes(stage.wash));
+});
+
+test("study handling uses learning framing and suppresses supplied harsh correction notes", () => {
+  const html = render([{ ...stage, edges: "Correct this weak edge on the current painting." }], { study: true });
+  assert(html.includes("How to study this handling"));
+  assert(html.includes("test it on a small new study"));
+  assert(html.includes(stage.brush));
+  assert(html.includes(stage.wash));
+  assert(!html.includes("Correct this weak edge"));
+  assert(!html.includes("Brush &amp; wash plan"));
+  const nested = render([stage], { hideHeading: true });
+  assert(!nested.includes("Brush &amp; wash plan"));
+  assert(nested.includes("First sky wash"));
+});
+
+test("explicit new-study handling keeps useful supplied timing, edge and stop instructions", () => {
+  const supplied = {
+    ...stage,
+    timing: "Wait until the first wash is dry. Let the paper settle before another layer.",
+    edges: "Keep background edges soft; reserve firm marks for the focal group.",
+    stop: "Stop after one small focal accent.",
+  };
+  const html = render([supplied], { study: true });
+  assert(html.includes("test it on a small new study"));
+  assert(html.includes(supplied.timing));
+  assert(html.includes(supplied.edges));
+  assert(html.includes(supplied.stop));
+  assert(!html.includes("In a separate study,"));
+  const guarded = render([{ ...supplied, edges: "You should fix this weak edge." }], { study: true });
+  assert(!guarded.includes("You should fix this weak edge"));
+  assert(guarded.includes(supplied.timing));
+});
+
+test("study handling retains preventive overworking stop cues without accepting diagnoses", () => {
+  for (const stop of [
+    "Stop before the middle wash is overworked.",
+    "Stop before overworking the first wash.",
+  ]) {
+    const html = render([{ ...stage, stop }], { study: true });
+    assert(html.includes(stop));
+    assert(html.includes(">Stop<"));
+  }
+  for (const stop of [
+    "This wash is overworked.",
+    "Stop before overworking this weak edge.",
+    "You should fix the overworked wash.",
+  ]) {
+    assert(!render([{ ...stage, stop }], { study: true }).includes(stop));
+  }
 });

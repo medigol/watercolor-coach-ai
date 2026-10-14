@@ -34,14 +34,18 @@ export function SavedImage({
   uri,
   label = "Your painting",
   overlays,
+  study = false,
 }: {
   uri?: string;
   label?: string;
   overlays?: unknown;
+  study?: boolean;
 }) {
   const [failedUri, setFailedUri] = useState<string>();
   if (uri && usableOverlays(overlays).length)
-    return <CoachingOverlay uri={uri} notes={overlays} label={label} />;
+    return (
+      <CoachingOverlay uri={uri} notes={overlays} label={label} study={study} />
+    );
   if (uri && failedUri === uri)
     return (
       <>

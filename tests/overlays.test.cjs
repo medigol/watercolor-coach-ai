@@ -131,7 +131,7 @@ function fixture(fail = false) {
       return [
         values[n],
         (v) => {
-          values[n] = v;
+          values[n] = typeof v === "function" ? v(values[n]) : v;
         },
       ];
     },
@@ -158,7 +158,7 @@ function fixture(fail = false) {
     },
     "../lib/overlays": overlay,
     "../lib/coachingPresentation": presentation,
-    "react-native-svg": {default:"Svg",Path:"Path"},
+    "react-native-svg": { default: "Svg", Path: "Path" },
     "../lib/overlayDrawing": drawing,
     "./CoachingMarks": { default: "CoachingMarks" },
     "./ui": {
@@ -166,10 +166,10 @@ function fixture(fail = false) {
       styles: { card: {} },
     },
   }).default;
-  const render = (uri = currentUri ?? "image", data = notes) => {
+  const render = (uri = currentUri ?? "image", data = notes, study = false) => {
     index = 0;
     currentUri = uri;
-    return Component({ uri, notes: data, label: "Your photo" });
+    return Component({ uri, notes: data, label: "Your photo", study });
   };
   function nodes(tree) {
     if (!tree) return [];
@@ -209,11 +209,23 @@ test("overlay maps image dimensions, marker selection highlights and expands mat
   assert.equal(marks.props.height, 240);
   marks.props.onSelect(0);
   tree = f.render();
-  const card = f.nodes(tree).find((n) => n.props?.accessibilityState?.expanded);
+  const card = f
+    .nodes(tree)
+    .find(
+      (n) =>
+        n.props?.accessibilityState?.expanded &&
+        n.props?.accessibilityState?.selected,
+    );
   assert(card.props.accessibilityLabel.includes("Strengthen focal point"));
   card.props.onPress();
   assert(
-    !f.nodes(f.render()).some((n) => n.props?.accessibilityState?.expanded),
+    !f
+      .nodes(f.render())
+      .some(
+        (n) =>
+          n.props?.accessibilityState?.expanded &&
+          n.props?.accessibilityState?.selected,
+      ),
   );
   image.props.onError();
   assert.equal(f.render(), null);
@@ -227,6 +239,99 @@ test("unavailable image, invalid or missing overlays produce no overlay section"
   assert.equal(good.render("image", null), null);
   assert.equal(good.render("image", []), null);
   assert.equal(good.render("image", [{ x: 200 }]), null);
+});
+
+test("visual note cards start collapsed, and mark selection opens the matching accessible note", () => {
+  const f = fixture();
+  f.render();
+  let tree = f.render();
+  f.nodes(tree)
+    .find((node) => node.props?.onLayout)
+    .props.onLayout({ nativeEvent: { layout: { width: 360 } } });
+  tree = f.render();
+  const toggle = f
+    .nodes(tree)
+    .find((node) => node.props?.accessibilityLabel === "Visual coaching notes");
+  assert.equal(toggle.props["aria-expanded"], false);
+  assert(
+    !f
+      .nodes(tree)
+      .some(
+        (node) =>
+          node.props?.ariaExpanded || node.props?.accessibilityState?.expanded,
+      ),
+  );
+  f.nodes(tree)
+    .find((node) => node.type === "CoachingMarks")
+    .props.onSelect(1);
+  tree = f.render();
+  assert.equal(
+    f
+      .nodes(tree)
+      .find(
+        (node) => node.props?.accessibilityLabel === "Visual coaching notes",
+      ).props["aria-expanded"],
+    true,
+  );
+  assert(
+    f
+      .nodes(tree)
+      .some(
+        (node) =>
+          node.props?.accessibilityState?.selected &&
+          node.props?.accessibilityState?.expanded,
+      ),
+  );
+  f.nodes(tree)
+    .find((node) => node.props?.accessibilityLabel === "Visual coaching notes")
+    .props.onPress();
+  tree = f.render();
+  assert.equal(
+    f
+      .nodes(tree)
+      .find(
+        (node) => node.props?.accessibilityLabel === "Visual coaching notes",
+      ).props["aria-expanded"],
+    false,
+  );
+  assert(
+    !f.nodes(tree).some((node) => node.props?.accessibilityState?.expanded),
+  );
+});
+
+test("study marks remain selectable while contradictory correction text is suppressed", () => {
+  const f = fixture();
+  const data = notes.map((note) => ({
+    ...note,
+    label: "Correct this weak area",
+    shortInstruction: "You should fix the shapes.",
+    reason: "This weakens the painting.",
+    action: "Move the house to the right.",
+  }));
+  f.render("image", data, true);
+  let tree = f.render("image", data, true);
+  f.nodes(tree)
+    .find((node) => node.props?.onLayout)
+    .props.onLayout({ nativeEvent: { layout: { width: 360 } } });
+  tree = f.render("image", data, true);
+  const marks = f.nodes(tree).find((node) => node.type === "CoachingMarks");
+  assert.deepEqual(marks.props.notes, data);
+  marks.props.onSelect(0);
+  tree = f.render("image", data, true);
+  const text = f
+    .nodes(tree)
+    .filter((node) => node.type === "Text")
+    .map((node) => node.props.children)
+    .flat(Infinity)
+    .join(" ");
+  assert(text.includes("Observe this decision"));
+  assert(text.includes("Study this effect"));
+  assert(text.includes("Optional next study variation"));
+  assert(
+    !/Correct this|should fix|weakens the painting|Move the house|Try now on this painting/.test(
+      text,
+    ),
+  );
 });
 
 const richNote = (type, geometry = {}) => ({ ...notes[0], type, ...geometry });
@@ -437,38 +542,125 @@ test("SVG renderer draws each rich shape and selects the matching card with rest
 });
 
 test("semantic aliases render their instructional shapes and retain purpose even with conflicting metadata", () => {
-  const expected=[
-    ["reserve_light_mark","focal_ring","reserve_light",box],
-    ["simplify_region","region_highlight","simplification",box],
-    ["eye_flow_arrow","arrow","composition",{points:pathPoints}],
-    ["composition_line","guide_line","composition",{points:pathPoints}],
+  const expected = [
+    ["reserve_light_mark", "focal_ring", "reserve_light", box],
+    ["simplify_region", "region_highlight", "simplification", box],
+    ["eye_flow_arrow", "arrow", "composition", { points: pathPoints }],
+    ["composition_line", "guide_line", "composition", { points: pathPoints }],
   ];
-  const jsx={jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props}),Fragment:"Fragment"};
-  const Marks=load("components/CoachingMarks.tsx",{"react/jsx-runtime":jsx,"react-native-svg":{default:"Svg",Ellipse:"Ellipse",Rect:"Rect",Polyline:"Polyline",Polygon:"Polygon",Path:"Path",G:"G"},"../lib/overlayDrawing":drawing,"../lib/overlays":overlay}).default;
-  const nodes=t=>!t || typeof t!=="object"?[]:[t,...[t.props?.children].flat(Infinity).flatMap(nodes)];
-  for(const [type,kind,category,geometry] of expected){
-    const note=richNote(type,{...geometry,category:"color_temperature",timing:"both"});
-    assert(overlay.validOverlays([note]));assert.equal(overlay.overlayKind(note),kind);assert.equal(overlay.overlayCategory(note),category);
-    const broken=overlay.usableOverlays([{...note,width:150,height:150,points:null}])[0];
-    assert.equal(broken.type,"point_marker");assert.equal(overlay.overlayCategory(broken),category);
-    const tree=Marks({notes:[note],width:320,height:240,selected:0,onSelect:()=>{}});
-    const all=nodes(tree);
-    assert(all.some(n=>n.type===(kind==="focal_ring"?"Ellipse":kind==="region_highlight"?"Rect":"Polyline")));
-    if(type==="reserve_light_mark") {assert.equal(presentation.markMeaning(note),"Keep this light clean.");assert(all.some(n=>n.props?.stroke==="#F7EDD4"));}
+  const jsx = {
+    jsx: (type, props) => ({ type, props }),
+    jsxs: (type, props) => ({ type, props }),
+    Fragment: "Fragment",
+  };
+  const Marks = load("components/CoachingMarks.tsx", {
+    "react/jsx-runtime": jsx,
+    "react-native-svg": {
+      default: "Svg",
+      Ellipse: "Ellipse",
+      Rect: "Rect",
+      Polyline: "Polyline",
+      Polygon: "Polygon",
+      Path: "Path",
+      G: "G",
+    },
+    "../lib/overlayDrawing": drawing,
+    "../lib/overlays": overlay,
+  }).default;
+  const nodes = (t) =>
+    !t || typeof t !== "object"
+      ? []
+      : [t, ...[t.props?.children].flat(Infinity).flatMap(nodes)];
+  for (const [type, kind, category, geometry] of expected) {
+    const note = richNote(type, {
+      ...geometry,
+      category: "color_temperature",
+      timing: "both",
+    });
+    assert(overlay.validOverlays([note]));
+    assert.equal(overlay.overlayKind(note), kind);
+    assert.equal(overlay.overlayCategory(note), category);
+    const broken = overlay.usableOverlays([
+      { ...note, width: 150, height: 150, points: null },
+    ])[0];
+    assert.equal(broken.type, "point_marker");
+    assert.equal(overlay.overlayCategory(broken), category);
+    const tree = Marks({
+      notes: [note],
+      width: 320,
+      height: 240,
+      selected: 0,
+      onSelect: () => {},
+    });
+    const all = nodes(tree);
+    assert(
+      all.some(
+        (n) =>
+          n.type ===
+          (kind === "focal_ring"
+            ? "Ellipse"
+            : kind === "region_highlight"
+              ? "Rect"
+              : "Polyline"),
+      ),
+    );
+    if (type === "reserve_light_mark") {
+      assert.equal(presentation.markMeaning(note), "Keep this light clean.");
+      assert(all.some((n) => n.props?.stroke === "#F7EDD4"));
+    }
   }
 });
-test("timing and action cards separate safe adjustments from structural next-study experiments",()=>{
-  for(const action of ["Move the house slightly right.","Place the figures farther right.","Increase the sky area and reduce the foreground.","Make the house smaller.","Lower the horizon.","Test this crop."]){
-    assert(presentation.requiresNewStudy(action),action);
-    const note=richNote("point_marker",{timing:"current_painting",action});
-    assert.equal(presentation.coachingTiming(note),"next_study");
-    const decision=presentation.compositionGuidance({decision:{tryNow:action},mainAdvice:"The focal contrast is scattered.",composition:"Try a quiet supporting mass."});
-    assert(!decision.tryNow.includes(action));assert.equal(decision.nextStudy,action);
+test("timing and action cards separate safe adjustments from structural next-study experiments", () => {
+  for (const action of [
+    "Move the house slightly right.",
+    "Place the figures farther right.",
+    "Increase the sky area and reduce the foreground.",
+    "Make the house smaller.",
+    "Lower the horizon.",
+    "Test this crop.",
+  ]) {
+    assert(presentation.requiresNewStudy(action), action);
+    const note = richNote("point_marker", {
+      timing: "current_painting",
+      action,
+    });
+    assert.equal(presentation.coachingTiming(note), "next_study");
+    const decision = presentation.compositionGuidance({
+      decision: { tryNow: action },
+      mainAdvice: "The focal contrast is scattered.",
+      composition: "Try a quiet supporting mass.",
+    });
+    assert(!decision.tryNow.includes(action));
+    assert.equal(decision.nextStudy, action);
   }
-  const action="Soften the distant edge after testing on scrap paper.";
+  const action = "Soften the distant edge after testing on scrap paper.";
   assert(!presentation.requiresNewStudy(action));
-  assert.equal(presentation.timingLabel(richNote("edge_mark",{points:pathPoints,timing:"current_painting",action})),"Try now on this painting");
-  assert.equal(presentation.timingLabel(richNote("crop_box",{...box,timing:"current_painting"})),"Try in the next study");
-  assert(!overlay.validOverlays([richNote("point_marker",{timing:"urgent"})]));
-  const arrow=[{x:10,y:10},{x:90,y:90}];assert.equal(drawing.arrowHead([...arrow,arrow[1]]),drawing.arrowHead(arrow));assert.equal(drawing.arrowHead([arrow[0],arrow[0]]),"");
+  assert.equal(
+    presentation.timingLabel(
+      richNote("edge_mark", {
+        points: pathPoints,
+        timing: "current_painting",
+        action,
+      }),
+    ),
+    "Try now on this painting",
+  );
+  assert.equal(
+    presentation.timingLabel(
+      richNote("crop_box", { ...box, timing: "current_painting" }),
+    ),
+    "Try in the next study",
+  );
+  assert(
+    !overlay.validOverlays([richNote("point_marker", { timing: "urgent" })]),
+  );
+  const arrow = [
+    { x: 10, y: 10 },
+    { x: 90, y: 90 },
+  ];
+  assert.equal(
+    drawing.arrowHead([...arrow, arrow[1]]),
+    drawing.arrowHead(arrow),
+  );
+  assert.equal(drawing.arrowHead([arrow[0], arrow[0]]), "");
 });

@@ -308,6 +308,7 @@ test("strict response schemas reject malformed fields, extra fields, unsafe pale
         "paletteStrategy",
         "promising",
         "brushPlan",
+        "coachingMode",
         ...(mode === "improve_painting"
           ? ["palette"]
           : ["whatWorks", "whatToFix"]),
@@ -925,7 +926,7 @@ test("supportive observations and three-stage brush guidance preserve both legac
     ),
   );
   assert(
-    !contract.validFeedback(
+    contract.validFeedback(
       { ...samples.referenceResult, whatToFix: [] },
       "create_reference",
     ),

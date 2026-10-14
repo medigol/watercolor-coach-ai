@@ -16,6 +16,7 @@ function render(
     saved = {},
     viewportWidth = 375,
     isSaved = true,
+    expandedAids = true,
   } = {},
 ) {
   const modules = new Map();
@@ -35,6 +36,12 @@ function render(
     ).outputText;
     new Function("exports", "require", code)(exports, (name) => {
       if (name === "@expo/vector-icons") return { Ionicons: () => null };
+      if (
+        name === "react" &&
+        expandedAids &&
+        relative.endsWith("StudyDisclosure.tsx")
+      )
+        return { ...React, useState: () => [true, () => {}] };
       if (name === "react" || name === "react/jsx-runtime")
         return require(name);
       if (name === "react-native-svg") {
@@ -211,7 +218,7 @@ for (const provider of ["mock", "openai"])
         assert(
           html.indexOf(imageLabel) <
             html.indexOf(
-              mode === "create_reference" ? "Painting plan" : "Main advice",
+              mode === "create_reference" ? "Painting plan" : "Main priority",
             ),
         );
       }
@@ -243,7 +250,7 @@ for (const provider of ["mock", "openai"])
             "The quiet blue-green palette creates a peaceful mood.",
           ),
         );
-        assert(html.indexOf("Main advice") < html.indexOf("What works well"));
+        assert(html.indexOf("Main priority") < html.indexOf("What works well"));
         assert(
           html.indexOf("What works well") < html.indexOf("What to improve"),
         );
@@ -254,8 +261,8 @@ for (const provider of ["mock", "openai"])
         assert(html.includes("Try now on this painting"));
         assert(html.includes("Try in the next study"));
         assert(
-          html.indexOf("Value mass study") <
-            html.indexOf("Next 15-minute practice"),
+          html.indexOf("Next 15-minute practice") <
+            html.indexOf("Value mass study"),
         );
         if (provider === "openai")
           assert(
@@ -286,7 +293,7 @@ test("saved painting strengths and improvements are immediately visible in separ
         "The trees and house have similar darkness, so the house gets lost.",
       ),
     );
-    assert(html.indexOf("Main advice") < html.indexOf("What works well"));
+    assert(html.indexOf("Main priority") < html.indexOf("What works well"));
     assert(
       html.indexOf("What to improve") < html.indexOf("Thumbnail planning"),
     );
@@ -318,7 +325,7 @@ test("saved overlay metadata without an uploaded image still renders normal text
     assert(!html.includes("Visual coaching notes"));
     assert(
       html.includes(
-        mode === "improve_painting" ? "Main advice" : "Painting plan",
+        mode === "improve_painting" ? "Main priority" : "Painting plan",
       ),
     );
     const invalid = render(
@@ -342,7 +349,8 @@ test("composition focus shows supplied decisions with safe now/next wording and 
     compositionDecision: {
       mainIssue: "The foreground competes with the figures.",
       reason: "The eye needs one clear light/dark meeting.",
-      tryNow: "Soften the outer foreground marks after testing the wash.",
+      tryNow:
+        "Soften one distracting edge only if still possible after a scrap-paper test.",
       nextStudy: "Move the figures slightly right in a new thumbnail.",
     },
     palette: [
@@ -444,7 +452,9 @@ test("desktop results use separate visual/advice columns while mobile keeps advi
     assert(desktop.includes(`data-testid="${id}"`));
   const mobile = render("improve_painting", "openai");
   assert(!mobile.includes('data-testid="result-columns"'));
-  assert(mobile.indexOf("Main advice") < mobile.indexOf("Thumbnail planning"));
+  assert(
+    mobile.indexOf("Main priority") < mobile.indexOf("Thumbnail planning"),
+  );
 });
 
 const brushPlan = [
@@ -484,17 +494,16 @@ test("both real modes show supplied strengths, potential, brush plan and palette
       { saved },
     );
     const labels = [
-      mode === "create_reference" ? "Painting plan" : "Main advice",
+      mode === "create_reference" ? "Painting plan" : "Main priority",
       "What works well",
       "What is promising",
       "What to improve",
+      ...(mode === "improve_painting" ? ["Next 15-minute practice"] : []),
       "Composition model",
       "Thumbnail planning",
       "Watercolor palette",
       "Brush &amp; wash plan",
-      mode === "create_reference"
-        ? "Painting steps"
-        : "Next 15-minute practice",
+      ...(mode === "create_reference" ? ["Painting steps"] : []),
     ];
     for (const label of labels) assert(html.includes(label), label);
     for (let i = 1; i < labels.length; i++)
@@ -585,4 +594,190 @@ test("result diagrams have human labels and hidden decorative SVGs without raw t
     const source = fs.readFileSync(path.join(root, "components", file), "utf8");
     assert(source.includes("aria-hidden={true}"));
   }
+});
+
+test("phone summary shows priority, specific strengths, improvements and practice before collapsed study aids", () => {
+  const html = render("improve_painting", "openai", undefined, undefined, {
+    expandedAids: false,
+  });
+  const order = [
+    "Main priority",
+    "What works well",
+    "What to improve",
+    "Next 15-minute practice",
+    "Composition model",
+    "Thumbnail planning",
+  ];
+  for (let i = 1; i < order.length; i++)
+    assert(html.indexOf(order[i - 1]) < html.indexOf(order[i]), order[i]);
+  assert(!html.includes("Instructor thumbnail"));
+  assert(!html.includes("Value mass study"));
+  assert(!html.includes("Composition decision"));
+  assert(html.includes('aria-label="Composition model" aria-expanded="false"'));
+  assert(
+    html.includes('aria-label="Thumbnail planning" aria-expanded="false"'),
+  );
+  assert(!html.includes('data-testid="result-columns"'));
+});
+test("resolved work uses learning headings, conditional refinements and separate study aids", () => {
+  const saved = {
+    coachingMode: "study",
+    mainAdvice:
+      "The reserved roof light and connected shadows give the scene a clear value hierarchy.",
+    whatWorks: [
+      "The soft background leaves the roof light easy to read.",
+      "One sharp roof corner anchors the focal group.",
+    ],
+    promising: "The lost shoreline edge offers a useful handling lesson.",
+    whatToFix: [
+      "One possible variation would be a quieter foreground in a separate study.",
+    ],
+    composition:
+      "Observe the off-centre roof light and its quieter supporting masses.",
+    practice:
+      "For 15 minutes, test one lost edge against a sharp focal corner in a small study. Compare the effect at arm’s length.",
+    brushPlan,
+  };
+  for (const mode of ["improve_painting", "create_reference"]) {
+    const html = render(mode, "openai", undefined, undefined, {
+      saved,
+      expandedAids: false,
+    });
+    for (const label of [
+      "Study observations and optional variations",
+      "What makes this work",
+      "Advanced learning notes",
+      "Optional refinements",
+      "Optional planning variation",
+    ])
+      assert(html.includes(label), label);
+    assert(!html.includes("What to improve"));
+    assert(!html.includes("Main issue"));
+    assert(!html.includes("Try now on this painting"));
+    assert(html.includes(saved.whatWorks[0]));
+    assert(!html.includes("Instructor thumbnail"));
+    if (mode === "improve_painting") {
+      assert(html.includes("Study observation"));
+      assert(
+        html.indexOf("What makes this work") <
+          html.indexOf("Next 15-minute practice"),
+      );
+      assert(
+        html.indexOf("Next 15-minute practice") <
+          html.indexOf("Composition model"),
+      );
+    }
+  }
+  const expanded = render("improve_painting", "openai", undefined, undefined, {
+    saved,
+  });
+  assert(expanded.includes("Observe this decision"));
+  assert(expanded.includes("Study this effect"));
+  assert(expanded.includes("Optional next study variation"));
+  assert(
+    expanded.includes(
+      "This is a general teaching model, not an exact copy of your image.",
+    ),
+  );
+});
+test("study metadata cannot expose stale forceful corrections, even when study aids are opened", () => {
+  const html = render("improve_painting", "openai", undefined, undefined, {
+    saved: {
+      coachingMode: "study",
+      mainAdvice: "The main issue is the roof. You should fix this.",
+      whatToFix: ["Correct this foreground; it weakens the painting."],
+      promising: "You must fix the composition.",
+      composition: "Fix this by moving the already-painted house.",
+      practice: "Correct this painting now.",
+      prompt: "How should I fix this mistake?",
+      compositionDecision: {
+        mainIssue: "The main issue is the house.",
+        reason: "This weakens the painting.",
+        tryNow: "Move the house to the right.",
+        nextStudy: "Correct this.",
+      },
+      palette: [
+        {
+          name: "Ultramarine",
+          hex: "#526B89",
+          use: "You should fix the sky.",
+          mix: "Correct this shadow.",
+        },
+      ],
+      paletteStrategy: "You must fix this palette.",
+    },
+  });
+  assert(
+    !/the main issue|you should fix|you must fix|weakens the painting|correct this|fix this/i.test(
+      html,
+    ),
+  );
+  assert(!html.includes("Try now on this painting"));
+  assert(html.includes("What makes this work"));
+});
+test("empty refinements do not manufacture a fault; malformed or sample calibration retains legacy tone", () => {
+  const html = render("improve_painting", "openai", undefined, undefined, {
+    saved: { coachingMode: "study", whatToFix: [] },
+  });
+  assert(html.includes("What makes this work"));
+  assert(!html.includes("What to improve"));
+  for (const [provider, coachingMode] of [
+    ["mock", "study"],
+    ["openai", "expert"],
+    ["openai", {}],
+  ]) {
+    const old = render("improve_painting", provider, undefined, undefined, {
+      saved: { coachingMode },
+    });
+    assert(old.includes("What works well"));
+    assert(!old.includes("What makes this work"));
+    if (provider === "mock") assert(old.includes("Sample watercolor guide"));
+  }
+});
+test("identical advice does not repeat across summary, improvements and practice", () => {
+  const text = "Stop adding scattered detail near the foreground.";
+  const html = render("improve_painting", "openai", undefined, undefined, {
+    saved: {
+      mainAdvice: text,
+      whatToFix: [text, text],
+      practice: text,
+      brushPlan: [{ ...brushPlan[0], timing: text, edges: text, stop: text }],
+    },
+    expandedAids: false,
+  });
+  assert.equal(html.split(text).length - 1, 1);
+  assert(html.includes("Spend 15 minutes testing one coaching decision"));
+});
+test("long brush plans and optional follow-up are folded; concise handling remains available", () => {
+  const long = render("improve_painting", "openai", undefined, undefined, {
+    saved: {
+      brushPlan: [brushPlan[0], { ...brushPlan[0], stage: "Final accents" }],
+    },
+    expandedAids: false,
+  });
+  assert(
+    long.includes('aria-label="Brush &amp; wash plan" aria-expanded="false"'),
+  );
+  assert(
+    long.includes('aria-label="Follow-up question" aria-expanded="false"'),
+  );
+  assert(!long.includes(brushPlan[0].timing));
+  assert(!long.includes("Let the house be the clearest"));
+  const concise = render("improve_painting", "openai", undefined, undefined, {
+    saved: {
+      brushPlan: [
+        {
+          stage: "Small study",
+          brush: "Medium round",
+          wash: "Tea-strength",
+          technique: "wet_on_dry",
+          timing: "Wait until dry.",
+          edges: "Keep one edge crisp.",
+          stop: "Stop after one mark.",
+        },
+      ],
+    },
+    expandedAids: false,
+  });
+  assert(concise.includes("Wait until dry."));
 });

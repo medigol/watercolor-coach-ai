@@ -6,6 +6,8 @@ import {
   usableOverlays,
   validOverlays,
 } from "./overlays.ts";
+export const coachingModes = ["constructive", "study"] as const;
+export type CoachingMode = (typeof coachingModes)[number];
 export const safePigmentCodes = ["PB29", "PBr7", "PY43", "PY42"] as const;
 function safePigmentForName(name: string, code: unknown): boolean {
   if (code == null) return true;
@@ -212,6 +214,7 @@ export function validFeedback(
       "paletteStrategy",
       "promising",
       "brushPlan",
+      "coachingMode",
       ...(mode === "improve_painting"
         ? ["palette"]
         : ["whatWorks", "whatToFix"]),
@@ -233,6 +236,8 @@ export function validFeedback(
   if (
     !validCompositionDecision(v.compositionDecision) ||
     !validBrushPlan(v.brushPlan) ||
+    (v.coachingMode != null &&
+      !coachingModes.includes(v.coachingMode as CoachingMode)) ||
     (v.promising != null && !boundedText(v.promising, 350)) ||
     (v.paletteStrategy != null && !boundedText(v.paletteStrategy, 350)) ||
     (mode === "improve_painting" &&
@@ -248,23 +253,23 @@ export function validFeedback(
   ) {
     return false;
   }
-  const list = (a: unknown) =>
+  const list = (a: unknown, minimum = 1) =>
     Array.isArray(a) &&
-    a.length >= 1 &&
+    a.length >= minimum &&
     a.length <= 8 &&
     a.every((s) => text(s, 350));
   if (mode === "improve_painting") {
     return (
       ["mainAdvice", "practice", "prompt"].every((k) => text(v[k])) &&
       list(v.whatWorks) &&
-      list(v.whatToFix)
+      list(v.whatToFix, 0)
     );
   }
   return (
     list(v.steps) &&
     validPalette(v.palette) &&
     (v.whatWorks == null || list(v.whatWorks)) &&
-    (v.whatToFix == null || list(v.whatToFix))
+    (v.whatToFix == null || list(v.whatToFix, 0))
   );
 }
 export function feedbackSchema(mode: Mode) {
@@ -353,6 +358,7 @@ export function feedbackSchema(mode: Mode) {
     composition: text,
     sketch: text,
     values: text,
+    coachingMode: { type: ["string", "null"], enum: [...coachingModes, null] },
     promising: { type: ["string", "null"] },
     brushPlan: {
       type: ["array", "null"],
@@ -482,6 +488,12 @@ export function cleanFeedback(value: unknown, mode: Mode): unknown {
     return withOverlays;
   }
   const result = { ...(withOverlays as Record<string, unknown>) };
+  if (
+    result.coachingMode != null &&
+    !coachingModes.includes(result.coachingMode as CoachingMode)
+  ) {
+    delete result.coachingMode;
+  }
   for (const field of ["promising", "paletteStrategy"]) {
     if (result[field] != null && !boundedText(result[field], 350)) {
       delete result[field];
@@ -523,7 +535,10 @@ export function cleanFeedback(value: unknown, mode: Mode): unknown {
           8,
         )
         : [];
-      if (items.length) result[field] = items;
+      if (
+        items.length ||
+        (field === "whatToFix" && Array.isArray(value) && value.length === 0)
+      ) result[field] = items;
       else delete result[field];
     }
   }

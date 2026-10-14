@@ -934,3 +934,57 @@ for (const mode of ["improve_painting", "create_reference"])
       1,
     );
   });
+
+for (const mode of ["improve_painting", "create_reference"]) {
+  test(`actual Edge SDK runtime: ${mode} preserves study framing and zero optional refinements in one call`, async () => {
+    const feedback = {
+      coachingMode: "study",
+      whatToFix: [],
+      compositionDecision: {
+        mainIssue: null,
+        reason: "The quiet distance supports one clear focal accent.",
+        tryNow: null,
+        nextStudy:
+          "One possible variation is a separate thumbnail with a lower horizon.",
+      },
+    };
+    const f = fixture({ mode, feedback });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).provider, "openai");
+    const completion = f.calls.find((call) =>
+      call.path.endsWith("/complete_openai_feedback")
+    );
+    assert.deepEqual(completion.body.p_result.whatToFix, []);
+    assert.equal(completion.body.p_result.coachingMode, "study");
+    assert.deepEqual(
+      completion.body.p_result.compositionDecision,
+      feedback.compositionDecision,
+    );
+    assert.equal(
+      f.calls.filter((call) => call.path === "/v1/chat/completions").length,
+      1,
+    );
+    const request = f.calls.find((call) =>
+      call.path === "/v1/chat/completions"
+    ).body;
+    assert.equal(request.max_completion_tokens, 3000);
+    assert(request.messages[0].content.includes("do not force criticism"));
+  });
+}
+for (const mode of ["improve_painting", "create_reference"]) {
+  test(`actual Edge SDK runtime: ${mode} discards malformed optional coaching flag and saves core feedback`, async () => {
+    const f = fixture({ mode, feedback: { coachingMode: ["study"] } });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).provider, "openai");
+    const result = f.calls.find((call) =>
+      call.path.endsWith("/complete_openai_feedback")
+    ).body.p_result;
+    assert(!Object.hasOwn(result, "coachingMode"));
+    assert.equal(
+      f.calls.filter((call) => call.path === "/v1/chat/completions").length,
+      1,
+    );
+  });
+}

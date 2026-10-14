@@ -18,6 +18,7 @@ export default function FeedbackSection({
   children?: ReactNode;
 }) {
   const improvement = title === "What to fix" || title === "What to improve";
+  const refinement = title === "Optional refinements";
   const accent = improvement ? "#A37C4F" : colors.accent;
   return (
     <View
@@ -74,7 +75,13 @@ export default function FeedbackSection({
             }}
           >
             <Ionicons
-              name={improvement ? "arrow-up-outline" : "checkmark"}
+              name={
+                refinement
+                  ? "ellipsis-horizontal"
+                  : improvement
+                    ? "arrow-up-outline"
+                    : "checkmark"
+              }
               size={15}
               color={accent}
               accessible={false}

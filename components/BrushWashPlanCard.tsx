@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { BrushWashStep } from "../types";
 import { colors, styles } from "./ui";
+import { studyText, uniqueGuidance } from "../lib/coachingPresentation";
 
 const fields = [
   "stage",
@@ -18,6 +19,22 @@ const techniqueLabels = {
 } as const;
 function shortText(value: unknown, limit: number): value is string {
   return typeof value === "string" && !!value.trim() && value.length <= limit;
+}
+
+function studyInstruction(value: string): string {
+  // The card explicitly frames execution as a new study, never a correction.
+  const prefix = "In a separate study, ";
+  return value.trim().split(/(?<=[.!?])\s+|\r?\n+/)
+    .map((sentence) => {
+      // A preventative stop cue describes a limit for the new study, not a
+      // diagnosis of the uploaded work. Other harsh wording stays guarded.
+      const check = /^stop before\b/i.test(sentence)
+        ? sentence.replace(/\boverwork\w*\b/gi, "repeated handling")
+        : sentence;
+      return studyText(prefix + check, "") ? sentence : "";
+    })
+    .filter(Boolean)
+    .join(" ");
 }
 
 // Missing optional execution guidance must never block a saved text result.
@@ -52,6 +69,14 @@ export function usableBrushPlan(value: unknown): BrushWashStep[] {
   return result;
 }
 
+export function isConciseBrushPlan(value: unknown): boolean {
+  const steps = usableBrushPlan(value);
+  return (
+    steps.length === 1 &&
+    Object.values(steps[0]).reduce((length, text) => length + text.length, 0) <= 300
+  );
+}
+
 function PlanNote({ label, text }: { label: string; text: string }) {
   return (
     <View style={planStyles.note}>
@@ -61,43 +86,82 @@ function PlanNote({ label, text }: { label: string; text: string }) {
   );
 }
 
-export default function BrushWashPlanCard({ plan }: { plan: unknown }) {
-  const steps = usableBrushPlan(plan);
+export default function BrushWashPlanCard({
+  plan,
+  study = false,
+  hideHeading = false,
+  omit = [],
+}: {
+  plan: unknown;
+  study?: boolean;
+  hideHeading?: boolean;
+  omit?: string[];
+}) {
+  const steps = usableBrushPlan(plan).filter((step) =>
+    !study || [step.brush, step.wash, step.timing, step.edges, step.stop]
+      .some((text) => !!studyInstruction(text)),
+  );
   if (!steps.length) return null;
   return (
-    <View style={styles.card}>
-      <Text style={styles.heading}>Brush &amp; wash plan</Text>
+    <View style={hideHeading ? { gap: 16 } : styles.card}>
+      {!hideHeading && (
+        <Text style={styles.heading}>
+          {study ? "How to study this handling" : "Brush & wash plan"}
+        </Text>
+      )}
       <Text style={styles.caption}>
-        Let the paper’s moisture guide your next mark.
+        {study
+          ? "Observe the handling; test it on a small new study."
+          : "Let the paper’s moisture guide your next mark."}
       </Text>
-      {steps.map((step, index) => (
-        <View
-          key={`${step.stage}-${index}`}
-          style={[planStyles.stage, index > 0 && planStyles.divider]}
-        >
-          <View style={planStyles.stageHeading}>
-            <View style={planStyles.number}>
-              <Text style={planStyles.numberText}>{index + 1}</Text>
+      {steps.map((step, index) => {
+        const stage = study ? studyText(step.stage, "Handling study") : step.stage;
+        const seen = [stage, ...omit];
+        const notes = [
+          ["Brush", step.brush],
+          ["Wash", step.wash],
+          ["Timing", step.timing],
+          ["Edges", step.edges],
+          ["Stop", step.stop],
+        ].flatMap(([label, supplied]) => {
+          const text = study ? studyInstruction(supplied) : supplied;
+          if (!uniqueGuidance([text], seen).length) return [];
+          seen.push(text);
+          return [{ label, text }];
+        });
+        const stop = notes.find((note) => note.label === "Stop");
+        return (
+          <View
+            key={`${step.stage}-${index}`}
+            style={[planStyles.stage, index > 0 && planStyles.divider]}
+          >
+            <View style={planStyles.stageHeading}>
+              <View style={planStyles.number}>
+                <Text style={planStyles.numberText}>{index + 1}</Text>
+              </View>
+              <View style={{ flex: 1, gap: 5 }}>
+                <Text style={planStyles.stageName}>{stage}</Text>
+                <Text style={planStyles.technique}>
+                  {techniqueLabels[step.technique]}
+                </Text>
+              </View>
             </View>
-            <View style={{ flex: 1, gap: 5 }}>
-              <Text style={planStyles.stageName}>{step.stage}</Text>
-              <Text style={planStyles.technique}>
-                {techniqueLabels[step.technique]}
-              </Text>
+            <View style={{ gap: 8 }}>
+              {notes
+                .filter((note) => note.label !== "Stop")
+                .map((note) => (
+                  <PlanNote key={note.label} label={note.label} text={note.text} />
+                ))}
             </View>
+            {!!stop && (
+              <View style={planStyles.stop}>
+                <Text style={planStyles.stopLabel}>Stop</Text>
+                <Text style={planStyles.instruction}>{stop.text}</Text>
+              </View>
+            )}
           </View>
-          <View style={{ gap: 8 }}>
-            <PlanNote label="Brush" text={step.brush} />
-            <PlanNote label="Wash" text={step.wash} />
-            <PlanNote label="Timing" text={step.timing} />
-            <PlanNote label="Edges" text={step.edges} />
-          </View>
-          <View style={planStyles.stop}>
-            <Text style={planStyles.stopLabel}>Stop</Text>
-            <Text style={planStyles.instruction}>{step.stop}</Text>
-          </View>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 }
