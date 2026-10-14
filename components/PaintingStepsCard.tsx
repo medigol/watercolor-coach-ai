@@ -1,14 +1,12 @@
-import MiniWatercolorScene, { type StudyKind } from "./MiniWatercolorScene";
 import { Text, View } from "react-native";
 import { colors, styles } from "./ui";
-const kinds: StudyKind[] = ["sketch", "wash", "layers", "layers", "painting"];
 export default function PaintingStepsCard({ steps }: { steps: string[] }) {
   return (
     <View style={styles.card}>
       <Text style={styles.heading}>Painting steps</Text>
       {steps.map((step, i) => (
         <View
-          key={step}
+          key={i}
           style={{
             gap: 12,
             paddingTop: i ? 18 : 0,
@@ -17,9 +15,6 @@ export default function PaintingStepsCard({ steps }: { steps: string[] }) {
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
-            <View style={{ width: 78, borderRadius: 12, overflow: "hidden" }}>
-              <MiniWatercolorScene kind={kinds[i] || "painting"} height={62} />
-            </View>
             <View
               style={{
                 width: 30,
@@ -34,8 +29,8 @@ export default function PaintingStepsCard({ steps }: { steps: string[] }) {
                 {i + 1}
               </Text>
             </View>
+            <Text style={[styles.body, { flex: 1 }]}>{step}</Text>
           </View>
-          <Text style={styles.body}>{step}</Text>
         </View>
       ))}
     </View>

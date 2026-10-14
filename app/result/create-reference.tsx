@@ -6,7 +6,7 @@ import SketchGuideCard from "../../components/SketchGuideCard";
 import ValueStudyCard from "../../components/ValueStudyCard";
 import PaletteCard from "../../components/PaletteCard";
 import PaintingStepsCard from "../../components/PaintingStepsCard";
-import { Screen, Placeholder, styles } from "../../components/ui";
+import { Screen, styles } from "../../components/ui";
 import { referenceResult as sample } from "../../data/mockResults";
 export default function ReferenceResult() {
   const { result, provider, image, loading, error, warning, retry } =
@@ -21,13 +21,18 @@ export default function ReferenceResult() {
           {warning}
         </Text>
       )}
-      <SavedImage uri={image} harbour />
+      <SavedImage uri={image} harbour label="Your photo" />
       <Text style={styles.caption}>
-        {provider === "mock" ? "Sample painting reference" : "Painting plan"}
+        {provider === "mock"
+          ? "Sample painting plan"
+          : "Photo-based coaching notes"}
       </Text>
       <View style={styles.card}>
-        <Text style={styles.heading}>Simplified reference</Text>
-        <Placeholder label="Coastal Town — simplified reference placeholder" />
+        <Text style={styles.heading}>Painting plan</Text>
+        <Text style={styles.body}>
+          Coaching notes for a painting you create. No new image is generated.
+          The visual studies below are generic planning aids.
+        </Text>
       </View>
       <CompositionSuggestionCard
         title="Composition plan"

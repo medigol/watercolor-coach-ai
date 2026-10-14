@@ -16,7 +16,7 @@ export default function SketchStudyCard({
         harbour={title === "Line sketch guide"}
       />
       <Text style={styles.caption}>
-        Sample line study · large shapes before details
+        Generic line-study aid · adapt it to your photo
       </Text>
       <Text style={styles.body}>{description}</Text>
     </View>
