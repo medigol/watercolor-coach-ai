@@ -6,7 +6,7 @@ import Svg, {
   Path,
   G,
 } from "react-native-svg";
-import { type CoachingOverlay } from "../lib/overlays";
+import { overlayCategory, type CoachingOverlay } from "../lib/overlays";
 import {
   arrowHead,
   legendGroup,
@@ -28,6 +28,7 @@ export default function CoachingMarks({
 }) {
   return (
     <Svg
+      testID="coaching-marks"
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
@@ -51,7 +52,24 @@ export default function CoachingMarks({
                 note.styleHint === "preserve_light" ||
                 note.styleHint === "lighten"
               ? "#FFFFFF"
-              : color;
+              : note.valueGroup === "middle"
+                ? "#8B9690"
+                : color;
+        const reserveLight =
+          note.type === "reserve_light_mark" ||
+          overlayCategory(note) === "reserve_light" ||
+          note.styleHint === "preserve_light";
+        const simplify =
+          note.styleHint === "simplify" ||
+          overlayCategory(note) === "simplification";
+        const fillOpacity =
+          (g.kind === "value_mass"
+            ? note.valueGroup === "dark"
+              ? 0.27
+              : note.valueGroup === "light"
+                ? 0.1
+                : 0.2
+            : 0.1) + (active ? 0.1 : 0);
         const dash =
           note.styleHint === "soft" ||
           (g.kind === "edge_mark" && note.styleHint !== "hard")
@@ -60,27 +78,50 @@ export default function CoachingMarks({
         return (
           <G key={`${note.id ?? "note"}-${i}`} onPress={() => onSelect(i)}>
             {g.kind === "focal_ring" && (
-              <Ellipse
-                cx={g.x + g.width / 2}
-                cy={g.y + g.height / 2}
-                rx={g.width / 2}
-                ry={g.height / 2}
-                fill="none"
-                stroke={color}
-                strokeWidth={strokeWidth}
-              />
+              <>
+                <Ellipse
+                  cx={g.x + g.width / 2}
+                  cy={g.y + g.height / 2}
+                  rx={g.width / 2}
+                  ry={g.height / 2}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={16}
+                  strokeOpacity={0.01}
+                />
+                <Ellipse
+                  cx={g.x + g.width / 2}
+                  cy={g.y + g.height / 2}
+                  rx={g.width / 2}
+                  ry={g.height / 2}
+                  fill="none"
+                  stroke={reserveLight ? "#F7EDD4" : color}
+                  strokeWidth={strokeWidth}
+                />
+                {(active || reserveLight) && (
+                  <Ellipse
+                    cx={g.x + g.width / 2}
+                    cy={g.y + g.height / 2}
+                    rx={Math.max(1, g.width / 2 - 5)}
+                    ry={Math.max(1, g.height / 2 - 5)}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth={1}
+                    strokeOpacity={0.7}
+                  />
+                )}
+              </>
             )}
             {(g.kind === "region_highlight" || g.kind === "value_mass") &&
               (g.points.length >= 3 ? (
                 <Polygon
                   points={points}
                   fill={fill}
-                  fillOpacity={active ? 0.24 : 0.13}
+                  fillOpacity={fillOpacity}
                   stroke={color}
                   strokeWidth={strokeWidth}
-                  strokeDasharray={
-                    note.styleHint === "simplify" ? "4 4" : undefined
-                  }
+                  strokeDasharray={simplify ? "1 5" : undefined}
+                  strokeLinecap="round"
                 />
               ) : (
                 <Rect
@@ -90,25 +131,79 @@ export default function CoachingMarks({
                   height={g.height}
                   rx={Math.min(12, g.width / 4, g.height / 4)}
                   fill={fill}
-                  fillOpacity={active ? 0.24 : 0.13}
+                  fillOpacity={fillOpacity}
                   stroke={color}
                   strokeWidth={strokeWidth}
-                  strokeDasharray={
-                    note.styleHint === "simplify" ? "4 4" : undefined
-                  }
+                  strokeDasharray={simplify ? "1 5" : undefined}
+                  strokeLinecap="round"
                 />
               ))}
             {g.kind === "crop_box" && (
-              <Rect
-                x={g.x}
-                y={g.y}
-                width={g.width}
-                height={g.height}
-                fill="none"
-                stroke={color}
-                strokeWidth={strokeWidth}
-                strokeDasharray="9 5"
-              />
+              <>
+                {active && (
+                  <G pointerEvents="none">
+                    <Rect
+                      x={0}
+                      y={0}
+                      width={width}
+                      height={g.y}
+                      fill="#253C3C"
+                      fillOpacity={0.15}
+                    />
+                    <Rect
+                      x={0}
+                      y={g.y + g.height}
+                      width={width}
+                      height={Math.max(0, height - g.y - g.height)}
+                      fill="#253C3C"
+                      fillOpacity={0.15}
+                    />
+                    <Rect
+                      x={0}
+                      y={g.y}
+                      width={g.x}
+                      height={g.height}
+                      fill="#253C3C"
+                      fillOpacity={0.15}
+                    />
+                    <Rect
+                      x={g.x + g.width}
+                      y={g.y}
+                      width={Math.max(0, width - g.x - g.width)}
+                      height={g.height}
+                      fill="#253C3C"
+                      fillOpacity={0.15}
+                    />
+                  </G>
+                )}
+                <Rect
+                  x={g.x}
+                  y={g.y}
+                  width={g.width}
+                  height={g.height}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={14}
+                  strokeOpacity={0.01}
+                />
+                <Rect
+                  x={g.x}
+                  y={g.y}
+                  width={g.width}
+                  height={g.height}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={strokeWidth}
+                  strokeDasharray="9 5"
+                />
+                <Path
+                  d={cropCorners(g)}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={strokeWidth}
+                  strokeLinecap="round"
+                />
+              </>
             )}
             {line && (
               <>
@@ -128,7 +223,11 @@ export default function CoachingMarks({
                   }
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeDasharray={dash}
+                  strokeDasharray={
+                    g.kind === "guide_line" && note.styleHint === "muted"
+                      ? "9 6"
+                      : dash
+                  }
                 />
                 {g.kind === "arrow" && (
                   <Path
@@ -147,4 +246,10 @@ export default function CoachingMarks({
       })}
     </Svg>
   );
+}
+
+function cropCorners(g: ReturnType<typeof markGeometry>) {
+  const { x, y, width: w, height: h } = g;
+  const arm = Math.min(12, w / 4, h / 4);
+  return `M ${x} ${y + arm} L ${x} ${y} L ${x + arm} ${y} M ${x + w - arm} ${y} L ${x + w} ${y} L ${x + w} ${y + arm} M ${x + w} ${y + h - arm} L ${x + w} ${y + h} L ${x + w - arm} ${y + h} M ${x + arm} ${y + h} L ${x} ${y + h} L ${x} ${y + h - arm}`;
 }

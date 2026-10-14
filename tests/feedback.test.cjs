@@ -245,7 +245,7 @@ test("strict response schemas reject malformed fields, extra fields, unsafe pale
     assert.equal(schema.additionalProperties, false);
     assert.deepEqual(
       schema.required.sort(),
-      [...Object.keys(result), "overlays"].sort(),
+      [...Object.keys(result), "overlays", "compositionDecision", "paletteStrategy", ...(mode === "improve_painting" ? ["palette"] : [])].sort(),
     );
   }
   assert(
@@ -348,9 +348,12 @@ test("rich geometry validates and malformed notes are discarded independently", 
     const raw = { ...sample, overlays: [richNote, { ...line, points: [{ x: 120, y: 0 }, { x: 2, y: 5 }] }, mass] };
     assert(!contract.validFeedback(raw, mode));
     const cleaned = contract.cleanOverlayFeedback(raw);
-    assert.deepEqual(cleaned.overlays, [richNote, mass]);
+    const { width: _width, height: _height, points: _points, ...lineText } = line;
+    assert.deepEqual(cleaned.overlays, [richNote, { ...lineText, type: "point_marker" }, mass]);
     assert(contract.validFeedback(cleaned, mode));
-    assert.deepEqual(contract.cleanOverlayFeedback({ ...sample, overlays: [{ ...richNote, width: null }] }), sample);
+    const { width: _ringWidth, height: _ringHeight, points: _ringPoints, ...ringText } = richNote;
+    assert.deepEqual(contract.cleanOverlayFeedback({ ...sample, overlays: [{ ...richNote, width: null }] }),
+      { ...sample, overlays: [{ ...ringText, type: "point_marker" }] });
   }
   for (const invalid of [
     { ...richNote, type: "focal_ring", width: null, height: null },
@@ -383,7 +386,7 @@ test("optional practical palette metadata stays compatible and rejects invented 
   for (const [name, pigmentCode] of [["Raw Sienna", "PBr7"], ["Red Ochre", "PY43"], ["Payne's Gray", "PB29"]])
     assert(!contract.validFeedback({ ...samples.referenceResult, palette: [{ name, hex: "#808080", pigmentCode }] }, "create_reference"));
   const schema = contract.feedbackSchema("create_reference");
-  assert.deepEqual(schema.properties.palette.items.required, ["name", "hex", "use", "pigmentCode"]);
+  assert.deepEqual(schema.properties.palette.items.required, ["name", "hex", "use", "pigmentCode", "temperature", "mix", "tag"]);
   assert.deepEqual(schema.properties.palette.items.properties.pigmentCode.enum, ["PB29", "PBr7", "PY43", "PY42", null]);
 });
 test("rich overlay cleanup preserves OpenAI result and calls the model only once", async () => {
@@ -405,4 +408,76 @@ test("rich overlay cleanup preserves OpenAI result and calls the model only once
   assert.equal(generated, 1);
   assert.deepEqual(saved.overlays, [richNote]);
   assert(!f.calls.includes("mock"));
+});
+
+test("semantic mark aliases and timing remain strict while invalid geometry keeps usable coaching cards", () => {
+  const paths = [{ x: 10, y: 70 }, { x: 35, y: 50 }, { x: 55, y: 45 }];
+  const aliases = [
+    { ...richNote, type: "eye_flow_arrow", category: null, styleHint: "eye_flow", timing: "next_study", width: null, height: null, points: paths },
+    { ...richNote, type: "composition_line", category: null, styleHint: "horizon", timing: "both", width: null, height: null, points: paths },
+    { ...richNote, type: "simplify_region", category: null, styleHint: "simplify", timing: "current_painting" },
+    { ...richNote, type: "reserve_light_mark", category: null, styleHint: "preserve_light", timing: null },
+  ];
+  const kinds = ["arrow", "guide_line", "region_highlight", "focal_ring"];
+  const categories = ["composition", "composition", "simplification", "reserve_light"];
+  aliases.forEach((note, index) => {
+    assert(overlayContract.validOverlays([note]));
+    assert.equal(overlayContract.overlayKind(note), kinds[index]);
+    assert.equal(overlayContract.overlayCategory(note), categories[index]);
+    const bad = { ...note, width: 110, height: 10, points: [{ x: 150, y: 0 }] };
+    assert(!overlayContract.validOverlays([bad]));
+    const [usable] = overlayContract.usableOverlays([bad]);
+    assert.equal(usable.type, "point_marker");
+    assert.equal(usable.category, categories[index]);
+    assert.equal(usable.x, note.x);
+    assert.equal(usable.y, note.y);
+    assert.equal(usable.timing, note.timing);
+    assert(!Object.hasOwn(usable, "width"));
+    assert(!Object.hasOwn(usable, "height"));
+    assert(!Object.hasOwn(usable, "points"));
+    assert(overlayContract.validOverlays([usable]));
+    assert.deepEqual(overlayContract.usableOverlays([{ ...bad, x: -1 }]), []);
+    assert.deepEqual(overlayContract.usableOverlays([{ ...bad, timing: "tomorrow" }]), []);
+    assert.deepEqual(overlayContract.usableOverlays([{ ...bad, action: "" }]), []);
+    assert.deepEqual(overlayContract.usableOverlays([{ ...bad, unexpected: "not allowed" }]), []);
+  });
+});
+test("composition decisions and extended palettes are optional and compatible in both feedback modes", () => {
+  const palette = [{ name: "Ultramarine", hex: "#52738a", pigmentCode: "PB29", use: "Cool sky wash and distance", temperature: "cool", mix: "Test a diluted neutral with Burnt Sienna", tag: "main_wash" }];
+  const decision = { mainIssue: "The foreground dark competes with the figures.", reason: "It attracts the eye before the focal area.", tryNow: "Stop adding detail to the foreground; keep focal accents selective.", nextStudy: "Test a higher crop in a small thumbnail before repainting." };
+  for (const mode of ["improve_painting", "create_reference"]) {
+    const sample = mode === "improve_painting" ? samples.improveResult : samples.referenceResult;
+    const enriched = { ...sample, palette, paletteStrategy: "Use cool distance and reserve stronger darks near the figures.", compositionDecision: decision };
+    assert(contract.validFeedback(sample, mode));
+    assert(contract.validFeedback(enriched, mode));
+    assert(contract.validFeedback({ ...enriched, compositionDecision: { tryNow: decision.tryNow } }, mode));
+    assert(contract.validFeedback({ ...enriched, compositionDecision: null, paletteStrategy: null }, mode));
+    for (const compositionDecision of [[], "text", { mainIssue: "x".repeat(351) }, { tryNow: 3 }, { mainIssue: "" }, { moveObject: "not allowed" }])
+      assert(!contract.validFeedback({ ...enriched, compositionDecision }, mode));
+    assert(!contract.validFeedback({ ...enriched, paletteStrategy: "x".repeat(351) }, mode));
+    for (const patch of [{ temperature: "hot" }, { tag: "buy_now" }, { mix: "x".repeat(181) }, { temperature: ["cool"] }, { manufacturer: "unverified" }])
+      assert(!contract.validFeedback({ ...enriched, palette: [{ ...palette[0], ...patch }] }, mode));
+  }
+  assert(contract.validFeedback({ ...samples.improveResult, palette: null }, "improve_painting"));
+  assert(!contract.validFeedback({ ...samples.referenceResult, palette: null }, "create_reference"));
+});
+test("strict model schemas require nullable optional guidance fields without forcing legacy JSON changes", () => {
+  function checkObject(schema) {
+    if (!schema || typeof schema !== "object") return;
+    if (schema.properties) {
+      assert.deepEqual([...schema.required].sort(), Object.keys(schema.properties).sort());
+      assert.equal(schema.additionalProperties, false);
+      Object.values(schema.properties).forEach(checkObject);
+    }
+    if (schema.items) checkObject(schema.items);
+  }
+  for (const mode of ["improve_painting", "create_reference"]) {
+    const schema = contract.feedbackSchema(mode);
+    checkObject(schema);
+    assert.deepEqual(schema.properties.compositionDecision.type, ["object", "null"]);
+    assert.deepEqual(schema.properties.overlays.items.properties.timing.enum, ["current_painting", "next_study", "both", null]);
+    assert(schema.properties.overlays.items.properties.type.enum.includes("eye_flow_arrow"));
+    assert(schema.properties.overlays.items.properties.styleHint.enum.includes("connect_shadow"));
+    assert.deepEqual(schema.properties.palette.type, mode === "improve_painting" ? ["array", "null"] : "array");
+  }
 });

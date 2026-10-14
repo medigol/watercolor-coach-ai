@@ -15,10 +15,23 @@ export const visualOverlayTypes = [
   "edge_mark",
   "value_mass",
 ] as const;
+export const semanticOverlayTypes = [
+  "eye_flow_arrow",
+  "composition_line",
+  "simplify_region",
+  "reserve_light_mark",
+] as const;
 export const overlayTypes = [
   ...legacyOverlayTypes,
   ...visualOverlayTypes,
+  ...semanticOverlayTypes,
 ] as const;
+export const overlayTimings = [
+  "current_painting",
+  "next_study",
+  "both",
+] as const;
+export type OverlayTiming = (typeof overlayTimings)[number];
 export const overlayCategories = [
   "focal_point",
   "composition",
@@ -39,6 +52,9 @@ export const overlayStyleHints = [
   "preserve_light",
   "crop",
   "focal",
+  "eye_flow",
+  "horizon",
+  "connect_shadow",
 ] as const;
 export type OverlayKind = (typeof visualOverlayTypes)[number];
 export type OverlayCategory = (typeof overlayCategories)[number];
@@ -58,6 +74,7 @@ export interface CoachingOverlay {
   points?: OverlayPoint[] | null;
   styleHint?: (typeof overlayStyleHints)[number] | null;
   valueGroup?: "light" | "middle" | "dark" | null;
+  timing?: OverlayTiming | null;
   priority: "high" | "medium" | "low";
   shortInstruction: string;
   reason: string;
@@ -75,6 +92,7 @@ const allowed = [
   "points",
   "styleHint",
   "valueGroup",
+  "timing",
   "priority",
   "shortInstruction",
   "reason",
@@ -84,7 +102,7 @@ const text = (v: unknown, limit: number) =>
   typeof v === "string" && !!v.trim() && v.length <= limit;
 const percent = (v: unknown): v is number =>
   typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= 100;
-function validOverlay(item: unknown): item is CoachingOverlay {
+function validTextMetadata(item: unknown): item is Record<string, unknown> {
   if (!item || typeof item !== "object" || Array.isArray(item)) return false;
   const v = item as Record<string, unknown>;
   if (
@@ -121,6 +139,16 @@ function validOverlay(item: unknown): item is CoachingOverlay {
   ) {
     return false;
   }
+  if (v.timing != null && !overlayTimings.includes(v.timing as OverlayTiming)) {
+    return false;
+  }
+  return true;
+}
+function validOverlay(item: unknown): item is CoachingOverlay {
+  if (!validTextMetadata(item)) return false;
+  const v = item;
+  const x = v.x as number;
+  const y = v.y as number;
   const hasWidth = v.width != null;
   const hasHeight = v.height != null;
   if (hasWidth !== hasHeight) return false;
@@ -128,7 +156,7 @@ function validOverlay(item: unknown): item is CoachingOverlay {
     hasWidth && (
       !percent(v.width) || !percent(v.height) || v.width <= 0 ||
       v.height <= 0 ||
-      v.x + v.width > 100 || v.y + v.height > 100
+      x + v.width > 100 || y + v.height > 100
     )
   ) return false;
   const hasPoints = v.points != null;
@@ -147,6 +175,7 @@ function validOverlay(item: unknown): item is CoachingOverlay {
   // Geometric marks must carry enough information to draw their intended shape.
   // Missing coordinates are discarded rather than replaced with invented shapes.
   const type = v.type as CoachingOverlay["type"];
+  const kind = semanticKind(type) ?? type;
   if (hasPoints) {
     const points = v.points as OverlayPoint[];
     const first = points[0];
@@ -157,7 +186,7 @@ function validOverlay(item: unknown): item is CoachingOverlay {
     ) {
       return false;
     }
-    if (type === "region_highlight" || type === "value_mass") {
+    if (kind === "region_highlight" || kind === "value_mass") {
       const twiceArea = points.reduce((sum, p, i) => {
         const next = points[(i + 1) % points.length];
         return sum + p.x * next.y - next.x * p.y;
@@ -165,17 +194,17 @@ function validOverlay(item: unknown): item is CoachingOverlay {
       if (Math.abs(twiceArea) <= 0.000001) return false;
     }
   }
-  if (type === "focal_ring" || type === "crop_box") {
+  if (kind === "focal_ring" || kind === "crop_box") {
     return hasWidth && !hasPoints;
   }
-  if (type === "region_highlight" || type === "value_mass") {
+  if (kind === "region_highlight" || kind === "value_mass") {
     return hasWidth !== hasPoints &&
       (!hasPoints || (v.points as OverlayPoint[]).length >= 3);
   }
-  if (["guide_line", "arrow", "edge_mark"].includes(type)) {
+  if (["guide_line", "arrow", "edge_mark"].includes(kind)) {
     return hasPoints && !hasWidth;
   }
-  if (type === "point_marker") return !hasWidth && !hasPoints;
+  if (kind === "point_marker") return !hasWidth && !hasPoints;
   return !hasPoints; // Original saved markers retain their point/region behavior.
 }
 export function validOverlays(value: unknown): value is CoachingOverlay[] {
@@ -192,15 +221,36 @@ export function usableOverlays(value: unknown): CoachingOverlay[] {
   const result: CoachingOverlay[] = [];
   // Bound work even for externally supplied saved JSON; never manufacture marks.
   for (const item of value.slice(0, 32)) {
-    if (!validOverlay(item)) continue;
-    if (item.id && seen.has(item.id)) continue;
-    if (item.id) seen.add(item.id);
-    result.push(item);
+    let note: CoachingOverlay;
+    if (validOverlay(item)) note = item;
+    else if (validTextMetadata(item)) {
+      // Keep a useful coaching card at its supplied anchor when its shape fails.
+      // Invalid geometry is removed; no replacement path or coordinates are invented.
+      const { width: _width, height: _height, points: _points, ...metadata } =
+        item;
+      note = {
+        ...metadata,
+        type: "point_marker",
+        category: overlayCategory(item as unknown as CoachingOverlay),
+      } as CoachingOverlay;
+    } else continue;
+    if (note.id && seen.has(note.id)) continue;
+    if (note.id) seen.add(note.id);
+    result.push(note);
     if (result.length === 6) break;
   }
   return result;
 }
+function semanticKind(type: CoachingOverlay["type"]): OverlayKind | null {
+  if (type === "eye_flow_arrow") return "arrow";
+  if (type === "composition_line") return "guide_line";
+  if (type === "simplify_region") return "region_highlight";
+  if (type === "reserve_light_mark") return "focal_ring";
+  return null;
+}
 export function overlayKind(note: CoachingOverlay): OverlayKind {
+  const semantic = semanticKind(note.type);
+  if (semantic) return semantic;
   if (visualOverlayTypes.includes(note.type as OverlayKind)) {
     return note.type as OverlayKind;
   }
@@ -216,6 +266,12 @@ export function overlayKind(note: CoachingOverlay): OverlayKind {
   return "point_marker";
 }
 export function overlayCategory(note: CoachingOverlay): OverlayCategory {
+  // A semantic mark's purpose takes precedence over contradictory saved metadata.
+  if (note.type === "reserve_light_mark") return "reserve_light";
+  if (note.type === "simplify_region") return "simplification";
+  if (note.type === "eye_flow_arrow" || note.type === "composition_line") {
+    return "composition";
+  }
   if (note.category) return note.category;
   if (note.type === "focal_point" || note.type === "focal_ring") {
     return "focal_point";

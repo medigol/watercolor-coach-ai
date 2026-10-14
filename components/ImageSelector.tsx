@@ -66,7 +66,7 @@ export default function ImageSelector({
       )}
       <Text style={styles.caption}>
         Your image is saved privately with your feedback when you continue.
-        Results still use the sample guide.
+        If automatic feedback is unavailable, we save a sample guide instead.
       </Text>
     </View>
   );

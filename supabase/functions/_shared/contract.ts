@@ -1,6 +1,7 @@
 import {
   overlayCategories,
   overlayStyleHints,
+  overlayTimings,
   overlayTypes,
   usableOverlays,
   validOverlays,
@@ -14,6 +15,43 @@ function safePigmentForName(name: string, code: unknown): boolean {
     return /\byellow\s+ochre\b/i.test(name) || /^ochre$/i.test(name.trim());
   }
   return false;
+}
+export interface CompositionDecision {
+  mainIssue?: string | null;
+  reason?: string | null;
+  tryNow?: string | null;
+  nextStudy?: string | null;
+}
+const boundedText = (value: unknown, max: number) =>
+  typeof value === "string" && !!value.trim() && value.length <= max;
+function validCompositionDecision(value: unknown): boolean {
+  if (value == null) return true;
+  if (typeof value !== "object" || Array.isArray(value)) return false;
+  const fields = ["mainIssue", "reason", "tryNow", "nextStudy"];
+  return Object.entries(value).every(([key, item]) =>
+    fields.includes(key) && (item == null || boundedText(item, 350))
+  );
+}
+function validPalette(value: unknown): boolean {
+  // Keep the prior eight-item bound for old saved JSON; the prompt prefers 4–7
+  // colors at most and fewer when they cover the scene's painting roles.
+  return Array.isArray(value) && value.length >= 1 && value.length <= 8 &&
+    value.every((p) =>
+      p && typeof p === "object" && !Array.isArray(p) &&
+      Object.keys(p).every((key) =>
+        ["name", "hex", "use", "pigmentCode", "temperature", "mix", "tag"]
+          .includes(key)
+      ) && boundedText(p.name, 60) && typeof p.hex === "string" &&
+      /^#[0-9a-f]{6}$/i.test(p.hex) &&
+      (p.use == null || boundedText(p.use, 180)) &&
+      (p.pigmentCode == null || safePigmentCodes.includes(p.pigmentCode)) &&
+      safePigmentForName(p.name, p.pigmentCode) &&
+      (p.temperature == null ||
+        ["warm", "cool", "neutral"].includes(p.temperature)) &&
+      (p.mix == null || boundedText(p.mix, 180)) &&
+      (p.tag == null ||
+        ["main_wash", "accent", "use_sparingly"].includes(p.tag))
+    );
 }
 export type Mode = "improve_painting" | "create_reference";
 export type Provider = "mock" | "openai";
@@ -105,7 +143,13 @@ export function validFeedback(
   const v = value as Record<string, unknown>;
   const fields = [
     ...(mode === "improve_painting" ? improveFields : referenceFields),
-    ...(Object.hasOwn(v, "overlays") ? ["overlays"] : []),
+    ...[
+      "overlays",
+      "compositionDecision",
+      "paletteStrategy",
+      ...(mode === "improve_painting" ? ["palette"] : []),
+    ]
+      .filter((key) => Object.hasOwn(v, key)),
   ];
   if (
     v.overlays !== undefined &&
@@ -120,6 +164,12 @@ export function validFeedback(
   ) {
     return false;
   }
+  if (
+    !validCompositionDecision(v.compositionDecision) ||
+    (v.paletteStrategy != null && !boundedText(v.paletteStrategy, 350)) ||
+    (mode === "improve_painting" && v.palette != null &&
+      !validPalette(v.palette))
+  ) return false;
   const text = (s: unknown, max = 700) =>
     typeof s === "string" && s.trim().length > 0 && s.length <= max;
   if (
@@ -140,27 +190,7 @@ export function validFeedback(
       list(v.whatToFix)
     );
   }
-  return (
-    list(v.steps) &&
-    Array.isArray(v.palette) &&
-    v.palette.length >= 1 &&
-    v.palette.length <= 8 &&
-    v.palette.every(
-      (p) =>
-        p &&
-        typeof p === "object" &&
-        !Array.isArray(p) &&
-        Object.keys(p).every((key) =>
-          ["name", "hex", "use", "pigmentCode"].includes(key)
-        ) &&
-        text(p.name, 60) &&
-        typeof p.hex === "string" &&
-        /^#[0-9a-f]{6}$/i.test(p.hex) &&
-        (p.use == null || text(p.use, 180)) &&
-        (p.pigmentCode == null || safePigmentCodes.includes(p.pigmentCode)) &&
-        safePigmentForName(p.name, p.pigmentCode),
-    )
-  );
+  return list(v.steps) && validPalette(v.palette);
 }
 export function feedbackSchema(mode: Mode) {
   const text = { type: "string" };
@@ -188,16 +218,64 @@ export function feedbackSchema(mode: Mode) {
       type: ["string", "null"],
       enum: ["light", "middle", "dark", null],
     },
+    timing: { type: ["string", "null"], enum: [...overlayTimings, null] },
     priority: { type: "string", enum: ["high", "medium", "low"] },
     shortInstruction: text,
     reason: text,
     action: text,
+  };
+  const palette = {
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        name: text,
+        hex: text,
+        use: { type: ["string", "null"] },
+        pigmentCode: {
+          type: ["string", "null"],
+          enum: [...safePigmentCodes, null],
+        },
+        temperature: {
+          type: ["string", "null"],
+          enum: ["warm", "cool", "neutral", null],
+        },
+        mix: { type: ["string", "null"] },
+        tag: {
+          type: ["string", "null"],
+          enum: ["main_wash", "accent", "use_sparingly", null],
+        },
+      },
+      required: [
+        "name",
+        "hex",
+        "use",
+        "pigmentCode",
+        "temperature",
+        "mix",
+        "tag",
+      ],
+      additionalProperties: false,
+    },
+  };
+  const decisionFields = {
+    mainIssue: { type: ["string", "null"] },
+    reason: { type: ["string", "null"] },
+    tryNow: { type: ["string", "null"] },
+    nextStudy: { type: ["string", "null"] },
   };
   const common = {
     title: text,
     composition: text,
     sketch: text,
     values: text,
+    compositionDecision: {
+      type: ["object", "null"],
+      properties: decisionFields,
+      required: Object.keys(decisionFields),
+      additionalProperties: false,
+    },
+    paletteStrategy: { type: ["string", "null"] },
     overlays: {
       type: ["array", "null"],
       items: {
@@ -216,26 +294,11 @@ export function feedbackSchema(mode: Mode) {
       whatToFix: list,
       practice: text,
       prompt: text,
+      palette: { ...palette, type: ["array", "null"] },
     }
     : {
       ...common,
-      palette: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            name: text,
-            hex: text,
-            use: { type: ["string", "null"] },
-            pigmentCode: {
-              type: ["string", "null"],
-              enum: [...safePigmentCodes, null],
-            },
-          },
-          required: ["name", "hex", "use", "pigmentCode"],
-          additionalProperties: false,
-        },
-      },
+      palette,
       steps: list,
     };
   return {

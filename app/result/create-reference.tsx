@@ -4,8 +4,7 @@ import { useSavedResult } from "../../hooks/useSavedResult";
 import { ResultState, SavedImage } from "../../components/SavedResultState";
 import { Text } from "react-native";
 import CompositionSuggestionCard from "../../components/CompositionSuggestionCard";
-import SketchGuideCard from "../../components/SketchGuideCard";
-import ValueStudyCard from "../../components/ValueStudyCard";
+import ThumbnailPlanning from "../../components/ThumbnailPlanning";
 import PaletteCard from "../../components/PaletteCard";
 import PaintingStepsCard from "../../components/PaintingStepsCard";
 import { Screen, styles } from "../../components/ui";
@@ -38,13 +37,15 @@ export default function ReferenceResult() {
         Coaching notes for a painting you create. No new image is generated.
       </Text>
       {!!image && <ReferencePreparation uri={image} />}
-      <Text style={styles.caption}>
-        PLAN · adapt these generic planning aids
-      </Text>
-      <SketchGuideCard description={result.sketch} />
-      <ValueStudyCard description={result.values} harbour />
+      <ThumbnailPlanning
+        overlays={result.overlays}
+        title={result.title}
+        composition={result.composition}
+        sketch={result.sketch}
+        values={result.values}
+      />
       <Text style={styles.caption}>PAINT · fewer colours, clear washes</Text>
-      <PaletteCard palette={result.palette} />
+      <PaletteCard palette={result.palette} strategy={result.paletteStrategy} />
       <PaintingStepsCard steps={result.steps} />
     </Screen>
   );

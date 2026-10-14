@@ -24,6 +24,9 @@ function load(file, mocks = {}) {
 }
 const overlay = load("lib/overlays.ts");
 const drawing = load("lib/overlayDrawing.ts", { "./overlays": overlay });
+const presentation = load("lib/coachingPresentation.ts", {
+  "./overlays": overlay,
+});
 const contract = load("supabase/functions/_shared/contract.ts", {
   "./overlays.ts": overlay,
 });
@@ -154,6 +157,8 @@ function fixture(fail = false) {
       View: "View",
     },
     "../lib/overlays": overlay,
+    "../lib/coachingPresentation": presentation,
+    "react-native-svg": {default:"Svg",Path:"Path"},
     "../lib/overlayDrawing": drawing,
     "./CoachingMarks": { default: "CoachingMarks" },
     "./ui": {
@@ -290,7 +295,16 @@ test("every rich mark validates without inventing geometry; degenerate and malfo
     richNote("point_marker", { valueGroup: "black" }),
   ]) {
     assert(!overlay.validOverlays([item]), JSON.stringify(item));
-    assert.deepEqual(overlay.usableOverlays([item, notes[1]]), [notes[1]]);
+    const usable = overlay.usableOverlays([item, notes[1]]);
+    assert.deepEqual(usable.at(-1), notes[1]);
+    if (usable.length > 1) {
+      assert.equal(usable[0].type, "point_marker");
+      assert.equal(usable[0].x, item.x);
+      assert.equal(usable[0].y, item.y);
+      assert.equal(usable[0].points, undefined);
+      assert.equal(usable[0].width, undefined);
+      assert.equal(usable[0].action, item.action);
+    }
   }
   const sameId = richNote("point_marker", { id: "focus-1" });
   assert(!overlay.validOverlays([sameId, sameId]));
@@ -331,16 +345,30 @@ test("responsive geometry aligns boxes and paths to the original image; old save
   );
 });
 test("overlapping number anchors remain tappable and bounded without changing supplied mark geometry", () => {
-  const marks = Array.from({length:6},()=>richNote("focal_ring",box));
-  const positions = drawing.markerPositions(marks,327,230);
-  for(const [i,p] of positions.entries()) {
-    assert.equal(p.target,44);assert(p.left>=0 && p.top>=0);
-    assert(p.left+44<=327 && p.top+44<=230);
-    for(const other of positions.slice(0,i)) assert(p.left>=other.left+44 || p.left+44<=other.left || p.top>=other.top+44 || p.top+44<=other.top);
+  const marks = Array.from({ length: 6 }, () => richNote("focal_ring", box));
+  const positions = drawing.markerPositions(marks, 327, 230);
+  for (const [i, p] of positions.entries()) {
+    assert.equal(p.target, 44);
+    assert(p.left >= 0 && p.top >= 0);
+    assert(p.left + 44 <= 327 && p.top + 44 <= 230);
+    for (const other of positions.slice(0, i))
+      assert(
+        p.left >= other.left + 44 ||
+          p.left + 44 <= other.left ||
+          p.top >= other.top + 44 ||
+          p.top + 44 <= other.top,
+      );
   }
-  assert.deepEqual(drawing.markGeometry(marks[0],327,230),drawing.markGeometry(marks[5],327,230));
-  const tiny = drawing.markerPositions(marks,16,8);
-  assert(tiny.every(p=>p.target===8 && p.top===0 && p.left>=0 && p.left<=8));
+  assert.deepEqual(
+    drawing.markGeometry(marks[0], 327, 230),
+    drawing.markGeometry(marks[5], 327, 230),
+  );
+  const tiny = drawing.markerPositions(marks, 16, 8);
+  assert(
+    tiny.every(
+      (p) => p.target === 8 && p.top === 0 && p.left >= 0 && p.left <= 8,
+    ),
+  );
 });
 test("SVG renderer draws each rich shape and selects the matching card with restrained highlighted marks", () => {
   const jsx = {
@@ -360,6 +388,7 @@ test("SVG renderer draws each rich shape and selects the matching card with rest
       G: "G",
     },
     "../lib/overlayDrawing": drawing,
+    "../lib/overlays": overlay,
   }).default;
   const rich = [
     richNote("focal_ring", box),
@@ -386,7 +415,7 @@ test("SVG renderer draws each rich shape and selects the matching card with rest
   for (const type of ["Ellipse", "Rect", "Polygon", "Polyline", "Path"])
     assert(all.some((n) => n.type === type));
   const value = all.find((n) => n.type === "Polygon");
-  assert.equal(value.props.fillOpacity, 0.24);
+  assert(Math.abs(value.props.fillOpacity - 0.37) < 0.001);
   assert.equal(value.props.strokeWidth, 3);
   all.filter((n) => n.type === "G")[4].props.onPress();
   assert.equal(selection, 4);
@@ -405,4 +434,41 @@ test("SVG renderer draws each rich shape and selects the matching card with rest
     ).length,
     0,
   );
+});
+
+test("semantic aliases render their instructional shapes and retain purpose even with conflicting metadata", () => {
+  const expected=[
+    ["reserve_light_mark","focal_ring","reserve_light",box],
+    ["simplify_region","region_highlight","simplification",box],
+    ["eye_flow_arrow","arrow","composition",{points:pathPoints}],
+    ["composition_line","guide_line","composition",{points:pathPoints}],
+  ];
+  const jsx={jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props}),Fragment:"Fragment"};
+  const Marks=load("components/CoachingMarks.tsx",{"react/jsx-runtime":jsx,"react-native-svg":{default:"Svg",Ellipse:"Ellipse",Rect:"Rect",Polyline:"Polyline",Polygon:"Polygon",Path:"Path",G:"G"},"../lib/overlayDrawing":drawing,"../lib/overlays":overlay}).default;
+  const nodes=t=>!t || typeof t!=="object"?[]:[t,...[t.props?.children].flat(Infinity).flatMap(nodes)];
+  for(const [type,kind,category,geometry] of expected){
+    const note=richNote(type,{...geometry,category:"color_temperature",timing:"both"});
+    assert(overlay.validOverlays([note]));assert.equal(overlay.overlayKind(note),kind);assert.equal(overlay.overlayCategory(note),category);
+    const broken=overlay.usableOverlays([{...note,width:150,height:150,points:null}])[0];
+    assert.equal(broken.type,"point_marker");assert.equal(overlay.overlayCategory(broken),category);
+    const tree=Marks({notes:[note],width:320,height:240,selected:0,onSelect:()=>{}});
+    const all=nodes(tree);
+    assert(all.some(n=>n.type===(kind==="focal_ring"?"Ellipse":kind==="region_highlight"?"Rect":"Polyline")));
+    if(type==="reserve_light_mark") {assert.equal(presentation.markMeaning(note),"Keep this light clean.");assert(all.some(n=>n.props?.stroke==="#F7EDD4"));}
+  }
+});
+test("timing and action cards separate safe adjustments from structural next-study experiments",()=>{
+  for(const action of ["Move the house slightly right.","Place the figures farther right.","Increase the sky area and reduce the foreground.","Make the house smaller.","Lower the horizon.","Test this crop."]){
+    assert(presentation.requiresNewStudy(action),action);
+    const note=richNote("point_marker",{timing:"current_painting",action});
+    assert.equal(presentation.coachingTiming(note),"next_study");
+    const decision=presentation.compositionGuidance({decision:{tryNow:action},mainAdvice:"The focal contrast is scattered.",composition:"Try a quiet supporting mass."});
+    assert(!decision.tryNow.includes(action));assert.equal(decision.nextStudy,action);
+  }
+  const action="Soften the distant edge after testing on scrap paper.";
+  assert(!presentation.requiresNewStudy(action));
+  assert.equal(presentation.timingLabel(richNote("edge_mark",{points:pathPoints,timing:"current_painting",action})),"Try now on this painting");
+  assert.equal(presentation.timingLabel(richNote("crop_box",{...box,timing:"current_painting"})),"Try in the next study");
+  assert(!overlay.validOverlays([richNote("point_marker",{timing:"urgent"})]));
+  const arrow=[{x:10,y:10},{x:90,y:90}];assert.equal(drawing.arrowHead([...arrow,arrow[1]]),drawing.arrowHead(arrow));assert.equal(drawing.arrowHead([arrow[0],arrow[0]]),"");
 });

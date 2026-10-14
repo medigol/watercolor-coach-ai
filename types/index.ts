@@ -21,4 +21,13 @@ export interface PaletteColour {
   hex: string;
   pigmentCode?: string | null;
   use?: string | null;
+  temperature?: "warm" | "cool" | "neutral" | null;
+  mix?: string | null;
+  tag?: "main_wash" | "accent" | "use_sparingly" | null;
+}
+export interface CompositionDecision {
+  mainIssue?: string | null;
+  reason?: string | null;
+  tryNow?: string | null;
+  nextStudy?: string | null;
 }

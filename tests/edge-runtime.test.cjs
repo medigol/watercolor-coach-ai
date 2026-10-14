@@ -37,6 +37,8 @@ function fixture(options = {}) {
       : load(path.join(root, "data/mockResults.ts")).improveResult;
   if (options.overlays) modelResult.overlays = options.overlays;
   if (options.palette) modelResult.palette = options.palette;
+  if (options.compositionDecision) modelResult.compositionDecision = options.compositionDecision;
+  if (options.paletteStrategy) modelResult.paletteStrategy = options.paletteStrategy;
   function json(data, status = 200) {
     return new Response(JSON.stringify(data), {
       status,
@@ -81,7 +83,7 @@ function fixture(options = {}) {
       assert(prompt.includes("category is focal_point, composition, value_structure"));
       if (options.mode === "create_reference") {
         assert(prompt.includes("keep, simplify, remove, or merge"));
-        assert(prompt.includes("3–5 useful watercolor pigments"));
+        assert(prompt.includes("4–7 colors maximum"));
         assert(prompt.includes("5–7 short, ordered actions"));
         assert(prompt.includes("stage-named string"));
         assert(prompt.includes("stage name followed by a colon and space"));
@@ -339,7 +341,9 @@ for (const mode of ["improve_painting", "create_reference"])
     assert.equal(response.status, 200);
     assert.equal((await response.json()).provider, "openai");
     assert.equal(f.calls.filter((c) => c.path.startsWith("/v1/")).length, 1);
-    assert.deepEqual(f.calls.find((c) => c.path.endsWith("/complete_openai_feedback")).body.p_result.overlays, [point, ring, line]);
+    const { width: _width, height: _height, points: _points, ...fallbackText } = invalid;
+    assert.deepEqual(f.calls.find((c) => c.path.endsWith("/complete_openai_feedback")).body.p_result.overlays,
+      [point, { ...fallbackText, type: "point_marker" }, ring, line]);
   });
 test("actual Edge SDK runtime: reference palette metadata is stored without new calls", async () => {
   const palette = [
@@ -361,3 +365,39 @@ test("actual Edge SDK runtime: invented pigment code keeps the safe mock fallbac
   assert.equal((await response.json()).provider, "mock");
   assert(!f.calls.some((c) => c.path.endsWith("/complete_openai_feedback")));
 });
+
+for (const mode of ["improve_painting", "create_reference"])
+  test(`actual Edge SDK runtime: ${mode} saves instructor timing/composition/palette in one analysis`, async () => {
+    const compositionDecision = {
+      mainIssue: "The lower dark pulls attention away from the focal figures.",
+      reason: "Its hard edges compete with the intended focal area.",
+      tryNow: "Stop adding foreground marks; keep one crisp focal accent.",
+      nextStudy: "Test a tighter lower crop before repainting.",
+    };
+    const palette = [
+      { name: "Ultramarine", hex: "#57788b", use: "Sky and atmospheric distance", pigmentCode: "PB29", temperature: "cool", mix: "Test a soft grey with Burnt Sienna", tag: "main_wash" },
+      { name: "Burnt Sienna", hex: "#a87960", use: "Warm planes and neutral shadows", pigmentCode: "PBr7", temperature: "warm", mix: null, tag: "accent" },
+    ];
+    const overlays = [{
+      type: "eye_flow_arrow", id: "eye-path", category: "composition", timing: "next_study",
+      label: "Lead the eye toward the figures", x: 15, y: 70, width: null, height: null,
+      points: [{ x: 15, y: 70 }, { x: 50, y: 50 }], styleHint: "eye_flow", valueGroup: null,
+      priority: "high", shortInstruction: "Keep a quieter foreground path toward the focal group.",
+      reason: "The viewer can follow the shoreline into the painting.", action: "Test this path in a thumbnail before adding more detail.",
+    }];
+    const f = fixture({ mode, palette, overlays, compositionDecision, paletteStrategy: "Keep distance cool and reserve small accents for the focal group." });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).provider, "openai");
+    const saved = f.calls.find((c) => c.path.endsWith("/complete_openai_feedback")).body.p_result;
+    assert.deepEqual(saved.compositionDecision, compositionDecision);
+    assert.deepEqual(saved.palette, palette);
+    assert.deepEqual(saved.overlays, overlays);
+    assert.equal(f.calls.filter((c) => c.path === "/v1/chat/completions").length, 1);
+    const prompt = f.calls.find((c) => c.path === "/v1/chat/completions").body.messages[0].content;
+    assert(prompt.includes("Never tell someone to physically move an already-painted object"));
+    assert(prompt.includes("current_painting, next_study, or both"));
+    assert(prompt.includes("eye_flow_arrow"));
+    assert(prompt.includes("paletteStrategy"));
+    if (mode === "improve_painting") assert(prompt.includes("If the selected focus is Composition"));
+  });
