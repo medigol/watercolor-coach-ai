@@ -34,6 +34,7 @@ export default function CoachingMarks({
       viewBox={`0 0 ${width} ${height}`}
       style={{ position: "absolute", left: 0, top: 0 }}
       accessible={false}
+      aria-hidden={true}
     >
       {notes.map((note, i) => {
         const g = markGeometry(note, width, height),

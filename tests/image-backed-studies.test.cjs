@@ -97,6 +97,7 @@ const input = {
   sketch: "Keep the large shapes connected.",
   values: "Group three values.",
   uri: "private-signed-image",
+  provider: "openai",
 };
 
 test("crop/flow/value/simplify/structure/focal study marks preserve validated saved geometry", () => {
@@ -199,6 +200,24 @@ test("available focal geometry outranks weak high-priority crop/value metadata",
   assert(result.slice(1).every((study) => study.marks.length === 0));
 });
 
+test("mock or missing provider never mixes sample guidance with the private uploaded image", () => {
+  for (const provider of ["mock", undefined, "unknown"]) {
+    const studies = planning.planThumbnailStudies({
+      ...input,
+      provider,
+      overlays: [crop, flow, value, focal],
+    });
+    assert(studies.every((study) => study.marks.length === 0));
+    assert(studies.length >= 2 && studies.length <= 3);
+  }
+  const real = planning.planThumbnailStudies({
+    ...input,
+    provider: "openai",
+    overlays: [crop, flow, value, focal],
+  });
+  assert(real.some((study) => study.marks.length > 0));
+});
+
 function fixture({
   ratio = [1200, 800],
   fail = false,
@@ -264,7 +283,10 @@ function fixture({
   }).default;
   const fallback = {
     type: "Fallback",
-    props: { children: "Generic planning diagram · Adapt this to your image" },
+    props: {
+      children:
+        "Generic planning diagram · use when image overlay is unavailable",
+    },
   };
   const render = (
     kind = "crop",

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { colors, styles } from "./ui";
 export default function FeedbackSection({
@@ -7,14 +8,17 @@ export default function FeedbackSection({
   items,
   highlight = false,
   tone,
+  children,
 }: {
   title: string;
   text?: string;
   items?: string[];
   highlight?: boolean;
   tone?: "blue";
+  children?: ReactNode;
 }) {
-  const accent = title === "What to fix" ? "#A37C4F" : colors.accent;
+  const improvement = title === "What to fix" || title === "What to improve";
+  const accent = improvement ? "#A37C4F" : colors.accent;
   return (
     <View
       style={[
@@ -49,7 +53,7 @@ export default function FeedbackSection({
       )}
       {items?.map((item, index) => (
         <View
-          key={item}
+          key={`${index}-${item}`}
           style={{
             flexDirection: "row",
             gap: 12,
@@ -66,19 +70,21 @@ export default function FeedbackSection({
               borderRadius: 8,
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor:
-                title === "What to fix" ? "#FAF1DF" : colors.pale,
+              backgroundColor: improvement ? "#FAF1DF" : colors.pale,
             }}
           >
             <Ionicons
-              name={title === "What to fix" ? "arrow-up-outline" : "checkmark"}
+              name={improvement ? "arrow-up-outline" : "checkmark"}
               size={15}
               color={accent}
+              accessible={false}
+              aria-hidden={true}
             />
           </View>
           <Text style={[styles.body, { flex: 1 }]}>{item}</Text>
         </View>
       ))}
+      {children}
     </View>
   );
 }

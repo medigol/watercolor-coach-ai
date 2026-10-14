@@ -7,8 +7,11 @@ const safePigmentCodes = new Set(["PB29", "PBr7", "PY43", "PY42"]);
 const temperatures = ["warm", "cool", "neutral"] as const;
 const tags = {
   main_wash: "Main wash",
+  shadow_mix: "Shadow mix",
   accent: "Accent",
   use_sparingly: "Use sparingly",
+  focal_accent: "Focal accent",
+  atmospheric_distance: "Atmospheric distance",
 } as const;
 function optionalText(value: unknown, limit: number): string | null {
   return typeof value === "string" && value.trim() && value.length <= limit
@@ -31,10 +34,11 @@ export function paletteGuidance(color: PaletteColour) {
         : null,
     use: optionalText(color.use, 180),
     mix: optionalText(color.mix, 180),
-    temperature:
-      temperatures.includes(color.temperature as (typeof temperatures)[number])
-        ? color.temperature!
-        : null,
+    temperature: temperatures.includes(
+      color.temperature as (typeof temperatures)[number],
+    )
+      ? color.temperature!
+      : null,
     tag:
       typeof color.tag === "string" && Object.hasOwn(tags, color.tag)
         ? color.tag
@@ -91,7 +95,8 @@ export default function PaletteCard({
       )}
       <View style={{ gap: 20 }}>
         {colours.map((color, index) => {
-          const { pigmentCode, use, mix, temperature, tag } = paletteGuidance(color);
+          const { pigmentCode, use, mix, temperature, tag } =
+            paletteGuidance(color);
           return (
             <View
               key={`${color.name}-${index}`}
@@ -116,7 +121,9 @@ export default function PaletteCard({
               </View>
               {use && (
                 <Text style={paletteStyles.detail}>
-                  <Text style={paletteStyles.detailLabel}>Use in this painting: </Text>
+                  <Text style={paletteStyles.detailLabel}>
+                    Use in this painting:{" "}
+                  </Text>
                   {use}
                 </Text>
               )}
@@ -151,11 +158,21 @@ const paletteStyles = StyleSheet.create({
     padding: 14,
     gap: 5,
   },
-  smallHeading: { color: colors.accent, fontSize: 13, lineHeight: 20, fontWeight: "600" },
+  smallHeading: {
+    color: colors.accent,
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: "600",
+  },
   entry: { gap: 9 },
   divider: { borderTopWidth: 1, borderColor: colors.border, paddingTop: 18 },
   row: { flexDirection: "row", alignItems: "center", gap: 14 },
-  badges: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 6 },
+  badges: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 6,
+  },
   name: { color: colors.ink, fontSize: 17, lineHeight: 24, fontWeight: "600" },
   code: {
     color: colors.muted,
@@ -174,5 +191,10 @@ const paletteStyles = StyleSheet.create({
   },
   detail: { color: colors.muted, fontSize: 14, lineHeight: 22 },
   detailLabel: { color: colors.ink, fontWeight: "600" },
-  note: { borderTopWidth: 1, borderColor: colors.border, paddingTop: 12, gap: 4 },
+  note: {
+    borderTopWidth: 1,
+    borderColor: colors.border,
+    paddingTop: 12,
+    gap: 4,
+  },
 });

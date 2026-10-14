@@ -5,6 +5,7 @@ import {
   type CoachingOverlay,
 } from "./overlays";
 import { timingLabel } from "./coachingPresentation";
+import type { ResultProvider } from "./artworks";
 
 export type ThumbnailKind =
   | "crop"
@@ -22,6 +23,7 @@ export type ThumbnailPlanningInput = {
   values: string;
   title?: string;
   uri?: string;
+  provider?: ResultProvider;
 };
 export type ThumbnailStudy = {
   kind: ThumbnailKind;
@@ -194,7 +196,10 @@ export function planThumbnailStudies(
     ThumbnailKind,
     { score: number; note?: CoachingOverlay }
   >();
-  const hasImage = typeof input.uri === "string" && !!input.uri.trim();
+  const hasImage =
+    input.provider === "openai" &&
+    typeof input.uri === "string" &&
+    !!input.uri.trim();
   const geometry = new Map<ThumbnailKind, CoachingOverlay[]>();
   function marksFor(kind: ThumbnailKind) {
     if (!hasImage) return [];

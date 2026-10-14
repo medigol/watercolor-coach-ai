@@ -355,7 +355,14 @@ test("legacy/mock results render honest diagrams and clear purposes without new 
     ),
   );
   assert.equal((html.match(/<svg\b/g) ?? []).length, 2);
-  assert.equal((html.match(/Adapt this to your image/g) ?? []).length, 2);
+  assert.equal(
+    (
+      html.match(
+        /Generic planning diagram · use when image overlay is unavailable/g,
+      ) ?? []
+    ).length,
+    2,
+  );
   assert(html.includes("Big-shape plan"));
   assert(html.includes("Value mass study"));
   assert(html.includes("Plan the painting as big shapes first."));
@@ -367,6 +374,25 @@ test("legacy/mock results render honest diagrams and clear purposes without new 
       html,
     ),
   );
+});
+
+test("mock/unknown provider keeps generic worksheets even with URI and valid saved geometry", () => {
+  for (const provider of ["mock", undefined]) {
+    const html = render({
+      ...empty,
+      uri: "private-image",
+      provider,
+      overlays: [note({ type: "crop_box", width: 40, height: 30 })],
+    });
+    assert(
+      html.includes(
+        "Generic planning diagram · use when image overlay is unavailable",
+      ),
+    );
+    assert(!html.includes("Study overlay on your image"));
+    assert(!html.includes("private-image"));
+    assert(html.includes('aria-hidden="true"'));
+  }
 });
 
 test("all template types render meaningful frame, arrow, value, merge and horizon diagrams", () => {

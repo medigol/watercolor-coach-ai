@@ -24,12 +24,16 @@ function loadComponents() {
       },
     ).outputText;
     new Function("exports", "require", code)(exports, (name) => {
-      if (name === "react" || name === "react/jsx-runtime") return require(name);
+      if (name === "react" || name === "react/jsx-runtime")
+        return require(name);
       if (name === "react-native")
         return {
           Text: (props) => React.createElement("span", null, props.children),
           View: (props) => {
-            const style = Object.assign({}, ...[props.style].flat(2).filter(Boolean));
+            const style = Object.assign(
+              {},
+              ...[props.style].flat(2).filter(Boolean),
+            );
             return React.createElement(
               "div",
               {
@@ -60,7 +64,9 @@ function loadComponents() {
 const load = loadComponents();
 const { usablePalette } = load("components/PaletteCard.tsx");
 const render = (props) =>
-  renderToStaticMarkup(React.createElement(load("components/PaletteCard.tsx").default, props));
+  renderToStaticMarkup(
+    React.createElement(load("components/PaletteCard.tsx").default, props),
+  );
 
 test("palette renders large translucent wash swatches rather than flat color blocks", () => {
   const html = render({ palette: [{ name: "Ultramarine", hex: "#526DA6" }] });
@@ -76,7 +82,8 @@ test("palette renders large translucent wash swatches rather than flat color blo
 
 test("supplied palette strategy, uses, temperature, mix and painting tags render", () => {
   const html = render({
-    strategy: "Keep earth colours quiet and reserve dark accents for the focal area.",
+    strategy:
+      "Keep earth colours quiet and reserve dark accents for the focal area.",
     palette: [
       {
         name: "Ultramarine",
@@ -98,12 +105,40 @@ test("supplied palette strategy, uses, temperature, mix and painting tags render
     ],
   });
   for (const text of [
-    "Palette strategy", "Keep earth colours quiet", "Use in this painting:",
-    "Cool sky wash and distant shadows.", "Mix idea:", "Mix with Burnt Sienna",
-    "Cool", "Warm", "Main wash", "Use sparingly", "PB29", "PBr7",
-  ]) assert(html.includes(text));
+    "Palette strategy",
+    "Keep earth colours quiet",
+    "Use in this painting:",
+    "Cool sky wash and distant shadows.",
+    "Mix idea:",
+    "Mix with Burnt Sienna",
+    "Cool",
+    "Warm",
+    "Main wash",
+    "Use sparingly",
+    "PB29",
+    "PBr7",
+  ])
+    assert(html.includes(text));
   assert(html.includes("paint formulations vary"));
   assert(!/buy|purchase|brand|manufacturer/i.test(html));
+});
+
+test("shadow, focal and distance roles render as friendly painting tags without invented metadata", () => {
+  const palette = [
+    { name: "Ultramarine", hex: "#526DA6", tag: "shadow_mix" },
+    { name: "Burnt Sienna", hex: "#AE6F50", tag: "focal_accent" },
+    { name: "Yellow Ochre", hex: "#CCA55A", tag: "atmospheric_distance" },
+  ];
+  const html = render({
+    palette,
+    strategy:
+      "Keep the main wash cool; reserve warm accents near the focal area.",
+  });
+  for (const tag of ["Shadow mix", "Focal accent", "Atmospheric distance"])
+    assert(html.includes(tag));
+  assert(html.includes("Keep the main wash cool"));
+  assert(!/Use in this painting|Mix idea|PB29|PBr7|PY43/.test(html));
+  assert.deepEqual(usablePalette(palette), palette);
 });
 
 test("old saved palette and mock palettes render without invented painting metadata", () => {
@@ -116,7 +151,11 @@ test("old saved palette and mock palettes render without invented painting metad
     const html = render({ palette });
     for (const color of palette) assert(html.includes(color.name));
     assert(html.includes("Approximate swatches"));
-    assert(!/Palette strategy|Use in this painting|Mix idea|PB29|PY43|Main wash|Cool|Warm/.test(html));
+    assert(
+      !/Palette strategy|Use in this painting|Mix idea|PB29|PY43|Main wash|Cool|Warm/.test(
+        html,
+      ),
+    );
     assert(!/purchase|manufacturer|generated palette|exact brand/i.test(html));
   }
   assert.deepEqual(usablePalette(old), old);
@@ -124,18 +163,34 @@ test("old saved palette and mock palettes render without invented painting metad
 
 test("invalid optional palette fields are omitted without losing valid saved color data", () => {
   const base = { name: "Sap green", hex: "#7F986E" };
-  assert.deepEqual(usablePalette([{ ...base,
-    temperature: "hot",
-    use: { text: "Vegetation" },
-    mix: "x".repeat(181),
-    tag: "constructor",
-    pigmentCode: "PB29",
-  }]), [base]);
-  for (const invalid of [undefined, null, "palette", {}, [null], [{ name: {}, hex: "#ffffff" }]]) {
+  assert.deepEqual(
+    usablePalette([
+      {
+        ...base,
+        temperature: "hot",
+        use: { text: "Vegetation" },
+        mix: "x".repeat(181),
+        tag: "constructor",
+        pigmentCode: "PB29",
+      },
+    ]),
+    [base],
+  );
+  for (const invalid of [
+    undefined,
+    null,
+    "palette",
+    {},
+    [null],
+    [{ name: {}, hex: "#ffffff" }],
+  ]) {
     assert.deepEqual(usablePalette(invalid), []);
     assert.equal(render({ palette: invalid }), "");
   }
-  assert.equal(usablePalette(Array.from({ length: 100 }, () => base)).length, 8);
+  assert.equal(
+    usablePalette(Array.from({ length: 100 }, () => base)).length,
+    8,
+  );
   const html = render({ palette: [base], strategy: { unexpected: true } });
   assert(html.includes("Sap green"));
   assert(!html.includes("Palette strategy"));
@@ -143,12 +198,27 @@ test("invalid optional palette fields are omitted without losing valid saved col
 
 test("optional pigment codes use only conservative common family matches", () => {
   for (const [name, code] of [
-    ["Ultramarine blue", "PB29"], ["Burnt Sienna", "PBr7"],
-    ["Yellow Ochre", "PY43"], ["Ochre", "PY42"],
-  ]) assert.equal(usablePalette([{ name, hex: "#526DA6", pigmentCode: code }])[0].pigmentCode, code);
+    ["Ultramarine blue", "PB29"],
+    ["Burnt Sienna", "PBr7"],
+    ["Yellow Ochre", "PY43"],
+    ["Ochre", "PY42"],
+  ])
+    assert.equal(
+      usablePalette([{ name, hex: "#526DA6", pigmentCode: code }])[0]
+        .pigmentCode,
+      code,
+    );
   for (const [name, code] of [
-    ["Ultramarine", "PB35"], ["Raw Sienna", "PBr7"],
-    ["Red Ochre", "PY43"], ["Cerulean", "PB35"],
-    ["Payne's Gray", "PBk7"], ["Sap green", "PB29"],
-  ]) assert.equal(usablePalette([{ name, hex: "#526DA6", pigmentCode: code }])[0].pigmentCode, undefined);
+    ["Ultramarine", "PB35"],
+    ["Raw Sienna", "PBr7"],
+    ["Red Ochre", "PY43"],
+    ["Cerulean", "PB35"],
+    ["Payne's Gray", "PBk7"],
+    ["Sap green", "PB29"],
+  ])
+    assert.equal(
+      usablePalette([{ name, hex: "#526DA6", pigmentCode: code }])[0]
+        .pigmentCode,
+      undefined,
+    );
 });
