@@ -245,7 +245,17 @@ test("strict response schemas reject malformed fields, extra fields, unsafe pale
     assert.equal(schema.additionalProperties, false);
     assert.deepEqual(
       schema.required.sort(),
-      [...Object.keys(result), "overlays", "compositionDecision", "paletteStrategy", ...(mode === "improve_painting" ? ["palette"] : [])].sort(),
+      [
+        ...Object.keys(result),
+        "overlays",
+        "compositionDecision",
+        "paletteStrategy",
+        "promising",
+        "brushPlan",
+        ...(mode === "improve_painting"
+          ? ["palette"]
+          : ["whatWorks", "whatToFix"]),
+      ].sort(),
     );
   }
   assert(
@@ -334,60 +344,203 @@ const richNote = {
 };
 test("rich geometry validates and malformed notes are discarded independently", () => {
   const line = {
-    ...richNote, id: "note-2", type: "guide_line", category: "composition",
-    width: null, height: null, points: [{ x: 10, y: 65 }, { x: 85, y: 60 }],
+    ...richNote,
+    id: "note-2",
+    type: "guide_line",
+    category: "composition",
+    width: null,
+    height: null,
+    points: [
+      { x: 10, y: 65 },
+      { x: 85, y: 60 },
+    ],
   };
   const mass = {
-    ...richNote, id: "note-3", type: "value_mass", category: "value_structure",
-    width: null, height: null, valueGroup: "middle",
-    points: [{ x: 15, y: 55 }, { x: 75, y: 60 }, { x: 65, y: 88 }],
+    ...richNote,
+    id: "note-3",
+    type: "value_mass",
+    category: "value_structure",
+    width: null,
+    height: null,
+    valueGroup: "middle",
+    points: [
+      { x: 15, y: 55 },
+      { x: 75, y: 60 },
+      { x: 65, y: 88 },
+    ],
   };
   for (const mode of ["improve_painting", "create_reference"]) {
-    const sample = mode === "improve_painting" ? samples.improveResult : samples.referenceResult;
-    assert(contract.validFeedback({ ...sample, overlays: [richNote, line, mass] }, mode));
-    const raw = { ...sample, overlays: [richNote, { ...line, points: [{ x: 120, y: 0 }, { x: 2, y: 5 }] }, mass] };
+    const sample =
+      mode === "improve_painting"
+        ? samples.improveResult
+        : samples.referenceResult;
+    assert(
+      contract.validFeedback(
+        { ...sample, overlays: [richNote, line, mass] },
+        mode,
+      ),
+    );
+    const raw = {
+      ...sample,
+      overlays: [
+        richNote,
+        {
+          ...line,
+          points: [
+            { x: 120, y: 0 },
+            { x: 2, y: 5 },
+          ],
+        },
+        mass,
+      ],
+    };
     assert(!contract.validFeedback(raw, mode));
     const cleaned = contract.cleanOverlayFeedback(raw);
-    const { width: _width, height: _height, points: _points, ...lineText } = line;
-    assert.deepEqual(cleaned.overlays, [richNote, { ...lineText, type: "point_marker" }, mass]);
+    const {
+      width: _width,
+      height: _height,
+      points: _points,
+      ...lineText
+    } = line;
+    assert.deepEqual(cleaned.overlays, [
+      richNote,
+      { ...lineText, type: "point_marker" },
+      mass,
+    ]);
     assert(contract.validFeedback(cleaned, mode));
-    const { width: _ringWidth, height: _ringHeight, points: _ringPoints, ...ringText } = richNote;
-    assert.deepEqual(contract.cleanOverlayFeedback({ ...sample, overlays: [{ ...richNote, width: null }] }),
-      { ...sample, overlays: [{ ...ringText, type: "point_marker" }] });
+    const {
+      width: _ringWidth,
+      height: _ringHeight,
+      points: _ringPoints,
+      ...ringText
+    } = richNote;
+    assert.deepEqual(
+      contract.cleanOverlayFeedback({
+        ...sample,
+        overlays: [{ ...richNote, width: null }],
+      }),
+      { ...sample, overlays: [{ ...ringText, type: "point_marker" }] },
+    );
   }
   for (const invalid of [
     { ...richNote, type: "focal_ring", width: null, height: null },
-    { ...line, points: [{ x: 10, y: 10 }, { x: 10, y: 10 }] },
-    { ...mass, points: [{ x: 10, y: 10 }, { x: 20, y: 20 }, { x: 30, y: 30 }] },
-    { ...mass, points: [{ x: 10, y: 10 }, { x: 20, y: 20 }] },
+    {
+      ...line,
+      points: [
+        { x: 10, y: 10 },
+        { x: 10, y: 10 },
+      ],
+    },
+    {
+      ...mass,
+      points: [
+        { x: 10, y: 10 },
+        { x: 20, y: 20 },
+        { x: 30, y: 30 },
+      ],
+    },
+    {
+      ...mass,
+      points: [
+        { x: 10, y: 10 },
+        { x: 20, y: 20 },
+      ],
+    },
     { ...line, styleHint: "glowing" },
     { ...richNote, category: "object_detection" },
     { ...mass, valueGroup: "bright" },
-    { ...line, points: [{ x: 10, y: 10, extra: true }, { x: 15, y: 25 }] },
+    {
+      ...line,
+      points: [
+        { x: 10, y: 10, extra: true },
+        { x: 15, y: 25 },
+      ],
+    },
     { ...richNote, width: 90 },
-  ]) assert(!overlayContract.validOverlays([invalid]), JSON.stringify(invalid));
+  ])
+    assert(!overlayContract.validOverlays([invalid]), JSON.stringify(invalid));
   assert(overlayContract.validOverlays([richNote]));
   assert(!overlayContract.validOverlays([richNote, richNote]));
-  assert.deepEqual(overlayContract.usableOverlays([richNote, richNote]), [richNote]);
+  assert.deepEqual(overlayContract.usableOverlays([richNote, richNote]), [
+    richNote,
+  ]);
 });
 test("optional practical palette metadata stays compatible and rejects invented pigment codes", () => {
   const palette = [
-    { name: "Ultramarine", hex: "#496983", use: "Cool sky and distant shadows", pigmentCode: "PB29" },
-    { name: "Burnt Sienna", hex: "#aa765c", use: "Warm building planes; test a neutral mix", pigmentCode: "PBr7" },
-    { name: "Yellow Ochre", hex: "#bf9b60", use: "Light warm walls", pigmentCode: "PY43" },
-    { name: "Payne's Gray", hex: "#45535e", use: "Optional convenience dark; use sparingly", pigmentCode: null },
+    {
+      name: "Ultramarine",
+      hex: "#496983",
+      use: "Cool sky and distant shadows",
+      pigmentCode: "PB29",
+    },
+    {
+      name: "Burnt Sienna",
+      hex: "#aa765c",
+      use: "Warm building planes; test a neutral mix",
+      pigmentCode: "PBr7",
+    },
+    {
+      name: "Yellow Ochre",
+      hex: "#bf9b60",
+      use: "Light warm walls",
+      pigmentCode: "PY43",
+    },
+    {
+      name: "Payne's Gray",
+      hex: "#45535e",
+      use: "Optional convenience dark; use sparingly",
+      pigmentCode: null,
+    },
   ];
-  assert(contract.validFeedback({ ...samples.referenceResult, palette }, "create_reference"));
+  assert(
+    contract.validFeedback(
+      { ...samples.referenceResult, palette },
+      "create_reference",
+    ),
+  );
   assert(contract.validFeedback(samples.referenceResult, "create_reference"));
   for (const patch of [
-    { pigmentCode: "PB99" }, { pigmentCode: "PB29/PBk7" }, { manufacturer: "unverified" },
-    { pigmentCode: "PBr7" }, { use: "x".repeat(181) }, { use: true },
-  ]) assert(!contract.validFeedback({ ...samples.referenceResult, palette: [{ ...palette[0], ...patch }] }, "create_reference"));
-  for (const [name, pigmentCode] of [["Raw Sienna", "PBr7"], ["Red Ochre", "PY43"], ["Payne's Gray", "PB29"]])
-    assert(!contract.validFeedback({ ...samples.referenceResult, palette: [{ name, hex: "#808080", pigmentCode }] }, "create_reference"));
+    { pigmentCode: "PB99" },
+    { pigmentCode: "PB29/PBk7" },
+    { manufacturer: "unverified" },
+    { pigmentCode: "PBr7" },
+    { use: "x".repeat(181) },
+    { use: true },
+  ])
+    assert(
+      !contract.validFeedback(
+        { ...samples.referenceResult, palette: [{ ...palette[0], ...patch }] },
+        "create_reference",
+      ),
+    );
+  for (const [name, pigmentCode] of [
+    ["Raw Sienna", "PBr7"],
+    ["Red Ochre", "PY43"],
+    ["Payne's Gray", "PB29"],
+  ])
+    assert(
+      !contract.validFeedback(
+        {
+          ...samples.referenceResult,
+          palette: [{ name, hex: "#808080", pigmentCode }],
+        },
+        "create_reference",
+      ),
+    );
   const schema = contract.feedbackSchema("create_reference");
-  assert.deepEqual(schema.properties.palette.items.required, ["name", "hex", "use", "pigmentCode", "temperature", "mix", "tag"]);
-  assert.deepEqual(schema.properties.palette.items.properties.pigmentCode.enum, ["PB29", "PBr7", "PY43", "PY42", null]);
+  assert.deepEqual(schema.properties.palette.items.required, [
+    "name",
+    "hex",
+    "use",
+    "pigmentCode",
+    "temperature",
+    "mix",
+    "tag",
+  ]);
+  assert.deepEqual(
+    schema.properties.palette.items.properties.pigmentCode.enum,
+    ["PB29", "PBr7", "PY43", "PY42", null],
+  );
 });
 test("rich overlay cleanup preserves OpenAI result and calls the model only once", async () => {
   let generated = 0;
@@ -395,7 +548,10 @@ test("rich overlay cleanup preserves OpenAI result and calls the model only once
   const f = fixture({
     generate: async () => {
       generated++;
-      return { ...samples.improveResult, overlays: [richNote, { ...richNote, x: -3 }] };
+      return {
+        ...samples.improveResult,
+        overlays: [richNote, { ...richNote, x: -3 }],
+      };
     },
     finish: async (_u, _i, result) => {
       saved = result;
@@ -411,15 +567,54 @@ test("rich overlay cleanup preserves OpenAI result and calls the model only once
 });
 
 test("semantic mark aliases and timing remain strict while invalid geometry keeps usable coaching cards", () => {
-  const paths = [{ x: 10, y: 70 }, { x: 35, y: 50 }, { x: 55, y: 45 }];
+  const paths = [
+    { x: 10, y: 70 },
+    { x: 35, y: 50 },
+    { x: 55, y: 45 },
+  ];
   const aliases = [
-    { ...richNote, type: "eye_flow_arrow", category: null, styleHint: "eye_flow", timing: "next_study", width: null, height: null, points: paths },
-    { ...richNote, type: "composition_line", category: null, styleHint: "horizon", timing: "both", width: null, height: null, points: paths },
-    { ...richNote, type: "simplify_region", category: null, styleHint: "simplify", timing: "current_painting" },
-    { ...richNote, type: "reserve_light_mark", category: null, styleHint: "preserve_light", timing: null },
+    {
+      ...richNote,
+      type: "eye_flow_arrow",
+      category: null,
+      styleHint: "eye_flow",
+      timing: "next_study",
+      width: null,
+      height: null,
+      points: paths,
+    },
+    {
+      ...richNote,
+      type: "composition_line",
+      category: null,
+      styleHint: "horizon",
+      timing: "both",
+      width: null,
+      height: null,
+      points: paths,
+    },
+    {
+      ...richNote,
+      type: "simplify_region",
+      category: null,
+      styleHint: "simplify",
+      timing: "current_painting",
+    },
+    {
+      ...richNote,
+      type: "reserve_light_mark",
+      category: null,
+      styleHint: "preserve_light",
+      timing: null,
+    },
   ];
   const kinds = ["arrow", "guide_line", "region_highlight", "focal_ring"];
-  const categories = ["composition", "composition", "simplification", "reserve_light"];
+  const categories = [
+    "composition",
+    "composition",
+    "simplification",
+    "reserve_light",
+  ];
   aliases.forEach((note, index) => {
     assert(overlayContract.validOverlays([note]));
     assert.equal(overlayContract.overlayKind(note), kinds[index]);
@@ -437,35 +632,117 @@ test("semantic mark aliases and timing remain strict while invalid geometry keep
     assert(!Object.hasOwn(usable, "points"));
     assert(overlayContract.validOverlays([usable]));
     assert.deepEqual(overlayContract.usableOverlays([{ ...bad, x: -1 }]), []);
-    assert.deepEqual(overlayContract.usableOverlays([{ ...bad, timing: "tomorrow" }]), []);
-    assert.deepEqual(overlayContract.usableOverlays([{ ...bad, action: "" }]), []);
-    assert.deepEqual(overlayContract.usableOverlays([{ ...bad, unexpected: "not allowed" }]), []);
+    assert.deepEqual(
+      overlayContract.usableOverlays([{ ...bad, timing: "tomorrow" }]),
+      [],
+    );
+    assert.deepEqual(
+      overlayContract.usableOverlays([{ ...bad, action: "" }]),
+      [],
+    );
+    assert.deepEqual(
+      overlayContract.usableOverlays([{ ...bad, unexpected: "not allowed" }]),
+      [],
+    );
   });
 });
 test("composition decisions and extended palettes are optional and compatible in both feedback modes", () => {
-  const palette = [{ name: "Ultramarine", hex: "#52738a", pigmentCode: "PB29", use: "Cool sky wash and distance", temperature: "cool", mix: "Test a diluted neutral with Burnt Sienna", tag: "main_wash" }];
-  const decision = { mainIssue: "The foreground dark competes with the figures.", reason: "It attracts the eye before the focal area.", tryNow: "Stop adding detail to the foreground; keep focal accents selective.", nextStudy: "Test a higher crop in a small thumbnail before repainting." };
+  const palette = [
+    {
+      name: "Ultramarine",
+      hex: "#52738a",
+      pigmentCode: "PB29",
+      use: "Cool sky wash and distance",
+      temperature: "cool",
+      mix: "Test a diluted neutral with Burnt Sienna",
+      tag: "main_wash",
+    },
+  ];
+  const decision = {
+    mainIssue: "The foreground dark competes with the figures.",
+    reason: "It attracts the eye before the focal area.",
+    tryNow:
+      "Stop adding detail to the foreground; keep focal accents selective.",
+    nextStudy: "Test a higher crop in a small thumbnail before repainting.",
+  };
   for (const mode of ["improve_painting", "create_reference"]) {
-    const sample = mode === "improve_painting" ? samples.improveResult : samples.referenceResult;
-    const enriched = { ...sample, palette, paletteStrategy: "Use cool distance and reserve stronger darks near the figures.", compositionDecision: decision };
+    const sample =
+      mode === "improve_painting"
+        ? samples.improveResult
+        : samples.referenceResult;
+    const enriched = {
+      ...sample,
+      palette,
+      paletteStrategy:
+        "Use cool distance and reserve stronger darks near the figures.",
+      compositionDecision: decision,
+    };
     assert(contract.validFeedback(sample, mode));
     assert(contract.validFeedback(enriched, mode));
-    assert(contract.validFeedback({ ...enriched, compositionDecision: { tryNow: decision.tryNow } }, mode));
-    assert(contract.validFeedback({ ...enriched, compositionDecision: null, paletteStrategy: null }, mode));
-    for (const compositionDecision of [[], "text", { mainIssue: "x".repeat(351) }, { tryNow: 3 }, { mainIssue: "" }, { moveObject: "not allowed" }])
-      assert(!contract.validFeedback({ ...enriched, compositionDecision }, mode));
-    assert(!contract.validFeedback({ ...enriched, paletteStrategy: "x".repeat(351) }, mode));
-    for (const patch of [{ temperature: "hot" }, { tag: "buy_now" }, { mix: "x".repeat(181) }, { temperature: ["cool"] }, { manufacturer: "unverified" }])
-      assert(!contract.validFeedback({ ...enriched, palette: [{ ...palette[0], ...patch }] }, mode));
+    assert(
+      contract.validFeedback(
+        { ...enriched, compositionDecision: { tryNow: decision.tryNow } },
+        mode,
+      ),
+    );
+    assert(
+      contract.validFeedback(
+        { ...enriched, compositionDecision: null, paletteStrategy: null },
+        mode,
+      ),
+    );
+    for (const compositionDecision of [
+      [],
+      "text",
+      { mainIssue: "x".repeat(351) },
+      { tryNow: 3 },
+      { mainIssue: "" },
+      { moveObject: "not allowed" },
+    ])
+      assert(
+        !contract.validFeedback({ ...enriched, compositionDecision }, mode),
+      );
+    assert(
+      !contract.validFeedback(
+        { ...enriched, paletteStrategy: "x".repeat(351) },
+        mode,
+      ),
+    );
+    for (const patch of [
+      { temperature: "hot" },
+      { tag: "buy_now" },
+      { mix: "x".repeat(181) },
+      { temperature: ["cool"] },
+      { manufacturer: "unverified" },
+    ])
+      assert(
+        !contract.validFeedback(
+          { ...enriched, palette: [{ ...palette[0], ...patch }] },
+          mode,
+        ),
+      );
   }
-  assert(contract.validFeedback({ ...samples.improveResult, palette: null }, "improve_painting"));
-  assert(!contract.validFeedback({ ...samples.referenceResult, palette: null }, "create_reference"));
+  assert(
+    contract.validFeedback(
+      { ...samples.improveResult, palette: null },
+      "improve_painting",
+    ),
+  );
+  assert(
+    !contract.validFeedback(
+      { ...samples.referenceResult, palette: null },
+      "create_reference",
+    ),
+  );
 });
 test("strict model schemas require nullable optional guidance fields without forcing legacy JSON changes", () => {
   function checkObject(schema) {
     if (!schema || typeof schema !== "object") return;
     if (schema.properties) {
-      assert.deepEqual([...schema.required].sort(), Object.keys(schema.properties).sort());
+      assert.deepEqual(
+        [...schema.required].sort(),
+        Object.keys(schema.properties).sort(),
+      );
       assert.equal(schema.additionalProperties, false);
       Object.values(schema.properties).forEach(checkObject);
     }
@@ -474,10 +751,204 @@ test("strict model schemas require nullable optional guidance fields without for
   for (const mode of ["improve_painting", "create_reference"]) {
     const schema = contract.feedbackSchema(mode);
     checkObject(schema);
-    assert.deepEqual(schema.properties.compositionDecision.type, ["object", "null"]);
-    assert.deepEqual(schema.properties.overlays.items.properties.timing.enum, ["current_painting", "next_study", "both", null]);
-    assert(schema.properties.overlays.items.properties.type.enum.includes("eye_flow_arrow"));
-    assert(schema.properties.overlays.items.properties.styleHint.enum.includes("connect_shadow"));
-    assert.deepEqual(schema.properties.palette.type, mode === "improve_painting" ? ["array", "null"] : "array");
+    assert.deepEqual(schema.properties.compositionDecision.type, [
+      "object",
+      "null",
+    ]);
+    assert.deepEqual(schema.properties.overlays.items.properties.timing.enum, [
+      "current_painting",
+      "next_study",
+      "both",
+      null,
+    ]);
+    assert(
+      schema.properties.overlays.items.properties.type.enum.includes(
+        "eye_flow_arrow",
+      ),
+    );
+    assert(
+      schema.properties.overlays.items.properties.styleHint.enum.includes(
+        "connect_shadow",
+      ),
+    );
+    assert.deepEqual(
+      schema.properties.palette.type,
+      mode === "improve_painting" ? ["array", "null"] : "array",
+    );
   }
+});
+
+const practicalBrushPlan = [
+  {
+    stage: "Next study — first sky wash",
+    brush: "Large soft brush for the broad sky",
+    wash: "Tea-strength cool wash across the distant sky",
+    technique: "wet_on_wet",
+    timing: "Wet a new sheet evenly; begin before the sheen disappears.",
+    edges: "Keep distant sky edges soft; preserve the focal light.",
+    stop: "Stop before the sky loses its light paper glow.",
+  },
+  {
+    stage: "Next study — connected shadows",
+    brush: "Medium round for connected shadow shapes",
+    wash: "Milk-strength blue-earth neutral for the middle values",
+    technique: "damp_on_damp",
+    timing: "Wait until the shine has nearly left; test on scrap first.",
+    edges: "Let secondary shadow edges disappear into the damp wash.",
+    stop: "Leave small scattered darks until the broad value reads clearly.",
+  },
+  {
+    stage: "Current painting — focal accents",
+    brush: "Small round for one selective focal accent",
+    wash: "A restrained dark only beside the focal light",
+    technique: "wet_on_dry",
+    timing: "Wait until fully dry; avoid rewetting existing glazes.",
+    edges: "Keep the focal accent crisp and surrounding detail quiet.",
+    stop: "Stop after one accent; check it from arm's length.",
+  },
+];
+test("supportive observations and three-stage brush guidance preserve both legacy result shapes", () => {
+  for (const mode of ["improve_painting", "create_reference"]) {
+    const sample =
+      mode === "improve_painting"
+        ? samples.improveResult
+        : samples.referenceResult;
+    const result = {
+      ...sample,
+      promising: "The clear foreground light can support a calmer focal group.",
+      brushPlan: practicalBrushPlan,
+      whatWorks: [
+        "The reserved reflection separates the foreground from the focal group.",
+        "The cool distance supports the warmer main subject.",
+      ],
+      whatToFix: [
+        "Keep the supporting foreground marks quieter.",
+        "Reserve the sharpest dark accent for the focal subject.",
+      ],
+    };
+    assert(contract.validFeedback(sample, mode));
+    assert(contract.validFeedback(result, mode));
+    assert(
+      contract.validFeedback(
+        { ...result, promising: null, brushPlan: null },
+        mode,
+      ),
+    );
+    assert(contract.validFeedback({ ...result, brushPlan: [] }, mode));
+    for (const promising of [true, [], "", "x".repeat(351)])
+      assert(!contract.validFeedback({ ...result, promising }, mode));
+    for (const brushPlan of [
+      "text",
+      {},
+      [null],
+      [practicalBrushPlan[0], ...practicalBrushPlan],
+      [{ ...practicalBrushPlan[0], stage: "x".repeat(61) }],
+      [{ ...practicalBrushPlan[0], brush: "x".repeat(121) }],
+      [{ ...practicalBrushPlan[0], timing: "" }],
+      [{ ...practicalBrushPlan[0], technique: "wet-on-wet" }],
+      [{ ...practicalBrushPlan[0], technique: ["wet_on_wet"] }],
+      [{ ...practicalBrushPlan[0], product: "not allowed" }],
+      [{ ...practicalBrushPlan[0], stop: null }],
+      [{ ...practicalBrushPlan[0], edges: undefined }],
+    ])
+      assert(
+        !contract.validFeedback({ ...result, brushPlan }, mode),
+        JSON.stringify(brushPlan),
+      );
+  }
+  assert(
+    contract.validFeedback(
+      { ...samples.referenceResult, whatWorks: null, whatToFix: null },
+      "create_reference",
+    ),
+  );
+  assert(
+    !contract.validFeedback(
+      { ...samples.referenceResult, whatWorks: [null] },
+      "create_reference",
+    ),
+  );
+  assert(
+    !contract.validFeedback(
+      { ...samples.referenceResult, whatToFix: [] },
+      "create_reference",
+    ),
+  );
+  assert(
+    !contract.validFeedback(
+      { ...samples.improveResult, whatWorks: null },
+      "improve_painting",
+    ),
+  );
+  assert(
+    !contract.validFeedback(
+      { ...samples.improveResult, whatToFix: null },
+      "improve_painting",
+    ),
+  );
+});
+test("extended palette roles validate without removing safe legacy tags", () => {
+  for (const tag of [
+    "main_wash",
+    "accent",
+    "use_sparingly",
+    "shadow_mix",
+    "focal_accent",
+    "atmospheric_distance",
+  ])
+    for (const mode of ["improve_painting", "create_reference"]) {
+      const sample =
+        mode === "improve_painting"
+          ? samples.improveResult
+          : samples.referenceResult;
+      const palette = [
+        { name: "Ultramarine", hex: "#57788b", pigmentCode: "PB29", tag },
+      ];
+      assert(contract.validFeedback({ ...sample, palette }, mode));
+    }
+  for (const mode of ["improve_painting", "create_reference"]) {
+    const schema = contract.feedbackSchema(mode);
+    assert.deepEqual(schema.properties.promising.type, ["string", "null"]);
+    assert.deepEqual(schema.properties.brushPlan.type, ["array", "null"]);
+    assert.equal(schema.properties.brushPlan.items.additionalProperties, false);
+    assert.deepEqual(schema.properties.brushPlan.items.required, [
+      "stage",
+      "brush",
+      "wash",
+      "technique",
+      "timing",
+      "edges",
+      "stop",
+    ]);
+    assert.deepEqual(
+      schema.properties.brushPlan.items.properties.technique.enum,
+      ["wet_on_wet", "wet_on_dry", "damp_on_damp"],
+    );
+    assert.deepEqual(
+      schema.properties.whatWorks.type,
+      mode === "improve_painting" ? "array" : ["array", "null"],
+    );
+    assert.deepEqual(
+      schema.properties.whatToFix.type,
+      mode === "improve_painting" ? "array" : ["array", "null"],
+    );
+    assert(
+      schema.properties.palette.items.properties.tag.enum.includes(
+        "shadow_mix",
+      ),
+    );
+  }
+});
+test("invalid optional brush guidance uses existing mock fallback without a real quota completion", async () => {
+  const f = fixture({
+    generate: async () => ({
+      ...samples.improveResult,
+      brushPlan: [{ ...practicalBrushPlan[0], technique: "unknown" }],
+    }),
+  });
+  const response = await f.run();
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).provider, "mock");
+  assert(f.calls.includes("mock"));
+  assert(!f.calls.includes("finish"));
 });

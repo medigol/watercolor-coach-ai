@@ -160,6 +160,7 @@ export default function CoachingOverlay({
                 height={12}
                 viewBox="0 0 12 12"
                 accessible={false}
+                aria-hidden={true}
               >
                 <Path
                   d="M1 11 L11 1 M5 1 L11 1 L11 7"

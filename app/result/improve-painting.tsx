@@ -5,6 +5,8 @@ import CompositionSuggestionCard from "../../components/CompositionSuggestionCar
 import CompositionDecisionCard from "../../components/CompositionDecisionCard";
 import ThumbnailPlanning from "../../components/ThumbnailPlanning";
 import PaletteCard from "../../components/PaletteCard";
+import BrushWashPlanCard from "../../components/BrushWashPlanCard";
+import CompositionModels from "../../components/CompositionModels";
 import ResultLayout from "../../components/ResultLayout";
 import ResultProviderLabel from "../../components/ResultProviderLabel";
 import FollowUpQuestion from "../../components/FollowUpQuestion";
@@ -29,11 +31,14 @@ export default function ImproveResult() {
   if (loading || error)
     return <ResultState loading={loading} error={error} retry={retry} />;
   const compositionFocus = focus === "Composition";
+  const live = provider === "openai";
   return (
     <ResultLayout
       header={
         <>
-          <Text style={styles.title}>{result.title}</Text>
+          <Text style={styles.title}>
+            {live ? result.title : "Sample watercolor guide"}
+          </Text>
           <ResultProviderLabel provider={provider} isSaved={isSaved} />
           {!!warning && (
             <Text accessibilityRole="alert" style={styles.body}>
@@ -45,18 +50,12 @@ export default function ImproveResult() {
           )}
         </>
       }
-      image={<SavedImage overlays={result.overlays} uri={image} />}
+      image={
+        live ? <SavedImage overlays={result.overlays} uri={image} /> : null
+      }
       guidance={
         <>
           <Text style={styles.caption}>IMPROVE · one painting decision</Text>
-          {compositionFocus && (
-            <CompositionDecisionCard
-              decision={result.compositionDecision}
-              overlays={result.overlays}
-              mainAdvice={result.mainAdvice}
-              composition={result.composition}
-            />
-          )}
           <FeedbackSection
             title="Main advice"
             text={
@@ -66,8 +65,19 @@ export default function ImproveResult() {
             }
             highlight
           />
-          <FeedbackDetails works={result.whatWorks} fixes={result.whatToFix} />
-          {!compositionFocus && (
+          <FeedbackDetails
+            works={result.whatWorks}
+            fixes={result.whatToFix}
+            promising={result.promising}
+          />
+          {compositionFocus ? (
+            <CompositionDecisionCard
+              decision={result.compositionDecision}
+              overlays={result.overlays}
+              mainAdvice={result.mainAdvice}
+              composition={result.composition}
+            />
+          ) : (
             <CompositionSuggestionCard
               title="Try in the next study"
               text={result.composition}
@@ -76,14 +86,23 @@ export default function ImproveResult() {
         </>
       }
       planning={
-        <ThumbnailPlanning
-          uri={image}
-          overlays={result.overlays}
-          title={result.title}
-          composition={result.composition}
-          sketch={result.sketch}
-          values={result.values}
-        />
+        <>
+          <CompositionModels
+            overlays={live ? result.overlays : undefined}
+            composition={result.composition}
+            values={result.values}
+            title={live ? result.title : undefined}
+          />
+          <ThumbnailPlanning
+            provider={provider}
+            uri={live ? image : undefined}
+            overlays={live ? result.overlays : undefined}
+            title={live ? result.title : undefined}
+            composition={result.composition}
+            sketch={result.sketch}
+            values={result.values}
+          />
+        </>
       }
       painting={
         <>
@@ -91,12 +110,13 @@ export default function ImproveResult() {
             palette={result.palette}
             strategy={result.paletteStrategy}
           />
+          <BrushWashPlanCard plan={result.brushPlan} />
           <Text style={styles.caption}>PRACTISE · one useful next step</Text>
           <FeedbackSection
             title="Next 15-minute practice"
             text={result.practice}
           />
-          <FollowUpQuestion text={result.prompt} />
+          {live && <FollowUpQuestion text={result.prompt} />}
         </>
       }
     />

@@ -156,7 +156,13 @@ function Diagram({
         backgroundColor: tone.paper,
       }}
     >
-      <Svg width="100%" height="100%" viewBox="0 0 320 180" accessible={false}>
+      <Svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 320 180"
+        accessible={false}
+        aria-hidden={true}
+      >
         {!simplePair && (
           <>
             <Rect
@@ -419,7 +425,7 @@ export default function ThumbnailPlanning(props: ThumbnailPlanningInput) {
           <Text style={{ ...styles.heading, fontSize: 17, lineHeight: 23 }}>
             {study.title}
           </Text>
-          {props.uri && study.marks.length ? (
+          {props.provider === "openai" && props.uri && study.marks.length ? (
             <ImageStudyThumbnail
               uri={props.uri}
               kind={study.kind}
@@ -428,7 +434,8 @@ export default function ThumbnailPlanning(props: ThumbnailPlanningInput) {
                 <View style={{ gap: 8 }}>
                   <Diagram kind={study.kind} layout={study.layout} />
                   <Text style={styles.caption}>
-                    Generic planning diagram · Adapt this to your image
+                    Generic planning diagram · use when image overlay is
+                    unavailable
                   </Text>
                 </View>
               }
@@ -437,7 +444,7 @@ export default function ThumbnailPlanning(props: ThumbnailPlanningInput) {
             <>
               <Diagram kind={study.kind} layout={study.layout} />
               <Text style={styles.caption}>
-                Generic planning diagram · Adapt this to your image
+                Generic planning diagram · use when image overlay is unavailable
               </Text>
             </>
           )}

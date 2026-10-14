@@ -23,7 +23,23 @@ export interface PaletteColour {
   use?: string | null;
   temperature?: "warm" | "cool" | "neutral" | null;
   mix?: string | null;
-  tag?: "main_wash" | "accent" | "use_sparingly" | null;
+  tag?:
+    | "main_wash"
+    | "shadow_mix"
+    | "accent"
+    | "use_sparingly"
+    | "focal_accent"
+    | "atmospheric_distance"
+    | null;
+}
+export interface BrushWashStep {
+  stage: string;
+  brush: string;
+  wash: string;
+  technique: "wet_on_wet" | "wet_on_dry" | "damp_on_damp";
+  timing: string;
+  edges: string;
+  stop: string;
 }
 export interface CompositionDecision {
   mainIssue?: string | null;

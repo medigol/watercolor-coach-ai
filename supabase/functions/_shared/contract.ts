@@ -16,6 +16,28 @@ function safePigmentForName(name: string, code: unknown): boolean {
   }
   return false;
 }
+export const brushTechniques = [
+  "wet_on_wet",
+  "wet_on_dry",
+  "damp_on_damp",
+] as const;
+export const paletteTags = [
+  "main_wash",
+  "accent",
+  "use_sparingly",
+  "shadow_mix",
+  "focal_accent",
+  "atmospheric_distance",
+] as const;
+export interface BrushWashStep {
+  stage: string;
+  brush: string;
+  wash: string;
+  technique: (typeof brushTechniques)[number];
+  timing: string;
+  edges: string;
+  stop: string;
+}
 export interface CompositionDecision {
   mainIssue?: string | null;
   reason?: string | null;
@@ -24,34 +46,75 @@ export interface CompositionDecision {
 }
 const boundedText = (value: unknown, max: number) =>
   typeof value === "string" && !!value.trim() && value.length <= max;
+function validBrushPlan(value: unknown): boolean {
+  if (value == null) return true;
+  if (!Array.isArray(value) || value.length > 3) return false;
+  const fields = [
+    "stage",
+    "brush",
+    "wash",
+    "technique",
+    "timing",
+    "edges",
+    "stop",
+  ];
+  return value.every(
+    (step) =>
+      step &&
+      typeof step === "object" &&
+      !Array.isArray(step) &&
+      Object.keys(step).length === fields.length &&
+      Object.keys(step).every((key) => fields.includes(key)) &&
+      fields
+        .filter((key) => key !== "technique")
+        .every((key) => boundedText(step[key], key === "stage" ? 60 : 120)) &&
+      brushTechniques.includes(step.technique),
+  );
+}
 function validCompositionDecision(value: unknown): boolean {
   if (value == null) return true;
   if (typeof value !== "object" || Array.isArray(value)) return false;
   const fields = ["mainIssue", "reason", "tryNow", "nextStudy"];
-  return Object.entries(value).every(([key, item]) =>
-    fields.includes(key) && (item == null || boundedText(item, 350))
+  return Object.entries(value).every(
+    ([key, item]) =>
+      fields.includes(key) && (item == null || boundedText(item, 350)),
   );
 }
 function validPalette(value: unknown): boolean {
   // Keep the prior eight-item bound for old saved JSON; the prompt prefers 4–7
   // colors at most and fewer when they cover the scene's painting roles.
-  return Array.isArray(value) && value.length >= 1 && value.length <= 8 &&
-    value.every((p) =>
-      p && typeof p === "object" && !Array.isArray(p) &&
-      Object.keys(p).every((key) =>
-        ["name", "hex", "use", "pigmentCode", "temperature", "mix", "tag"]
-          .includes(key)
-      ) && boundedText(p.name, 60) && typeof p.hex === "string" &&
-      /^#[0-9a-f]{6}$/i.test(p.hex) &&
-      (p.use == null || boundedText(p.use, 180)) &&
-      (p.pigmentCode == null || safePigmentCodes.includes(p.pigmentCode)) &&
-      safePigmentForName(p.name, p.pigmentCode) &&
-      (p.temperature == null ||
-        ["warm", "cool", "neutral"].includes(p.temperature)) &&
-      (p.mix == null || boundedText(p.mix, 180)) &&
-      (p.tag == null ||
-        ["main_wash", "accent", "use_sparingly"].includes(p.tag))
-    );
+  return (
+    Array.isArray(value) &&
+    value.length >= 1 &&
+    value.length <= 8 &&
+    value.every(
+      (p) =>
+        p &&
+        typeof p === "object" &&
+        !Array.isArray(p) &&
+        Object.keys(p).every((key) =>
+          [
+            "name",
+            "hex",
+            "use",
+            "pigmentCode",
+            "temperature",
+            "mix",
+            "tag",
+          ].includes(key),
+        ) &&
+        boundedText(p.name, 60) &&
+        typeof p.hex === "string" &&
+        /^#[0-9a-f]{6}$/i.test(p.hex) &&
+        (p.use == null || boundedText(p.use, 180)) &&
+        (p.pigmentCode == null || safePigmentCodes.includes(p.pigmentCode)) &&
+        safePigmentForName(p.name, p.pigmentCode) &&
+        (p.temperature == null ||
+          ["warm", "cool", "neutral"].includes(p.temperature)) &&
+        (p.mix == null || boundedText(p.mix, 180)) &&
+        (p.tag == null || paletteTags.includes(p.tag)),
+    )
+  );
 }
 export type Mode = "improve_painting" | "create_reference";
 export type Provider = "mock" | "openai";
@@ -147,9 +210,12 @@ export function validFeedback(
       "overlays",
       "compositionDecision",
       "paletteStrategy",
-      ...(mode === "improve_painting" ? ["palette"] : []),
-    ]
-      .filter((key) => Object.hasOwn(v, key)),
+      "promising",
+      "brushPlan",
+      ...(mode === "improve_painting"
+        ? ["palette"]
+        : ["whatWorks", "whatToFix"]),
+    ].filter((key) => Object.hasOwn(v, key)),
   ];
   if (
     v.overlays !== undefined &&
@@ -166,10 +232,14 @@ export function validFeedback(
   }
   if (
     !validCompositionDecision(v.compositionDecision) ||
+    !validBrushPlan(v.brushPlan) ||
+    (v.promising != null && !boundedText(v.promising, 350)) ||
     (v.paletteStrategy != null && !boundedText(v.paletteStrategy, 350)) ||
-    (mode === "improve_painting" && v.palette != null &&
+    (mode === "improve_painting" &&
+      v.palette != null &&
       !validPalette(v.palette))
-  ) return false;
+  )
+    return false;
   const text = (s: unknown, max = 700) =>
     typeof s === "string" && s.trim().length > 0 && s.length <= max;
   if (
@@ -190,7 +260,12 @@ export function validFeedback(
       list(v.whatToFix)
     );
   }
-  return list(v.steps) && validPalette(v.palette);
+  return (
+    list(v.steps) &&
+    validPalette(v.palette) &&
+    (v.whatWorks == null || list(v.whatWorks)) &&
+    (v.whatToFix == null || list(v.whatToFix))
+  );
 }
 export function feedbackSchema(mode: Mode) {
   const text = { type: "string" };
@@ -243,7 +318,7 @@ export function feedbackSchema(mode: Mode) {
         mix: { type: ["string", "null"] },
         tag: {
           type: ["string", "null"],
-          enum: ["main_wash", "accent", "use_sparingly", null],
+          enum: [...paletteTags, null],
         },
       },
       required: [
@@ -264,11 +339,30 @@ export function feedbackSchema(mode: Mode) {
     tryNow: { type: ["string", "null"] },
     nextStudy: { type: ["string", "null"] },
   };
+  const brushFields = {
+    stage: text,
+    brush: text,
+    wash: text,
+    technique: { type: "string", enum: [...brushTechniques] },
+    timing: text,
+    edges: text,
+    stop: text,
+  };
   const common = {
     title: text,
     composition: text,
     sketch: text,
     values: text,
+    promising: { type: ["string", "null"] },
+    brushPlan: {
+      type: ["array", "null"],
+      items: {
+        type: "object",
+        properties: brushFields,
+        required: Object.keys(brushFields),
+        additionalProperties: false,
+      },
+    },
     compositionDecision: {
       type: ["object", "null"],
       properties: decisionFields,
@@ -286,21 +380,24 @@ export function feedbackSchema(mode: Mode) {
       },
     },
   };
-  const properties = mode === "improve_painting"
-    ? {
-      ...common,
-      mainAdvice: text,
-      whatWorks: list,
-      whatToFix: list,
-      practice: text,
-      prompt: text,
-      palette: { ...palette, type: ["array", "null"] },
-    }
-    : {
-      ...common,
-      palette,
-      steps: list,
-    };
+  const properties =
+    mode === "improve_painting"
+      ? {
+          ...common,
+          mainAdvice: text,
+          whatWorks: list,
+          whatToFix: list,
+          practice: text,
+          prompt: text,
+          palette: { ...palette, type: ["array", "null"] },
+        }
+      : {
+          ...common,
+          palette,
+          steps: list,
+          whatWorks: { ...list, type: ["array", "null"] },
+          whatToFix: { ...list, type: ["array", "null"] },
+        };
   return {
     type: "object",
     properties,

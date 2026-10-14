@@ -3,6 +3,9 @@ import ReferencePreparation from "../../components/ReferencePreparation";
 import CompositionSuggestionCard from "../../components/CompositionSuggestionCard";
 import ThumbnailPlanning from "../../components/ThumbnailPlanning";
 import PaletteCard from "../../components/PaletteCard";
+import FeedbackDetails from "../../components/FeedbackDetails";
+import BrushWashPlanCard from "../../components/BrushWashPlanCard";
+import CompositionModels from "../../components/CompositionModels";
 import PaintingStepsCard from "../../components/PaintingStepsCard";
 import ResultLayout from "../../components/ResultLayout";
 import ResultProviderLabel from "../../components/ResultProviderLabel";
@@ -16,11 +19,14 @@ export default function ReferenceResult() {
     useSavedResult<ReferenceData>(sample, "create_reference");
   if (loading || error)
     return <ResultState loading={loading} error={error} retry={retry} />;
+  const live = provider === "openai";
   return (
     <ResultLayout
       header={
         <>
-          <Text style={styles.title}>{result.title}</Text>
+          <Text style={styles.title}>
+            {live ? result.title : "Sample watercolor guide"}
+          </Text>
           <ResultProviderLabel provider={provider} isSaved={isSaved} />
           {!!warning && (
             <Text accessibilityRole="alert" style={styles.body}>
@@ -30,7 +36,13 @@ export default function ReferenceResult() {
         </>
       }
       image={
-        <SavedImage overlays={result.overlays} uri={image} label="Your photo" />
+        live ? (
+          <SavedImage
+            overlays={result.overlays}
+            uri={image}
+            label="Your photo"
+          />
+        ) : null
       }
       guidance={
         <>
@@ -42,15 +54,27 @@ export default function ReferenceResult() {
           <Text style={styles.caption}>
             Coaching notes for a painting you create. No new image is generated.
           </Text>
+          <FeedbackDetails
+            works={result.whatWorks}
+            fixes={result.whatToFix}
+            promising={result.promising}
+          />
         </>
       }
       planning={
         <>
-          {!!image && <ReferencePreparation uri={image} />}
+          {live && !!image && <ReferencePreparation uri={image} />}
+          <CompositionModels
+            overlays={live ? result.overlays : undefined}
+            composition={result.composition}
+            values={result.values}
+            title={live ? result.title : undefined}
+          />
           <ThumbnailPlanning
-            uri={image}
-            overlays={result.overlays}
-            title={result.title}
+            provider={provider}
+            uri={live ? image : undefined}
+            overlays={live ? result.overlays : undefined}
+            title={live ? result.title : undefined}
             composition={result.composition}
             sketch={result.sketch}
             values={result.values}
@@ -66,6 +90,7 @@ export default function ReferenceResult() {
             palette={result.palette}
             strategy={result.paletteStrategy}
           />
+          <BrushWashPlanCard plan={result.brushPlan} />
           <PaintingStepsCard steps={result.steps} />
         </>
       }

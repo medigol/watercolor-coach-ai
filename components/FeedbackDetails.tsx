@@ -1,50 +1,50 @@
-import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import FeedbackSection from "./FeedbackSection";
-import { colors, styles } from "./ui";
+import { styles } from "./ui";
+
+function feedbackItems(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value
+        .filter(
+          (item): item is string =>
+            typeof item === "string" && !!item.trim() && item.length <= 500,
+        )
+        .slice(0, 8)
+    : [];
+}
+
 export default function FeedbackDetails({
   works,
   fixes,
+  promising,
 }: {
-  works: string[];
-  fixes: string[];
+  works?: unknown;
+  fixes?: unknown;
+  promising?: unknown;
 }) {
-  const [open, setOpen] = useState(false);
+  const strengths = feedbackItems(works);
+  const improvements = feedbackItems(fixes);
+  const potential =
+    typeof promising === "string" && promising.trim() && promising.length <= 350
+      ? promising
+      : undefined;
+  if (!strengths.length && !improvements.length && !potential) return null;
   return (
     <View style={{ gap: 12 }}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="What works and what to fix"
-        aria-expanded={open}
-        accessibilityState={{ expanded: open }}
-        onPress={() => setOpen(!open)}
-        style={[
-          styles.card,
-          {
-            padding: 16,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          },
-        ]}
-      >
-        <View style={{ gap: 4, flex: 1 }}>
-          <Text style={[styles.heading, { fontSize: 17 }]}>
-            What works &amp; what to fix
-          </Text>
-          <Text style={styles.caption}>
-            Keep the strengths. Avoid competing detail.
-          </Text>
-        </View>
-        <Text style={{ color: colors.accent, fontSize: 22 }}>
-          {open ? "−" : "+"}
-        </Text>
-      </Pressable>
-      {open && (
-        <>
-          <FeedbackSection title="What works" items={works} />
-          <FeedbackSection title="What to fix" items={fixes} />
-        </>
+      {!!(strengths.length || potential) && (
+        <FeedbackSection title="What works well" items={strengths}>
+          {!!potential && (
+            <View style={{ gap: 6 }}>
+              <Text style={[styles.heading, { fontSize: 16 }]}>
+                What is promising
+              </Text>
+              <Text style={styles.body}>{potential}</Text>
+            </View>
+          )}
+        </FeedbackSection>
+      )}
+      {!!improvements.length && (
+        <FeedbackSection title="What to improve" items={improvements} />
       )}
     </View>
   );

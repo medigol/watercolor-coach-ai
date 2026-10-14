@@ -21,7 +21,7 @@ export default function ResultProviderLabel({
         ]}
       >
         {provider === "mock"
-          ? "Sample guide shown — live AI feedback was unavailable."
+          ? "Sample guide shown — live AI feedback was unavailable. This example may not match your uploaded image."
           : "AI feedback"}
       </Text>
       {isSaved && <Text style={styles.caption}>Saved result</Text>}
