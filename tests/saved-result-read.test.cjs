@@ -122,14 +122,14 @@ for (const mode of ["improve_painting", "create_reference"])
       assert.equal(f.calls.model, 0);
       assert.equal(f.calls.saves, 0);
     });
-test("no-ID sample routes are labelled mock rather than saved, with no requests", async () => {
+test("a result route without an ID shows an error instead of an implicit production sample, with no requests", async () => {
   const f = fixture("improve_painting", "openai", { sampleOnly: true });
   f.render();
   await f.settle();
   const state = f.render();
   assert.equal(state.isSaved, false);
   assert.equal(state.provider, "mock");
-  assert.equal(state.result.title, "Lake House");
+  assert.match(state.error, /choose an artwork from My Artworks/);
   assert.equal(state.loading, false);
   assert.deepEqual(f.calls, { reads: [], signs: [], model: 0, saves: 0 });
 });

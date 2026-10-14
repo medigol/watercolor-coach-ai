@@ -1,14 +1,13 @@
 import {
   validInput,
   validFeedback,
-  cleanOverlayFeedback,
+  cleanFeedback,
   uuid,
   readLimited,
   limitMessage,
   type Input,
   type Saved,
 } from "../_shared/contract.ts";
-import { improveResult, referenceResult } from "../_shared/mockResults.ts";
 export interface User {
   id: string;
   token: string;
@@ -29,7 +28,6 @@ export interface Dependencies {
     input: Input,
     result: Record<string, unknown>,
   ): Promise<Saved>;
-  mock(user: User, input: Input, result: unknown): Promise<Saved>;
   release(user: User, input: Input): Promise<void>;
 }
 const cors = {
@@ -44,13 +42,16 @@ const reply = (value: unknown, status = 200) =>
     status,
     headers: { ...cors, "Content-Type": "application/json" },
   });
-function success(saved: Saved, warning?: string) {
-  if (!uuid(saved.id) || !["mock", "openai"].includes(saved.provider))
+function success(saved: Saved, expectedId: string) {
+  if (
+    saved.id !== expectedId ||
+    !uuid(saved.id) ||
+    !["mock", "openai"].includes(saved.provider)
+  )
     throw new Error("Invalid save");
   return reply({
     id: saved.id,
     provider: saved.provider,
-    ...(warning && saved.provider === "mock" ? { warning } : {}),
   });
 }
 export function createHandler(deps: Dependencies) {
@@ -96,16 +97,26 @@ export function createHandler(deps: Dependencies) {
     let claimed = false;
     try {
       const existing = await deps.existing(user, input);
-      if (existing) return success(existing);
+      if (existing) return success(existing, input.request_id);
       const usage = await deps.usage(user);
       if (usage.used >= Math.min(usage.limit, 3))
         return reply({ code: "usage_limit", message: limitMessage }, 403);
-      const sample =
-        input.mode === "improve_painting" ? improveResult : referenceResult;
-      if (!deps.hasOpenAI || !input.image_path)
-        return success(
-          await deps.mock(user, input, sample),
-          "Automatic feedback is unavailable. We saved a sample guide instead.",
+      if (!deps.hasOpenAI)
+        return reply(
+          {
+            code: "unavailable",
+            message:
+              "Live AI feedback could not be prepared. Please try again.",
+          },
+          503,
+        );
+      if (!input.image_path)
+        return reply(
+          {
+            code: "invalid_request",
+            message: "Select an image before requesting live feedback.",
+          },
+          400,
         );
       const claim = await deps.claim(user, input);
       if (claim.status === "limit")
@@ -119,30 +130,30 @@ export function createHandler(deps: Dependencies) {
           },
           409,
         );
-      if (claim.status === "existing") return success(claim);
+      if (claim.status === "existing") return success(claim, input.request_id);
       claimed = true;
-      let data: Record<string, unknown> | null = null;
-      try {
-        const bytes = await deps.download(user, input.image_path);
-        const generated = cleanOverlayFeedback(
-          await deps.generate(input, bytes),
+      const bytes = await deps.download(user, input.image_path);
+      const data = cleanFeedback(await deps.generate(input, bytes), input.mode);
+      if (!validFeedback(data, input.mode))
+        return reply(
+          {
+            code: "unavailable",
+            message:
+              "Live AI feedback could not be prepared. Please try again.",
+          },
+          422,
         );
-        if (validFeedback(generated, input.mode)) data = generated;
-      } catch {
-        /* Never expose upstream errors, keys, prompts, or image contents. */
-      }
-      if (data) return success(await deps.finish(user, input, data));
-      return success(
-        await deps.mock(user, input, sample),
-        "Automatic feedback is unavailable. We saved a sample guide instead.",
-      );
+      const saved = await deps.finish(user, input, data);
+      if (saved.provider !== "openai") throw new Error("Invalid live save");
+      return success(saved, input.request_id);
     } catch {
-      // A database/network outcome may be uncertain; frontend fallback reuses the
-      // same artwork ID so it cannot create a duplicate or overwrite a real result.
+      // Never expose upstream details or replace a live request with a sample.
+      // A save may have committed before its response was lost. Reuse this ID on
+      // manual retry so existing() can recover it without another model call.
       return reply(
         {
           code: "unavailable",
-          message: "Feedback is temporarily unavailable.",
+          message: "Live AI feedback could not be prepared. Please try again.",
         },
         503,
       );

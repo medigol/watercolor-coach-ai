@@ -8,6 +8,11 @@ import type {
 export type ResultProvider = "mock" | "openai";
 export const freeLimitMessage =
   "You have used your 3 free AI feedback results. More feedback will be available after subscriptions are added.";
+export const liveFeedbackErrorMessage =
+  "Live AI feedback could not be prepared. Please try again.";
+const signInMessage = "Please sign in again before requesting feedback.";
+const busyMessage =
+  "Feedback is already being prepared. Check My Artworks in a moment.";
 export function createSaveAttempt(): SaveAttempt {
   return { id: requestId() };
 }
@@ -15,7 +20,6 @@ export interface SaveAttempt {
   id: string;
   ownerId?: string;
   imagePath?: string | null;
-  warning?: string | null;
   mayHaveSaved?: boolean;
 }
 function requestId() {
@@ -31,10 +35,10 @@ function requestId() {
 function validSave(
   value: unknown,
   id: string,
-): value is { id: string; provider: ResultProvider; warning?: string } {
+): value is { id: string; provider: "openai" } {
   if (!value || typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
-  return v.id === id && (v.provider === "mock" || v.provider === "openai");
+  return v.id === id && v.provider === "openai";
 }
 export type SavedMode = "improve_painting" | "create_reference";
 import type { CoachingOverlay } from "./overlays";
@@ -122,42 +126,62 @@ export async function saveArtwork(
   attempt: SaveAttempt = createSaveAttempt(),
 ) {
   const client = requireSupabase();
-  const {
-    data: { user },
-    error: authError,
-  } = await client.auth.getUser();
+  let identity: Awaited<ReturnType<typeof client.auth.getUser>>;
+  try {
+    identity = await client.auth.getUser();
+  } catch {
+    throw new Error(liveFeedbackErrorMessage);
+  }
+  const { data: { user }, error: authError } = identity;
+  if (
+    authError &&
+    (authError.name === "AuthRetryableFetchError" ||
+      authError.status === 0 || (authError.status ?? 0) >= 500)
+  )
+    throw new Error(liveFeedbackErrorMessage);
   if (authError || !user)
-    throw new Error("Please sign in again before saving.");
+    throw new Error(signInMessage);
   const ownerId = user.id;
   if (
     !validArtworkId(attempt.id) ||
     (attempt.ownerId && attempt.ownerId !== ownerId)
   )
-    throw new Error("Your account changed. Please try again after signing in.");
+    throw new Error(signInMessage);
   attempt.ownerId = ownerId;
   let path = attempt.imagePath ?? null;
-  let warning = attempt.warning ?? null;
   async function checkAccount() {
     const { data, error } = await client.auth.getSession();
     if (error || data.session?.user.id !== ownerId)
-      throw new Error(
-        "Your account changed. Please try again after signing in.",
-      );
+      throw new Error(signInMessage);
   }
-  if (image && attempt.imagePath === undefined) {
+  if (!path) {
+    if (!image)
+      throw new Error("Choose a painting or photo before requesting feedback.");
+    let uploadMessage =
+      "Your image could not be uploaded. Choose it again and try again.";
     try {
-      if (image.fileSize !== undefined && image.fileSize > imageLimit)
+      if (image.fileSize !== undefined && image.fileSize > imageLimit) {
+        uploadMessage = "Choose an image smaller than 10 MB, then try again.";
         throw new Error("Image too large");
+      }
       const response = await fetch(image.uri);
       if (!response.ok) throw new Error("Image unavailable");
       const size = Number(response.headers.get("content-length"));
-      if (Number.isFinite(size) && size > imageLimit)
+      if (Number.isFinite(size) && size > imageLimit) {
+        uploadMessage = "Choose an image smaller than 10 MB, then try again.";
         throw new Error("Image too large");
+      }
       const bytes = await response.arrayBuffer();
       // Use file signatures, rather than trusting a filename or supplied MIME.
       const format = imageType(bytes);
-      if (!format || !bytes.byteLength || bytes.byteLength > imageLimit)
+      if (bytes.byteLength > imageLimit) {
+        uploadMessage = "Choose an image smaller than 10 MB, then try again.";
+        throw new Error("Image too large");
+      }
+      if (!format || !bytes.byteLength) {
+        uploadMessage = "Choose a JPEG, PNG, or WebP image, then try again.";
         throw new Error("Unsupported image");
+      }
       await checkAccount();
       const next = `${ownerId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${format.extension}`;
       const { error } = await client.storage
@@ -165,23 +189,27 @@ export async function saveArtwork(
         .upload(next, bytes, { contentType: format.mime, upsert: false });
       if (error) throw error;
       path = next;
-    } catch {
-      warning =
-        "Your image could not be stored. We saved your sample feedback and will show the sample artwork instead.";
+    } catch (error) {
+      // A failed upload remains retryable. It must never submit a null image or
+      // turn the user's live request into a sample result.
+      attempt.imagePath = undefined;
+      throw new Error(
+        error instanceof Error && error.message === signInMessage
+          ? signInMessage : uploadMessage,
+      );
     }
   }
-  const result = mode === "improve_painting" ? improveResult : referenceResult;
   const id = attempt.id;
   attempt.imagePath = path;
-  attempt.warning = warning;
   let definitelyRejected = false;
-  let rpcStarted = false;
+  let edgeStarted = false;
   let edgeMayHaveSaved = attempt.mayHaveSaved ?? false;
-  let specificError: string | null = null;
+  let message = liveFeedbackErrorMessage;
   try {
     await checkAccount();
-    // One ID is shared by Edge and local fallback. If a response is lost after
-    // commit, the fallback returns that saved result instead of saving twice.
+    // Retries reuse this ID and upload so Edge can return an already-saved
+    // OpenAI result after a lost response, without another model call or charge.
+    edgeStarted = true;
     edgeMayHaveSaved = true;
     let edge: { data: unknown; error: unknown };
     try {
@@ -201,80 +229,62 @@ export async function saveArtwork(
     if (!edge.error && validSave(edge.data, id)) {
       attempt.mayHaveSaved = true;
       await checkAccount();
-      const edgeWarning =
-        typeof edge.data.warning === "string" ? edge.data.warning : null;
       return {
         id,
         provider: edge.data.provider,
-        warning: warning ?? edgeWarning,
+        warning: null,
       };
+    }
+    if (
+      !edge.error &&
+      edge.data &&
+      typeof edge.data === "object" &&
+      (edge.data as Record<string, unknown>).id === id &&
+      (edge.data as Record<string, unknown>).provider === "mock"
+    ) {
+      // A stale Edge deployment may have saved a sample under this ID. Keep
+      // its referenced image, but let the next manual retry request live feedback
+      // under a fresh ID after the deployment is fixed. Never retry automatically.
+      attempt.id = requestId();
+      attempt.mayHaveSaved = true;
     }
     const context = (edge.error as { context?: Response } | null)?.context;
     if (context instanceof Response) {
       // Only definite rejections can safely discard an uploaded image.
-      if ([400, 401, 403, 404, 405].includes(context.status))
+      definitelyRejected =
+        context.status >= 400 && context.status < 500 &&
+        ![408, 409, 429].includes(context.status);
+      if (definitelyRejected)
         edgeMayHaveSaved = attempt.mayHaveSaved ?? false;
       const problem = await context
         .clone()
         .json()
         .catch(() => null);
-      if (problem?.code === "usage_limit") specificError = freeLimitMessage;
-      if (problem?.code === "auth")
-        specificError = "Please sign in again before saving.";
-      if (problem?.code === "invalid_request")
-        specificError = "Your account or image changed. Please try again.";
-      if (problem?.code === "busy")
-        specificError =
-          "Feedback is already being prepared. Check My Artworks in a moment.";
-      if (specificError) throw new Error(specificError);
+      if (problem?.code === "usage_limit") message = freeLimitMessage;
+      else if (problem?.code === "auth" || context.status === 401)
+        message = signInMessage;
+      else if (problem?.code === "busy") message = busyMessage;
     }
-    await checkAccount();
-    rpcStarted = true;
-    const { data, error, status } = await client.rpc("save_mock_feedback", {
-      p_mode: mode,
-      p_title: result.title,
-      p_focus_area: focus,
-      p_image_path: path,
-      p_result: result,
-      p_expected_user_id: ownerId,
-      p_request_id: id,
-    });
-    definitelyRejected =
-      !!error &&
-      status >= 400 &&
-      status < 500 &&
-      status !== 408 &&
-      status !== 429;
-    if (error || !validSave(data, id)) throw new Error("Save failed");
-    attempt.mayHaveSaved = true;
-    await checkAccount();
-    return {
-      id,
-      provider: data.provider,
-      warning:
-        warning ??
-        (data.provider === "mock"
-          ? "Automatic feedback is unavailable. We saved a sample guide instead."
-          : null),
-    };
-  } catch {
-    attempt.mayHaveSaved ||=
-      edgeMayHaveSaved || (rpcStarted && !definitelyRejected);
-    if (path && !attempt.mayHaveSaved && (!rpcStarted || definitelyRejected)) {
+    // HTTP 200 with a sample/invalid provider can come from a stale deployment.
+    // Reject it instead of navigating to a critique that never analysed the image.
+    throw new Error(message);
+  } catch (error) {
+    if (error instanceof Error && error.message === signInMessage)
+      message = signInMessage;
+    attempt.mayHaveSaved ||= edgeMayHaveSaved;
+    if (path && !attempt.mayHaveSaved && (!edgeStarted || definitelyRejected)) {
       // A definite rejection may remove the image. A retry must upload again;
       // uncertain outcomes retain both the path and ID for safe recovery.
       attempt.imagePath = undefined;
-      attempt.warning = undefined;
       await client.storage
         .from("artworks")
         .remove([path])
         .catch(() => {});
     }
     throw new Error(
-      specificError ??
-        ((rpcStarted && !definitelyRejected) || edgeMayHaveSaved
-          ? "We could not confirm your save. Check My Artworks before trying again."
-          : "We could not save your feedback. Check your connection and account setup, then try again."),
+      message === liveFeedbackErrorMessage && attempt.mayHaveSaved
+        ? `${message} Check My Artworks before requesting it again; your result may already be saved.`
+        : message,
     );
   }
 }

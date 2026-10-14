@@ -111,7 +111,11 @@ export function useSavedResult<T extends ImproveData | ReferenceData>(
         ? params.focus[0]
         : params.focus,
     loading: !!id && (loading || completedRequest !== requestKey),
-    error: id && completedRequest === requestKey ? error : "",
+    error: !id
+      ? "We could not open this saved result. Please choose an artwork from My Artworks."
+      : completedRequest === requestKey
+        ? error
+        : "",
     warning: Array.isArray(params.warning) ? params.warning[0] : params.warning,
     retry: () => setAttempt((v) => v + 1),
   };

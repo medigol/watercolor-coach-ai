@@ -19,7 +19,7 @@ export default function ImprovePainting() {
     <Screen>
       <Text style={styles.title}>Improve my painting</Text>
       <Text style={styles.body}>
-        Choose a painting, or explore with our Lake House sample.
+        Choose your painting for clear, practical feedback.
       </Text>
       <ImageSelector
         sample="Lake House — sample painting placeholder"
@@ -85,8 +85,8 @@ export default function ImprovePainting() {
         title="Get feedback"
       />
       <Text style={styles.caption}>
-        Feedback uses your painting when available. A sample guide is saved if
-        automatic feedback is unavailable.
+        Feedback uses your uploaded painting. If it cannot be prepared, you can
+        retry here.
       </Text>
     </Screen>
   );

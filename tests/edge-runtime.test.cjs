@@ -132,7 +132,7 @@ function fixture(options = {}) {
       return json({
         choices: [
           {
-            finish_reason: "stop",
+            finish_reason: options.finishReason ?? "stop",
             message: {
               content: options.invalidJSON
                 ? "{invalid json"
@@ -179,12 +179,9 @@ function fixture(options = {}) {
     }
     if (url.pathname.startsWith("/rest/v1/rpc/")) {
       if (url.pathname.endsWith("/save_mock_feedback")) {
-        assert.equal(headers.get("authorization"), "Bearer user-session");
-        assert.equal(headers.get("apikey"), fakePublic);
-        assert.equal(body.p_expected_user_id, uid);
-        assert.equal(body.p_request_id, id);
-        stored ??= { artwork_id: id, provider: "mock", mode: body.p_mode };
-        return json({ id, provider: stored.provider });
+        throw new Error(
+          "A production Edge request must never save a mock result",
+        );
       }
       assert.equal(headers.get("apikey"), fakeServer);
       assert.equal(headers.get("authorization"), `Bearer ${fakeServer}`);
@@ -205,14 +202,18 @@ function fixture(options = {}) {
           body.p_result,
           load(
             path.join(root, "supabase/functions/_shared/contract.ts"),
-          ).cleanOverlayFeedback(modelResult),
+          ).cleanFeedback(modelResult, options.mode ?? input.mode),
         );
+        if (options.saveError)
+          return json({ message: "private database failure" }, 500);
         stored ??= { artwork_id: id, provider: "openai", mode: body.p_mode };
         if (options.lostCommitResponse)
           return json({ message: "Connection lost after commit" }, 503);
         return json({
-          id,
-          provider: options.badProvider ? ["openai"] : "openai",
+          id: options.completionId ?? id,
+          provider: options.badProvider
+            ? ["openai"]
+            : (options.completionProvider ?? "openai"),
         });
       }
       if (url.pathname.endsWith("/release_feedback_request"))
@@ -250,7 +251,9 @@ function fixture(options = {}) {
             ({
               SUPABASE_URL: "https://edge-test.supabase.co",
               SUPABASE_ANON_KEY: fakePublic,
-              SUPABASE_SERVICE_ROLE_KEY: fakeServer,
+              SUPABASE_SERVICE_ROLE_KEY: options.noAdmin
+                ? undefined
+                : fakeServer,
               OPENAI_API_KEY: options.noKey ? undefined : fakeOpenAI,
             })[name],
         },
@@ -294,22 +297,30 @@ for (const mode of ["improve_painting", "create_reference"])
   });
 for (const [name, options] of [
   ["missing key", { noKey: true }],
+  ["missing server credential", { noAdmin: true }],
   ["invalid JSON", { invalidJSON: true }],
   ["invalid response envelope", { badEnvelope: true }],
   ["model failure", { modelError: true }],
   ["refusal", { refusal: true }],
+  ["truncated model output", { finishReason: "length" }],
   ["unreadable image", { imageMissing: true }],
 ])
-  test(`actual Edge SDK runtime: ${name} saves mock without OpenAI commit`, async () => {
+  test(`actual Edge SDK runtime: ${name} returns live failure without any mock save`, async () => {
     const f = fixture(options);
     const r = await f.run();
-    assert.equal(r.status, 200);
+    assert.equal(r.status, 503);
     const value = await r.json();
-    assert.equal(value.provider, "mock");
-    assert.match(value.warning, /sample guide/);
+    assert.deepEqual(value, {
+      code: "unavailable",
+      message: "Live AI feedback could not be prepared. Please try again.",
+    });
+    assert(!JSON.stringify(value).includes("private"));
+    assert(!f.calls.some((c) => c.path.endsWith("/save_mock_feedback")));
     assert(!f.calls.some((c) => c.path.endsWith("/complete_openai_feedback")));
-    if (options.noKey || options.imageMissing)
+    if (options.noKey || options.noAdmin || options.imageMissing)
       assert(!f.calls.some((c) => c.path.startsWith("/v1/")));
+    if (!options.noKey && !options.noAdmin)
+      assert(f.calls.some((c) => c.path.endsWith("/release_feedback_request")));
   });
 for (const [name, options] of [
   ["invalid session", { invalidSession: true }],
@@ -331,7 +342,12 @@ test("actual Edge SDK runtime: quota stops all paid/storage/save calls", async (
 });
 for (const provider of ["openai", "mock"])
   test(`actual Edge SDK runtime: an existing ${provider} result returns before quota/model/save even at the limit`, async () => {
-    const f = fixture({ existingProvider: provider, quota: true });
+    const f = fixture({
+      existingProvider: provider,
+      quota: true,
+      noKey: true,
+      noAdmin: true,
+    });
     const response = await f.run();
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { id, provider });
@@ -388,17 +404,17 @@ test("actual Edge SDK runtime: a committed result with a lost completion respons
     1,
   );
 });
-test("actual Edge SDK runtime: retrying a saved mock fallback never repeats the failed model call or consumes a real completion", async () => {
+test("actual Edge SDK runtime: a model failure saves nothing and makes one call per manual attempt", async () => {
   const f = fixture({ modelError: true });
-  assert.equal((await (await f.run()).json()).provider, "mock");
-  assert.deepEqual(await (await f.run()).json(), { id, provider: "mock" });
+  assert.equal((await f.run()).status, 503);
+  assert.equal((await f.run()).status, 503);
   assert.equal(
     f.calls.filter((call) => call.path === "/v1/chat/completions").length,
-    1,
+    2,
   );
   assert.equal(
     f.calls.filter((call) => call.path.endsWith("/save_mock_feedback")).length,
-    1,
+    0,
   );
   assert.equal(
     f.calls.filter((call) => call.path.endsWith("/complete_openai_feedback"))
@@ -444,6 +460,147 @@ test("actual Edge SDK runtime: malformed saved provider is not accepted as succe
   assert.equal(r.status, 503);
   assert.equal((await r.json()).code, "unavailable");
 });
+for (const options of [
+  { completionProvider: "mock" },
+  { completionId: "30000000-0000-4000-8000-000000000001" },
+  { saveError: true },
+])
+  test(`actual Edge SDK runtime: uncertain/invalid live completion ${JSON.stringify(options)} returns failure and releases claim`, async () => {
+    const f = fixture(options);
+    const response = await f.run();
+    assert.equal(response.status, 503);
+    assert.equal((await response.json()).code, "unavailable");
+    assert(
+      f.calls.some((call) => call.path.endsWith("/release_feedback_request")),
+    );
+    assert(!f.calls.some((call) => call.path.endsWith("/save_mock_feedback")));
+    assert.equal(
+      f.calls.filter((call) => call.path === "/v1/chat/completions").length,
+      1,
+    );
+  });
+for (const mode of ["improve_painting", "create_reference"])
+  test(`actual Edge SDK runtime: ${mode} malformed promising and optional palette tags retain a real result`, async () => {
+    const f = fixture({
+      mode,
+      feedback: {
+        promising: true,
+        paletteStrategy: { invalid: true },
+        palette: [
+          {
+            name: "Ultramarine",
+            hex: "#57788b",
+            tag: "buy_now",
+            temperature: "hot",
+            mix: true,
+            pigmentCode: "PB999",
+            use: "Cool sky wash.",
+          },
+        ],
+      },
+    });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).provider, "openai");
+    const saved = f.calls.find((call) =>
+      call.path.endsWith("/complete_openai_feedback"),
+    ).body.p_result;
+    assert(!Object.hasOwn(saved, "promising"));
+    assert(!Object.hasOwn(saved, "paletteStrategy"));
+    assert.deepEqual(saved.palette, [
+      { name: "Ultramarine", hex: "#57788b", use: "Cool sky wash." },
+    ]);
+    assert(!f.calls.some((call) => call.path.endsWith("/save_mock_feedback")));
+    assert.equal(
+      f.calls.filter((call) => call.path === "/v1/chat/completions").length,
+      1,
+    );
+  });
+for (const mode of ["improve_painting", "create_reference"])
+  test(`actual Edge SDK runtime: ${mode} type-correct overlong optional guidance keeps real feedback`, async () => {
+    const f = fixture({
+      mode,
+      feedback: {
+        promising: "x".repeat(351),
+        paletteStrategy: "x".repeat(351),
+        brushPlan: [
+          {
+            stage: "Next study — first wash",
+            brush: "x".repeat(121),
+            wash: "Tea-strength sky wash",
+            technique: "wet_on_wet",
+            timing: "Begin while the new study sheet has an even sheen.",
+            edges: "Keep distant edges soft and reserve the focal light.",
+            stop: "Stop before the wash loses its light paper glow.",
+          },
+        ],
+      },
+    });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).provider, "openai");
+    const completed = f.calls.filter((call) =>
+      call.path.endsWith("/complete_openai_feedback"),
+    );
+    assert.equal(completed.length, 1);
+    for (const field of ["brushPlan", "promising", "paletteStrategy"])
+      assert(!Object.hasOwn(completed[0].body.p_result, field));
+    const analysis = f.calls.filter(
+      (call) => call.path === "/v1/chat/completions",
+    );
+    assert.equal(analysis.length, 1);
+    const schema = analysis[0].body.response_format.json_schema.schema;
+    assert.equal(
+      schema.properties.brushPlan.items.properties.brush.type,
+      "string",
+    );
+    assert.equal(
+      schema.properties.brushPlan.items.properties.brush.maxLength,
+      undefined,
+    );
+    assert.equal(schema.properties.promising.maxLength, undefined);
+    assert.equal(schema.properties.paletteStrategy.maxLength, undefined);
+    assert(!f.calls.some((call) => call.path.endsWith("/save_mock_feedback")));
+  });
+for (const [name, options] of [
+  [
+    "invalid required painting observations",
+    { feedback: { whatWorks: [null] } },
+  ],
+  [
+    "missing required reference palette",
+    { mode: "create_reference", feedback: { palette: null } },
+  ],
+  [
+    "unsafe required palette colour",
+    {
+      mode: "create_reference",
+      palette: [{ name: "Sky", hex: "url(unsafe)" }],
+    },
+  ],
+  [
+    "missing required reference sequence",
+    { mode: "create_reference", feedback: { steps: [] } },
+  ],
+])
+  test(`actual Edge SDK runtime: ${name} fails with no result row or sample and frees the reservation`, async () => {
+    const f = fixture(options);
+    const response = await f.run();
+    assert.equal(response.status, 422);
+    assert.equal((await response.json()).code, "unavailable");
+    assert(
+      !f.calls.some((call) =>
+        /complete_openai_feedback|save_mock_feedback/.test(call.path),
+      ),
+    );
+    assert(
+      f.calls.some((call) => call.path.endsWith("/release_feedback_request")),
+    );
+    assert.equal(
+      f.calls.filter((call) => call.path === "/v1/chat/completions").length,
+      1,
+    );
+  });
 
 for (const mode of ["improve_painting", "create_reference"])
   test(`actual Edge SDK runtime: ${mode} saves valid overlays in the same model call`, async () => {
@@ -576,7 +733,7 @@ test("actual Edge SDK runtime: reference palette metadata is stored without new 
     1,
   );
 });
-test("actual Edge SDK runtime: invented pigment code keeps the safe mock fallback", async () => {
+test("actual Edge SDK runtime: invented optional pigment code is stripped and real feedback is saved", async () => {
   const f = fixture({
     mode: "create_reference",
     palette: [
@@ -585,8 +742,13 @@ test("actual Edge SDK runtime: invented pigment code keeps the safe mock fallbac
   });
   const response = await f.run();
   assert.equal(response.status, 200);
-  assert.equal((await response.json()).provider, "mock");
-  assert(!f.calls.some((c) => c.path.endsWith("/complete_openai_feedback")));
+  assert.equal((await response.json()).provider, "openai");
+  assert.deepEqual(
+    f.calls.find((c) => c.path.endsWith("/complete_openai_feedback")).body
+      .p_result.palette,
+    [{ name: "Ultramarine", hex: "#57788b", use: "Sky" }],
+  );
+  assert(!f.calls.some((c) => c.path.endsWith("/save_mock_feedback")));
 });
 
 for (const mode of ["improve_painting", "create_reference"])
@@ -747,7 +909,7 @@ for (const mode of ["improve_painting", "create_reference"])
       );
   });
 for (const mode of ["improve_painting", "create_reference"])
-  test(`actual Edge SDK runtime: ${mode} malformed brush data falls back without real completion`, async () => {
+  test(`actual Edge SDK runtime: ${mode} malformed optional brush data is dropped before real completion`, async () => {
     const f = fixture({
       mode,
       feedback: {
@@ -757,10 +919,16 @@ for (const mode of ["improve_painting", "create_reference"])
     });
     const response = await f.run();
     assert.equal(response.status, 200);
-    assert.equal((await response.json()).provider, "mock");
-    assert(
-      !f.calls.some((call) => call.path.endsWith("/complete_openai_feedback")),
+    assert.equal((await response.json()).provider, "openai");
+    const saved = f.calls.find((call) =>
+      call.path.endsWith("/complete_openai_feedback"),
+    ).body.p_result;
+    assert(!Object.hasOwn(saved, "brushPlan"));
+    assert.equal(
+      saved.promising,
+      "The focal light has useful painting potential.",
     );
+    assert(!f.calls.some((call) => call.path.endsWith("/save_mock_feedback")));
     assert.equal(
       f.calls.filter((call) => call.path === "/v1/chat/completions").length,
       1,
