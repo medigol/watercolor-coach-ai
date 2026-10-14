@@ -4,6 +4,7 @@ import { Text, View } from "react-native";
 import {
   saveArtwork,
   createSaveAttempt,
+  liveFeedbackErrorMessage,
   type SaveAttempt,
   type ArtworkImage,
   type SavedMode,
@@ -51,12 +52,13 @@ export default function SaveResultButton({
       if (request.current?.key !== key)
         request.current = { key, attempt: createSaveAttempt() };
       const attempt = request.current.attempt;
-      const { id, warning } = await saveArtwork(
+      const { id, warning, provider } = await saveArtwork(
         mode,
         focus || null,
         image,
         attempt,
       );
+      if (provider !== "openai") throw new Error(liveFeedbackErrorMessage);
       if (!active.current || account.current !== userId) return;
       router.push({
         pathname:
@@ -70,7 +72,7 @@ export default function SaveResultButton({
         setError(
           e instanceof Error
             ? e.message
-            : "We could not save your result. Please try again.",
+            : liveFeedbackErrorMessage,
         );
     } finally {
       saving.current = false;

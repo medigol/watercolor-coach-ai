@@ -28,7 +28,7 @@ const contract = load("supabase/functions/_shared/contract.ts", {
 const samples = load("supabase/functions/_shared/mockResults.ts");
 const { createHandler } = load(
   "supabase/functions/generate-feedback/handler.ts",
-  { "../_shared/contract.ts": contract, "../_shared/mockResults.ts": samples },
+  { "../_shared/contract.ts": contract },
 );
 const uid = "10000000-0000-4000-8000-000000000001";
 const id = "20000000-0000-4000-8000-000000000001";
@@ -63,15 +63,9 @@ function fixture(overrides = {}) {
       assert(contract.validFeedback(result, i.mode));
       return { id, provider: "openai" };
     },
-    mock: async (_u, _i, result) => {
+    mock: async () => {
       calls.push("mock");
-      assert.equal(
-        result,
-        _i.mode === "improve_painting"
-          ? samples.improveResult
-          : samples.referenceResult,
-      );
-      return { id, provider: "mock" };
+      throw new Error("A live request must never save a sample");
     },
     release: async () => {
       calls.push("release");
@@ -131,29 +125,37 @@ for (const [name, overrides] of [
     { generate: async () => ({ ...samples.improveResult, whatWorks: [null] }) },
   ],
 ])
-  test(`${name}: saves mock without counting a real result`, async () => {
+  test(`${name}: reports failure without saving or counting a sample`, async () => {
     const f = fixture(overrides);
     const r = await f.run();
-    assert.equal(r.status, 200);
+    assert.equal(
+      r.status,
+      name === "invalid JSON" || name === "wrong response shape" ? 422 : 503,
+    );
     const body = await r.json();
-    assert.equal(body.provider, "mock");
-    assert.match(body.warning, /sample guide/);
+    assert.equal(body.code, "unavailable");
+    assert.equal(
+      body.message,
+      "Live AI feedback could not be prepared. Please try again.",
+    );
+    assert(!JSON.stringify(body).includes("private upstream error"));
     assert(!f.calls.includes("finish"));
-    assert(f.calls.includes("mock"));
+    assert(!f.calls.includes("mock"));
     if (name === "missing server key") assert(!f.calls.includes("claim"));
+    else assert(f.calls.includes("release"));
   });
-test("no image uses original sample without calling OpenAI", async () => {
+test("no image is rejected before reservation, model or any saved result", async () => {
   const f = fixture();
-  assert.equal(
-    (await (await f.run({ ...input, image_path: null })).json()).provider,
-    "mock",
-  );
-  assert.deepEqual(f.calls, ["mock"]);
+  const response = await f.run({ ...input, image_path: null });
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).code, "invalid_request");
+  assert.deepEqual(f.calls, []);
 });
 test("quota blocks calls before storage or model use", async () => {
   for (const overrides of [
     { usage: async () => ({ used: 3, limit: 3 }) },
     { usage: async () => ({ used: 3, limit: 99 }) },
+    { hasOpenAI: false, usage: async () => ({ used: 3, limit: 3 }) },
     { claim: async () => ({ status: "limit" }) },
   ]) {
     const f = fixture(overrides);
@@ -181,6 +183,29 @@ test("idempotent retries return existing result before quota check", async () =>
     },
   });
   assert.deepEqual(await (await f.run()).json(), { id, provider: "openai" });
+  assert.deepEqual(f.calls, []);
+});
+for (const provider of ["mock", "openai"])
+  test(`old saved ${provider} remains readable without keys, quota or a new analysis`, async () => {
+    const f = fixture({
+      hasOpenAI: false,
+      existing: async () => ({ id, provider }),
+      usage: async () => {
+        throw new Error("Must not query usage");
+      },
+    });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { id, provider });
+    assert.deepEqual(f.calls, []);
+  });
+test("atomic claim can replay an old saved sample without creating another result", async () => {
+  const f = fixture({
+    claim: async () => ({ status: "existing", id, provider: "mock" }),
+  });
+  const response = await f.run();
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { id, provider: "mock" });
   assert.deepEqual(f.calls, []);
 });
 test("unauthenticated and invalid users cannot invoke storage/model/saves", async () => {
@@ -228,7 +253,38 @@ test("failed DB save exposes no upstream details and releases reservation", asyn
   assert.equal(r.status, 503);
   assert(!JSON.stringify(await r.json()).includes("sensitive"));
   assert(f.calls.includes("release"));
+  assert(!f.calls.includes("mock"));
 });
+test("release failure does not turn saved live feedback into a sample or trigger a second analysis", async () => {
+  let generated = 0;
+  const f = fixture({
+    generate: async () => {
+      generated++;
+      return samples.improveResult;
+    },
+    release: async () => {
+      throw new Error("private release failure");
+    },
+  });
+  const response = await f.run();
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { id, provider: "openai" });
+  assert.equal(generated, 1);
+  assert(!f.calls.includes("mock"));
+});
+for (const saved of [
+  { id, provider: "mock" },
+  { id: "30000000-0000-4000-8000-000000000001", provider: "openai" },
+  { id, provider: "other" },
+])
+  test(`new completion rejects unexpected provider/id ${JSON.stringify(saved)}`, async () => {
+    const f = fixture({ finish: async () => saved });
+    const response = await f.run();
+    assert.equal(response.status, 503);
+    assert.equal((await response.json()).code, "unavailable");
+    assert(f.calls.includes("release"));
+    assert(!f.calls.includes("mock"));
+  });
 test("strict response schemas reject malformed fields, extra fields, unsafe palette and excessive content", () => {
   for (const mode of ["improve_painting", "create_reference"]) {
     const result =
@@ -939,16 +995,23 @@ test("extended palette roles validate without removing safe legacy tags", () => 
     );
   }
 });
-test("invalid optional brush guidance uses existing mock fallback without a real quota completion", async () => {
+test("invalid optional brush guidance is dropped while the live result is saved", async () => {
+  let saved;
   const f = fixture({
     generate: async () => ({
       ...samples.improveResult,
       brushPlan: [{ ...practicalBrushPlan[0], technique: "unknown" }],
     }),
+    finish: async (_user, _input, result) => {
+      saved = result;
+      return { id, provider: "openai" };
+    },
   });
   const response = await f.run();
   assert.equal(response.status, 200);
-  assert.equal((await response.json()).provider, "mock");
-  assert(f.calls.includes("mock"));
-  assert(!f.calls.includes("finish"));
+  assert.equal((await response.json()).provider, "openai");
+  assert(!Object.hasOwn(saved, "brushPlan"));
+  assert(contract.validFeedback(saved, "improve_painting"));
+  assert(!f.calls.includes("mock"));
+  assert(f.calls.includes("release"));
 });

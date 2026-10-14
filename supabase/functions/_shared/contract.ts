@@ -470,3 +470,103 @@ export function cleanOverlayFeedback(value: unknown): unknown {
   const overlays = usableOverlays(v.overlays);
   return overlays.length ? { ...text, overlays } : text;
 }
+
+// Optional teaching aids must not reject otherwise sound text feedback. Keep
+// required content unchanged so validFeedback remains the final strict gate.
+export function cleanFeedback(value: unknown, mode: Mode): unknown {
+  const withOverlays = cleanOverlayFeedback(value);
+  if (
+    !withOverlays || typeof withOverlays !== "object" ||
+    Array.isArray(withOverlays)
+  ) {
+    return withOverlays;
+  }
+  const result = { ...(withOverlays as Record<string, unknown>) };
+  for (const field of ["promising", "paletteStrategy"]) {
+    if (result[field] != null && !boundedText(result[field], 350)) {
+      delete result[field];
+    }
+  }
+
+  if (result.brushPlan != null && !validBrushPlan(result.brushPlan)) {
+    const stages = Array.isArray(result.brushPlan)
+      ? result.brushPlan.slice(0, 32).filter((stage) => validBrushPlan([stage]))
+        .slice(0, 3)
+      : [];
+    if (stages.length) result.brushPlan = stages;
+    else delete result.brushPlan;
+  }
+  if (
+    result.compositionDecision != null &&
+    !validCompositionDecision(result.compositionDecision)
+  ) {
+    const decision = result.compositionDecision;
+    const cleaned: Record<string, unknown> = {};
+    if (decision && typeof decision === "object" && !Array.isArray(decision)) {
+      for (const [key, item] of Object.entries(decision)) {
+        if (
+          ["mainIssue", "reason", "tryNow", "nextStudy"].includes(key) &&
+          (item === null || boundedText(item, 350))
+        ) cleaned[key] = item;
+      }
+    }
+    if (Object.keys(cleaned).length) result.compositionDecision = cleaned;
+    else delete result.compositionDecision;
+  }
+  if (mode === "create_reference") {
+    for (const field of ["whatWorks", "whatToFix"]) {
+      const value = result[field];
+      if (value == null) continue;
+      const items = Array.isArray(value)
+        ? value.slice(0, 32).filter((item) => boundedText(item, 350)).slice(
+          0,
+          8,
+        )
+        : [];
+      if (items.length) result[field] = items;
+      else delete result[field];
+    }
+  }
+  if (Array.isArray(result.palette)) {
+    result.palette = result.palette.map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+      const colour = { ...item } as Record<string, unknown>;
+      // name/hex are core reference data. Never fill, coerce, or remove them.
+      for (const key of Object.keys(colour)) {
+        const field = colour[key];
+        if (key === "name" || key === "hex") continue;
+        if (key === "use" || key === "mix") {
+          if (field != null && !boundedText(field, 180)) delete colour[key];
+        } else if (key === "pigmentCode") {
+          if (
+            field != null &&
+            (typeof colour.name !== "string" ||
+              !safePigmentCodes.includes(
+                field as (typeof safePigmentCodes)[number],
+              ) ||
+              !safePigmentForName(colour.name, field))
+          ) delete colour[key];
+        } else if (key === "temperature") {
+          if (
+            field != null &&
+            !["warm", "cool", "neutral"].includes(field as string)
+          ) delete colour[key];
+        } else if (key === "tag") {
+          if (
+            field != null &&
+            !paletteTags.includes(field as (typeof paletteTags)[number])
+          ) delete colour[key];
+        } else delete colour[key];
+      }
+      return colour;
+    });
+  }
+  if (
+    mode === "improve_painting" && result.palette != null &&
+    !validPalette(result.palette)
+  ) {
+    delete result.palette;
+  }
+  // Unknown top-level fields remain here and are rejected by validFeedback.
+  return result;
+}

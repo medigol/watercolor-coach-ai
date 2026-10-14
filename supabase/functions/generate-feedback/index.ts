@@ -188,19 +188,6 @@ const handler = createHandler({
       }),
     );
   },
-  async mock(user, input, result) {
-    const { data, error } = await userClient(user).rpc("save_mock_feedback", {
-      p_mode: input.mode,
-      p_title: (result as { title: string }).title,
-      p_focus_area: input.focus_area,
-      p_image_path: input.image_path,
-      p_result: result,
-      p_expected_user_id: user.id,
-      p_request_id: input.request_id,
-    });
-    if (error) throw new Error("Save unavailable");
-    return saved(data);
-  },
   async release(user, input) {
     await adminRpc("release_feedback_request", user, input);
   },

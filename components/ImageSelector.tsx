@@ -31,7 +31,9 @@ export default function ImageSelector({
         onSelect?.(result.assets[0]);
       }
     } catch {
-      setError("We could not open your photos. You can still use the sample.");
+      setError(
+        "We could not open your photos. Please try choosing an image again.",
+      );
     } finally {
       setBusy(false);
     }
@@ -47,7 +49,7 @@ export default function ImageSelector({
           onError={() => {
             setFailedUri(uri);
             setError(
-              "We could not preview this image. You can still use the sample.",
+              "We could not preview this image. Please choose another image if feedback cannot be prepared.",
             );
           }}
         />
@@ -65,8 +67,8 @@ export default function ImageSelector({
         </Text>
       )}
       <Text style={styles.caption}>
-        Your image is saved privately with your feedback when you continue.
-        If automatic feedback is unavailable, we save a sample guide instead.
+        Your image is stored privately for feedback. If feedback cannot be
+        prepared, you can retry here.
       </Text>
     </View>
   );
