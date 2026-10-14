@@ -21,7 +21,10 @@ function load(file, imports = {}) {
   });
   return out;
 }
-const contract = load("supabase/functions/_shared/contract.ts");
+const overlayContract = load("supabase/functions/_shared/overlays.ts");
+const contract = load("supabase/functions/_shared/contract.ts", {
+  "./overlays.ts": overlayContract,
+});
 const samples = load("supabase/functions/_shared/mockResults.ts");
 const { createHandler } = load(
   "supabase/functions/generate-feedback/handler.ts",
@@ -240,7 +243,10 @@ test("strict response schemas reject malformed fields, extra fields, unsafe pale
     );
     const schema = contract.feedbackSchema(mode);
     assert.equal(schema.additionalProperties, false);
-    assert.deepEqual(schema.required.sort(), Object.keys(result).sort());
+    assert.deepEqual(
+      schema.required.sort(),
+      [...Object.keys(result), "overlays"].sort(),
+    );
   }
   assert(
     !contract.validFeedback(
@@ -293,4 +299,18 @@ test("frontend and Pages have no private-key reads or backend imports", () => {
     "utf8",
   );
   assert(!/OPENAI_API_KEY|SUPABASE_SERVICE_ROLE_KEY/.test(workflow));
+});
+
+test("invalid optional overlays keep validated OpenAI text instead of forcing mock", async () => {
+  const f = fixture({
+    generate: async () => ({
+      ...samples.improveResult,
+      overlays: [{ x: 200 }],
+    }),
+  });
+  const r = await f.run();
+  assert.equal(r.status, 200);
+  assert.equal((await r.json()).provider, "openai");
+  assert(f.calls.includes("finish"));
+  assert(!f.calls.includes("mock"));
 });

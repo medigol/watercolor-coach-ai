@@ -32,8 +32,13 @@ function validSave(
   return v.id === id && (v.provider === "mock" || v.provider === "openai");
 }
 export type SavedMode = "improve_painting" | "create_reference";
-export type ImproveData = typeof improveResult;
-export type ReferenceData = typeof referenceResult;
+import type { CoachingOverlay } from "./overlays";
+export type ImproveData = typeof improveResult & {
+  overlays?: CoachingOverlay[] | null;
+};
+export type ReferenceData = typeof referenceResult & {
+  overlays?: CoachingOverlay[] | null;
+};
 export interface ArtworkImage {
   uri: string;
   mimeType?: string | null;

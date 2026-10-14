@@ -130,7 +130,7 @@ const handler = createHandler({
       signal: AbortSignal.timeout(45000),
       body: JSON.stringify({
         model: "gpt-4.1-mini",
-        max_completion_tokens: 1800,
+        max_completion_tokens: 3000,
         temperature: 0.3,
         messages: [
           {

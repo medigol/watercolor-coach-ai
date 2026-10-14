@@ -35,6 +35,7 @@ function fixture(options = {}) {
     options.mode === "create_reference"
       ? load(path.join(root, "data/mockResults.ts")).referenceResult
       : load(path.join(root, "data/mockResults.ts")).improveResult;
+  if (options.overlays) modelResult.overlays = options.overlays;
   function json(data, status = 200) {
     return new Response(JSON.stringify(data), {
       status,
@@ -268,3 +269,32 @@ test("actual Edge SDK runtime: malformed saved provider is not accepted as succe
   assert.equal(r.status, 503);
   assert.equal((await r.json()).code, "unavailable");
 });
+
+for (const mode of ["improve_painting", "create_reference"])
+  test(`actual Edge SDK runtime: ${mode} saves valid overlays in the same model call`, async () => {
+    const overlays = Array.from({ length: 3 }, (_, i) => ({
+      type: "simplify",
+      label: "Simplify this area",
+      x: 20 + i * 20,
+      y: 30 + i * 15,
+      width: null,
+      height: null,
+      priority: "medium",
+      shortInstruction: "Merge secondary detail into one shape.",
+      reason: "This keeps the focal point clear.",
+      action: "Connect the shapes with a soft middle-value wash.",
+    }));
+    const f = fixture({ mode, overlays });
+    const r = await f.run();
+    assert.equal(r.status, 200);
+    assert.equal((await r.json()).provider, "openai");
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert.deepEqual(
+      f.calls.find((c) => c.path.endsWith("/complete_openai_feedback")).body
+        .p_result.overlays,
+      overlays,
+    );
+  });
