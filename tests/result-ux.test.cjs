@@ -1079,6 +1079,24 @@ test("canonical invalid required data renders an explicit saved-analysis error",
   assert(!html.includes("Lake House"));
 });
 
+test("canonical developing analysis without strengths renders its supplied lesson without a strength section", () => {
+  const fixture = require("./helpers/canonical-fixture.cjs")();
+  fixture.canonicalAnalysis.qualityAssessment.level = "developing";
+  fixture.canonicalAnalysis.insights.forEach(
+    (i) => (i.classification = "optional_refinement"),
+  );
+  const html = render("improve_painting", "openai", image, undefined, {
+    focus: "Overall feedback",
+    canonicalResult: fixture,
+    expandedAids: false,
+  });
+  assert(html.includes('data-testid="expert-view-controls"'));
+  assert(html.includes(fixture.canonicalAnalysis.insights[0].lesson));
+  assert(!html.includes("What works well"));
+  assert(!html.includes("What makes this work"));
+  assert(!html.includes("We could not open this saved analysis"));
+});
+
 test("canonical composition retains distinct text teaching when optional structure is absent", () => {
   const fixture = require("./helpers/canonical-fixture.cjs")();
   fixture.canonicalAnalysis.composition.primary = null;

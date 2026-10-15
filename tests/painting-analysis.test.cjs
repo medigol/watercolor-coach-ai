@@ -113,13 +113,21 @@ for (const [name, mutate] of [
     (r) => (r.canonicalAnalysis.insights[0].factIds = ["absent"]),
   ],
   [
-    "cross-domain view",
-    (r) => (r.expertViews.colourValue.summaryId = "design"),
+    "view without supplied same-domain material",
+    (r) =>
+      Object.assign(r.expertViews.colourValue, {
+        summaryId: "design",
+        insightIds: ["design"],
+      }),
   ],
   ["duplicate insight", (r) => (r.canonicalAnalysis.insights[1].id = "whole")],
   [
-    "two focal groups",
-    (r) => (r.canonicalAnalysis.visualRoles[1].role = "focal"),
+    "ambiguous focal groups",
+    (r) =>
+      Object.assign(r.canonicalAnalysis.visualRoles[1], {
+        role: "focal",
+        confidence: 0.92,
+      }),
   ],
   [
     "empty required lesson",
@@ -486,11 +494,18 @@ test("corrected role projection preserves canonical roles and Composition Lock i
     "view projection must not mutate canonical saved data",
   );
 });
-test("copied paragraphs cannot masquerade as four different expert insights", () => {
+test("repeated lesson prose preserves the supplied domain ownership instead of rejecting the result", () => {
   const r = fixture();
   r.canonicalAnalysis.insights[2].lesson =
     r.canonicalAnalysis.insights[1].lesson;
-  assert(!painting.validPaintingAnalysis(r));
+  assert(painting.validPaintingAnalysis(r));
+  const value = clean(r);
+  assert(painting.validPaintingAnalysis(value));
+  assert.equal(
+    value.canonicalAnalysis.insights[2].lesson,
+    r.canonicalAnalysis.insights[1].lesson,
+  );
+  assert.equal(value.canonicalAnalysis.insights[2].domain, "colour_value");
 });
 
 test("one successful canonical request uses one quota unit; retries/local views are free; explicit new requests use the normal three-result limit", async () => {
@@ -501,7 +516,8 @@ test("one successful canonical request uses one quota unit; retries/local views 
   const userId = "10000000-0000-4000-8000-000000000001";
   let used = 0,
     calls = 0,
-    fail = false;
+    fail = false,
+    invalid = false;
   const saved = new Map();
   const handler = createHandler({
     hasOpenAI: true,
@@ -513,7 +529,9 @@ test("one successful canonical request uses one quota unit; retries/local views 
     generate: async () => {
       calls++;
       if (fail) throw Error("upstream failure");
-      return fixture();
+      const result = fixture();
+      if (invalid) result.canonicalAnalysis.insights[0].factIds = ["missing"];
+      return result;
     },
     finish: async (_u, i, result) => {
       assert(painting.validPaintingAnalysis(result));
@@ -553,6 +571,16 @@ test("one successful canonical request uses one quota unit; retries/local views 
   assert.equal((await send(2)).status, 503);
   assert.equal(used, 1);
   fail = false;
+  invalid = true;
+  const beforeInvalid = calls;
+  assert.equal((await send(2)).status, 422);
+  assert.equal(calls, beforeInvalid + 1);
+  assert.equal(
+    used,
+    1,
+    "a rejected paid response must not consume a successful quota unit",
+  );
+  invalid = false;
   assert.equal((await send(2)).status, 200);
   assert.equal(used, 2);
   assert.equal((await send(3)).status, 200);
