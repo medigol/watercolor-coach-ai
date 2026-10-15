@@ -33,6 +33,16 @@ const contract = load("supabase/functions/_shared/contract.ts", {
 });
 const clean = (value) =>
   painting.cleanPaintingAnalysis(value, notes.usableOverlays);
+const { conflictsWithDecision } = loadShared(
+  "../shared/coachingDecision.ts",
+  "lib/overlays.ts",
+);
+const bridgeFixture = () =>
+  JSON.parse(
+    JSON.stringify(fixture())
+      .replace(/\btower\b/g, "house")
+      .replace(/\bbank\b/g, "bridge"),
+  );
 
 test("one versioned envelope has four domain-owned views, facts and insights stored only once", () => {
   const raw = fixture(),
@@ -350,6 +360,131 @@ test("equal emphasis cannot mutate the canonical roles or their shared display",
       c.canonicalAnalysis.composition.primary,
     );
   }
+});
+test("canonical focal areas remain in the compatibility emphasis list", () => {
+  const view = painting.projectPaintingAnalysis(clean(fixture()), "overall");
+  assert.deepEqual(view.coachingDecision.areasToEmphasize, ["tower"]);
+});
+test("the compatibility quiet list contains only canonical quiet areas", () => {
+  const view = painting.projectPaintingAnalysis(clean(fixture()), "overall");
+  assert.deepEqual(view.coachingDecision.areasToQuiet, ["water"]);
+});
+test("a non-focal supporting area is not automatically quiet", () => {
+  const value = clean(bridgeFixture());
+  for (const key of painting.expertViewKeys) {
+    const decision = painting.projectPaintingAnalysis(
+      value,
+      key,
+    ).coachingDecision;
+    assert(
+      decision.visualRoles.some(
+        ({ area, role }) => area === "bridge" && role === "supporting",
+      ),
+    );
+    assert(!decision.areasToQuiet.includes("bridge"));
+    assert(!decision.areasToEmphasize.includes("bridge"));
+  }
+});
+test("authoritative supporting roles still downgrade competing focal emphasis", () => {
+  const raw = bridgeFixture();
+  const action = "Sharpen the bridge to make it an equally strong focal point.";
+  Object.assign(raw.canonicalAnalysis.insights[1], {
+    classification: "optional_refinement",
+    action,
+  });
+  const value = clean(raw);
+  const decision = painting.projectPaintingAnalysis(
+    value,
+    "composition",
+  ).coachingDecision;
+  assert(conflictsWithDecision(action, decision));
+  assert(
+    !conflictsWithDecision(action, { ...decision, visualRoles: null }),
+    "the authoritative role map supplies the supporting-area safeguard",
+  );
+  assert.equal(
+    value.canonicalAnalysis.insights[1].classification,
+    "study_experiment",
+  );
+  assert.notEqual(value.canonicalAnalysis.insights[1].action, action);
+  assert.match(
+    value.canonicalAnalysis.insights[1].action,
+    /preserving the original focal hierarchy/,
+  );
+});
+test("restrained supporting guidance survives cleaning and projection", () => {
+  const action =
+    "Slightly clarify the bridge edge so it leads toward the focal house.";
+  const emphasis =
+    "Slightly sharpen the bridge so it leads toward the focal house.";
+  const raw = bridgeFixture();
+  Object.assign(raw.canonicalAnalysis.insights[1], {
+    classification: "optional_refinement",
+    action,
+  });
+  const value = clean(raw);
+  assert(painting.validPaintingAnalysis(value));
+  assert.equal(value.canonicalAnalysis.insights[1].action, action);
+  assert.equal(
+    value.canonicalAnalysis.insights[1].classification,
+    "optional_refinement",
+  );
+  for (const key of painting.expertViewKeys) {
+    const decision = painting.projectPaintingAnalysis(
+      value,
+      key,
+    ).coachingDecision;
+    assert(!conflictsWithDecision(action, decision));
+    assert(!conflictsWithDecision(emphasis, decision));
+    assert(
+      conflictsWithDecision(emphasis, {
+        ...decision,
+        areasToQuiet: [...decision.areasToQuiet, "bridge"],
+      }),
+      "misclassifying support as quiet would reject restrained emphasis",
+    );
+  }
+});
+test("corrected role projection preserves canonical roles and Composition Lock in every view", () => {
+  const raw = bridgeFixture();
+  raw.canonicalAnalysis.composition.secondary = {
+    ...raw.canonicalAnalysis.composition.primary,
+    type: "off_centre",
+    paths: null,
+  };
+  const value = clean(raw);
+  const before = structuredClone(value);
+  assert.deepEqual(
+    value.canonicalAnalysis.visualRoles,
+    raw.canonicalAnalysis.visualRoles,
+  );
+  assert(value.canonicalAnalysis.composition.primary);
+  assert(value.canonicalAnalysis.composition.secondary);
+  for (const key of painting.expertViewKeys) {
+    const view = painting.projectPaintingAnalysis(value, key);
+    assert.deepEqual(
+      view.coachingDecision.visualRoles,
+      raw.canonicalAnalysis.visualRoles.map(({ area, role }) => ({
+        area,
+        role,
+      })),
+    );
+    assert.deepEqual(view.coachingDecision.areasToEmphasize, ["house"]);
+    assert.deepEqual(view.coachingDecision.areasToQuiet, ["water"]);
+    assert.deepEqual(
+      view.compositionOverlay,
+      value.canonicalAnalysis.composition.primary,
+    );
+    assert.deepEqual(
+      view.secondaryCompositionOverlay,
+      value.canonicalAnalysis.composition.secondary,
+    );
+  }
+  assert.deepEqual(
+    value,
+    before,
+    "view projection must not mutate canonical saved data",
+  );
 });
 test("copied paragraphs cannot masquerade as four different expert insights", () => {
   const r = fixture();

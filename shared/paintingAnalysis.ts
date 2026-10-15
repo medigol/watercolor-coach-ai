@@ -357,7 +357,7 @@ function roleDecision(
       .filter((r) => r.role === "focal")
       .map((r) => r.area),
     areasToQuiet: c.visualRoles
-      .filter((r) => r.role !== "focal")
+      .filter((r) => r.role === "quiet")
       .map((r) => r.area)
       .slice(0, 3),
     visualRoles: c.visualRoles.map((r) => ({ area: r.area, role: r.role })),
