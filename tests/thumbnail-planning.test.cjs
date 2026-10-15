@@ -52,29 +52,16 @@ const note = (patch = {}) => ({
   shortInstruction: "Leave space around the main shape.",
   reason: "The eye needs one clear place to rest.",
   action:
-    "Keep the supporting marks quiet and save a sharp accent for the focal area.",
+    "In a separate study, test quiet supporting marks around one focal accent.",
   ...patch,
 });
 
-test("unknown subject and legacy text-only results use two useful studies", () => {
-  const result = planning.planThumbnailStudies(empty);
-  assert.deepEqual(
-    result.map((item) => item.kind),
-    ["big_shapes", "value_mass"],
-  );
-  assert(result.every((item) => item.layout === "abstract"));
-  assert(result.every((item) => item.purpose && item.action));
-  assert.equal(
-    planning.planThumbnailStudies({ ...empty, overlays: null }).length,
-    2,
-  );
-  assert.equal(
-    planning.planThumbnailStudies({ ...empty, overlays: { bad: true } }).length,
-    2,
-  );
+test("missing evidence does not manufacture worksheets", () => {
+  for (const overlays of [undefined, null, { bad: true }])
+    assert.deepEqual(planning.planThumbnailStudies({ ...empty, overlays }), []);
 });
 
-test("validated crop, values and simplification select exactly three relevant worksheets", () => {
+test("validated crop, values and simplification select at most two supported worksheets", () => {
   const result = planning.planThumbnailStudies({
     ...empty,
     title: "Coastal landscape",
@@ -91,20 +78,20 @@ test("validated crop, values and simplification select exactly three relevant wo
         width: 30,
         height: 35,
         category: "value_structure",
-        action: "Connect the foreground shadows in one damp wash.",
+        action: "Test connected foreground shadows in a separate wash study.",
       }),
       note({
         type: "simplify_region",
         width: 35,
         height: 20,
         category: "simplification",
-        action: "Reduce the small background marks to one middle-value wash.",
+        action: "In a separate study, test one connected background shape.",
       }),
     ],
   });
   assert.deepEqual(
     result.map((item) => item.kind),
-    ["crop", "value_mass", "simplification"],
+    ["crop", "value_mass"],
   );
   assert(result.every((item) => item.layout === "landscape"));
   assert.equal(
@@ -113,7 +100,7 @@ test("validated crop, values and simplification select exactly three relevant wo
   );
   assert.equal(
     result[1].action,
-    "Connect the foreground shadows in one damp wash.",
+    "Test connected foreground shadows in a separate wash study.",
   );
 });
 
@@ -134,6 +121,8 @@ test("eye-flow/horizon and legacy categories choose instructional composition st
         type: "composition_line",
         category: "composition",
         styleHint: "horizon",
+        label: "Horizon placement",
+        action: "Test a lower horizon in a separate study.",
         points: [
           { x: 10, y: 35 },
           { x: 90, y: 35 },
@@ -143,7 +132,7 @@ test("eye-flow/horizon and legacy categories choose instructional composition st
   });
   assert.deepEqual(
     result.map((item) => item.kind),
-    ["eye_flow", "horizon", "value_mass"],
+    ["eye_flow", "horizon"],
   );
   const legacy = planning.planThumbnailStudies({
     ...empty,
@@ -152,7 +141,7 @@ test("eye-flow/horizon and legacy categories choose instructional composition st
   assert.equal(legacy[0].kind, "crop");
 });
 
-test("text cues are conservative, deterministic, and bounded to three cards", () => {
+test("text cues are conservative, deterministic, and bounded to two cards", () => {
   const input = {
     composition: "Test a crop and a leading line along the shoreline.",
     sketch: "Simplify supporting detail.",
@@ -161,7 +150,7 @@ test("text cues are conservative, deterministic, and bounded to three cards", ()
   };
   const result = planning.planThumbnailStudies(input);
   assert.deepEqual(result, planning.planThumbnailStudies(input));
-  assert.equal(result.length, 3);
+  assert.equal(result.length, 2);
   assert.equal(result[0].kind, "crop");
   assert.equal(
     planning.thumbnailLayout({ ...empty, title: "Street with buildings" }),
@@ -470,7 +459,7 @@ test("full legacy and saved sketch/value guidance stays available in the expanda
     const diagramCount = nodes(tree).filter(
       (node) => node.props?.accessibilityRole === "image",
     ).length;
-    assert(diagramCount >= 2 && diagramCount <= 3);
+    assert(diagramCount <= 2); // Legacy full notes survive without filler diagrams.
     assert.equal(button(tree).props["aria-expanded"], false);
     assert.equal(button(tree).props.accessibilityState.expanded, false);
     assert(!text(tree).includes(input.sketch));
@@ -503,7 +492,11 @@ test("missing sketch/value guidance does not show an empty expandable control", 
 });
 
 test("legacy/mock results render honest diagrams and clear purposes without new image outputs", () => {
-  const html = render(empty);
+  const html = render({
+    ...empty,
+    composition: "Compare a crop in a separate study.",
+    values: "Test a value grouping study.",
+  });
   assert(html.includes("Thumbnail planning"));
   assert(
     html.includes(
@@ -519,12 +512,12 @@ test("legacy/mock results render honest diagrams and clear purposes without new 
     ).length,
     2,
   );
-  assert(html.includes("Big-shape plan"));
+  assert(html.includes("Crop study"));
   assert(html.includes("Value mass study"));
-  assert(html.includes("Plan the painting as big shapes first."));
+  assert(html.includes("Try this framing before repainting."));
   assert(html.includes("Group values; do not copy detail."));
-  assert(html.includes("#E1E7DC"));
-  assert(html.includes("#A9B4A7"));
+  assert(html.includes("Value mass study"));
+  assert(html.includes("Crop study"));
   assert(
     !/<img\b|generated from|AI painting|Exact plan|Rendered reference/i.test(
       html,
@@ -602,10 +595,36 @@ test("all template types render meaningful frame, arrow, value, merge and horizo
     { ...empty, composition: "Test a crop." },
     {
       ...empty,
-      composition: "Use a leading line along this street perspective.",
+      composition: "Test an eye path along this street perspective.",
     },
-    { ...empty, sketch: "Simplify secondary detail." },
-    { ...empty, composition: "Test the shoreline horizon.", title: "Beach" },
+    {
+      ...empty,
+      overlays: [
+        note({
+          type: "simplify_region",
+          category: "simplification",
+          width: 30,
+          height: 20,
+          action: "Test one simplified supporting wash in a study.",
+        }),
+      ],
+    },
+    {
+      ...empty,
+      overlays: [
+        note({
+          type: "composition_line",
+          styleHint: "horizon",
+          label: "Horizon placement",
+          points: [
+            { x: 10, y: 30 },
+            { x: 90, y: 30 },
+          ],
+          action: "Test a lower horizon in a new study.",
+        }),
+      ],
+      title: "Beach",
+    },
   ];
   const html = cases.map(render).join(" ");
   for (const text of [

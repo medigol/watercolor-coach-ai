@@ -19,6 +19,28 @@ const input = {
 const fakePublic = "sb_publishable_test_only";
 const fakeServer = "sb_secret_test_only";
 const fakeOpenAI = "test-only-openai-placeholder";
+const focusCases = [
+  [
+    "Overall feedback",
+    "The reserved light holds this quiet scene together.",
+    "Compare one reserved light in a 15-minute study.",
+  ],
+  [
+    "Composition",
+    "The cliff diagonal carries the eye toward the lighthouse.",
+    "Compare two cliff diagonals in small thumbnails.",
+  ],
+  [
+    "Colour & contrast",
+    "Warm roof light separates from a cool middle-value group.",
+    "Test warm light against two cool middle values.",
+  ],
+  [
+    "Watercolor technique",
+    "Diffused distant transitions contrast with the crisp roof edge.",
+    "Practise one soft-to-sharp transition on a separate sheet.",
+  ],
+];
 function fixture(options = {}) {
   const calls = [];
   const boundaryErrors = [];
@@ -283,6 +305,49 @@ function fixture(options = {}) {
       return response;
     },
   };
+}
+for (const [focus, mainAdvice, practice] of focusCases) {
+  test(`actual Edge SDK: ${focus} saves its independent interpretation in one paid call`, async () => {
+    const f = fixture({
+      feedback: {
+        mainAdvice,
+        practice,
+        whatWorks: ["The roof light separates from its darker surroundings."],
+        whatToFix: [],
+        coachingDecision: {
+          primaryGoal: "Preserve the existing light-dark hierarchy.",
+          primarySubjectOrArea: "roof",
+          areasToEmphasize: ["roof"],
+          areasToQuiet: ["background"],
+          currentPaintingAction: null,
+          nextStudyAction: null,
+          supportingObservations: [
+            "The roof light separates from its surroundings.",
+          ],
+          compositionImplication: null,
+          colourImplication: null,
+          techniqueImplication: null,
+        },
+      },
+    });
+    const response = await f.run({ ...input, focus_area: focus });
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).provider, "openai");
+    const saved = f.calls.find((call) =>
+      call.path.endsWith("/complete_openai_feedback"),
+    ).body.p_result;
+    assert.equal(saved.mainAdvice, mainAdvice);
+    assert.equal(saved.practice, practice);
+    const model = f.calls.filter(
+      (call) => call.path === "/v1/chat/completions",
+    );
+    assert.equal(model.length, 1);
+    assert.equal(model[0].body.max_completion_tokens, 3000);
+    assert(
+      model[0].body.messages[0].content.includes(`Selected focus: ${focus}.`),
+    );
+    assert(!f.calls.some((call) => call.path.includes("save_mock")));
+  });
 }
 for (const mode of ["improve_painting", "create_reference"])
   test(`actual Edge SDK runtime: ${mode} uses user storage and server-only model/save`, async () => {
@@ -825,7 +890,9 @@ for (const mode of ["improve_painting", "create_reference"])
     const prompt = f.calls.find((c) => c.path === "/v1/chat/completions").body
       .messages[0].content;
     assert(
-      prompt.includes("Current actions must not reposition painted objects"),
+      prompt.includes(
+        "Structural moves/crop/horizon/proportions belong to future studies",
+      ),
     );
     assert(prompt.includes("current_painting, next_study, or both"));
     assert(prompt.includes("eye_flow_arrow"));
@@ -889,7 +956,7 @@ for (const mode of ["improve_painting", "create_reference"])
       .body.messages[0].content;
     assert(prompt.includes("Identify 2–3 genuine strengths before fixes"));
     assert(prompt.includes("promising is one evidence-based sentence"));
-    assert(prompt.includes("up to three short stages"));
+    assert(prompt.includes("up to three short recommended practice stages"));
     assert(
       prompt.includes("Avoid casual lifting/scrubbing/repeated rewetting"),
     );
@@ -1048,7 +1115,9 @@ for (const mode of ["improve_painting", "create_reference"]) {
         );
         assert.deepEqual(result.whatToFix, ["Keep the pier soft."]);
         if (mode === "improve_painting")
-          assert.equal(result.mainAdvice, coachingDecision.primaryGoal);
+          assert.notEqual(result.mainAdvice, coachingDecision.primaryGoal);
+        if (mode === "improve_painting")
+          assert(result.mainAdvice.includes("lake house"));
         else assert(!Object.hasOwn(result, "practice"));
       } else assert(!Object.hasOwn(result, "coachingDecision"));
       assert.equal(

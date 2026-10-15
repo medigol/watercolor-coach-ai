@@ -1,3 +1,8 @@
+import {
+  conflictsWithStrength,
+  observationText,
+  sameLearningInsight,
+} from "../shared/coachingEvidence";
 import { Text, View } from "react-native";
 import FeedbackSection from "./FeedbackSection";
 import { styles } from "./ui";
@@ -32,6 +37,7 @@ export default function FeedbackDetails({
   omit?: string[];
 }) {
   const originalStrengths = feedbackItems(works)
+    .map(observationText)
     .map((item) => (study ? studyText(item, "") : item))
     .filter(Boolean);
   let strengths = uniqueGuidance(originalStrengths, omit).slice(0, 3);
@@ -47,14 +53,18 @@ export default function FeedbackDetails({
     )
       ? promising
       : undefined;
-  const potential = suppliedPotential
-    ? uniqueGuidance(
-        [study ? studyText(suppliedPotential, "") : suppliedPotential],
-        [...omit, ...strengths],
-      )[0]
-    : undefined;
+  const potential =
+    suppliedPotential &&
+    !strengths.some((item) => sameLearningInsight(item, suppliedPotential))
+      ? uniqueGuidance(
+          [study ? studyText(suppliedPotential, "") : suppliedPotential],
+          [...omit, ...strengths],
+        )[0]
+      : undefined;
   const improvements = uniqueGuidance(
     feedbackItems(fixes)
+      .filter((item) => !conflictsWithStrength(item, strengths))
+      .map(observationText)
       .map((item) => (study ? studyText(item, "") : item))
       .filter(Boolean),
     [...omit, ...strengths, ...(potential ? [potential] : [])],

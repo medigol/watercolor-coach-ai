@@ -189,9 +189,36 @@ export function createCompositionStructurePlan(
     type: overlay.type,
     label: archetypeLabel(overlay.type),
     explanation: overlay.shortExplanation,
-    strokes,
-    masses: overlay.masses ?? [],
-    anchors,
+    strokes:
+      overlay.type === "rule_of_thirds" ||
+      overlay.type === "off_centre" ||
+      [
+        "balanced_masses",
+        "steelyard",
+        "three_spot",
+        "overlapping_masses",
+      ].includes(overlay.type)
+        ? []
+        : strokes.slice(
+            0,
+            ["cross", "radiating", "rhythm"].includes(overlay.type) ? 2 : 1,
+          ),
+    masses: ["balanced_masses", "steelyard", "overlapping_masses"].includes(
+      overlay.type,
+    )
+      ? (overlay.masses ?? []).slice(0, 2)
+      : (overlay.masses ?? [])
+          .filter((mass) => mass.role === "supporting")
+          .slice(0, 1),
+    anchors: [
+      "triangle",
+      "three_spot",
+      "balanced_masses",
+      "steelyard",
+      "rhythm",
+    ].includes(overlay.type)
+      ? anchors.slice(0, 3)
+      : anchors.filter((anchor) => anchor.role === "focal").slice(0, 1),
     thirdsGrid: overlay.type === "rule_of_thirds",
   };
 }

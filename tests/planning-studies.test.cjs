@@ -172,10 +172,10 @@ test("unified planning prefers relevant validated image studies and caps the com
     "Watercolor technique",
   ]) {
     const studies = planPlanningStudies({ ...input, focus });
-    assert(studies.length >= 2 && studies.length <= 3, focus);
+    assert(studies.length >= 1 && studies.length <= 2, focus);
     assert.equal(
       studies.filter((study) => study.source === "image").length,
-      2,
+      focus === "Colour & contrast" ? 1 : 2,
       focus,
     );
     assert(studies.filter((study) => study.type === "model").length <= 1);
@@ -206,6 +206,88 @@ test("the same controlled guidance ranks eye path, value, and edge studies diffe
   );
 });
 
+test("zero to two studies require focus and evidence, with no horizon or eye-flow filler", () => {
+  for (const focus of [
+    "Overall feedback",
+    "Composition",
+    "Colour & contrast",
+    "Watercolor technique",
+  ]) {
+    assert.deepEqual(
+      planPlanningStudies({
+        ...input,
+        overlays: [],
+        composition: "",
+        sketch: "",
+        values: "",
+        focus,
+      }),
+      [],
+    );
+  }
+  const colour = planPlanningStudies({ ...input, focus: "Colour & contrast" });
+  assert(colour.length > 0 && colour.length <= 2);
+  assert(
+    colour.every(
+      (card) =>
+        card.type === "thumbnail" &&
+        ["value_mass", "focal_point"].includes(card.study.kind),
+    ),
+  );
+  const technique = planPlanningStudies({
+    ...input,
+    focus: "Watercolor technique",
+  });
+  assert(technique.length > 0 && technique.length <= 2);
+  assert(
+    technique.every(
+      (card) =>
+        card.type === "thumbnail" &&
+        ["edge_control", "simplification"].includes(card.study.kind),
+    ),
+  );
+  assert(
+    !planPlanningStudies({
+      ...input,
+      overlays: [],
+      composition: "The horizon is low and the shoreline leads right.",
+      focus: "Composition",
+    }).some(
+      (card) => card.type === "thumbnail" && card.study.kind === "horizon",
+    ),
+  );
+});
+test("named source and action mismatch omits the image-backed claim", () => {
+  const mismatch = {
+    ...edge,
+    label: "Roof edge",
+    reason: "Foreground trees need softer boundaries.",
+    action: "Practise soft foreground tree edges in a separate study.",
+    domain: "technique",
+  };
+  const cards = planPlanningStudies({
+    ...input,
+    overlays: [mismatch],
+    focus: "Watercolor technique",
+  });
+  assert(cards.every((card) => card.source !== "image"));
+  const matched = {
+    ...mismatch,
+    reason: "The roof edge contrasts with the softer distance.",
+    action: "Practise this roof edge on a separate sheet.",
+  };
+  const good = planPlanningStudies({
+    ...input,
+    overlays: [matched],
+    focus: "Watercolor technique",
+  });
+  assert.equal(good.length, 1);
+  assert.equal(good[0].source, "image");
+  assert(good[0].study.title.includes("Roof edge"));
+  assert.deepEqual(good[0].study.marks, [matched]);
+  assert.equal(good[0].study.action, matched.action);
+});
+
 test("a generic model is omitted when its teaching idea is already covered", () => {
   const studies = planPlanningStudies({
     ...input,
@@ -215,7 +297,7 @@ test("a generic model is omitted when its teaching idea is already covered", () 
     sketch: "",
     values: "",
   });
-  assert.equal(studies.length, 2);
+  assert.equal(studies.length, 1);
   assert(studies.every((study) => study.type === "thumbnail"));
 });
 
@@ -238,14 +320,15 @@ test("old, mock, unavailable-image, and malformed-geometry results keep honest b
   ]) {
     const props = { ...input, ...patch };
     const studies = planPlanningStudies(props);
-    assert(studies.length >= 2 && studies.length <= 3);
+    assert(studies.length <= 2);
     assert(studies.every((study) => study.source === "generic"));
     const html = renderToStaticMarkup(
       React.createElement(PlanningStudies, props),
     );
     assert(!html.includes("Study overlay on your image"));
     assert(!html.includes("private-signed-image"));
-    assert(html.includes("Generic study aid · adapt it to your painting."));
+    if (studies.length)
+      assert(html.includes("Generic study aid · adapt it to your painting."));
     assert(
       !/generated from|Rendered reference|Exact match|Edited image/.test(html),
     );
@@ -267,7 +350,7 @@ test("the production planning section unifies captions and never repeats full sk
   assert.equal(
     (html.match(/Teaching model · not an exact copy of your painting\./g) ?? [])
       .length,
-    1,
+    0,
   );
   assert(!html.includes("Thumbnail planning"));
   assert(!html.includes("Composition model"));
@@ -294,35 +377,29 @@ test("strong-work studies are framed as optional variations", () => {
   assert(!/Main issue|Try now|Fix this painting/.test(html));
 });
 
-test("canonical direction replaces conflicting study actions without inventing advice or marks", () => {
-  const props = {
-    ...input,
-    coachingDecision: decision,
-    overlays: [{ ...focal, action: "Sharpen the pavilion." }],
-  };
-  const cards = planPlanningStudies(props);
-  const focused = cards.find(
-    (card) => card.type === "thumbnail" && card.study.kind === "focal_point",
-  );
-  assert(focused);
-  assert.equal(focused.study.action, decision.nextStudyAction);
-  assert.equal(focused.study.marks.length, 0);
-  assert.equal(focused.source, "generic");
-  const html = renderToStaticMarkup(
-    React.createElement(PlanningStudies, props),
-  );
-  assert(!html.includes("Sharpen the pavilion"));
-  assert(html.includes(decision.nextStudyAction));
-  const neutral = planPlanningStudies({
-    ...props,
-    coachingDecision: { ...decision, nextStudyAction: null },
-  }).find(
-    (card) => card.type === "thumbnail" && card.study.kind === "focal_point",
-  );
-  assert.equal(
-    neutral.study.action,
-    "Compare this layout with your coaching goal in a separate study.",
-  );
+test("conflicting studies are omitted instead of attaching unrelated canonical actions to geometry", () => {
+  for (const nextStudyAction of [decision.nextStudyAction, null]) {
+    const cards = planPlanningStudies({
+      ...input,
+      coachingDecision: { ...decision, nextStudyAction },
+      overlays: [
+        { ...focal, action: "In a separate study, sharpen the pavilion." },
+      ],
+    });
+    assert(
+      !cards.some(
+        (card) =>
+          card.type === "thumbnail" &&
+          card.study.action.includes("sharpen the pavilion"),
+      ),
+    );
+    assert(
+      !cards.some(
+        (card) =>
+          card.type === "thumbnail" && card.study.action === nextStudyAction,
+      ),
+    );
+  }
 });
 
 test("a generic teaching model that contradicts the named canonical target is omitted", () => {
@@ -336,7 +413,7 @@ test("a generic teaching model that contradicts the named canonical target is om
 });
 
 test("a known distinct sub-area remains usable and older missing metadata keeps existing planning", () => {
-  const action = "Sharpen the pavilion roof.";
+  const action = "In a separate study, test a crisp pavilion roof.";
   const props = {
     ...input,
     overlays: [{ ...focal, action }],

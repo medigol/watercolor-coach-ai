@@ -1,4 +1,8 @@
 import {
+  observationText,
+  studyTargetAligned,
+} from "../shared/coachingEvidence";
+import {
   overlayCategory,
   overlayKind,
   usableOverlays,
@@ -29,6 +33,8 @@ export type ThumbnailPlanningInput = {
   provider?: ResultProvider;
   study?: boolean;
   focus?: string;
+  mainAdvice?: string;
+  practice?: string;
 };
 export type ThumbnailStudy = {
   kind: ThumbnailKind;
@@ -130,7 +136,11 @@ export function imageStudyMarks(
       (note) =>
         noteGeometryVisible(note) &&
         note.scope !== "multi_region" &&
-        markGeometry(note, 1, 1).kind !== "point_marker",
+        markGeometry(note, 1, 1).kind !== "point_marker" &&
+        studyTargetAligned(
+          note.label,
+          `${note.shortInstruction}. ${note.reason}. ${note.action}`,
+        ),
     )
     .sort(
       (a, b) =>
@@ -170,7 +180,8 @@ export function imageStudyMarks(
       case "horizon":
         return (
           geometry === "guide_line" &&
-          (category === "composition" || note.styleHint === "horizon")
+          note.styleHint === "horizon" &&
+          /\bhorizon\b/i.test(`${note.label}. ${note.action}`)
         );
       case "focal_point":
         return geometry === "focal_ring" && category === "focal_point";
@@ -181,29 +192,9 @@ export function imageStudyMarks(
     }
   });
   if (!primary.length) return [];
-  if (kind === "value_mass") return primary.slice(0, 3);
-  const first =
-    kind === "eye_flow"
-      ? (primary.find((note) => overlayKind(note) === "arrow") ?? primary[0])
-      : primary[0];
-  const result = [first];
-  if (kind === "crop" || kind === "eye_flow") {
-    const focal = notes.find(
-      (note) =>
-        overlayKind(note) === "focal_ring" &&
-        overlayCategory(note) === "focal_point",
-    );
-    if (focal) result.push(focal);
-  }
-  if (kind === "eye_flow") {
-    const quiet = notes.find(
-      (note) =>
-        overlayKind(note) === "region_highlight" &&
-        overlayCategory(note) === "simplification",
-    );
-    if (quiet) result.push(quiet);
-  }
-  return result;
+  // One evidence item owns its title, action and geometry. Unrelated focal or
+  // quiet companions must not silently change what a study illustrates.
+  return primary.slice(0, 1);
 }
 
 export function planThumbnailStudies(
@@ -211,7 +202,17 @@ export function planThumbnailStudies(
 ): ThumbnailStudy[] {
   const layout = thumbnailLayout(input);
   const notes = usableOverlays(input.overlays);
-  const text = [input.composition, input.sketch, input.values]
+  const text = [
+    input.mainAdvice,
+    input.practice,
+    ...(input.focus === "Composition"
+      ? [input.composition]
+      : input.focus === "Colour & contrast"
+        ? [input.values]
+        : input.focus === "Watercolor technique"
+          ? []
+          : [input.composition, input.values]),
+  ]
     .map(safeText)
     .join(" ");
   const candidates = new Map<
@@ -225,7 +226,25 @@ export function planThumbnailStudies(
   const geometry = new Map<ThumbnailKind, CoachingOverlay[]>();
   function marksFor(kind: ThumbnailKind) {
     if (!hasImage) return [];
-    if (!geometry.has(kind)) geometry.set(kind, imageStudyMarks(kind, notes));
+    if (!geometry.has(kind))
+      geometry.set(
+        kind,
+        imageStudyMarks(
+          kind,
+          notes.filter((note) => {
+            if (!note.domain || note.domain === "overall") return true;
+            const expected =
+              input.focus === "Colour & contrast"
+                ? "colour_value"
+                : input.focus === "Watercolor technique"
+                  ? "technique"
+                  : input.focus === "Composition"
+                    ? "composition"
+                    : null;
+            return !expected || note.domain === expected;
+          }),
+        ),
+      );
     return geometry.get(kind)!;
   }
   function consider(
@@ -235,6 +254,83 @@ export function planThumbnailStudies(
   ) {
     // A selected focus changes which saved planning geometry is useful, while
     // genuine image-backed studies remain ahead of generic text worksheets.
+    const domain = note?.domain;
+    if (
+      (!input.focus || input.focus === "Overall feedback") &&
+      input.mainAdvice
+    ) {
+      const point = `${input.mainAdvice} ${input.practice ?? ""}`;
+      const relevant: Record<ThumbnailKind, RegExp> = {
+        crop: /\b(?:crop|fram(?:e|ing))\b/i,
+        eye_flow: /\b(?:eye path|eye.flow|leading|direction|diagonal|flow)\b/i,
+        big_shapes: /\b(?:shape|mass|balance|simplif\w*)\b/i,
+        value_mass: /\b(?:value|light|dark|shadow|contrast)\b/i,
+        focal_point:
+          /\b(?:focal|attention|focus|centre|center|clearest|light|contrast)\b/i,
+        simplification: /\b(?:simplif\w*|detail|quiet|atmosphere)\b/i,
+        horizon: /\bhorizon\b/i,
+        edge_control: /\b(?:edge|soft|crisp|wash|handling|transparency)\b/i,
+      };
+      if (!relevant[kind].test(point)) return;
+    }
+
+    if (
+      note &&
+      !/\b(?:test|compare|practi[cs]e|study|exercise|experiment|thumbnail)\b/i.test(
+        note.action,
+      )
+    )
+      return;
+    const allowed: Record<string, ThumbnailKind[]> = {
+      Composition: [
+        "crop",
+        "eye_flow",
+        "big_shapes",
+        "simplification",
+        "horizon",
+        "focal_point",
+        "value_mass",
+      ],
+      "Colour & contrast": ["value_mass", "focal_point"],
+      "Watercolor technique": ["edge_control", "simplification"],
+    };
+    if (
+      input.focus &&
+      allowed[input.focus] &&
+      !allowed[input.focus].includes(kind)
+    )
+      return;
+    if (
+      input.focus === "Composition" &&
+      domain &&
+      !["composition", "overall"].includes(domain)
+    )
+      return;
+    if (
+      input.focus === "Colour & contrast" &&
+      domain &&
+      !["colour_value", "overall"].includes(domain)
+    )
+      return;
+    if (
+      input.focus === "Watercolor technique" &&
+      domain &&
+      !["technique", "overall"].includes(domain)
+    )
+      return;
+    if (
+      kind === "horizon" &&
+      (!note || !/\bhorizon\b/i.test(`${note.label}. ${note.action}`))
+    )
+      return;
+    if (
+      kind === "focal_point" &&
+      input.focus === "Colour & contrast" &&
+      !/\b(?:value|contrast|temperature|warm|cool|chroma|colou?r)\b/i.test(
+        `${note?.reason ?? ""} ${note?.action ?? ""}`,
+      )
+    )
+      return;
     const priorities: Record<string, Partial<Record<ThumbnailKind, number>>> = {
       Composition: { eye_flow: 75, focal_point: 70, crop: 65, horizon: 50 },
       "Colour & contrast": {
@@ -256,8 +352,6 @@ export function planThumbnailStudies(
     if (rankedScore > (candidates.get(kind)?.score ?? -1))
       candidates.set(kind, { score: rankedScore, note });
   }
-  consider("big_shapes", 10);
-  consider("value_mass", 9);
   for (const note of notes) {
     const kind = overlayKind(note),
       category = overlayCategory(note);
@@ -299,44 +393,36 @@ export function planThumbnailStudies(
     if (category === "edge_control")
       consider("edge_control", 91 + weight, note);
   }
-  if (/\b(crop|cropping|framing)\b/i.test(text)) consider("crop", 80);
-  if (
-    /\b(eye[ -]?(flow|path)|lead(?:s|ing)?\s+(?:the\s+)?eye|leading line|street perspective)\b/i.test(
-      text,
+  // A generic aid earns a place only for an explicit supplied experiment.
+  const experiment =
+    /\b(?:test|compare|practi[cs]e|experiment|thumbnail)\b/i.test(text);
+  if (experiment) {
+    if (/\b(?:crop|cropping|framing)\b/i.test(text)) consider("crop", 80);
+    if (/\b(?:eye[ -]?(?:flow|path)|leading line)\b/i.test(text))
+      consider("eye_flow", 79);
+    if (
+      /\b(?:value grouping|value study|light.middle.dark|connected shadows?)\b/i.test(
+        text,
+      )
     )
-  )
-    consider("eye_flow", 79);
-  if (/\b(value|values|shadows?|light|middle|dark)\b/i.test(text))
-    consider("value_mass", 70);
-  if (
-    /\b(soft[ -]to[ -]sharp|lost[ -]and[ -]found|edge control|edge handling)\b/i.test(
-      text,
-    )
-  )
-    consider("edge_control", 73);
-  if (
-    /\b(simplif\w*|reduce\s+(?:competing\s+)?detail|quiet\s+(?:the\s+)?background|one\s+(?:connected\s+)?wash)\b/i.test(
-      text,
-    )
-  )
-    consider("simplification", 68);
-  if (
-    layout === "landscape" &&
-    /\b(horizon|sky\/ground|sky and (?:ground|water)|shoreline)\b/i.test(text)
-  )
-    consider("horizon", 76);
+      consider("value_mass", 70);
+    if (/\b(?:edge|wash|glazing|transparency|dry.brush)\b/i.test(text))
+      consider("edge_control", 73);
+  }
   const ranked = [...candidates.entries()].sort(
     (a, b) => b[1].score - a[1].score,
   );
-  const count =
-    ranked.filter(([, item]) => item.score >= 50).length >= 3 ? 3 : 2;
-  return ranked.slice(0, count).map(([kind, candidate]) => {
+  return ranked.slice(0, 2).map(([kind, candidate]) => {
     const marks = marksFor(kind);
     const source = marks[0] ?? candidate.note;
     return {
       kind,
       layout,
       ...studies[kind],
+      ...(input.focus === "Watercolor technique" && !source
+        ? { title: "Handling study" }
+        : {}),
+      ...(source ? { title: `${studies[kind].title} · ${source.label}` } : {}),
       ...(kind === "horizon" && marks.length
         ? { title: "Horizon / structure study" }
         : {}),
@@ -345,13 +431,15 @@ export function planThumbnailStudies(
             source?.reason,
             "Compare this planning idea with the wider composition.",
           )
-        : (source?.reason ?? studies[kind].purpose),
+        : (source?.reason ??
+          (observationText(input.mainAdvice) || studies[kind].purpose)),
       action: input.study
         ? studyText(
             source?.action,
             "If useful, test one small variation on a separate sheet.",
           )
-        : (source?.action ?? studies[kind].action),
+        : (source?.action ??
+          (observationText(input.practice) || studies[kind].action)),
       timing: input.study
         ? "Optional next study variation"
         : kind === "crop"

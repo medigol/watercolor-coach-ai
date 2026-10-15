@@ -264,10 +264,32 @@ test("malformed optional geometry is dropped individually while valid saved geom
   });
   const plan = library.createCompositionStructurePlan(overlay);
   assert.equal(plan.strokes.length, 1);
-  assert.equal(plan.masses.length, 1);
-  assert.equal(plan.anchors.length, 2);
+  assert.equal(plan.masses.length, 0); // Unrelated quiet polygon is not the diagonal lesson.
+  assert.equal(plan.anchors.length, 1);
   assert.equal(plan.explanation, overlay.shortExplanation);
   assert(!render(overlay).includes("NaN"));
+});
+test("a current diagonal teaches one path and landing, without unrelated grids or polygons", () => {
+  const plan = library.createCompositionStructurePlan(
+    fixture({
+      paths: [
+        [first, last],
+        [middle, last],
+        [first, middle],
+      ],
+      secondaryPoints: [middle, first],
+      masses: [
+        mass(triangle, "quiet"),
+        mass(triangle, "supporting"),
+        mass(triangle, "focal"),
+      ],
+    }),
+  );
+  assert.equal(plan.strokes.length, 1);
+  assert.equal(plan.anchors.length, 1);
+  assert.equal(plan.masses.length, 1);
+  assert.equal(plan.masses[0].role, "supporting");
+  assert.equal(plan.thirdsGrid, false);
 });
 
 test("overlay and source frame share projection across source ratios and browser sizes", () => {
