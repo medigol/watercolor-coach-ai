@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -22,7 +23,7 @@ function load(file, mocks = {}) {
     },
   ).outputText;
   new Function("exports", "require", source)(exports, (name) => {
-    assert(name in mocks, `Unexpected import ${name} in ${file}`);
+    if (!(name in mocks)) return loadShared(name, file);
     return mocks[name];
   });
   return exports;
@@ -647,6 +648,6 @@ test("whole-painting and low-confidence notes retain text without false numbered
     assert(
       !nodes(tree).some((n) => n.props?.testID?.startsWith("coaching-marker-")),
     );
-    assert(text(tree).includes("open notes for whole-painting context"));
+    assert(text(tree).includes("choose Notes for whole-painting context"));
   }
 });

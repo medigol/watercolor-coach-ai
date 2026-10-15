@@ -88,6 +88,50 @@ const decision = {
     { area: "trees", role: "quiet" },
   ],
 };
+test("optional composition teaching preserves concrete visible elements and flow while cleaning members independently", () => {
+  const teaching = {
+    elements: ["cliff", "lighthouse"],
+    entry: "Lower left rock",
+    path: "Rock edge toward the tower",
+    landing: "Pale tower",
+    supportingMass: "Low cliff",
+    quietMass: "Open water",
+    counterbalance: null,
+    risk: "Scattered foreground accents",
+  };
+  const result = contract.cleanFeedback(
+    { ...samples.improveResult, compositionOverlay: { ...diagonal, teaching } },
+    "improve_painting",
+  );
+  assert(contract.validFeedback(result, "improve_painting"));
+  assert.deepEqual(result.compositionOverlay.teaching, teaching);
+  for (const malformed of [
+    42,
+    { ...teaching, elements: "invalid" },
+    { ...teaching, path: { bad: true }, risk: "x".repeat(181) },
+  ]) {
+    const cleaned = contract.cleanFeedback(
+      {
+        ...samples.improveResult,
+        compositionOverlay: { ...diagonal, teaching: malformed },
+      },
+      "improve_painting",
+    );
+    assert(contract.validFeedback(cleaned, "improve_painting"));
+    assert.deepEqual(cleaned.compositionOverlay.paths, diagonal.paths);
+    assert.equal(cleaned.mainAdvice, samples.improveResult.mainAdvice);
+  }
+  const renamed = {
+    ...diagonal,
+    teaching,
+    confidence: 0.7,
+    shortExplanation: "Same geometry in other words.",
+  };
+  assert.equal(
+    visual.compositionIdentity(renamed),
+    visual.compositionIdentity(diagonal),
+  );
+});
 for (const mode of ["improve_painting", "create_reference"]) {
   const sample =
     mode === "improve_painting"
@@ -431,7 +475,7 @@ test("domain prompts separate design, colour and handling and explicitly avoid f
       "Clear issues need visible evidence",
       "Study mode may have zero clear issues",
       "Do not force a formula",
-      "Supporting shapes may guide the eye without equal sharpness/contrast",
+      "Supporting elements must remain subordinate",
       "never initiates another model call",
     ])
       assert(prompt.includes(text), text);

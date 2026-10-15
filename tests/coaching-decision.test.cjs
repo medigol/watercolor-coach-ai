@@ -409,10 +409,10 @@ for (const [focus, expectations] of Object.entries(focusExpectations)) {
     const prompt = coachingPrompt("improve_painting", focus);
     assert(prompt.includes(`Selected focus: ${focus}.`));
     for (const text of expectations) assert(prompt.includes(text), text);
-    assert(prompt.includes("ONE canonical coachingDecision"));
+    assert(prompt.includes("SHARED VISUAL FACTS, DIFFERENT EXPERT LENSES"));
     assert(
       prompt.includes(
-        "All existing result fields, overlays, palette, brush steps, practice and follow-up derive from that canonical goal",
+        "do not make four paraphrases of one hierarchy instruction",
       ),
     );
     assert(
@@ -425,10 +425,10 @@ for (const [focus, expectations] of Object.entries(focusExpectations)) {
         "recommended practice conditions, not reconstructed facts",
       ),
     );
-    assert(prompt.includes("An area to quiet must not be told to sharpen"));
+    assert(prompt.includes("Supporting elements must remain subordinate"));
     assert(
       prompt.includes(
-        "practice is ONE specific 15-minute exercise tied to primaryGoal",
+        "practice is ONE specific 15-minute exercise answering the selected expert question",
       ),
     );
     assert(prompt.includes("never initiates another model call"));

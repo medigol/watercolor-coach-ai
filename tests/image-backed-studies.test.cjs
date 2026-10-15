@@ -46,7 +46,7 @@ const note = (patch = {}) => ({
   shortInstruction: "Keep the supporting shapes quiet.",
   reason: "This lets the light focal shape carry the painting.",
   action:
-    "Soften competing marks and keep one sharp accent near the focal shape.",
+    "In a separate study, test soft supporting marks and one focal accent.",
   ...patch,
 });
 const crop = note({
@@ -93,6 +93,8 @@ const horizon = note({
   type: "composition_line",
   category: "composition",
   styleHint: "horizon",
+  label: "Horizon placement",
+  action: "Test this horizon placement in a new study.",
   points: [
     { x: 5, y: 40 },
     { x: 90, y: 40 },
@@ -117,12 +119,8 @@ const input = {
 test("crop/flow/value/simplify/structure/focal study marks preserve validated saved geometry", () => {
   const notes = [crop, flow, value, focal, quiet, horizon];
   const before = JSON.stringify(notes);
-  assert.deepEqual(planning.imageStudyMarks("crop", notes), [crop, focal]);
-  assert.deepEqual(planning.imageStudyMarks("eye_flow", notes), [
-    flow,
-    focal,
-    quiet,
-  ]);
+  assert.deepEqual(planning.imageStudyMarks("crop", notes), [crop]);
+  assert.deepEqual(planning.imageStudyMarks("eye_flow", notes), [flow]);
   assert.deepEqual(planning.imageStudyMarks("value_mass", notes), [value]);
   assert.deepEqual(planning.imageStudyMarks("simplification", notes), [quiet]);
   assert.deepEqual(planning.imageStudyMarks("horizon", notes), [horizon]);
@@ -170,10 +168,10 @@ test("image-backed selection keeps two/three cards and uses relevant reason/acti
     ...input,
     overlays: [crop, flow, value, focal, quiet, horizon],
   });
-  assert.equal(result.length, 3);
+  assert.equal(result.length, 2);
   assert.deepEqual(
     result.map((study) => study.kind),
-    ["crop", "value_mass", "eye_flow"],
+    ["crop", "value_mass"],
   );
   assert(result.every((study) => study.marks.length > 0));
   assert.equal(result[0].purpose, crop.reason);
@@ -182,7 +180,8 @@ test("image-backed selection keeps two/three cards and uses relevant reason/acti
   const structural = note({
     ...flow,
     timing: "current_painting",
-    action: "Move the figures closer to the main building.",
+    action:
+      "Test moving the figures closer to the main building in the next study.",
   });
   const next = planning
     .planThumbnailStudies({ ...input, overlays: [structural] })
@@ -212,7 +211,7 @@ test("available focal geometry outranks weak high-priority crop/value metadata",
   });
   assert.equal(result[0].kind, "focal_point");
   assert.deepEqual(result[0].marks, [focal]);
-  assert(result.length >= 2 && result.length <= 3);
+  assert(result.length >= 1 && result.length <= 2);
   assert(result.slice(1).every((study) => study.marks.length === 0));
 });
 
@@ -224,7 +223,7 @@ test("mock or missing provider never mixes sample guidance with the private uplo
       overlays: [crop, flow, value, focal],
     });
     assert(studies.every((study) => study.marks.length === 0));
-    assert(studies.length >= 2 && studies.length <= 3);
+    assert(studies.length <= 2);
   }
   const real = planning.planThumbnailStudies({
     ...input,

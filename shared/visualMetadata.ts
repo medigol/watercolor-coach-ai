@@ -1,3 +1,4 @@
+import { changeRecommendation, observationText } from "./coachingEvidence.ts";
 // Optional image-local teaching metadata. Pure validation only: no I/O or assets.
 import {
   validPath,
@@ -144,6 +145,15 @@ export function sanitizeVisualMetadata<T>(value: T): T {
     result.domain = detected;
   }
   if (
+    result.classification === "strength" &&
+    [result.shortInstruction, result.action].some(
+      (item) => typeof item === "string" && changeRecommendation(item),
+    )
+  ) {
+    result.classification = "study_experiment";
+    result.timing = "next_study";
+  }
+  if (
     (result.classification === "clear_issue" ||
       result.classification === "optional_refinement") &&
     !usefulEvidence(result.evidence)
@@ -235,7 +245,54 @@ export interface CompositionMass {
   points: NormalizedPoint[];
   role: VisualRole | null;
 }
+export const compositionTeachingFields = [
+  "elements",
+  "entry",
+  "path",
+  "landing",
+  "supportingMass",
+  "quietMass",
+  "counterbalance",
+  "risk",
+] as const;
+export interface CompositionTeaching {
+  elements: string[];
+  entry: string | null;
+  path: string | null;
+  landing: string | null;
+  supportingMass: string | null;
+  quietMass: string | null;
+  counterbalance: string | null;
+  risk: string | null;
+}
+export function usableCompositionTeaching(
+  value: unknown,
+): CompositionTeaching | null {
+  if (!record(value)) return null;
+  const result: Record<string, unknown> = {
+    elements: Array.isArray(value.elements)
+      ? value.elements
+          .filter(
+            (item) =>
+              typeof item === "string" && item.trim() && item.length <= 100,
+          )
+          .slice(0, 3)
+      : [],
+  };
+  for (const field of compositionTeachingFields.slice(1))
+    result[field] =
+      typeof value[field] === "string" &&
+      value[field].trim() &&
+      value[field].length <= 180
+        ? observationText(value[field]) || null
+        : null;
+  return (result.elements as string[]).length &&
+    [result.entry, result.path, result.landing].some(Boolean)
+    ? (result as unknown as CompositionTeaching)
+    : null;
+}
 export interface CompositionOverlay {
+  teaching?: CompositionTeaching | null;
   type: CompositionArchetype;
   confidence: number;
   shortExplanation: string;
@@ -259,6 +316,8 @@ export function usableCompositionOverlay(
     value.shortExplanation.length > 350
   )
     return null;
+  const explanation = observationText(value.shortExplanation);
+  if (!explanation) return null;
   const paths = Array.isArray(value.paths)
     ? (value.paths
         .slice(0, 16)
@@ -286,12 +345,50 @@ export function usableCompositionOverlay(
   return {
     type: value.type as CompositionArchetype,
     confidence: value.confidence,
-    shortExplanation: value.shortExplanation,
+    shortExplanation: explanation,
     paths: paths.length ? paths : null,
     focalPoint: validPoint(value.focalPoint) ? value.focalPoint : null,
     secondaryPoints: secondaryPoints.length ? secondaryPoints : null,
     masses: masses.length ? masses : null,
+    ...(Object.hasOwn(value, "teaching")
+      ? { teaching: usableCompositionTeaching(value.teaching) }
+      : {}),
   };
+}
+export function compositionIdentity(value: CompositionOverlay): string {
+  const {
+    type: _type,
+    confidence: _confidence,
+    shortExplanation: _explanation,
+    teaching: _teaching,
+    ...geometry
+  } = value;
+  return JSON.stringify(geometry);
+}
+function validCompositionTeaching(value: unknown): boolean {
+  if (
+    !record(value) ||
+    !Array.isArray(value.elements) ||
+    value.elements.length > 3 ||
+    !usableCompositionTeaching(value)
+  )
+    return false;
+  return (
+    Object.keys(value).every((key) =>
+      (compositionTeachingFields as readonly string[]).includes(key),
+    ) &&
+    value.elements.every(
+      (item) => typeof item === "string" && !!item.trim() && item.length <= 100,
+    ) &&
+    compositionTeachingFields
+      .slice(1)
+      .every(
+        (key) =>
+          value[key] == null ||
+          (typeof value[key] === "string" &&
+            (value[key] as string).length <= 180),
+      )
+  );
 }
 export function validCompositionOverlay(value: unknown): boolean {
   if (!record(value)) return false;
@@ -305,9 +402,11 @@ export function validCompositionOverlay(value: unknown): boolean {
     "focalPoint",
     "secondaryPoints",
     "masses",
+    "teaching",
   ];
   return (
     Object.keys(value).every((key) => keys.includes(key)) &&
+    (value.teaching == null || validCompositionTeaching(value.teaching)) &&
     (value.paths == null ||
       (Array.isArray(value.paths) &&
         value.paths.length <= 4 &&

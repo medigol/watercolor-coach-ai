@@ -1,3 +1,4 @@
+import { observationText } from "../shared/coachingEvidence";
 import { StyleSheet, Text, View } from "react-native";
 import type { BrushWashStep } from "../types";
 import { colors, styles } from "./ui";
@@ -31,7 +32,7 @@ function suggestedMethod(value: string): string {
   const originalProcess =
     /\b(?:artist|painter|you|they)\s+(?:(?:clearly|definitely|originally)\s+)?(?:used|chose|painted|worked|applied|mixed|began|finished|soaked|glazed|layered)\b|\b(?:was|were|had been|has been|must have been)\s+(?:(?:clearly|definitely|originally|fully|still|evenly)\s+)?(?:painted|applied|used|mixed|laid|brushed|wet|wetted|damp|dry|soaked|glazed|layered|added)\b|\b(?:original|actual|exact)\s+(?:brush|pigment|paper moisture|wash sequence|process)\b.{0,40}\b(?:is|was|were|used|must be)\b/i;
   return conciseText(
-    value
+    observationText(value)
       .trim()
       .split(/(?<=[.!?])\s+|\r?\n+/)
       .filter((sentence) => !originalProcess.test(sentence))
@@ -140,7 +141,7 @@ export default function BrushWashPlanCard({
       )}
       <Text style={styles.caption}>
         {study
-          ? "For a separate study: a suggested way to practise this effect."
+          ? "For a separate study: a suggested practice method, not a reconstruction of the original process."
           : "A suggested practice method, not a reconstruction of the original process."}
       </Text>
       {steps.map((step, index) => {

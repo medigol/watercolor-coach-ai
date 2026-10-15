@@ -621,11 +621,11 @@ export default function CoachingOverlay({
         <Text style={styles.caption}>
           {valid.length} coaching {valid.length === 1 ? "note" : "notes"} ·{" "}
           {valid.some(noteGeometryVisible)
-            ? "tap a marker or open notes"
-            : "open notes for whole-painting context"}
+            ? "tap a marker or choose Notes"
+            : "choose Notes for whole-painting context"}
         </Text>
       )}
-      {notesVisible && valid.length > 0 && (!hideNotes || onOpenNotes) && (
+      {notesVisible && valid.length > 0 && !hideNotes && (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={

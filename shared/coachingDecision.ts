@@ -1,3 +1,4 @@
+import { evidenceFeedback } from "./coachingEvidence.ts";
 import type { VisualRole } from "./visualMetadata.ts";
 // Shared deterministic presentation rules. No network, storage or model calls.
 export interface CoachingDecision {
@@ -314,12 +315,12 @@ export function coherentFeedback<T>(
   mode: "improve_painting" | "create_reference",
 ): T {
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
-  const original = value as Record<string, unknown>;
+  const original = evidenceFeedback(value) as Record<string, unknown>;
   if (
     !Object.hasOwn(original, "coachingDecision") ||
     original.coachingDecision === null
   )
-    return value;
+    return original as T;
   const result = { ...original };
   const decision = usableCoachingDecision(result.coachingDecision);
   if (!decision) {
@@ -329,7 +330,16 @@ export function coherentFeedback<T>(
   result.coachingDecision = decision;
   if (result.coachingMode === "study") decision.currentPaintingAction = null;
   // Never repair malformed required data: the strict core gate still rejects it.
-  if (mode === "improve_painting" && text(result.mainAdvice, 700))
+  if (
+    mode === "improve_painting" &&
+    text(result.mainAdvice, 700) &&
+    (conflictsWithDecision(result.mainAdvice, decision) ||
+      (decision.areasToQuiet.length > 0 &&
+        /\b(?:equally|everywhere|every area)\b/i.test(result.mainAdvice) &&
+        /\b(?:add|sharpen|darken|increase|emphasize|strengthen)\b/i.test(
+          result.mainAdvice,
+        )))
+  )
     result.mainAdvice = decision.primaryGoal;
   for (const key of ["whatWorks", "whatToFix"]) {
     if (
@@ -459,7 +469,40 @@ export function coherentFeedback<T>(
       });
   }
   for (const field of ["compositionOverlay", "secondaryCompositionOverlay"]) {
-    const overlay = result[field];
+    let overlay = result[field];
+    if (overlay && typeof overlay === "object" && !Array.isArray(overlay)) {
+      const source = overlay as Record<string, unknown>;
+      if (
+        source.teaching &&
+        typeof source.teaching === "object" &&
+        !Array.isArray(source.teaching)
+      ) {
+        const teaching = { ...(source.teaching as Record<string, unknown>) };
+        for (const key of [
+          "entry",
+          "path",
+          "landing",
+          "supportingMass",
+          "quietMass",
+          "counterbalance",
+          "risk",
+        ])
+          if (
+            typeof teaching[key] === "string" &&
+            conflictsWithDecision(teaching[key] as string, decision)
+          )
+            teaching[key] = null;
+        overlay = {
+          ...source,
+          teaching: [teaching.entry, teaching.path, teaching.landing].some(
+            Boolean,
+          )
+            ? teaching
+            : null,
+        };
+        result[field] = overlay;
+      }
+    }
     if (
       overlay &&
       typeof overlay === "object" &&

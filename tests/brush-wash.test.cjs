@@ -193,7 +193,7 @@ test("study handling uses learning framing and suppresses supplied harsh correct
   assert(html.includes("How to practise this handling"));
   assert(
     html.includes(
-      "For a separate study: a suggested way to practise this effect.",
+      "For a separate study: a suggested practice method, not a reconstruction of the original process.",
     ),
   );
   assert(html.includes(stage.brush));
@@ -217,7 +217,7 @@ test("explicit new-study handling keeps useful supplied timing, edge and stop in
   const html = render([supplied], { study: true });
   assert(
     html.includes(
-      "For a separate study: a suggested way to practise this effect.",
+      "For a separate study: a suggested practice method, not a reconstruction of the original process.",
     ),
   );
   assert(html.includes(supplied.timing));

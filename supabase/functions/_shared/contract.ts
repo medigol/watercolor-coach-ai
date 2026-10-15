@@ -1,5 +1,6 @@
 import {
   compositionArchetypes,
+  compositionIdentity,
   feedbackClassifications,
   feedbackDomains,
   feedbackScopes,
@@ -449,7 +450,31 @@ export function feedbackSchema(mode: Mode) {
     edges: text,
     stop: text,
   };
+  const teachingFields = {
+    elements: {
+      type: "array",
+      maxItems: 3,
+      items: { type: "string", maxLength: 100 },
+    },
+    ...Object.fromEntries(
+      [
+        "entry",
+        "path",
+        "landing",
+        "supportingMass",
+        "quietMass",
+        "counterbalance",
+        "risk",
+      ].map((field) => [field, { type: ["string", "null"], maxLength: 180 }]),
+    ),
+  };
   const compositionOverlayFields = {
+    teaching: {
+      type: ["object", "null"],
+      properties: teachingFields,
+      required: Object.keys(teachingFields),
+      additionalProperties: false,
+    },
     type: { type: "string", enum: [...compositionArchetypes] },
     confidence: unit,
     shortExplanation: { type: "string", maxLength: 350 },
@@ -635,8 +660,16 @@ export function cleanFeedback(value: unknown, mode: Mode): unknown {
   if (
     result.secondaryCompositionOverlay &&
     result.compositionOverlay &&
-    JSON.stringify(result.secondaryCompositionOverlay) ===
-      JSON.stringify(result.compositionOverlay)
+    compositionIdentity(
+      result.secondaryCompositionOverlay as NonNullable<
+        ReturnType<typeof usableCompositionOverlay>
+      >,
+    ) ===
+      compositionIdentity(
+        result.compositionOverlay as NonNullable<
+          ReturnType<typeof usableCompositionOverlay>
+        >,
+      )
   )
     delete result.secondaryCompositionOverlay;
   if (

@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -17,7 +18,7 @@ function load(file, mocks = {}) {
     },
   ).outputText;
   new Function("exports", "require", code)(exports, (name) => {
-    assert(name in mocks, `Unexpected import ${name}`);
+    if (!(name in mocks)) return loadShared(name, file);
     return mocks[name];
   });
   return exports;
@@ -767,7 +768,7 @@ test("displayed overlays are priority-ranked and limited to three supplied marks
     .flatMap((n) => [n.props.children].flat(Infinity))
     .join(" ")
     .replace(/\s+/g, " ");
-  assert(text.includes("3 coaching notes · tap a marker or open notes"));
+  assert(text.includes("3 coaching notes · tap a marker or choose Notes"));
   assert(!text.includes("Primary decision"));
 });
 
@@ -851,10 +852,14 @@ test("compact image delegates note opening to Explore without rendering long not
     2,
   );
   assert(!f.nodes(tree).some((n) => n.props?.accessibilityState?.expanded));
-  f.nodes(tree)
-    .find((n) => n.props?.accessibilityLabel === "Open visual coaching notes")
-    .props.onPress();
-  assert.equal(opened, 1);
+  assert(
+    !f
+      .nodes(tree)
+      .some(
+        (n) => n.props?.accessibilityLabel === "Open visual coaching notes",
+      ),
+  );
+  assert.equal(opened, 0); // The unified Notes layer owns opening; marker callback remains linked.
 });
 
 test("image sizing and render failures notify text-only image fallback", () => {
