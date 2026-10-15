@@ -1,7 +1,21 @@
+import {
+  cleanPaintingAnalysis,
+  expertViewFocus,
+  expertViewKeys,
+  expertViewLabels,
+  hasPaintingAnalysis,
+  initialExpertView,
+  optionalViewInsights,
+  projectPaintingAnalysis,
+  validPaintingAnalysis,
+  type ExpertViewKey,
+  type PaintingAnalysisResult,
+} from "../shared/paintingAnalysis";
 import { sameLearningInsight } from "../shared/coachingEvidence";
-import { overlayCategory } from "../lib/overlays";
+import { overlayCategory, usableOverlays } from "../lib/overlays";
 import {
   useCallback,
+  useMemo,
   useEffect,
   useRef,
   useState,
@@ -10,6 +24,7 @@ import {
 import { Platform, Pressable, Text, View } from "react-native";
 import type {
   ImproveData,
+  LegacyImproveData,
   ReferenceData,
   ResultProvider,
 } from "../lib/artworks";
@@ -40,7 +55,7 @@ import {
   domainLabel,
 } from "../shared/visualMetadata";
 import { archetypeLabel } from "../lib/compositionArchetypes";
-import { planVisualRoles } from "../lib/visualRoles";
+import { planCanonicalVisualRoles, planVisualRoles } from "../lib/visualRoles";
 import type { ImageSize } from "../shared/imageGeometry";
 import ResultLayout from "./ResultLayout";
 import ResultProviderLabel from "./ResultProviderLabel";
@@ -146,7 +161,57 @@ function DetailNote({
   );
 }
 
+type CanonicalContext = {
+  source: PaintingAnalysisResult;
+  view: ExpertViewKey;
+  select: (key: ExpertViewKey) => void;
+};
+type LegacyProps = Omit<Props, "result"> & {
+  result: LegacyImproveData | ReferenceData;
+  canonical?: CanonicalContext;
+};
+
 export default function ResultExperience(props: Props) {
+  if (props.mode === "improve_painting" && hasPaintingAnalysis(props.result))
+    return <CanonicalExperience {...props} />;
+  return <LegacyResultExperience {...(props as LegacyProps)} />;
+}
+function CanonicalExperience(props: Props) {
+  const [view, setView] = useState<ExpertViewKey>(() =>
+    initialExpertView(props.focus),
+  );
+  useEffect(
+    () => setView(initialExpertView(props.focus)),
+    [props.result, props.focus],
+  );
+  const source = useMemo(
+    () => cleanPaintingAnalysis(props.result, usableOverlays),
+    [props.result],
+  );
+  const projection = useMemo(
+    () =>
+      validPaintingAnalysis(source)
+        ? projectPaintingAnalysis(source, view)
+        : null,
+    [source, view],
+  );
+  if (!validPaintingAnalysis(source) || !projection)
+    return (
+      <Text accessibilityRole="alert" style={styles.body}>
+        We could not open this saved analysis. Please return to My Artworks.
+      </Text>
+    );
+  return (
+    <LegacyResultExperience
+      {...props}
+      result={projection as LegacyImproveData}
+      focus={expertViewFocus[view]}
+      canonical={{ source, view, select: setView }}
+    />
+  );
+}
+
+function LegacyResultExperience(props: LegacyProps) {
   const [chosenSection, setChosenSection] = useState<ExploreKey | null>();
   const [selectedNote, setSelectedNote] = useState<number | null>(null);
   const [sourceMetrics, setSourceMetrics] = useState<{
@@ -172,7 +237,10 @@ export default function ResultExperience(props: Props) {
     setChosenMode(undefined);
     setCompositionVariant("primary");
     setPendingScroll(null);
-  }, [props.result, props.focus]);
+  }, [
+    props.canonical?.source ?? props.result,
+    props.canonical ? null : props.focus,
+  ]);
   useEffect(() => {
     if (!pendingScroll) return;
     if (Platform.OS === "web") {
@@ -207,7 +275,7 @@ export default function ResultExperience(props: Props) {
     : null;
   const study = live && result.coachingMode === "study";
   const focus = resultFocus(props.focus);
-  const painting = result as ImproveData;
+  const painting = result as LegacyImproveData;
   const reference = result as ReferenceData;
   const advice =
     mode === "improve_painting"
@@ -259,12 +327,17 @@ export default function ResultExperience(props: Props) {
     compositionVariant === "secondary" && secondaryStructure
       ? secondaryStructure
       : primaryStructure;
-  const roleRegions = planVisualRoles(
-    notes,
-    live ? result.compositionOverlay : undefined,
-  );
+  const roleRegions = props.canonical
+    ? planCanonicalVisualRoles(
+        props.canonical.source.canonicalAnalysis.visualRoles,
+      )
+    : planVisualRoles(notes, live ? result.compositionOverlay : undefined);
   const brush = usableBrushPlan(result.brushPlan);
-  const omit = [summary, shortPractice];
+  const omit = [
+    summary,
+    shortPractice,
+    ...(props.canonical ? (result.whatWorks ?? []) : []),
+  ];
   const planningInput = {
     provider,
     uri: live ? image : undefined,
@@ -281,7 +354,10 @@ export default function ResultExperience(props: Props) {
     currentCompositionOverlay: primaryStructure,
     secondaryCompositionOverlay: secondaryStructure,
   };
-  const studies = planPlanningStudies(planningInput);
+  const studies = planPlanningStudies(planningInput).slice(
+    0,
+    props.canonical?.view === "overall" ? 1 : 2,
+  );
   const composition = compositionGuidance({
     decision: decision
       ? {
@@ -296,9 +372,11 @@ export default function ResultExperience(props: Props) {
     composition: result.composition,
     study,
   });
-  const compositionNote = decision
-    ? decision.compositionImplication
-    : result.composition;
+  const compositionNote = props.canonical
+    ? props.canonical.source.canonicalAnalysis.composition.observation
+    : decision
+      ? decision.compositionImplication
+      : result.composition;
   const colourNote = decision
     ? decision.colourImplication
     : (result.paletteStrategy ?? result.values);
@@ -483,7 +561,7 @@ export default function ResultExperience(props: Props) {
       key: "planning",
       title: "Planning studies",
       helper: `${studies.length} ${study ? "optional future variations" : "future study ideas"}`,
-      content: <PlanningStudies {...planningInput} />,
+      content: <PlanningStudies {...planningInput} studies={studies} />,
     },
     {
       key: "composition",
@@ -711,7 +789,14 @@ export default function ResultExperience(props: Props) {
     mode === "improve_painting" ? primaryExploreSection(focus) : null;
   const visibleRows = rows.filter((row) => {
     if (row.key === "planning" && !studies.length) return false;
+    if (props.canonical && (row.key === "sketch" || row.key === "followup"))
+      return false;
     if (!decision) return true;
+    if (props.canonical && row.key === "composition")
+      return (
+        !!activeStructure ||
+        domainNotes("composition", "Composition", compositionOmit).length > 0
+      );
     if (row.key === "composition")
       return (
         !!activeStructure ||
@@ -765,8 +850,49 @@ export default function ResultExperience(props: Props) {
               {warning}
             </Text>
           )}
+          {props.canonical && (
+            <View testID="expert-view-controls" style={{ gap: 10 }}>
+              <Text style={styles.caption}>
+                Explore four views of the same painting analysis.
+              </Text>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                {expertViewKeys.map((key) => (
+                  <VisualChoice
+                    key={key}
+                    title={expertViewLabels[key]}
+                    label={`Show ${expertViewLabels[key]} guidance`}
+                    active={props.canonical!.view === key}
+                    onPress={() => props.canonical!.select(key)}
+                  />
+                ))}
+              </View>
+              <Text style={styles.heading}>
+                {props.canonical.source.canonicalAnalysis.qualityAssessment.level
+                  .replace(/_/g, " ")
+                  .replace(/^./, (letter) => letter.toUpperCase())}{" "}
+                painting
+              </Text>
+              <Text style={styles.caption}>
+                {
+                  props.canonical.source.canonicalAnalysis.qualityAssessment
+                    .rationale
+                }
+              </Text>
+              {!props.canonical.source.canonicalAnalysis.insights.some(
+                (i) => i.classification === "clear_issue",
+              ) && (
+                <Text style={styles.caption}>
+                  No significant correction is needed. Explore what works and
+                  what to study.
+                </Text>
+              )}
+            </View>
+          )}
           {mode === "improve_painting" && (
-            <Text style={styles.caption}>Your selected focus: {focus}</Text>
+            <Text style={styles.caption}>
+              {props.canonical ? "Your selected view" : "Your selected focus"}:{" "}
+              {focus}
+            </Text>
           )}
         </>
       }
@@ -866,6 +992,23 @@ export default function ResultExperience(props: Props) {
             study={study}
             omit={[summary]}
           />
+          {props.canonical &&
+            optionalViewInsights(
+              props.canonical.source,
+              props.canonical.view,
+            ).map((insight) => (
+              <FeedbackSection
+                key={insight.id}
+                title={
+                  {
+                    optional_refinement: "Optional refinement",
+                    stylistic_alternative: "Stylistic alternative",
+                    study_experiment: "Study experiment",
+                  }[insight.classification as "optional_refinement"]
+                }
+                text={`For a separate study: ${insight.lesson} ${insight.action}`}
+              />
+            ))}
           <FeedbackSection
             title="Next 15-minute practice"
             text={shortPractice}
@@ -873,31 +1016,33 @@ export default function ResultExperience(props: Props) {
         </>
       }
       explore={
-        <View style={{ gap: 12 }} testID="explore-feedback">
-          <Text style={styles.heading}>Explore your feedback</Text>
-          {order.flatMap((key) => {
-            const row = visibleRows.find((item) => item.key === key);
-            return row
-              ? [
-                  <StudyDisclosure
-                    key={key}
-                    title={row.title}
-                    helper={row.helper}
-                    open={openSection === key}
-                    onOpenChange={(open) => {
-                      setChosenSection(open ? key : null);
-                      if (key === "composition" && open && activeStructure)
-                        setChosenMode("composition");
-                      if (key === "visual" && open) setChosenMode("notes");
-                      if (!open || key !== "visual") setSelectedNote(null);
-                    }}
-                  >
-                    {row.content}
-                  </StudyDisclosure>,
-                ]
-              : [];
-          })}
-        </View>
+        visibleRows.length ? (
+          <View style={{ gap: 12 }} testID="explore-feedback">
+            <Text style={styles.heading}>Explore your feedback</Text>
+            {order.flatMap((key) => {
+              const row = visibleRows.find((item) => item.key === key);
+              return row
+                ? [
+                    <StudyDisclosure
+                      key={key}
+                      title={row.title}
+                      helper={row.helper}
+                      open={openSection === key}
+                      onOpenChange={(open) => {
+                        setChosenSection(open ? key : null);
+                        if (key === "composition" && open && activeStructure)
+                          setChosenMode("composition");
+                        if (key === "visual" && open) setChosenMode("notes");
+                        if (!open || key !== "visual") setSelectedNote(null);
+                      }}
+                    >
+                      {row.content}
+                    </StudyDisclosure>,
+                  ]
+                : [];
+            })}
+          </View>
+        ) : null
       }
     />
   );

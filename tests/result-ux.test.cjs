@@ -14,6 +14,7 @@ function render(
   {
     focus = "Composition",
     saved = {},
+    canonicalResult,
     viewportWidth = 375,
     isSaved = true,
     expandedAids = true,
@@ -149,7 +150,7 @@ function render(
       if (name.endsWith("/useSavedResult"))
         return {
           useSavedResult: (sample) => ({
-            result: {
+            result: canonicalResult ?? {
               ...sample,
               ...(overlays === undefined ? {} : { overlays }),
               ...saved,
@@ -1012,4 +1013,141 @@ test("current composition teaching does not repeat its paragraph or invent a gen
     ),
   );
   assert(!html.includes("Current painting"));
+});
+
+for (const focus of [
+  "Overall feedback",
+  "Composition",
+  "Colour & contrast",
+  "Watercolor technique",
+])
+  test(`canonical saved result: ${focus} renders its own view without forced correction`, () => {
+    const fixture = require("./helpers/canonical-fixture.cjs")();
+    const key = {
+      "Overall feedback": "overall",
+      Composition: "composition",
+      "Colour & contrast": "colourValue",
+      "Watercolor technique": "technique",
+    }[focus];
+    const html = render("improve_painting", "openai", image, undefined, {
+      focus,
+      canonicalResult: fixture,
+      expandedAids: false,
+    });
+    assert(html.includes('data-testid="expert-view-controls"'));
+    assert(html.includes("Highly resolved painting"));
+    assert(html.includes("No significant correction is needed"));
+    assert(!html.includes("What to improve"));
+    const lesson = fixture.canonicalAnalysis.insights.find(
+      (i) => i.id === fixture.expertViews[key].summaryId,
+    ).lesson;
+    assert(html.includes(lesson));
+    assert.equal(
+      (html.match(/guidance" aria-pressed="true"/g) || []).length,
+      1,
+    );
+    assert(!html.includes("Open notes"));
+  });
+test("canonical optional alternatives are explicitly labelled, not presented as defects", () => {
+  const fixture = require("./helpers/canonical-fixture.cjs")();
+  fixture.canonicalAnalysis.insights.push({
+    id: "alternative",
+    domain: "technique",
+    classification: "stylistic_alternative",
+    factIds: ["edges"],
+    lesson: "A broken dry accent offers another valid handling choice.",
+    action: "Compare it in a separate study.",
+  });
+  fixture.expertViews.technique.insightIds.push("alternative");
+  const html = render("improve_painting", "openai", image, undefined, {
+    focus: "Watercolor technique",
+    canonicalResult: fixture,
+    expandedAids: false,
+  });
+  assert(html.includes("Stylistic alternative"));
+  assert(html.includes("For a separate study"));
+  assert(!html.includes("What to improve"));
+});
+test("canonical invalid required data renders an explicit saved-analysis error", () => {
+  const fixture = require("./helpers/canonical-fixture.cjs")();
+  delete fixture.expertViews.technique;
+  const html = render("improve_painting", "openai", image, undefined, {
+    canonicalResult: fixture,
+    expandedAids: false,
+  });
+  assert(html.includes("We could not open this saved analysis"));
+  assert(!html.includes("Lake House"));
+});
+
+test("canonical composition retains distinct text teaching when optional structure is absent", () => {
+  const fixture = require("./helpers/canonical-fixture.cjs")();
+  fixture.canonicalAnalysis.composition.primary = null;
+  fixture.canonicalAnalysis.composition.observation =
+    "The broad unpainted water holds space around the tower group.";
+  const html = render("improve_painting", "openai", image, undefined, {
+    focus: "Composition",
+    canonicalResult: fixture,
+  });
+  assert(html.includes(fixture.canonicalAnalysis.composition.observation));
+  assert(!html.includes("On your painting · Diagonal"));
+});
+test("canonical Overall renders at most one supported planning card", () => {
+  const fixture = require("./helpers/canonical-fixture.cjs")();
+  fixture.canonicalAnalysis.qualityAssessment.level = "developing";
+  fixture.canonicalAnalysis.insights[0].lesson =
+    "Compare the reserved light and the connected shadow group.";
+  fixture.canonicalAnalysis.insights[0].classification = "study_experiment";
+  fixture.canonicalAnalysis.insights[0].action =
+    "In a separate study, test the reserved light against a connected shadow.";
+  fixture.canonicalAnalysis.composition.primary = null;
+  fixture.expertViews.overall.practice =
+    "Test one connected shadow and reserved light in a 15-minute value study.";
+  fixture.canonicalAnalysis.visualEvidence = [
+    {
+      insightId: "whole",
+      roleId: "tower",
+      note: {
+        id: "light",
+        type: "focal_ring",
+        category: "focal_point",
+        label: "Tower light",
+        scope: "local",
+        region: { x: 0.56, y: 0.24, width: 0.2, height: 0.3 },
+        regionConfidence: 0.92,
+        x: 56,
+        y: 24,
+        width: 20,
+        height: 30,
+        priority: "high",
+        shortInstruction: "Compare this reserved light in a separate study.",
+      },
+    },
+    {
+      insightId: "whole",
+      roleId: "tower",
+      note: {
+        id: "dark",
+        type: "value_mass",
+        category: "value_structure",
+        label: "Tower shadow",
+        scope: "local",
+        region: { x: 0.56, y: 0.24, width: 0.2, height: 0.3 },
+        regionConfidence: 0.92,
+        x: 56,
+        y: 24,
+        width: 20,
+        height: 30,
+        priority: "high",
+        shortInstruction: "Compare this connected shadow in a separate study.",
+        valueGroup: "dark",
+      },
+    },
+  ];
+  const html = render("improve_painting", "openai", image, undefined, {
+    focus: "Overall feedback",
+    canonicalResult: fixture,
+  });
+  const labels = (html.match(/Study overlay on your image/g) || []).length;
+  assert(labels <= 1);
+  assert(!html.includes("2 future study ideas"));
 });

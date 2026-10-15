@@ -8,6 +8,7 @@ import {
   type Input,
   type Saved,
 } from "../_shared/contract.ts";
+import { hasPaintingAnalysis } from "../../../shared/paintingAnalysis.ts";
 export interface User {
   id: string;
   token: string;
@@ -134,7 +135,10 @@ export function createHandler(deps: Dependencies) {
       claimed = true;
       const bytes = await deps.download(user, input.image_path);
       const data = cleanFeedback(await deps.generate(input, bytes), input.mode);
-      if (!validFeedback(data, input.mode))
+      if (
+        !validFeedback(data, input.mode) ||
+        (input.mode === "improve_painting" && !hasPaintingAnalysis(data))
+      )
         return reply(
           {
             code: "unavailable",

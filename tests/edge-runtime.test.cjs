@@ -1,3 +1,4 @@
+const canonicalFixture = require("./helpers/canonical-fixture.cjs");
 // Execute the real Edge entrypoint with the installed Supabase SDK. Replace only
 // outbound fetch and Deno's env/serve boundary; never call a paid API or live DB.
 const test = require("node:test");
@@ -63,7 +64,7 @@ function fixture(options = {}) {
   const modelResult =
     options.mode === "create_reference"
       ? load(path.join(root, "data/mockResults.ts")).referenceResult
-      : load(path.join(root, "data/mockResults.ts")).improveResult;
+      : (options.canonical ?? canonicalFixture());
   if (options.overlays) modelResult.overlays = options.overlays;
   if (options.palette) modelResult.palette = options.palette;
   if (options.compositionDecision)
@@ -108,11 +109,19 @@ function fixture(options = {}) {
       assert.equal(body.model, "gpt-4.1-mini");
       const prompt = body.messages[0].content;
       assert(prompt.includes("visible locations"));
-      assert(prompt.includes("never claim to have generated"));
-      assert(prompt.includes("Aim for two concise useful visual marks"));
+      assert(prompt.toLowerCase().includes("never claim to have generated"));
+      assert(
+        prompt
+          .toLowerCase()
+          .includes("aim for two concise useful visual marks"),
+      );
       assert(prompt.includes("at most three distinct high-value notes"));
       assert(
-        prompt.includes("one practical sentence under 25 words for action"),
+        prompt.includes(
+          options.mode === "create_reference"
+            ? "one practical sentence under 25 words for action"
+            : "action one practical sentence under25 words",
+        ),
       );
       assert.equal(body.max_completion_tokens, 3000);
       assert(
@@ -144,7 +153,15 @@ function fixture(options = {}) {
       } else {
         assert(prompt.includes("ONE main priority"));
         assert(prompt.includes("lost/found edges, and negative shapes"));
-        assert(prompt.includes("without generic compliments"));
+        assert(
+          prompt
+            .toLowerCase()
+            .includes(
+              options.mode === "create_reference"
+                ? "without generic compliments"
+                : "avoid generic compliments",
+            ),
+        );
       }
       if (options.modelError)
         return json({ error: { message: "private upstream error" } }, 429);
@@ -306,47 +323,30 @@ function fixture(options = {}) {
     },
   };
 }
-for (const [focus, mainAdvice, practice] of focusCases) {
-  test(`actual Edge SDK: ${focus} saves its independent interpretation in one paid call`, async () => {
-    const f = fixture({
-      feedback: {
-        mainAdvice,
-        practice,
-        whatWorks: ["The roof light separates from its darker surroundings."],
-        whatToFix: [],
-        coachingDecision: {
-          primaryGoal: "Preserve the existing light-dark hierarchy.",
-          primarySubjectOrArea: "roof",
-          areasToEmphasize: ["roof"],
-          areasToQuiet: ["background"],
-          currentPaintingAction: null,
-          nextStudyAction: null,
-          supportingObservations: [
-            "The roof light separates from its surroundings.",
-          ],
-          compositionImplication: null,
-          colourImplication: null,
-          techniqueImplication: null,
-        },
-      },
-    });
+for (const [focus] of focusCases) {
+  test(`actual Edge SDK: ${focus} saves the same canonical facts and four views in one paid call`, async () => {
+    const f = fixture();
     const response = await f.run({ ...input, focus_area: focus });
     assert.equal(response.status, 200);
-    assert.equal((await response.json()).provider, "openai");
-    const saved = f.calls.find((call) =>
-      call.path.endsWith("/complete_openai_feedback"),
+    const saved = f.calls.find((c) =>
+      c.path.endsWith("/complete_openai_feedback"),
     ).body.p_result;
-    assert.equal(saved.mainAdvice, mainAdvice);
-    assert.equal(saved.practice, practice);
-    const model = f.calls.filter(
-      (call) => call.path === "/v1/chat/completions",
-    );
-    assert.equal(model.length, 1);
-    assert.equal(model[0].body.max_completion_tokens, 3000);
+    assert.equal(saved.canonicalAnalysis.version, 1);
+    assert.deepEqual(Object.keys(saved.expertViews), [
+      "overall",
+      "composition",
+      "colourValue",
+      "technique",
+    ]);
+    assert.equal(saved.canonicalAnalysis.composition.primary.type, "diagonal");
+    const calls = f.calls.filter((c) => c.path === "/v1/chat/completions");
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].body.max_completion_tokens, 3000);
     assert(
-      model[0].body.messages[0].content.includes(`Selected focus: ${focus}.`),
+      !calls[0].body.messages[0].content.includes(`Selected focus: ${focus}`),
     );
-    assert(!f.calls.some((call) => call.path.includes("save_mock")));
+    assert(!calls[0].body.messages[1].content[0].text.includes(focus));
+    assert(!f.calls.some((c) => c.path.includes("save_mock")));
   });
 }
 for (const mode of ["improve_painting", "create_reference"])
@@ -542,7 +542,7 @@ for (const options of [
       1,
     );
   });
-for (const mode of ["improve_painting", "create_reference"])
+for (const mode of ["create_reference"])
   test(`actual Edge SDK runtime: ${mode} malformed promising and optional palette tags retain a real result`, async () => {
     const f = fixture({
       mode,
@@ -579,7 +579,7 @@ for (const mode of ["improve_painting", "create_reference"])
       1,
     );
   });
-for (const mode of ["improve_painting", "create_reference"])
+for (const mode of ["create_reference"])
   test(`actual Edge SDK runtime: ${mode} type-correct overlong optional guidance keeps real feedback`, async () => {
     const f = fixture({
       mode,
@@ -665,7 +665,7 @@ for (const [name, options] of [
     );
   });
 
-for (const mode of ["improve_painting", "create_reference"])
+for (const mode of ["create_reference"])
   test(`actual Edge SDK runtime: ${mode} saves valid overlays in the same model call`, async () => {
     const overlays = Array.from({ length: 3 }, (_, i) => ({
       type: "simplify",
@@ -694,7 +694,7 @@ for (const mode of ["improve_painting", "create_reference"])
     );
   });
 
-for (const mode of ["improve_painting", "create_reference"])
+for (const mode of ["create_reference"])
   test(`actual Edge SDK runtime: ${mode} preserves useful rich marks when one geometry is invalid`, async () => {
     const point = {
       type: "point_marker",
@@ -814,7 +814,7 @@ test("actual Edge SDK runtime: invented optional pigment code is stripped and re
   assert(!f.calls.some((c) => c.path.endsWith("/save_mock_feedback")));
 });
 
-for (const mode of ["improve_painting", "create_reference"])
+for (const mode of ["create_reference"])
   test(`actual Edge SDK runtime: ${mode} saves instructor timing/composition/palette in one analysis`, async () => {
     const compositionDecision = {
       mainIssue: "The lower dark pulls attention away from the focal figures.",
@@ -901,7 +901,7 @@ for (const mode of ["improve_painting", "create_reference"])
       assert(prompt.includes("If the selected focus is Composition"));
   });
 
-for (const mode of ["improve_painting", "create_reference"])
+for (const mode of ["create_reference"])
   test(`actual Edge SDK runtime: ${mode} saves supportive observations and brush plan in the existing call`, async () => {
     const feedback = {
       promising: "The clear foreground light can carry a calmer focal group.",
@@ -969,7 +969,7 @@ for (const mode of ["improve_painting", "create_reference"])
         ),
       );
   });
-for (const mode of ["improve_painting", "create_reference"])
+for (const mode of ["create_reference"])
   test(`actual Edge SDK runtime: ${mode} malformed optional brush data is dropped before real completion`, async () => {
     const f = fixture({
       mode,
@@ -996,7 +996,7 @@ for (const mode of ["improve_painting", "create_reference"])
     );
   });
 
-for (const mode of ["improve_painting", "create_reference"]) {
+for (const mode of ["create_reference"]) {
   test(`actual Edge SDK runtime: ${mode} preserves study framing and zero optional refinements in one call`, async () => {
     const feedback = {
       coachingMode: "study",
@@ -1033,7 +1033,7 @@ for (const mode of ["improve_painting", "create_reference"]) {
     assert(request.messages[0].content.includes("do not force criticism"));
   });
 }
-for (const mode of ["improve_painting", "create_reference"]) {
+for (const mode of ["create_reference"]) {
   test(`actual Edge SDK runtime: ${mode} discards malformed optional coaching flag and saves core feedback`, async () => {
     const f = fixture({ mode, feedback: { coachingMode: ["study"] } });
     const response = await f.run();
@@ -1056,7 +1056,7 @@ for (const focus of [
   "Colour & contrast",
   "Watercolor technique",
 ]) {
-  test(`actual Edge SDK runtime: ${focus} reaches its distinct system prompt through validated input`, async () => {
+  test(`actual Edge SDK runtime: ${focus} requests the same canonical contract through validated input`, async () => {
     const f = fixture();
     const response = await f.run({ ...input, focus_area: focus });
     assert.equal(response.status, 200);
@@ -1065,7 +1065,9 @@ for (const focus of [
     );
     assert.equal(calls.length, 1);
     assert(
-      calls[0].body.messages[0].content.includes(`Selected focus: ${focus}.`),
+      calls[0].body.messages[0].content.includes(
+        "ALL FOUR compact expertViews",
+      ),
     );
     assert.equal(calls[0].body.max_completion_tokens, 3000);
     assert.equal(
@@ -1075,7 +1077,7 @@ for (const focus of [
     );
   });
 }
-for (const mode of ["improve_painting", "create_reference"]) {
+for (const mode of ["create_reference"]) {
   test(`actual Edge SDK runtime: ${mode} saves a coherent optional decision and rejects no valid core data`, async () => {
     const coachingDecision = {
       primaryGoal: "Keep the pavilion crisp and quiet the pier.",
@@ -1137,7 +1139,7 @@ for (const mode of ["improve_painting", "create_reference"]) {
   });
 }
 
-for (const mode of ["improve_painting", "create_reference"]) {
+for (const mode of ["create_reference"]) {
   test(`actual Edge SDK runtime: ${mode} preserves optional region/evidence and composition metadata in the same single paid result`, async () => {
     const primary = {
       type: "diagonal",
@@ -1258,3 +1260,74 @@ for (const mode of ["improve_painting", "create_reference"]) {
     assert(!f.calls.some((call) => call.path.endsWith("/save_mock_feedback")));
   });
 }
+
+test("canonical requests are byte-identical at the model boundary for every initial view, with one image each", async () => {
+  const bodies = [];
+  for (const [focus] of focusCases) {
+    const f = fixture();
+    assert.equal((await f.run({ ...input, focus_area: focus })).status, 200);
+    const model = f.calls.filter((c) => c.path === "/v1/chat/completions");
+    assert.equal(model.length, 1);
+    bodies.push(model[0].body);
+    assert.equal(
+      model[0].body.messages[1].content.filter(
+        (item) => item.type === "image_url",
+      ).length,
+      1,
+    );
+    assert.equal(
+      f.calls.filter((c) => c.path.endsWith("/complete_openai_feedback"))
+        .length,
+      1,
+    );
+  }
+  for (const body of bodies) assert.deepEqual(body, bodies[0]);
+});
+for (const [name, mutate] of [
+  ["missing view", (r) => delete r.expertViews.colourValue],
+  ["invalid version", (r) => (r.canonicalAnalysis.version = 99)],
+  [
+    "cross-domain summary",
+    (r) => (r.expertViews.technique.summaryId = "design"),
+  ],
+  [
+    "view geometry override",
+    (r) => (r.expertViews.colourValue.composition = { type: "triangle" }),
+  ],
+])
+  test(`actual Edge SDK canonical ${name} saves nothing and does not fall back`, async () => {
+    const canonical = canonicalFixture();
+    mutate(canonical);
+    const f = fixture({ canonical });
+    const response = await f.run();
+    assert.equal(response.status, 422);
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert(
+      !f.calls.some((c) => /complete_openai_feedback|save_mock/.test(c.path)),
+    );
+    assert(f.calls.some((c) => c.path.endsWith("/release_feedback_request")));
+  });
+test("actual Edge SDK drops optional canonical geometry and teaching aids without losing four-view text", async () => {
+  const canonical = canonicalFixture();
+  canonical.canonicalAnalysis.composition.primary = { bad: true };
+  canonical.canonicalAnalysis.visualEvidence = [
+    { roleId: null, note: { x: 900 } },
+  ];
+  canonical.canonicalAnalysis.brushPlan = [{ bad: true }];
+  canonical.canonicalAnalysis.palette = [
+    { name: "Unsafe", hex: "url(bad)", use: "x" },
+  ];
+  const f = fixture({ canonical });
+  assert.equal((await f.run()).status, 200);
+  const saved = f.calls.find((c) =>
+    c.path.endsWith("/complete_openai_feedback"),
+  ).body.p_result;
+  assert.equal(saved.canonicalAnalysis.composition.primary, null);
+  assert.deepEqual(saved.canonicalAnalysis.visualEvidence, []);
+  assert.equal(saved.canonicalAnalysis.brushPlan, null);
+  assert.equal(saved.canonicalAnalysis.palette, null);
+  assert.equal(Object.keys(saved.expertViews).length, 4);
+});

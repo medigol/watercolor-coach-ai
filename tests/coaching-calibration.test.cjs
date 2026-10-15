@@ -84,7 +84,7 @@ for (const mode of ["improve_painting", "create_reference"]) {
       assert(contract.validFeedback(cleaned, mode));
       assert.deepEqual(cleaned, sample);
     }
-    const schema = contract.feedbackSchema(mode);
+    const schema = contract.legacyFeedbackSchema(mode);
     assert(schema.required.includes("coachingMode"));
     assert.deepEqual(schema.properties.coachingMode.type, ["string", "null"]);
     assert.deepEqual(schema.properties.coachingMode.enum, [
@@ -95,26 +95,31 @@ for (const mode of ["improve_painting", "create_reference"]) {
   });
   test(`${mode}: prompt privately calibrates confidence with modest independent study guidance`, () => {
     const prompt = coachingPrompt(mode);
-    for (const phrase of [
-      "First privately calibrate how resolved this single image appears",
-      "never infer or label the user's skill level",
-      "use study for strong/highly resolved work or when critique confidence is uncertain",
-      "do not force criticism",
-      "0–2 modest conditional optional variations",
-      "empty array when no useful refinement is supported",
-      "current actions must be safe, conditional and tested on scrap first",
-      "big-shape proportions or value-mass redesign belong only to next_study",
-      "practice gives one short exercise",
-      "neither repeats mainAdvice or composition paragraphs",
-      "neutral labels and next_study timing for experiments",
-    ])
+    for (const phrase of mode === "improve_painting"
+      ? [
+          "Assess the PAINTING first",
+          "zero clear_issue is valid",
+          "no score out of100",
+          "Recommended practice conditions, not reconstructed facts",
+          "No generated stages",
+        ]
+      : [
+          "First privately calibrate how resolved this single image appears",
+          "never infer or label the user's skill level",
+          "use study for strong/highly resolved work or when critique confidence is uncertain",
+          "do not force criticism",
+          "0–2 modest conditional optional variations",
+          "empty array when no useful refinement is supported",
+          "current actions must be safe, conditional and tested on scrap first",
+          "big-shape proportions or value-mass redesign belong only to next_study",
+          "practice gives one short exercise",
+          "neither repeats mainAdvice or composition paragraphs",
+          "neutral labels and next_study timing for experiments",
+        ])
       assert(prompt.includes(phrase), phrase);
     if (mode === "improve_painting") {
-      assert(prompt.includes("mainAdvice is one sentence"));
-      assert(
-        prompt.includes("mainIssue is null or a neutral study observation"),
-      );
-      assert(prompt.includes("tryNow is null"));
+      assert(prompt.includes("Overall is shortest"));
+      assert(prompt.includes("without visible harm"));
       assert(prompt.includes("separate sheet"));
     } else {
       assert(

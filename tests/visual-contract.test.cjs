@@ -148,7 +148,7 @@ for (const mode of ["improve_painting", "create_reference"]) {
       if (extension.compositionOverlay)
         assert.deepEqual(clean.compositionOverlay, diagonal);
     }
-    const schema = contract.feedbackSchema(mode);
+    const schema = contract.legacyFeedbackSchema(mode);
     assert(schema.required.includes("compositionOverlay"));
     for (const key of [
       "region",
@@ -451,35 +451,26 @@ test("malformed visual role entries cannot invalidate a compatible canonical dec
   const { visualRoles: _roles, ...legacy } = decision;
   assert.deepEqual(coaching.usableCoachingDecision(legacy), legacy);
 });
-test("domain prompts separate design, colour and handling and explicitly avoid forcing flaws or archetypes", () => {
-  const composition = coachingPrompt("improve_painting", "Composition");
-  assert(
-    composition.includes("physical brush/moisture recipes belong to Technique"),
-  );
-  const technique = coachingPrompt("improve_painting", "Watercolor technique");
-  assert(technique.includes("Avoid major crop, horizon or spacing redesign"));
-  const colour = coachingPrompt("improve_painting", "Colour & contrast");
-  assert(
-    colour.includes(
-      "value hierarchy, dominant temperature, warm/cool contrast, chroma restraint",
-    ),
-  );
+test("one canonical prompt owns all domains and avoids forced flaws, formulas and reconstructed process", () => {
+  const prompt = coachingPrompt("improve_painting");
   for (const focus of [
     "Overall feedback",
     "Composition",
     "Colour & contrast",
     "Watercolor technique",
-  ]) {
-    const prompt = coachingPrompt("improve_painting", focus);
-    for (const text of [
-      "Clear issues need visible evidence",
-      "Study mode may have zero clear issues",
-      "Do not force a formula",
-      "Supporting elements must remain subordinate",
-      "never initiates another model call",
-    ])
-      assert(prompt.includes(text), text);
-  }
+  ])
+    assert.equal(coachingPrompt("improve_painting", focus), prompt);
+  for (const phrase of [
+    "COMPOSITION LOCK",
+    "Strong positive teaching",
+    "zero clear_issue is valid",
+    "Do not force a formula",
+    "Supporting elements must remain subordinate",
+    "ONE domain",
+    "Temperature",
+    "paper moisture",
+  ])
+    assert(prompt.toLowerCase().includes(phrase.toLowerCase()), phrase);
 });
 
 test("scope-aware metadata keeps valid multi-region parts without fabricating one local crop", () => {
@@ -553,7 +544,7 @@ test("an unsupported correction is safely a future experiment; a specific eviden
   );
 });
 test("evidence, scope and geometry are bounded strict nullable output fields", () => {
-  const schema = contract.feedbackSchema("improve_painting");
+  const schema = contract.legacyFeedbackSchema("improve_painting");
   const fields = schema.properties.overlays.items;
   for (const key of ["scope", "evidence", "regions", "anchors"])
     assert(fields.required.includes(key));

@@ -92,7 +92,7 @@ for (const mode of ["improve_painting", "create_reference"]) {
     assert(contract.validFeedback(cleaned, mode));
     assert.deepEqual(frontend.coherentFeedback(raw, mode), cleaned);
     assert.deepEqual(contract.cleanFeedback(cleaned, mode), cleaned);
-    const schema = contract.feedbackSchema(mode);
+    const schema = contract.legacyFeedbackSchema(mode);
     assert(schema.required.includes("coachingDecision"));
     assert.equal(
       schema.properties.coachingDecision.additionalProperties,
@@ -376,62 +376,25 @@ test("reference practice is optional and malformed or conflicting optional guida
   assert(clean.steps[0].includes(decision.nextStudyAction));
 });
 
-const focusExpectations = {
-  "Overall feedback": [
-    "strongest success",
-    "the shortest focus",
-    "Return brushPlan null",
-    "overall value/design coherence",
-  ],
-  Composition: [
-    "eye path",
-    "focal placement",
-    "negative space",
-    "Keep brushPlan null",
-    "two small thumbnails",
-  ],
-  "Colour & contrast": [
-    "dominant temperature",
-    "warm/cool contrast",
-    "chroma restraint",
-    "Do not introduce unrelated crop redesign",
-  ],
-  "Watercolor technique": [
-    "physical handling",
-    "moisture cues",
-    "brush load",
-    "2–3 brushPlan stages",
-    "Avoid major crop",
-  ],
-};
-for (const [focus, expectations] of Object.entries(focusExpectations)) {
-  test(`${focus}: same single-image request has genuinely domain-specific analysis priorities`, () => {
+for (const focus of [
+  "Overall feedback",
+  "Composition",
+  "Colour & contrast",
+  "Watercolor technique",
+]) {
+  test(`${focus}: initial view requests the same complete canonical analysis`, () => {
     const prompt = coachingPrompt("improve_painting", focus);
-    assert(prompt.includes(`Selected focus: ${focus}.`));
-    for (const text of expectations) assert(prompt.includes(text), text);
-    assert(prompt.includes("SHARED VISUAL FACTS, DIFFERENT EXPERT LENSES"));
-    assert(
-      prompt.includes(
-        "do not make four paraphrases of one hierarchy instruction",
-      ),
-    );
-    assert(
-      prompt.includes(
-        "never assert an exact original brush, size, pigment, brand, paper moisture or wash sequence",
-      ),
-    );
-    assert(
-      prompt.includes(
-        "recommended practice conditions, not reconstructed facts",
-      ),
-    );
-    assert(prompt.includes("Supporting elements must remain subordinate"));
-    assert(
-      prompt.includes(
-        "practice is ONE specific 15-minute exercise answering the selected expert question",
-      ),
-    );
-    assert(prompt.includes("never initiates another model call"));
+    assert.equal(prompt, coachingPrompt("improve_painting"));
+    for (const phrase of [
+      "ALL FOUR compact expertViews",
+      "COMPOSITION LOCK",
+      "INSIGHT OWNERSHIP",
+      "OBSERVABLE EFFECT",
+      "zero clear_issue is valid",
+      "Supporting elements must remain subordinate",
+    ])
+      assert(prompt.includes(phrase), phrase);
+    assert(!prompt.includes(`Selected focus: ${focus}`));
   });
 }
 

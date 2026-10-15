@@ -46,7 +46,9 @@ export default function SaveResultButton({
       const key = JSON.stringify([
         userId,
         mode,
-        focus ?? null,
+        // Improve Painting's focus is only an initial local view, not another
+        // analysis. An uncertain completion must retain its idempotency ID.
+        mode === "improve_painting" ? null : (focus ?? null),
         image?.uri ?? null,
       ]);
       if (request.current?.key !== key)
@@ -69,11 +71,7 @@ export default function SaveResultButton({
       });
     } catch (e) {
       if (active.current && account.current === userId)
-        setError(
-          e instanceof Error
-            ? e.message
-            : liveFeedbackErrorMessage,
-        );
+        setError(e instanceof Error ? e.message : liveFeedbackErrorMessage);
     } finally {
       saving.current = false;
       if (active.current) setBusy(false);

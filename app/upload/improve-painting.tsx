@@ -26,7 +26,9 @@ export default function ImprovePainting() {
         label="Choose painting"
         onSelect={setImage}
       />
-      <Text style={styles.heading}>What do you want help with?</Text>
+      <Text style={styles.heading}>
+        Which view would you like to explore first?
+      </Text>
       <View style={{ gap: 10 }}>
         {options.map((option) => (
           <Pressable

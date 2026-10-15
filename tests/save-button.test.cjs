@@ -115,12 +115,11 @@ test("double-click and in-place retry make one attempt and retain its request ID
   assert.equal(f.routes.length, 1);
   assert.equal(f.routes[0].params.id, "saved-result");
 });
-test("changing focus, selected image, or account starts a new attempt", async () => {
+test("changing a selected image or account starts a new attempt", async () => {
   const f = fixture();
   let previous;
   for (const props of [
     {},
-    { focus: "Watercolor technique" },
     { focus: "Watercolor technique", image: { uri: "blob:another" } },
   ]) {
     const pending = f.render(props).onPress();
@@ -173,4 +172,8 @@ test("a stale or malformed provider response cannot navigate to a fake critique"
     assert.equal(f.render().disabled, false);
     assert.equal(f.errorText(), "Live AI feedback could not be prepared. Please try again.");
   }
+});
+
+test("initial painting focus changes preserve an uncertain request ID; reference identity stays unchanged",async()=>{
+ for(const mode of ["improve_painting","create_reference"]){const f=fixture();let previous;for(const focus of ["Composition","Colour & contrast","Watercolor technique"]){const pending=f.render({mode,focus}).onPress();const current=f.calls.at(-1);if(previous){if(mode==='improve_painting')assert.equal(current.args[3],previous);else assert.notEqual(current.args[3],previous);}previous=current.args[3];current.reject(new Error('Uncertain completion'));await pending;}}
 });

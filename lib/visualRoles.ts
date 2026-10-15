@@ -4,11 +4,13 @@ import {
   type VisualRole,
 } from "../shared/visualMetadata";
 import {
+  validRect,
   noteGeometryVisible,
   noteRegions,
   type NormalizedPoint,
   type NormalizedRect,
 } from "./imageGeometry";
+import type { PaintingRole } from "../shared/paintingAnalysis";
 
 export type VisualRoleRegion =
   | { kind: "rectangle"; role: VisualRole; region: NormalizedRect }
@@ -39,6 +41,40 @@ function fingerprint(item: VisualRoleRegion): string {
   ]
     .sort()
     .join("|");
+}
+
+// Canonical roles own their located regions. Neither the selected expert view
+// nor a note's prose or a secondary composition can redefine this map.
+export function planCanonicalVisualRoles(
+  roles: PaintingRole[],
+): VisualRoleRegion[] {
+  const located = roles.filter(
+    (role) =>
+      validRect(role.region) &&
+      typeof role.confidence === "number" &&
+      role.confidence >= 0.65 &&
+      role.confidence <= 1,
+  );
+  const candidates = located.map((role) => ({
+    kind: "rectangle" as const,
+    role: role.role,
+    region: role.region!,
+  }));
+  const consistent = candidates.filter(
+    (region) =>
+      !candidates.some(
+        (other) =>
+          other.role !== region.role &&
+          fingerprint(other) === fingerprint(region),
+      ),
+  );
+  const selected = visualRoles
+    .map((role) => consistent.find((region) => region.role === role))
+    .filter((region): region is NonNullable<typeof region> => !!region);
+  return selected.length >= 2 &&
+    selected.some((region) => region.role === "focal")
+    ? selected
+    : [];
 }
 
 /**

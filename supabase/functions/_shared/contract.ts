@@ -1,4 +1,10 @@
 import {
+  cleanPaintingAnalysis,
+  hasPaintingAnalysis,
+  paintingAnalysisSchema,
+  validPaintingAnalysis,
+} from "../../../shared/paintingAnalysis.ts";
+import {
   compositionArchetypes,
   compositionIdentity,
   feedbackClassifications,
@@ -218,6 +224,8 @@ export function validFeedback(
   value: unknown,
   mode: Mode,
 ): value is Record<string, unknown> {
+  if (hasPaintingAnalysis(value))
+    return mode === "improve_painting" && validPaintingAnalysis(value);
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const v = value as Record<string, unknown>;
   const fields = [
@@ -298,7 +306,7 @@ export function validFeedback(
     (v.whatToFix == null || list(v.whatToFix, 0))
   );
 }
-export function feedbackSchema(mode: Mode) {
+export function legacyFeedbackSchema(mode: Mode) {
   const text = { type: "string" };
   const list = { type: "array", items: text };
   const unit = { type: "number", minimum: 0, maximum: 1 };
@@ -576,6 +584,36 @@ export function feedbackSchema(mode: Mode) {
     additionalProperties: false,
   };
 }
+// Legacy schema remains available for compatibility tests and reference plans;
+// newly generated painting feedback always requires the canonical v1 envelope.
+export function feedbackSchema(mode: Mode) {
+  const legacy = legacyFeedbackSchema(mode);
+  if (mode === "create_reference") return legacy;
+  const fields = legacy.properties.overlays.items.properties;
+  const note = Object.fromEntries(
+    Object.entries(fields).filter(
+      ([key]) =>
+        ![
+          "visualRole",
+          "classification",
+          "domain",
+          "evidence",
+          "reason",
+          "action",
+        ].includes(key),
+    ),
+  );
+  return paintingAnalysisSchema({
+    overlay: {
+      type: "object",
+      properties: note,
+      required: Object.keys(note),
+      additionalProperties: false,
+    },
+    structure: legacy.properties.compositionOverlay,
+    brush: { ...legacy.properties.brushPlan, maxItems: 2 },
+  });
+}
 export async function readLimited(
   body: ReadableStream<Uint8Array> | null,
   max: number,
@@ -641,6 +679,10 @@ export function cleanOverlayFeedback(value: unknown): unknown {
 // Optional teaching aids must not reject otherwise sound text feedback. Keep
 // required content unchanged so validFeedback remains the final strict gate.
 export function cleanFeedback(value: unknown, mode: Mode): unknown {
+  if (hasPaintingAnalysis(value))
+    return mode === "improve_painting"
+      ? cleanPaintingAnalysis(value, usableOverlays)
+      : value;
   const withOverlays = cleanOverlayFeedback(value);
   if (
     !withOverlays ||
