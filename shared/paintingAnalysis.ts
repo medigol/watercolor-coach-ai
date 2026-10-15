@@ -147,22 +147,44 @@ export function hasPaintingAnalysis(value: unknown): boolean {
   );
 }
 
-/** Required facts/views cannot be repaired into a successful paid result. Optional
- * geometry/aids are cleaned separately, never fabricated from legacy prose. */
-export function validPaintingAnalysis(
+// Fixed reason codes only. The server may log these, never the model's content.
+export type CanonicalValidationIssue =
+  | "missing_canonical_analysis"
+  | "unsupported_version"
+  | "required_structure"
+  | "core_text"
+  | "quality_assessment"
+  | "visual_roles"
+  | "duplicate_role_ids"
+  | "duplicate_role_areas"
+  | "multiple_focal_roles"
+  | "missing_facts"
+  | "fact_structure"
+  | "fact_reference"
+  | "duplicate_fact_ids"
+  | "composition_structure"
+  | "insight_structure"
+  | "insight_fact_reference"
+  | "duplicate_insight_ids"
+  | "missing_domain_insight"
+  | "expert_views"
+  | "view_reference";
+
+/** Diagnose the strict core gate AFTER structural repair. No prose, identifiers,
+ * image data or credentials are included in a reason code. Optional aids never
+ * decide core validity; the cleaner handles them independently. */
+export function canonicalValidationIssue(
   value: unknown,
-): value is PaintingAnalysisResult {
-  if (
-    !record(value) ||
-    !keys(value, ["title", "canonicalAnalysis", "expertViews"]) ||
-    !text(value.title, 100)
-  )
-    return false;
+): CanonicalValidationIssue | null {
+  if (!record(value) || !record(value.canonicalAnalysis))
+    return "missing_canonical_analysis";
+  if (!keys(value, ["title", "canonicalAnalysis", "expertViews"]))
+    return "required_structure";
+  if (!text(value.title, 100)) return "core_text";
   const c = value.canonicalAnalysis,
     views = value.expertViews;
+  if (c.version !== 1) return "unsupported_version";
   if (
-    !record(c) ||
-    c.version !== 1 ||
     !keys(
       c,
       [
@@ -174,11 +196,11 @@ export function validPaintingAnalysis(
         "insights",
       ],
       ["visualEvidence", "palette", "brushPlan"],
-    ) ||
-    !record(views) ||
-    !keys(views, [...expertViewKeys])
+    )
   )
-    return false;
+    return "required_structure";
+  if (!record(views) || !keys(views, [...expertViewKeys]))
+    return "expert_views";
   const q = c.qualityAssessment;
   if (
     !record(q) ||
@@ -188,7 +210,7 @@ export function validPaintingAnalysis(
     !text(q.rationale) ||
     personAssessment(q.rationale)
   )
-    return false;
+    return "quality_assessment";
   if (
     !list(c.visualRoles, 0, 6) ||
     !c.visualRoles.every(
@@ -202,39 +224,39 @@ export function validPaintingAnalysis(
         Object.hasOwn(r, "confidence"),
     )
   )
-    return false;
+    return "visual_roles";
   const roles = c.visualRoles as unknown as PaintingRole[];
-  if (
-    !distinct(roles.map((r) => r.id)) ||
-    !distinct(roles.map((r) => r.area.trim().toLowerCase())) ||
-    roles.filter((r) => r.role === "focal").length > 1
-  )
-    return false;
+  if (!distinct(roles.map((r) => r.id))) return "duplicate_role_ids";
+  if (!distinct(roles.map((r) => r.area.trim().toLowerCase())))
+    return "duplicate_role_areas";
+  if (roles.filter((r) => r.role === "focal").length > 1)
+    return "multiple_focal_roles";
   const roleIds = new Set(roles.map((r) => r.id));
+  if (!list(c.facts, 1, 8)) return "missing_facts";
   if (
-    !list(c.facts, 1, 8) ||
     !c.facts.every(
       (f) =>
         record(f) &&
         keys(f, ["id", "domain", "observation", "roleId"]) &&
         id(f.id) &&
-        feedbackDomains.includes(f.domain as never) &&
-        text(f.observation) &&
-        (f.roleId === null || roleIds.has(f.roleId as string)),
+        feedbackDomains.includes(f.domain as never),
     )
   )
-    return false;
+    return "fact_structure";
   const facts = c.facts as unknown as PaintingFact[],
     factIds = new Set(facts.map((f) => f.id));
-  if (factIds.size !== facts.length) return false;
+  if (facts.some((f) => !text(f.observation))) return "core_text";
+  if (facts.some((f) => f.roleId !== null && !roleIds.has(f.roleId)))
+    return "fact_reference";
+  if (factIds.size !== facts.length) return "duplicate_fact_ids";
   if (
     !record(c.composition) ||
-    !keys(c.composition, ["observation", "primary", "secondary"]) ||
-    !text(c.composition.observation)
+    !keys(c.composition, ["observation", "primary", "secondary"])
   )
-    return false;
+    return "composition_structure";
+  if (!text(c.composition.observation)) return "core_text";
+  if (!list(c.insights, 1, 12)) return "missing_domain_insight";
   if (
-    !list(c.insights, 4, 12) ||
     !c.insights.every(
       (i) =>
         record(i) &&
@@ -248,50 +270,177 @@ export function validPaintingAnalysis(
         ]) &&
         id(i.id) &&
         feedbackDomains.includes(i.domain as never) &&
-        feedbackClassifications.includes(i.classification as never) &&
-        list(i.factIds, 1, 3) &&
-        distinct(i.factIds) &&
-        i.factIds.every((f) => factIds.has(f as string)) &&
-        text(i.lesson) &&
-        text(i.action, 180),
+        feedbackClassifications.includes(i.classification as never),
     )
   )
-    return false;
+    return "insight_structure";
   const insights = c.insights as unknown as PaintingInsight[];
-  if (!distinct(insights.map((i) => i.id))) return false;
+  if (insights.some((i) => !text(i.lesson) || !text(i.action, 180)))
+    return "core_text";
+  if (!distinct(insights.map((i) => i.id))) return "duplicate_insight_ids";
   if (
-    insights.some((insight, index) =>
-      insights
-        .slice(0, index)
-        .some(
-          (previous) =>
-            previous.domain !== insight.domain &&
-            previous.lesson.trim().toLowerCase() ===
-              insight.lesson.trim().toLowerCase(),
-        ),
+    insights.some(
+      (i) =>
+        !list(i.factIds, 1, 3) ||
+        !distinct(i.factIds) ||
+        !i.factIds.every((f) => factIds.has(f as string)),
     )
   )
-    return false;
+    return "insight_fact_reference";
+  if (
+    feedbackDomains.some((domain) => !insights.some((i) => i.domain === domain))
+  )
+    return "missing_domain_insight";
   for (const key of expertViewKeys) {
     const v = views[key];
     if (
       !record(v) ||
       !keys(v, ["summaryId", "insightIds", "practice"]) ||
+      !text(v.practice, 240)
+    )
+      return "expert_views";
+    if (
       !id(v.summaryId) ||
-      !text(v.practice, 240) ||
       !list(v.insightIds, 1, key === "overall" ? 2 : 3) ||
       !distinct(v.insightIds) ||
       !v.insightIds.includes(v.summaryId)
     )
-      return false;
+      return "view_reference";
     if (
       !v.insightIds.every((ref) =>
         insights.some((i) => i.id === ref && i.domain === domains[key]),
       )
     )
-      return false;
+      return "view_reference";
   }
-  return insights.some((i) => i.classification === "strength");
+  // Repeated prose and missing strength classifications are presentation issues,
+  // not grounds to discard a useful analysis or invent a positive judgment.
+  return null;
+}
+export function validPaintingAnalysis(
+  value: unknown,
+): value is PaintingAnalysisResult {
+  return canonicalValidationIssue(value) === null;
+}
+
+/** Bounded repairs use only explicitly supplied IDs, domains and confidence.
+ * Ambiguous identity, missing required material and malformed core text still
+ * fail the strict gate. This never creates observations, prose or geometry. */
+function repairCanonicalReferences(value: unknown): unknown {
+  if (
+    !record(value) ||
+    !record(value.canonicalAnalysis) ||
+    !record(value.expertViews)
+  )
+    return value;
+  const c = value.canonicalAnalysis;
+  if (
+    c.version !== 1 ||
+    !list(c.facts, 1, 8) ||
+    !list(c.insights, 4, 12) ||
+    !list(c.visualRoles, 0, 6) ||
+    !c.facts.every((f) => record(f) && id(f.id)) ||
+    !c.insights.every((i) => record(i) && id(i.id)) ||
+    !c.visualRoles.every(record)
+  )
+    return value;
+  const facts = c.facts as Record<string, unknown>[],
+    insights = c.insights as Record<string, unknown>[],
+    roles = c.visualRoles as Record<string, unknown>[];
+  // Duplicate identities cannot be resolved by choosing an arbitrary first row.
+  if (!distinct(facts.map((f) => f.id)) || !distinct(insights.map((i) => i.id)))
+    return value;
+  const factIds = new Set(facts.map((f) => f.id));
+  const byId = new Map(insights.map((i) => [i.id, i]));
+  const views: Record<string, unknown> = { ...value.expertViews };
+  const essential = new Set<unknown>();
+  for (const key of expertViewKeys) {
+    const view = views[key];
+    if (!record(view) || !list(view.insightIds, 0, 12)) return value;
+    const refs = [
+      ...new Set(
+        view.insightIds.filter(
+          (ref): ref is string =>
+            typeof ref === "string" && byId.get(ref)?.domain === domains[key],
+        ),
+      ),
+    ];
+    const suppliedSummary = byId.get(view.summaryId);
+    const summaryId =
+      suppliedSummary?.domain === domains[key]
+        ? view.summaryId
+        : refs.find((ref) => {
+            const insight = byId.get(ref)!;
+            return (
+              list(insight.factIds, 1, 3) &&
+              insight.factIds.some((id) => factIds.has(id))
+            );
+          });
+    if (summaryId === undefined) return value;
+    essential.add(summaryId);
+    const ordered = refs.includes(summaryId as string)
+      ? refs
+      : [summaryId, ...refs];
+    // Preserve an explicitly supplied valid summary even when trimming extras.
+    const limit = key === "overall" ? 2 : 3;
+    const selected = ordered.slice(0, limit);
+    if (!selected.includes(summaryId))
+      selected[selected.length - 1] = summaryId;
+    views[key] = { ...view, summaryId, insightIds: selected };
+  }
+  const repairedInsights = insights.flatMap((insight) => {
+    if (!list(insight.factIds, 0, 3)) return [insight];
+    const refs = [
+      ...new Set(insight.factIds.filter((ref) => factIds.has(ref))),
+    ];
+    // A summary without evidence is fatal, not permission to invent or silently
+    // replace that summary. Only a nonessential secondary insight may be omitted.
+    return refs.length || essential.has(insight.id)
+      ? [{ ...insight, factIds: refs }]
+      : [];
+  });
+  const remainingIds = new Set(repairedInsights.map((i) => i.id));
+  for (const key of expertViewKeys) {
+    const view = views[key] as Record<string, unknown>;
+    views[key] = {
+      ...view,
+      insightIds: (view.insightIds as unknown[]).filter((ref) =>
+        remainingIds.has(ref),
+      ),
+    };
+  }
+  const focals = roles.filter((r) => r.role === "focal");
+  let winner: Record<string, unknown> | undefined;
+  if (focals.length > 1 && focals.every((r) => unit(r.confidence))) {
+    const highest = Math.max(...focals.map((r) => r.confidence as number));
+    const winners = focals.filter((r) => r.confidence === highest);
+    if (winners.length === 1) winner = winners[0];
+  }
+  return {
+    ...value,
+    canonicalAnalysis: {
+      ...c,
+      insights: repairedInsights,
+      visualRoles: roles.map((role) => ({
+        ...role,
+        region: role.region ?? null,
+        confidence: role.confidence ?? null,
+        ...(winner && role.role === "focal" && role !== winner
+          ? { role: "supporting" }
+          : {}),
+      })),
+      ...(record(c.composition)
+        ? {
+            composition: {
+              ...c.composition,
+              primary: c.composition.primary ?? null,
+              secondary: c.composition.secondary ?? null,
+            },
+          }
+        : {}),
+    },
+    expertViews: views,
+  };
 }
 
 export type NoteCleaner = (value: unknown) => unknown[];
@@ -375,6 +524,7 @@ export function cleanPaintingAnalysis(
   value: unknown,
   cleanNotes: NoteCleaner,
 ): unknown {
+  value = repairCanonicalReferences(value);
   if (!validPaintingAnalysis(value)) return value;
   const c = value.canonicalAnalysis;
   const facts = c.facts.map((f) => ({

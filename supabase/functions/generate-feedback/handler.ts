@@ -8,7 +8,10 @@ import {
   type Input,
   type Saved,
 } from "../_shared/contract.ts";
-import { hasPaintingAnalysis } from "../../../shared/paintingAnalysis.ts";
+import {
+  canonicalValidationIssue,
+  hasPaintingAnalysis,
+} from "../../../shared/paintingAnalysis.ts";
 export interface User {
   id: string;
   token: string;
@@ -134,11 +137,21 @@ export function createHandler(deps: Dependencies) {
       if (claim.status === "existing") return success(claim, input.request_id);
       claimed = true;
       const bytes = await deps.download(user, input.image_path);
-      const data = cleanFeedback(await deps.generate(input, bytes), input.mode);
+      const generated = await deps.generate(input, bytes);
+      const data = cleanFeedback(generated, input.mode);
       if (
         !validFeedback(data, input.mode) ||
         (input.mode === "improve_painting" && !hasPaintingAnalysis(data))
-      )
+      ) {
+        if (input.mode === "improve_painting") {
+          // Private, fixed reason codes only. Never log model prose, images,
+          // identifiers, upstream errors or credentials; keep the reply generic.
+          const reason =
+            data === null
+              ? (canonicalValidationIssue(generated) ?? "core_text_cleaning")
+              : (canonicalValidationIssue(data) ?? "required_structure");
+          console.warn(`canonical_invalid:${reason}`);
+        }
         return reply(
           {
             code: "unavailable",
@@ -147,6 +160,7 @@ export function createHandler(deps: Dependencies) {
           },
           422,
         );
+      }
       const saved = await deps.finish(user, input, data);
       if (saved.provider !== "openai") throw new Error("Invalid live save");
       return success(saved, input.request_id);

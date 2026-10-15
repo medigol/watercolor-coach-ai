@@ -44,6 +44,7 @@ const focusCases = [
 ];
 function fixture(options = {}) {
   const calls = [];
+  const diagnostics = [];
   const boundaryErrors = [];
   let stored = options.existingProvider
     ? {
@@ -276,7 +277,7 @@ function fixture(options = {}) {
         target: ts.ScriptTarget.ES2022,
       },
     }).outputText;
-    new Function("exports", "require", "Deno", "fetch", output)(
+    new Function("exports", "require", "Deno", "fetch", "console", output)(
       exports,
       (name) =>
         name === "npm:@supabase/supabase-js@2.117.3"
@@ -299,12 +300,14 @@ function fixture(options = {}) {
         },
       },
       network,
+      { ...console, warn: (...args) => diagnostics.push(args) },
     );
     return exports;
   }
   load(path.join(root, "supabase/functions/generate-feedback/index.ts"));
   return {
     calls,
+    diagnostics,
     run: async (body) => {
       const response = await handler(
         new Request(
@@ -1287,8 +1290,12 @@ for (const [name, mutate] of [
   ["missing view", (r) => delete r.expertViews.colourValue],
   ["invalid version", (r) => (r.canonicalAnalysis.version = 99)],
   [
-    "cross-domain summary",
-    (r) => (r.expertViews.technique.summaryId = "design"),
+    "view with no supplied same-domain reference",
+    (r) =>
+      Object.assign(r.expertViews.technique, {
+        summaryId: "design",
+        insightIds: ["design"],
+      }),
   ],
   [
     "view geometry override",
@@ -1330,4 +1337,145 @@ test("actual Edge SDK drops optional canonical geometry and teaching aids withou
   assert.equal(saved.canonicalAnalysis.brushPlan, null);
   assert.equal(saved.canonicalAnalysis.palette, null);
   assert.equal(Object.keys(saved.expertViews).length, 4);
+});
+
+for (const [name, mutate] of [
+  [
+    "duplicated domain lesson",
+    (r) =>
+      (r.canonicalAnalysis.insights[2].lesson =
+        r.canonicalAnalysis.insights[1].lesson),
+  ],
+  [
+    "no strength classification",
+    (r) => {
+      r.canonicalAnalysis.qualityAssessment.level = "developing";
+      r.canonicalAnalysis.insights.forEach(
+        (i) => (i.classification = "optional_refinement"),
+      );
+    },
+  ],
+  [
+    "duplicate and invalid view references",
+    (r) =>
+      (r.expertViews.technique.insightIds = [
+        "missing",
+        "handling",
+        "handling",
+      ]),
+  ],
+  [
+    "cross-domain summary with supplied fallback",
+    (r) => (r.expertViews.technique.summaryId = "design"),
+  ],
+  [
+    "secondary bad fact reference",
+    (r) => {
+      r.canonicalAnalysis.insights.push({
+        ...r.canonicalAnalysis.insights[1],
+        id: "secondary",
+        factIds: ["missing", "path"],
+      });
+      r.expertViews.composition.insightIds.push("secondary");
+    },
+  ],
+  [
+    "secondary without surviving facts",
+    (r) => {
+      r.canonicalAnalysis.insights.push({
+        ...r.canonicalAnalysis.insights[1],
+        id: "secondary",
+        factIds: ["missing"],
+      });
+      r.expertViews.composition.insightIds.push("secondary");
+    },
+  ],
+  [
+    "multiple focal roles with a unique confidence winner",
+    (r) => (r.canonicalAnalysis.visualRoles[1].role = "focal"),
+  ],
+])
+  test(`actual Edge SDK repairs ${name} in one paid call and one successful completion`, async () => {
+    const canonical = canonicalFixture();
+    mutate(canonical);
+    const f = fixture({ canonical });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { id, provider: "openai" });
+    const models = f.calls.filter((c) => c.path === "/v1/chat/completions");
+    assert.equal(
+      models.length,
+      1,
+      "normalization must never call the model again",
+    );
+    assert.equal(models[0].body.model, "gpt-4.1-mini");
+    assert.equal(models[0].body.max_completion_tokens, 3000);
+    assert.equal(
+      f.calls.filter((c) => c.path.endsWith("/complete_openai_feedback"))
+        .length,
+      1,
+      "the unchanged completion RPC charges one successful quota unit",
+    );
+    assert.equal(
+      f.calls.filter((c) => c.path.endsWith("/release_feedback_request"))
+        .length,
+      1,
+    );
+    assert(!f.calls.some((c) => /save_mock|images\/generations/.test(c.path)));
+    assert.deepEqual(f.diagnostics, []);
+  });
+
+for (const [reason, mutate] of [
+  [
+    "duplicate_role_ids",
+    (r) => (r.canonicalAnalysis.visualRoles[1].id = "tower"),
+  ],
+  [
+    "multiple_focal_roles",
+    (r) =>
+      Object.assign(r.canonicalAnalysis.visualRoles[1], {
+        role: "focal",
+        confidence: 0.92,
+      }),
+  ],
+  [
+    "insight_fact_reference",
+    (r) => (r.canonicalAnalysis.insights[0].factIds = ["missing"]),
+  ],
+  [
+    "core_text_cleaning",
+    (r) =>
+      (r.canonicalAnalysis.facts[0].observation =
+        "The artist used a size 12 round brush."),
+  ],
+])
+  test(`actual Edge SDK logs only private ${reason} while validation failure saves no quota unit`, async () => {
+    const canonical = canonicalFixture();
+    canonical.title = "PRIVATE MODEL CONTENT";
+    mutate(canonical);
+    const f = fixture({ canonical });
+    const response = await f.run();
+    assert.equal(response.status, 422);
+    assert.deepEqual(await response.json(), {
+      code: "unavailable",
+      message: "Live AI feedback could not be prepared. Please try again.",
+    });
+    assert.deepEqual(f.diagnostics, [[`canonical_invalid:${reason}`]]);
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert(
+      !f.calls.some((c) => /complete_openai_feedback|save_mock/.test(c.path)),
+    );
+    assert(f.calls.some((c) => c.path.endsWith("/release_feedback_request")));
+  });
+
+test("actual Edge SDK upstream truncation remains 503, distinct from canonical 422 diagnostics", async () => {
+  const f = fixture({ finishReason: "length" });
+  assert.equal((await f.run()).status, 503);
+  assert.deepEqual(f.diagnostics, []);
+  assert(
+    !f.calls.some((c) => /complete_openai_feedback|save_mock/.test(c.path)),
+  );
 });
