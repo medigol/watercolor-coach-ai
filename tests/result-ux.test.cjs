@@ -18,6 +18,7 @@ function render(
     isSaved = true,
     expandedAids = true,
     openSection,
+    resultState = {},
   } = {},
 ) {
   const modules = new Map();
@@ -40,12 +41,22 @@ function render(
       if (
         name === "react" &&
         relative.endsWith("ResultExperience.tsx") &&
-        openSection !== undefined
+        (openSection !== undefined || Object.keys(resultState).length)
       ) {
         let stateIndex = 0;
         return {
           ...React,
-          useState: () => [stateIndex++ === 0 ? openSection : null, () => {}],
+          useState: (initial) => {
+            const index = stateIndex++;
+            const defaults =
+              typeof initial === "function" ? initial() : initial;
+            const value = Object.hasOwn(resultState, index)
+              ? resultState[index]
+              : index === 0 && openSection !== undefined
+                ? openSection
+                : defaults;
+            return [value, () => {}];
+          },
         };
       }
       if (name === "react" || name === "react/jsx-runtime")
@@ -114,6 +125,7 @@ function render(
                 "aria-label": props.accessibilityLabel,
                 "aria-expanded": props["aria-expanded"],
                 "aria-selected": props["aria-selected"],
+                "aria-pressed": props["aria-pressed"],
                 disabled: props.disabled,
               },
               props.children,
@@ -157,9 +169,12 @@ function render(
           default: () => React.createElement("div", { "data-study-aid": true }),
         };
       const full = path.resolve(root, path.dirname(relative), name);
-      const file = [".tsx", ".ts"]
-        .map((ext) => full + ext)
-        .find((f) => fs.existsSync(f));
+      const file =
+        fs.existsSync(full) && /\.tsx?$/.test(full)
+          ? full
+          : [".tsx", ".ts"]
+              .map((ext) => full + ext)
+              .find((f) => fs.existsSync(f));
       if (!file) throw new Error(`Unexpected import ${name}`);
       return load(path.relative(root, file));
     });
@@ -722,4 +737,215 @@ test("irrelevant optional domains are omitted instead of producing empty Explore
   assert(html.includes("Main coaching point"));
   assert(html.includes("Next 15-minute practice"));
   assert(html.includes("Planning studies"));
+});
+
+const structure = {
+  type: "diagonal",
+  confidence: 0.9,
+  shortExplanation:
+    "The shoreline enters at lower left and carries the eye to the pavilion; the quiet trees support that landing.",
+  paths: [
+    [
+      { x: 0.1, y: 0.8 },
+      { x: 0.65, y: 0.4 },
+    ],
+  ],
+  focalPoint: { x: 0.65, y: 0.4 },
+  secondaryPoints: null,
+  masses: null,
+};
+const readyImageState = {
+  2: { uri: image, size: { width: 1200, height: 900 } },
+};
+
+test("primary and optional secondary composition interpretations are inspected separately", () => {
+  const secondary = {
+    ...structure,
+    type: "off_centre",
+    paths: null,
+    shortExplanation:
+      "The pavilion sits right of centre, balanced by the quiet left bank.",
+  };
+  const html = render("improve_painting", "openai", image, notes, {
+    saved: {
+      ...saved,
+      compositionOverlay: structure,
+      secondaryCompositionOverlay: secondary,
+    },
+    openSection: "composition",
+    expandedAids: false,
+    resultState: readyImageState,
+  });
+  assert(html.includes(structure.shortExplanation));
+  assert(!html.includes(secondary.shortExplanation));
+  assert(html.includes('aria-label="Primary structure"'));
+  assert(html.includes('aria-label="Secondary structure"'));
+  assert(!html.includes("Tertiary structure"));
+  const alternate = render("improve_painting", "openai", image, notes, {
+    saved: {
+      ...saved,
+      compositionOverlay: structure,
+      secondaryCompositionOverlay: secondary,
+    },
+    openSection: "composition",
+    expandedAids: false,
+    resultState: { ...readyImageState, 5: "secondary" },
+  });
+  assert(alternate.includes(secondary.shortExplanation));
+  assert(!alternate.includes(structure.shortExplanation));
+});
+
+test("no secondary is forced and identical geometry with different confidence is deduplicated", () => {
+  for (const secondary of [
+    undefined,
+    {
+      ...structure,
+      confidence: 0.7,
+      shortExplanation: "Same structure in other words.",
+    },
+    { ...structure, confidence: 0.2 },
+  ]) {
+    const html = render("improve_painting", "openai", image, [], {
+      saved: {
+        ...saved,
+        compositionOverlay: structure,
+        secondaryCompositionOverlay: secondary,
+      },
+      openSection: "composition",
+      expandedAids: false,
+      resultState: readyImageState,
+    });
+    assert(!html.includes('aria-label="Secondary structure"'));
+    assert(html.includes(structure.shortExplanation));
+  }
+});
+
+test("visual controls are absent before intrinsic dimensions and offer only useful layers", () => {
+  const pending = render("improve_painting", "openai", image, notes, {
+    saved: { ...saved, compositionOverlay: structure },
+    expandedAids: false,
+  });
+  assert(!pending.includes('data-testid="visual-layer-controls"'));
+  const ready = render("improve_painting", "openai", image, notes, {
+    saved: { ...saved, compositionOverlay: structure },
+    expandedAids: false,
+    resultState: readyImageState,
+  });
+  assert(ready.includes('aria-label="Hide coaching"'));
+  assert(ready.includes('aria-label="Notes view"'));
+  assert(ready.includes('aria-label="Composition view"'));
+  assert(!ready.includes('aria-label="Roles view"'));
+  const hidden = render("improve_painting", "openai", image, notes, {
+    saved: { ...saved, compositionOverlay: structure },
+    expandedAids: false,
+    resultState: { ...readyImageState, 3: false },
+  });
+  assert(hidden.includes('aria-label="Show coaching"'));
+  assert(!hidden.includes('aria-label="Composition view"'));
+});
+
+test("old misfiled brush advice appears in Technique and a related-domain tag replaces repetition", () => {
+  const recipe = "Use a damp brush to soften the trees in a separate study.";
+  const data = {
+    ...saved,
+    coachingDecision: {
+      ...canonical,
+      primaryGoal: recipe,
+      compositionImplication: recipe,
+    },
+  };
+  const composition = render("improve_painting", "openai", image, notes, {
+    saved: data,
+    focus: "Composition",
+    expandedAids: false,
+  });
+  assert(!composition.includes(recipe));
+  assert(composition.includes("Also affects: Technique"));
+  const technique = render("improve_painting", "openai", image, notes, {
+    saved: data,
+    focus: "Composition",
+    openSection: "technique",
+    expandedAids: false,
+  });
+  assert.equal((technique.match(new RegExp(recipe, "g")) || []).length, 1);
+});
+
+test("routed paragraphs and actions keep their destination available even when its original implication is absent", () => {
+  const design = "In a separate study, move the house to the right.";
+  const handling = "In a separate study, practise wet-on-wet.";
+  const data = {
+    ...saved,
+    palette: null,
+    brushPlan: null,
+    coachingDecision: {
+      ...canonical,
+      compositionImplication: null,
+      colourImplication: design,
+      techniqueImplication: null,
+      currentPaintingAction: null,
+      nextStudyAction: handling,
+    },
+  };
+  const composition = render("improve_painting", "openai", image, [], {
+    saved: data,
+    focus: "Overall feedback",
+    openSection: "composition",
+    expandedAids: false,
+  });
+  assert(composition.includes(aria("Composition", true)));
+  assert(composition.includes(design));
+  const technique = render("improve_painting", "openai", image, [], {
+    saved: data,
+    focus: "Overall feedback",
+    openSection: "technique",
+    expandedAids: false,
+  });
+  assert(technique.includes(aria("Watercolor technique", true)));
+  assert(technique.includes(handling));
+});
+
+test("an identical supplied implication has one home and a short related-domain label", () => {
+  const observation =
+    "The pavilion stays dominant against the quieter distance.";
+  const data = {
+    ...saved,
+    coachingDecision: {
+      ...canonical,
+      compositionImplication: observation,
+      colourImplication: observation,
+      techniqueImplication: observation,
+    },
+  };
+  const composition = render("improve_painting", "openai", image, [], {
+    saved: data,
+    openSection: "composition",
+    expandedAids: false,
+  });
+  assert.equal(
+    (composition.match(new RegExp(observation, "g")) || []).length,
+    1,
+  );
+  assert(composition.includes("Also affects: Colour &amp; value, Technique"));
+  const colour = render("improve_painting", "openai", image, [], {
+    saved: data,
+    openSection: "colour",
+    expandedAids: false,
+  });
+  assert(!colour.includes(observation));
+});
+
+test("global observations retain Notes mode as full-image context beside an available composition", () => {
+  const globalNote = {
+    ...notes[0],
+    scope: "global",
+    classification: "strength",
+    evidence: "Large soft shapes stay subordinate to the pavilion's light.",
+  };
+  const html = render("improve_painting", "openai", image, [globalNote], {
+    saved: { ...saved, compositionOverlay: structure },
+    expandedAids: false,
+    resultState: { ...readyImageState, 0: "visual", 4: "notes" },
+  });
+  assert(html.includes('aria-label="Notes view" aria-pressed="true"'));
+  assert(html.includes('aria-label="Composition view" aria-pressed="false"'));
 });

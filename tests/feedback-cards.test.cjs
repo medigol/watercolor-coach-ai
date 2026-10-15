@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "..");
@@ -11,32 +12,38 @@ function load(relative) {
   if (modules.has(relative)) return modules.get(relative);
   const exports = {};
   modules.set(relative, exports);
-  const code = ts.transpileModule(
-    fs.readFileSync(path.join(root, relative), "utf8"),
-    {
-      compilerOptions: {
-        module: ts.ModuleKind.CommonJS,
-        jsx: ts.JsxEmit.ReactJSX,
-        target: ts.ScriptTarget.ES2022,
+  try {
+    const code = ts.transpileModule(
+      fs.readFileSync(path.join(root, relative), "utf8"),
+      {
+        compilerOptions: {
+          module: ts.ModuleKind.CommonJS,
+          jsx: ts.JsxEmit.ReactJSX,
+          target: ts.ScriptTarget.ES2022,
+        },
       },
-    },
-  ).outputText;
-  new Function("exports", "require", code)(exports, (name) => {
-    if (name === "react" || name === "react/jsx-runtime") return require(name);
-    if (name === "@expo/vector-icons") return { Ionicons: () => null };
-    if (name === "react-native")
-      return {
-        Text: (props) => React.createElement("span", null, props.children),
-        View: (props) => React.createElement("div", null, props.children),
-      };
-    if (name === "./ui") return { styles: {}, colors: {} };
-    const full = path.resolve(root, path.dirname(relative), name);
-    const file = [".tsx", ".ts"]
-      .map((ext) => full + ext)
-      .find((f) => fs.existsSync(f));
-    if (!file) throw new Error(`Unexpected import ${name}`);
-    return load(path.relative(root, file));
-  });
+    ).outputText;
+    new Function("exports", "require", code)(exports, (name) => {
+      if (name === "react" || name === "react/jsx-runtime")
+        return require(name);
+      if (name === "@expo/vector-icons") return { Ionicons: () => null };
+      if (name === "react-native")
+        return {
+          Text: (props) => React.createElement("span", null, props.children),
+          View: (props) => React.createElement("div", null, props.children),
+        };
+      if (name === "./ui") return { styles: {}, colors: {} };
+      const full = path.resolve(root, path.dirname(relative), name);
+      const file = [".tsx", ".ts"]
+        .map((ext) => full + ext)
+        .find((f) => fs.existsSync(f));
+      if (!file) return loadShared(name, relative);
+      return load(path.relative(root, file));
+    });
+  } catch (error) {
+    modules.delete(relative);
+    throw error;
+  }
   return exports;
 }
 const feedback = (props) =>

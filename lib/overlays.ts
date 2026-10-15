@@ -1,3 +1,10 @@
+import { noteAnchor } from "../shared/imageGeometry.ts";
+import {
+  sanitizeVisualMetadata,
+  validVisualMetadata,
+  visualMetadataFields,
+} from "../shared/visualMetadata.ts";
+import type { VisualNoteMetadata } from "../shared/visualMetadata.ts";
 export const legacyOverlayTypes = [
   "focal_point",
   "value_adjustment",
@@ -62,7 +69,7 @@ export interface OverlayPoint {
   x: number;
   y: number;
 }
-export interface CoachingOverlay {
+export interface CoachingOverlay extends VisualNoteMetadata {
   type: (typeof overlayTypes)[number];
   id?: string | null;
   category?: OverlayCategory | null;
@@ -81,6 +88,7 @@ export interface CoachingOverlay {
   action: string;
 }
 const allowed = [
+  ...visualMetadataFields,
   "type",
   "id",
   "category",
@@ -109,10 +117,14 @@ function validTextMetadata(item: unknown): item is Record<string, unknown> {
     Object.keys(v).some((k) => !allowed.includes(k)) ||
     !overlayTypes.includes(v.type as CoachingOverlay["type"]) ||
     !["high", "medium", "low"].includes(v.priority as string) ||
-    !text(v.label, 70) || !text(v.shortInstruction, 160) ||
-    !text(v.reason, 350) || !text(v.action, 350) ||
-    !percent(v.x) || !percent(v.y)
-  ) return false;
+    !text(v.label, 70) ||
+    !text(v.shortInstruction, 160) ||
+    !text(v.reason, 350) ||
+    !text(v.action, 350) ||
+    !percent(v.x) ||
+    !percent(v.y)
+  )
+    return false;
   if (
     v.id != null &&
     (typeof v.id !== "string" || !/^[a-zA-Z0-9_-]{1,64}$/.test(v.id))
@@ -145,7 +157,7 @@ function validTextMetadata(item: unknown): item is Record<string, unknown> {
   return true;
 }
 function validOverlay(item: unknown): item is CoachingOverlay {
-  if (!validTextMetadata(item)) return false;
+  if (!validTextMetadata(item) || !validVisualMetadata(item)) return false;
   const v = item;
   const x = v.x as number;
   const y = v.y as number;
@@ -153,25 +165,33 @@ function validOverlay(item: unknown): item is CoachingOverlay {
   const hasHeight = v.height != null;
   if (hasWidth !== hasHeight) return false;
   if (
-    hasWidth && (
-      !percent(v.width) || !percent(v.height) || v.width <= 0 ||
+    hasWidth &&
+    (!percent(v.width) ||
+      !percent(v.height) ||
+      v.width <= 0 ||
       v.height <= 0 ||
-      x + v.width > 100 || y + v.height > 100
-    )
-  ) return false;
+      x + v.width > 100 ||
+      y + v.height > 100)
+  )
+    return false;
   const hasPoints = v.points != null;
   if (
-    hasPoints && (
-      !Array.isArray(v.points) || v.points.length < 2 || v.points.length > 12 ||
-      !v.points.every((p) =>
-        p && typeof p === "object" && !Array.isArray(p) &&
-        Object.keys(p).length === 2 && Object.keys(p).every((k) =>
-          k === "x" || k === "y"
-        ) &&
-        percent(p.x) && percent(p.y)
-      )
-    )
-  ) return false;
+    hasPoints &&
+    (!Array.isArray(v.points) ||
+      v.points.length < 2 ||
+      v.points.length > 12 ||
+      !v.points.every(
+        (p) =>
+          p &&
+          typeof p === "object" &&
+          !Array.isArray(p) &&
+          Object.keys(p).length === 2 &&
+          Object.keys(p).every((k) => k === "x" || k === "y") &&
+          percent(p.x) &&
+          percent(p.y),
+      ))
+  )
+    return false;
   // Geometric marks must carry enough information to draw their intended shape.
   // Missing coordinates are discarded rather than replaced with invented shapes.
   const type = v.type as CoachingOverlay["type"];
@@ -180,8 +200,8 @@ function validOverlay(item: unknown): item is CoachingOverlay {
     const points = v.points as OverlayPoint[];
     const first = points[0];
     if (
-      !points.some((p) =>
-        Math.abs(p.x - first.x) + Math.abs(p.y - first.y) > 0.000001
+      !points.some(
+        (p) => Math.abs(p.x - first.x) + Math.abs(p.y - first.y) > 0.000001,
       )
     ) {
       return false;
@@ -198,8 +218,10 @@ function validOverlay(item: unknown): item is CoachingOverlay {
     return hasWidth && !hasPoints;
   }
   if (kind === "region_highlight" || kind === "value_mass") {
-    return hasWidth !== hasPoints &&
-      (!hasPoints || (v.points as OverlayPoint[]).length >= 3);
+    return (
+      hasWidth !== hasPoints &&
+      (!hasPoints || (v.points as OverlayPoint[]).length >= 3)
+    );
   }
   if (["guide_line", "arrow", "edge_mark"].includes(kind)) {
     return hasPoints && !hasWidth;
@@ -220,14 +242,19 @@ export function usableOverlays(value: unknown): CoachingOverlay[] {
   const seen = new Set<string>();
   const result: CoachingOverlay[] = [];
   // Bound work even for externally supplied saved JSON; never manufacture marks.
-  for (const item of value.slice(0, 32)) {
+  for (const raw of value.slice(0, 32)) {
+    const item = sanitizeVisualMetadata(raw);
     let note: CoachingOverlay;
     if (validOverlay(item)) note = item;
     else if (validTextMetadata(item)) {
       // Keep a useful coaching card at its supplied anchor when its shape fails.
       // Invalid geometry is removed; no replacement path or coordinates are invented.
-      const { width: _width, height: _height, points: _points, ...metadata } =
-        item;
+      const {
+        width: _width,
+        height: _height,
+        points: _points,
+        ...metadata
+      } = item;
       note = {
         ...metadata,
         type: "point_marker",
@@ -290,16 +317,6 @@ export function overlayCategory(note: CoachingOverlay): OverlayCategory {
 // Coordinates describe the original image: boxes use top-left x/y. For paths,
 // anchor the numbered marker at their bounds' centre, independently of layout.
 export function overlayAnchor(note: CoachingOverlay): OverlayPoint {
-  if (note.points?.length) {
-    const xs = note.points.map((p) => p.x);
-    const ys = note.points.map((p) => p.y);
-    return {
-      x: (Math.min(...xs) + Math.max(...xs)) / 2,
-      y: (Math.min(...ys) + Math.max(...ys)) / 2,
-    };
-  }
-  return {
-    x: note.x + (note.width ?? 0) / 2,
-    y: note.y + (note.height ?? 0) / 2,
-  };
+  const anchor = noteAnchor(note) ?? { x: 0, y: 0 };
+  return { x: anchor.x * 100, y: anchor.y * 100 };
 }

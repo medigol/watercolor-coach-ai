@@ -6,6 +6,8 @@ import {
 } from "./overlays";
 import { timingLabel, studyText } from "./coachingPresentation";
 import type { ResultProvider } from "./artworks";
+import { noteGeometryVisible } from "../shared/imageGeometry";
+import { markGeometry } from "./overlayDrawing";
 
 export type ThumbnailKind =
   | "crop"
@@ -121,11 +123,20 @@ export function imageStudyMarks(
   kind: ThumbnailKind,
   value: unknown,
 ): CoachingOverlay[] {
-  const notes = [...usableOverlays(value)].sort(
-    (a, b) =>
-      ({ high: 3, medium: 2, low: 1 })[b.priority] -
-      { high: 3, medium: 2, low: 1 }[a.priority],
-  );
+  // Relationship notes remain available in the main coaching view. Thumbnail
+  // studies require an actual drawable shape, rather than an inactive marker.
+  const notes = usableOverlays(value)
+    .filter(
+      (note) =>
+        noteGeometryVisible(note) &&
+        note.scope !== "multi_region" &&
+        markGeometry(note, 1, 1).kind !== "point_marker",
+    )
+    .sort(
+      (a, b) =>
+        ({ high: 3, medium: 2, low: 1 })[b.priority] -
+        { high: 3, medium: 2, low: 1 }[a.priority],
+    );
   const primary = notes.filter((note) => {
     const geometry = overlayKind(note),
       category = overlayCategory(note);

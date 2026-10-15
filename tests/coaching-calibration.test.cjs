@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -16,7 +17,7 @@ function load(file, imports = {}) {
     },
   ).outputText;
   new Function("exports", "require", code)(exports, (name) => {
-    if (!(name in imports)) throw new Error(`Unexpected import: ${name}`);
+    if (!(name in imports)) return loadShared(name, file);
     return imports[name];
   });
   return exports;

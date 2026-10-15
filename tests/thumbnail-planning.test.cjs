@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -20,7 +21,7 @@ function load(relative, mocks = {}) {
     },
   ).outputText;
   new Function("exports", "require", code)(exports, (name) => {
-    assert(name in mocks, `Unexpected import ${name}`);
+    if (!(name in mocks)) return loadShared(name, relative);
     return mocks[name];
   });
   return exports;
@@ -29,9 +30,17 @@ const overlay = load("lib/overlays.ts");
 const presentation = load("lib/coachingPresentation.ts", {
   "./overlays": overlay,
 });
+const drawing = load("lib/overlayDrawing.ts", {
+  "./overlays": overlay,
+  "./imageGeometry": loadShared(
+    "../shared/imageGeometry",
+    "lib/overlayDrawing.ts",
+  ),
+});
 const planning = load("lib/thumbnailPlanning.ts", {
   "./overlays": overlay,
   "./coachingPresentation": presentation,
+  "./overlayDrawing": drawing,
 });
 const empty = { composition: "", sketch: "", values: "" };
 const note = (patch = {}) => ({
@@ -199,6 +208,143 @@ test("invalid optional metadata cannot manufacture a planning action or hide fal
     planning.planThumbnailStudies(input),
     planning.planThumbnailStudies(empty),
   );
+});
+
+test("global, uncertain, and inactive relationship notes never claim an image-backed study", () => {
+  const cases = [
+    ["crop", { type: "crop_box", width: 40, height: 30 }],
+    [
+      "value_mass",
+      {
+        type: "value_mass",
+        category: "value_structure",
+        width: 30,
+        height: 20,
+      },
+    ],
+    [
+      "focal_point",
+      { type: "focal_ring", category: "focal_point", width: 15, height: 10 },
+    ],
+    [
+      "eye_flow",
+      {
+        type: "arrow",
+        category: "composition",
+        points: [
+          { x: 20, y: 70 },
+          { x: 60, y: 30 },
+        ],
+      },
+    ],
+  ];
+  for (const [kind, geometry] of cases) {
+    for (const metadata of [
+      { scope: "global" },
+      { scope: "local", regionConfidence: 0.4 },
+      {
+        scope: "multi_region",
+        regionConfidence: 0.9,
+        regions: [
+          { x: 0.1, y: 0.2, width: 0.1, height: 0.2 },
+          { x: 0.6, y: 0.3, width: 0.1, height: 0.1 },
+        ],
+      },
+    ]) {
+      const overlays = [note({ ...geometry, ...metadata })];
+      assert.deepEqual(
+        planning.imageStudyMarks(kind, overlays),
+        [],
+        `${kind}/${JSON.stringify(metadata)}`,
+      );
+      const studies = planning.planThumbnailStudies({
+        ...empty,
+        provider: "openai",
+        uri: "private-image",
+        overlays,
+      });
+      assert(studies.every((study) => study.marks.length === 0));
+    }
+  }
+});
+
+test("hidden focal and quiet companions cannot sneak into an otherwise visible image study", () => {
+  const flow = note({
+    type: "arrow",
+    category: "composition",
+    points: [
+      { x: 20, y: 70 },
+      { x: 60, y: 30 },
+    ],
+  });
+  const hiddenFocal = note({
+    type: "focal_ring",
+    category: "focal_point",
+    width: 15,
+    height: 10,
+    regionConfidence: 0.3,
+  });
+  const hiddenQuiet = note({
+    type: "simplify_region",
+    category: "simplification",
+    width: 20,
+    height: 15,
+    scope: "global",
+  });
+  assert.deepEqual(
+    planning.imageStudyMarks("eye_flow", [flow, hiddenFocal, hiddenQuiet]),
+    [flow],
+  );
+  assert.deepEqual(
+    planning.imageStudyMarks("crop", [
+      note({ type: "crop_box", width: 40, height: 30 }),
+      hiddenFocal,
+    ]).length,
+    1,
+  );
+});
+
+test("thumbnail eligibility follows rendered geometry when explicit regions contradict saved paths", () => {
+  for (const [kind, patch] of [
+    ["eye_flow", { type: "arrow", category: "composition" }],
+    [
+      "eye_flow",
+      { type: "guide_line", category: "composition", styleHint: "eye_flow" },
+    ],
+    ["edge_control", { type: "edge_mark", category: "edge_control" }],
+  ]) {
+    const conflicting = note({
+      ...patch,
+      scope: "local",
+      regionConfidence: 0.9,
+      region: { x: 0.1, y: 0.1, width: 0.2, height: 0.2 },
+      points: [
+        { x: 20, y: 70 },
+        { x: 60, y: 30 },
+      ],
+    });
+    const before = JSON.stringify(conflicting);
+    assert.equal(drawing.markGeometry(conflicting, 1, 1).kind, "point_marker");
+    assert.equal(overlay.usableOverlays([conflicting]).length, 1);
+    assert.deepEqual(planning.imageStudyMarks(kind, [conflicting]), []);
+    assert(
+      planning
+        .planThumbnailStudies({
+          ...empty,
+          provider: "openai",
+          uri: "private-image",
+          overlays: [conflicting],
+        })
+        .every((study) => study.marks.length === 0),
+    );
+    assert.equal(JSON.stringify(conflicting), before);
+    const contained = {
+      ...conflicting,
+      region: { x: 0.1, y: 0.1, width: 0.7, height: 0.7 },
+    };
+    assert.equal(drawing.markGeometry(contained, 1, 1).kind, patch.type);
+    assert.deepEqual(planning.imageStudyMarks(kind, [contained]), [contained]);
+  }
 });
 
 test("templates use semantic advice but never copy saved image geometry", () => {
@@ -403,6 +549,52 @@ test("mock/unknown provider keeps generic worksheets even with URI and valid sav
     assert(!html.includes("private-image"));
     assert(html.includes('aria-hidden="true"'));
   }
+});
+
+test("live results with text-only geometry show generic aids instead of empty image overlays", () => {
+  const html = render({
+    ...empty,
+    provider: "openai",
+    uri: "private-image",
+    overlays: [
+      note({ type: "crop_box", width: 40, height: 30, scope: "global" }),
+    ],
+  });
+  assert(
+    html.includes(
+      "Generic planning diagram · use when image overlay is unavailable",
+    ),
+  );
+  assert(!html.includes("Study overlay on your image"));
+  assert(!html.includes("private-image"));
+});
+
+test("a suppressed path falls back visibly instead of advertising an empty image study", () => {
+  const html = render({
+    ...empty,
+    provider: "openai",
+    uri: "private-image",
+    overlays: [
+      note({
+        type: "arrow",
+        category: "composition",
+        scope: "local",
+        region: { x: 0.1, y: 0.1, width: 0.2, height: 0.2 },
+        regionConfidence: 0.9,
+        points: [
+          { x: 20, y: 70 },
+          { x: 60, y: 30 },
+        ],
+      }),
+    ],
+  });
+  assert(
+    html.includes(
+      "Generic planning diagram · use when image overlay is unavailable",
+    ),
+  );
+  assert(!html.includes("Study overlay on your image"));
+  assert(!html.includes("private-image"));
 });
 
 test("all template types render meaningful frame, arrow, value, merge and horizon diagrams", () => {

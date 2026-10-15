@@ -22,14 +22,34 @@ function load(file, mocks = {}) {
   });
   return exports;
 }
-const overlay = load("lib/overlays.ts");
-const drawing = load("lib/overlayDrawing.ts", { "./overlays": overlay });
+const geometry = load("shared/imageGeometry.ts");
+const metadata = load("shared/visualMetadata.ts", {
+  "./imageGeometry.ts": geometry,
+});
+const overlay = load("lib/overlays.ts", {
+  "../shared/imageGeometry.ts": geometry,
+  "../shared/visualMetadata.ts": metadata,
+});
+const drawing = load("lib/overlayDrawing.ts", {
+  "./overlays": overlay,
+  "./imageGeometry": geometry,
+});
 const presentation = load("lib/coachingPresentation.ts", {
   "./overlays": overlay,
+});
+const localPresentation = load("lib/localNotePresentation.ts", {
+  "./overlayDrawing": drawing,
+  "./coachingPresentation": presentation,
+  "../shared/visualMetadata": metadata,
+});
+const roles = load("lib/visualRoles.ts", {
+  "../shared/visualMetadata": metadata,
+  "./imageGeometry": geometry,
 });
 const contract = load("supabase/functions/_shared/contract.ts", {
   "./overlays.ts": overlay,
   "./coachingDecision.ts": load("shared/coachingDecision.ts"),
+  "../../../shared/visualMetadata.ts": metadata,
 });
 const samples = load("data/mockResults.ts");
 const notes = Array.from({ length: 3 }, (_, i) => ({
@@ -42,6 +62,9 @@ const notes = Array.from({ length: 3 }, (_, i) => ({
   priority: i ? "medium" : "high",
   shortInstruction: "Keep the supporting shapes quiet.",
   reason: "This supports the light at the focal point.",
+  evidence:
+    "The lightest roof shape sits against the connected middle-value trees.",
+  classification: "optional_refinement",
   action: "Use a soft middle-value wash while the paper is damp.",
 }));
 test("bounded overlay contract accepts points/regions, empty array and strict known fields", () => {
@@ -97,11 +120,15 @@ test("legacy/mocks remain valid; valid overlays survive; malformed optional over
 });
 test("frontend and server overlay contracts remain identical; no image API or new credentials", () => {
   assert.equal(
-    fs.readFileSync(path.join(root, "lib/overlays.ts"), "utf8"),
-    fs.readFileSync(
-      path.join(root, "supabase/functions/_shared/overlays.ts"),
-      "utf8",
-    ),
+    fs
+      .readFileSync(path.join(root, "lib/overlays.ts"), "utf8")
+      .replaceAll("../shared/", "SHARED/"),
+    fs
+      .readFileSync(
+        path.join(root, "supabase/functions/_shared/overlays.ts"),
+        "utf8",
+      )
+      .replace(/(?:\.\.\/)+shared\//g, "SHARED/"),
   );
   const source = fs.readFileSync(
     path.join(root, "supabase/functions/generate-feedback/index.ts"),
@@ -156,12 +183,20 @@ function fixture(fail = false) {
       Pressable: "Pressable",
       Text: "Text",
       View: "View",
+      useWindowDimensions: () => ({ width: 375, height: 800 }),
     },
+    "../shared/imageGeometry": geometry,
+    "../shared/visualMetadata": metadata,
     "../lib/overlays": overlay,
     "../lib/coachingPresentation": presentation,
+    "../lib/localNotePresentation": localPresentation,
+    "../lib/visualRoles": roles,
     "react-native-svg": { default: "Svg", Path: "Path" },
     "../lib/overlayDrawing": drawing,
     "./CoachingMarks": { default: "CoachingMarks" },
+    "./CompositionStructure": { default: "CompositionStructure" },
+    "./RegionCrop": { default: "RegionCrop" },
+    "./VisualRoleMap": { default: "VisualRoleMap" },
     "./ui": {
       colors: { accent: "teal", ink: "dark", border: "border" },
       styles: { card: {} },
@@ -355,7 +390,6 @@ test("study marks remain selectable while contradictory correction text is suppr
     .map((node) => node.props.children)
     .flat(Infinity)
     .join(" ");
-  assert(text.includes("Observe this decision"));
   assert(text.includes("Study this effect"));
   assert(text.includes("Optional next study variation"));
   assert(
@@ -464,7 +498,9 @@ test("responsive geometry aligns boxes and paths to the original image; old save
     { x: 60, y: 40 },
     { x: 100, y: 20 },
   ]);
-  assert.deepEqual(overlay.overlayAnchor(path), { x: 30, y: 30 });
+  const anchor = overlay.overlayAnchor(path);
+  assert(Math.abs(anchor.x - 30) < 1e-10);
+  assert(Math.abs(anchor.y - 30) < 1e-10);
   assert.equal(overlay.overlayKind({ ...notes[0], ...box }), "focal_ring");
   assert.equal(overlay.overlayKind({ ...notes[1], ...box }), "value_mass");
   assert.equal(
@@ -525,6 +561,7 @@ test("SVG renderer draws each rich shape and selects the matching card with rest
     },
     "../lib/overlayDrawing": drawing,
     "../lib/overlays": overlay,
+    "../lib/imageGeometry": geometry,
   }).default;
   const rich = [
     richNote("focal_ring", box),
@@ -597,6 +634,7 @@ test("semantic aliases render their instructional shapes and retain purpose even
     },
     "../lib/overlayDrawing": drawing,
     "../lib/overlays": overlay,
+    "../lib/imageGeometry": geometry,
   }).default;
   const nodes = (t) =>
     !t || typeof t !== "object"

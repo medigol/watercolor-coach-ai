@@ -9,22 +9,31 @@ import Svg, {
 import { overlayCategory, type CoachingOverlay } from "../lib/overlays";
 import {
   arrowHead,
+  activeRegionsGeometry,
   legendGroup,
   markColors,
   markGeometry,
 } from "../lib/overlayDrawing";
+import {
+  noteAnchors,
+  noteGeometryVisible,
+  projectPoint,
+  type ImageFrame,
+} from "../lib/imageGeometry";
 export default function CoachingMarks({
   notes,
   width,
   height,
   selected,
   onSelect,
+  frame,
 }: {
   notes: CoachingOverlay[];
   width: number;
   height: number;
   selected: number | null;
   onSelect: (index: number) => void;
+  frame?: Pick<ImageFrame, "x" | "y" | "width" | "height">;
 }) {
   return (
     <Svg
@@ -37,9 +46,22 @@ export default function CoachingMarks({
       aria-hidden={true}
     >
       {notes.map((note, i) => {
-        const g = markGeometry(note, width, height),
+        if (!noteGeometryVisible(note)) return null;
+        const g = markGeometry(note, width, height, frame),
           color = markColors[legendGroup(note)],
           active = selected === i;
+        const regions = active
+          ? activeRegionsGeometry(note, width, height, frame)
+          : [];
+        const multi = note.scope === "multi_region";
+        // A relationship uses its real targets, never the legacy single shape.
+        if (multi) g.kind = "point_marker";
+        const anchors =
+          active && (multi || regions.length === 0)
+            ? noteAnchors(note).map((anchor) =>
+                projectPoint(anchor, frame ?? { x: 0, y: 0, width, height }),
+              )
+            : [];
         const strokeWidth = active ? 3 : 2;
         const points = g.points.map((p) => `${p.x},${p.y}`).join(" ");
         const line =
@@ -78,6 +100,37 @@ export default function CoachingMarks({
             : undefined;
         return (
           <G key={`${note.id ?? "note"}-${i}`} onPress={() => onSelect(i)}>
+            {regions.map((region, regionIndex) => (
+              <Rect
+                key={`region-${regionIndex}`}
+                testID="active-coaching-region"
+                pointerEvents="none"
+                x={region.x}
+                y={region.y}
+                width={region.width}
+                height={region.height}
+                fill={color}
+                fillOpacity={0.035}
+                stroke={color}
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+              />
+            ))}
+            {anchors.map((anchor, anchorIndex) => (
+              <Ellipse
+                key={`target-${anchorIndex}`}
+                testID="active-coaching-anchor"
+                pointerEvents="none"
+                cx={anchor.x}
+                cy={anchor.y}
+                rx={5}
+                ry={5}
+                fill="none"
+                stroke={color}
+                strokeWidth={1.5}
+                strokeDasharray="2 2"
+              />
+            ))}
             {g.kind === "focal_ring" && (
               <>
                 <Ellipse

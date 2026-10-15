@@ -1,5 +1,7 @@
+import type { VisualRole } from "./visualMetadata.ts";
 // Shared deterministic presentation rules. No network, storage or model calls.
 export interface CoachingDecision {
+  visualRoles?: { area: string; role: VisualRole }[] | null;
   primaryGoal: string;
   primarySubjectOrArea: string;
   areasToEmphasize: string[];
@@ -146,8 +148,10 @@ export function usableCoachingDecision(
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const v = value as Record<string, unknown>;
   if (
-    Object.keys(v).length !== fields.length ||
-    Object.keys(v).some((key) => !fields.includes(key)) ||
+    !fields.every((key) => Object.hasOwn(v, key)) ||
+    Object.keys(v).some(
+      (key) => !fields.includes(key) && key !== "visualRoles",
+    ) ||
     !text(v.primaryGoal) ||
     !text(v.primarySubjectOrArea, 100)
   )
@@ -181,6 +185,42 @@ export function usableCoachingDecision(
     areasToQuiet: unique(v.areasToQuiet as string[]),
     supportingObservations: unique(v.supportingObservations as string[]),
   };
+  if (Object.hasOwn(v, "visualRoles")) {
+    decision.visualRoles = Array.isArray(v.visualRoles)
+      ? v.visualRoles
+          .slice(0, 32)
+          .filter(
+            (item) =>
+              item &&
+              typeof item === "object" &&
+              !Array.isArray(item) &&
+              Object.keys(item).every(
+                (key) => key === "area" || key === "role",
+              ) &&
+              text(item.area, 100) &&
+              ["focal", "supporting", "quiet"].includes(item.role),
+          )
+          .filter(
+            (item, index, all) =>
+              all.findIndex(
+                (other) => target(other.area) === target(item.area),
+              ) === index,
+          )
+          .filter(
+            (item) =>
+              !(
+                item.role === "quiet" &&
+                directions(decision.primaryGoal, item.area).has("emphasize")
+              ) &&
+              !(
+                item.role === "focal" &&
+                directions(decision.primaryGoal, item.area).has("quiet")
+              ),
+          )
+          .slice(0, 6)
+          .map((item) => ({ area: item.area, role: item.role }))
+      : null;
+  }
   const shared = decision.areasToEmphasize.filter((area) =>
     decision.areasToQuiet.some((other) => target(other) === target(area)),
   );
@@ -244,6 +284,18 @@ export function conflictsWithDecision(
   decision: CoachingDecision,
 ): boolean {
   return (
+    !!decision.visualRoles?.some(({ area, role }) => {
+      const action = directions(value, area);
+      if (role === "quiet") return action.has("emphasize");
+      if (role === "focal") return action.has("quiet");
+      return (
+        role === "supporting" &&
+        action.has("emphasize") &&
+        !/\b(?:subordinate|restrained|small|slight|lead(?:s|ing)? (?:the eye )?toward|guide(?:s|ing)? (?:the eye )?toward)\b/i.test(
+          value,
+        )
+      );
+    }) ||
     decision.areasToQuiet.some((area) =>
       directions(value, area).has("emphasize"),
     ) ||
@@ -289,6 +341,24 @@ export function coherentFeedback<T>(
       const coherent = items.filter(
         (item) => !conflictsWithDecision(item, decision),
       );
+      // New optional role metadata must not make an otherwise compatible core
+      // invalid. If it removes every required strength without supplied positive
+      // evidence to use, retain the established canonical decision without roles.
+      if (
+        key === "whatWorks" &&
+        items.length &&
+        !coherent.length &&
+        decision.visualRoles?.length &&
+        !decision.supportingObservations.some(
+          (item) => !conflictsWithDecision(item, decision),
+        )
+      ) {
+        const { visualRoles: _roles, ...legacyDecision } = decision;
+        return coherentFeedback(
+          { ...original, coachingDecision: legacyDecision },
+          mode,
+        ) as T;
+      }
       result[key] = (
         key === "whatWorks" && items.length && !coherent.length
           ? decision.supportingObservations.filter(
@@ -358,6 +428,26 @@ export function coherentFeedback<T>(
       .sort((a, b) => priority(a) - priority(b))
       .slice(0, 3)
       .map((note) => {
+        if (note && typeof note === "object") {
+          const matchingRole = decision.visualRoles?.find(
+            ({ area }) => target(area) === target(note.label ?? ""),
+          );
+          if (matchingRole) note = { ...note, visualRole: matchingRole.role };
+          if (
+            result.coachingMode === "study" &&
+            note.classification === "clear_issue"
+          )
+            note = {
+              ...note,
+              classification: "optional_refinement",
+              timing: "next_study",
+            };
+          if (
+            note.classification === "stylistic_alternative" ||
+            note.classification === "study_experiment"
+          )
+            note = { ...note, timing: "next_study" };
+        }
         if (
           note &&
           typeof note === "object" &&
@@ -367,6 +457,20 @@ export function coherentFeedback<T>(
           return { ...note, timing: "next_study" };
         return note;
       });
+  }
+  for (const field of ["compositionOverlay", "secondaryCompositionOverlay"]) {
+    const overlay = result[field];
+    if (
+      overlay &&
+      typeof overlay === "object" &&
+      typeof (overlay as Record<string, unknown>).shortExplanation ===
+        "string" &&
+      conflictsWithDecision(
+        (overlay as Record<string, unknown>).shortExplanation as string,
+        decision,
+      )
+    )
+      delete result[field];
   }
   if (Array.isArray(result.brushPlan))
     result.brushPlan = result.brushPlan

@@ -1,9 +1,14 @@
+import { overlayCategory, overlayKind, type CoachingOverlay } from "./overlays";
 import {
-  overlayAnchor,
-  overlayCategory,
-  overlayKind,
-  type CoachingOverlay,
-} from "./overlays";
+  legacyGeometry,
+  noteAnchor,
+  noteRegion,
+  noteRegions,
+  noteGeometryVisible,
+  projectPoint,
+  projectRect,
+  type ImageFrame,
+} from "./imageGeometry";
 export type LegendGroup =
   | "Focus"
   | "Value"
@@ -36,20 +41,25 @@ export function markerPositions(
   notes: CoachingOverlay[],
   width: number,
   height: number,
+  frame: Pick<ImageFrame, "x" | "y" | "width" | "height"> = {
+    x: 0,
+    y: 0,
+    width,
+    height,
+  },
 ) {
   const target = Math.max(1, Math.min(44, width, height));
   const positions: { left: number; top: number; target: number }[] = [];
   for (const note of notes) {
-    const anchor = overlayAnchor(note);
+    const normalizedAnchor = noteAnchor(note);
+    if (!noteGeometryVisible(note) || !normalizedAnchor) {
+      positions.push({ left: 0, top: 0, target: 0 });
+      continue;
+    }
+    const anchor = projectPoint(normalizedAnchor, frame);
     const clamp = (dx: number, dy: number) => ({
-      left: Math.max(
-        0,
-        Math.min(width - target, (width * anchor.x) / 100 - target / 2 + dx),
-      ),
-      top: Math.max(
-        0,
-        Math.min(height - target, (height * anchor.y) / 100 - target / 2 + dy),
-      ),
+      left: Math.max(0, Math.min(width - target, anchor.x - target / 2 + dx)),
+      top: Math.max(0, Math.min(height - target, anchor.y - target / 2 + dy)),
       target,
     });
     const candidates = [clamp(0, 0)];
@@ -70,6 +80,7 @@ export function markerPositions(
     const collision = (p: (typeof positions)[number]) =>
       positions.some(
         (other) =>
+          other.target > 0 &&
           p.left < other.left + target + 1 &&
           p.left + target + 1 > other.left &&
           p.top < other.top + target + 1 &&
@@ -83,19 +94,91 @@ export function markGeometry(
   note: CoachingOverlay,
   width: number,
   height: number,
+  frame: Pick<ImageFrame, "x" | "y" | "width" | "height"> = {
+    x: 0,
+    y: 0,
+    width,
+    height,
+  },
 ) {
-  const points = (note.points ?? []).map((p) => ({
-    x: (p.x * width) / 100,
-    y: (p.y * height) / 100,
-  }));
+  const normalized = legacyGeometry(note);
+  let kind = overlayKind(note);
+  const explicitRegion = note.region != null ? noteRegion(note) : null;
+  const point = projectPoint(
+    explicitRegion
+      ? {
+          x: explicitRegion.x + explicitRegion.width / 2,
+          y: explicitRegion.y + explicitRegion.height / 2,
+        }
+      : (normalized?.point ?? { x: 0, y: 0 }),
+    frame,
+  );
+  const regionShape = [
+    "focal_ring",
+    "crop_box",
+    "region_highlight",
+    "value_mass",
+  ].includes(kind);
+  const sourceRect =
+    explicitRegion && regionShape ? explicitRegion : normalized?.rect;
+  const rect = sourceRect ? projectRect(sourceRect, frame) : null;
+  let sourcePoints = normalized?.points ?? [];
+  if (explicitRegion && regionShape) {
+    // New normalized regions are authoritative. An older polygon/box may have
+    // survived beside them in saved JSON; do not draw two conflicting targets.
+    sourcePoints = [];
+  } else if (
+    explicitRegion &&
+    sourcePoints.some(
+      (p) =>
+        p.x < explicitRegion.x - 1e-7 ||
+        p.y < explicitRegion.y - 1e-7 ||
+        p.x > explicitRegion.x + explicitRegion.width + 1e-7 ||
+        p.y > explicitRegion.y + explicitRegion.height + 1e-7,
+    )
+  ) {
+    // Preserve an actual path only when it agrees with the supplied local
+    // target. A contradictory path is omitted, never moved or redrawn.
+    sourcePoints = [];
+    kind = "point_marker";
+  }
+  const points = sourcePoints.map((p) => projectPoint(p, frame));
   return {
-    kind: overlayKind(note),
-    x: (note.x * width) / 100,
-    y: (note.y * height) / 100,
-    width: ((note.width ?? 0) * width) / 100,
-    height: ((note.height ?? 0) * height) / 100,
+    kind,
+    x: rect?.x ?? point.x,
+    y: rect?.y ?? point.y,
+    width: rect?.width ?? 0,
+    height: rect?.height ?? 0,
     points,
   };
+}
+export function activeRegionGeometry(
+  note: CoachingOverlay,
+  width: number,
+  height: number,
+  frame: Pick<ImageFrame, "x" | "y" | "width" | "height"> = {
+    x: 0,
+    y: 0,
+    width,
+    height,
+  },
+) {
+  const region = noteRegion(note);
+  return region ? projectRect(region, frame) : null;
+}
+export function activeRegionsGeometry(
+  note: CoachingOverlay,
+  width: number,
+  height: number,
+  frame: Pick<ImageFrame, "x" | "y" | "width" | "height"> = {
+    x: 0,
+    y: 0,
+    width,
+    height,
+  },
+) {
+  if (!noteGeometryVisible(note)) return [];
+  return noteRegions(note).map((region) => projectRect(region, frame));
 }
 export function arrowHead(points: { x: number; y: number }[], length = 10) {
   if (points.length < 2) return "";

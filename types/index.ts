@@ -1,3 +1,12 @@
+export type {
+  CompositionOverlay,
+  CompositionArchetype,
+  FeedbackClassification,
+  FeedbackScope,
+  FeedbackDomain,
+  VisualRole,
+  VisualNoteMetadata,
+} from "../shared/visualMetadata";
 export type CoachingMode = "constructive" | "study";
 export type { CoachingDecision } from "../shared/coachingDecision";
 export type ArtworkMode = "Improve painting" | "Create reference";

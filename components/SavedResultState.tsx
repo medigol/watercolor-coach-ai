@@ -3,6 +3,9 @@ import { usableOverlays } from "../lib/overlays";
 import { ActivityIndicator, Text, Image } from "react-native";
 import { Button, Screen, styles, colors } from "./ui";
 import { useState } from "react";
+import type { ImageSize } from "../shared/imageGeometry";
+import { drawableCompositionOverlay } from "../shared/visualMetadata";
+import { planVisualRoles, type VisualRoleRegion } from "../lib/visualRoles";
 export function ResultState({
   loading,
   error,
@@ -39,6 +42,12 @@ export function SavedImage({
   selectedNote,
   onSelectNote,
   onOpenNotes,
+  onImageSize,
+  compositionOverlay,
+  showComposition = false,
+  coachingVisible = true,
+  visualMode,
+  roleRegions,
 }: {
   uri?: string;
   label?: string;
@@ -48,6 +57,12 @@ export function SavedImage({
   selectedNote?: number | null;
   onSelectNote?: (index: number) => void;
   onOpenNotes?: () => void;
+  onImageSize?: (size: ImageSize | null) => void;
+  compositionOverlay?: unknown;
+  showComposition?: boolean;
+  coachingVisible?: boolean;
+  visualMode?: "notes" | "composition" | "roles";
+  roleRegions?: VisualRoleRegion[];
 }) {
   const [failedUri, setFailedUri] = useState<string>();
   if (uri && failedUri === uri)
@@ -58,7 +73,12 @@ export function SavedImage({
         </Text>
       </>
     );
-  if (uri && usableOverlays(overlays).length)
+  if (
+    uri &&
+    (usableOverlays(overlays).length ||
+      drawableCompositionOverlay(compositionOverlay) ||
+      (roleRegions ?? planVisualRoles(overlays, compositionOverlay)).length > 0)
+  )
     return (
       <CoachingOverlay
         uri={uri}
@@ -69,6 +89,12 @@ export function SavedImage({
         selectedNote={selectedNote}
         onSelectNote={onSelectNote}
         onOpenNotes={onOpenNotes}
+        onImageSize={onImageSize}
+        compositionOverlay={compositionOverlay}
+        showComposition={showComposition}
+        coachingVisible={coachingVisible}
+        visualMode={visualMode}
+        roleRegions={roleRegions}
         onImageError={() => setFailedUri(uri)}
       />
     );
@@ -80,7 +106,10 @@ export function SavedImage({
         accessibilityLabel={label}
         style={{ height: 210, width: "100%", borderRadius: 18 }}
         resizeMode="contain"
-        onError={() => setFailedUri(uri)}
+        onError={() => {
+          setFailedUri(uri);
+          onImageSize?.(null);
+        }}
       />
     </>
   ) : null;
