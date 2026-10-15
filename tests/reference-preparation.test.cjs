@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -18,7 +19,7 @@ function load(relative, mocks = {}) {
     },
   ).outputText;
   new Function("exports", "require", code)(exports, (name) => {
-    assert(name in mocks, `Unexpected import ${name}`);
+    if (!(name in mocks)) return loadShared(name, relative);
     return mocks[name];
   });
   return exports;

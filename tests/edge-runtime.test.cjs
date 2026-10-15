@@ -87,8 +87,8 @@ function fixture(options = {}) {
       const prompt = body.messages[0].content;
       assert(prompt.includes("visible locations"));
       assert(prompt.includes("never claim to have generated"));
-      assert(prompt.includes("Aim for 2–3 useful visual marks"));
-      assert(prompt.includes("preferably three distinct high-value notes"));
+      assert(prompt.includes("Aim for two concise useful visual marks"));
+      assert(prompt.includes("at most three distinct high-value notes"));
       assert(
         prompt.includes("one practical sentence under 25 words for action"),
       );
@@ -1065,5 +1065,127 @@ for (const mode of ["improve_painting", "create_reference"]) {
         !f.calls.some((call) => call.path.endsWith("/save_mock_feedback")),
       );
     }
+  });
+}
+
+for (const mode of ["improve_painting", "create_reference"]) {
+  test(`actual Edge SDK runtime: ${mode} preserves optional region/evidence and composition metadata in the same single paid result`, async () => {
+    const primary = {
+      type: "diagonal",
+      confidence: 0.85,
+      shortExplanation:
+        "The pier leads from the lower left toward the focal house.",
+      paths: [
+        [
+          { x: 0.1, y: 0.8 },
+          { x: 0.65, y: 0.35 },
+        ],
+      ],
+      focalPoint: { x: 0.65, y: 0.35 },
+      secondaryPoints: null,
+      masses: null,
+    };
+    const localNote = {
+      type: "point_marker",
+      id: "roof",
+      label: "Focal roof",
+      x: 65,
+      y: 35,
+      priority: "high",
+      shortInstruction: "Notice the roof against the quiet trees.",
+      reason: "This separation concentrates attention.",
+      action: "Preserve the light shape in a separate study.",
+      classification: "strength",
+      domain: "composition",
+      relatedDomain: null,
+      visualRole: "focal",
+      scope: "local",
+      region: { x: 0.55, y: 0.25, width: 0.2, height: 0.2 },
+      regionConfidence: 0.9,
+      regions: null,
+      anchors: null,
+      evidence:
+        "The roof has the sharpest light-dark boundary against the softer trees.",
+    };
+    const f = fixture({
+      mode,
+      feedback: {
+        compositionOverlay: primary,
+        secondaryCompositionOverlay: {
+          ...primary,
+          type: "off_centre",
+          paths: null,
+        },
+        overlays: [localNote],
+      },
+    });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { id, provider: "openai" });
+    const saved = f.calls.find((call) =>
+      call.path.endsWith("/complete_openai_feedback"),
+    ).body.p_result;
+    assert.equal(saved.overlays[0].classification, "strength");
+    assert.equal(saved.overlays[0].scope, "local");
+    assert.equal(saved.compositionOverlay.type, "diagonal");
+    assert.equal(saved.secondaryCompositionOverlay.type, "off_centre");
+    assert.equal(
+      f.calls.filter((call) => call.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert.equal(
+      f.calls.filter((call) => call.path.endsWith("/complete_openai_feedback"))
+        .length,
+      1,
+    );
+    assert(
+      !f.calls.some(
+        (call) =>
+          call.path.includes("save_mock") ||
+          (call.path.includes("/storage/v1/object/") && call.body),
+      ),
+    );
+  });
+  test(`actual Edge SDK runtime: ${mode} bad optional visual fields preserve live text without mock completion`, async () => {
+    const f = fixture({
+      mode,
+      feedback: {
+        compositionOverlay: { type: "invented" },
+        secondaryCompositionOverlay: { confidence: 9 },
+        overlays: [
+          {
+            type: "point_marker",
+            label: "Roof",
+            x: 65,
+            y: 35,
+            priority: "high",
+            shortInstruction: "Study the reserved light.",
+            reason: "It concentrates attention.",
+            action: "Try a separate small study.",
+            classification: "clear_issue",
+            scope: "local",
+            region: { x: 2, y: 0, width: 0.2, height: 0.2 },
+            regionConfidence: "certain",
+            evidence: "bad",
+          },
+        ],
+      },
+    });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { id, provider: "openai" });
+    const saved = f.calls.find((call) =>
+      call.path.endsWith("/complete_openai_feedback"),
+    ).body.p_result;
+    assert.equal(saved.compositionOverlay, undefined);
+    assert.equal(saved.secondaryCompositionOverlay, undefined);
+    assert.equal(saved.overlays[0].region, null);
+    assert.equal(saved.overlays[0].regionConfidence, 0);
+    assert.equal(saved.overlays[0].classification, "study_experiment");
+    assert.equal(
+      f.calls.filter((call) => call.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert(!f.calls.some((call) => call.path.endsWith("/save_mock_feedback")));
   });
 }

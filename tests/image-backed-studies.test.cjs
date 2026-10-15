@@ -17,6 +17,12 @@ function load(relative, mocks = {}) {
     },
   ).outputText;
   new Function("exports", "require", code)(exports, (name) => {
+    if (!(name in mocks) && name.startsWith(".")) {
+      const file = path.resolve(path.dirname(path.join(root, relative)), name);
+      return load(
+        path.relative(root, /\.tsx?$/.test(file) ? file : `${file}.ts`),
+      );
+    }
     assert(name in mocks, `Unexpected import ${name}`);
     return mocks[name];
   });

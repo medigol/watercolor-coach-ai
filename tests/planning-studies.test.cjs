@@ -5,6 +5,7 @@ const path = require("node:path");
 const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const root = path.resolve(__dirname, "..");
 const loaded = new Map();
 const tag =
@@ -56,6 +57,13 @@ function load(file) {
           ),
       };
     assert(name.startsWith("."), `Unexpected import ${name}`);
+    if (
+      path
+        .resolve(root, path.dirname(file), name)
+        .startsWith(path.join(root, "shared") + path.sep)
+    ) {
+      return loadShared(name, file);
+    }
     const base = path.join(path.dirname(file), name);
     const next = [base, `${base}.ts`, `${base}.tsx`].find((candidate) =>
       fs.existsSync(path.join(root, candidate)),
@@ -139,6 +147,21 @@ const decision = {
   compositionImplication: null,
   colourImplication: null,
   techniqueImplication: null,
+};
+const currentDiagonal = {
+  type: "diagonal",
+  confidence: 0.85,
+  shortExplanation:
+    "The road carries the eye from the lower left toward the roof light.",
+  paths: [
+    [
+      { x: 0.2, y: 0.8 },
+      { x: 0.65, y: 0.35 },
+    ],
+  ],
+  focalPoint: null,
+  secondaryPoints: null,
+  masses: null,
 };
 
 test("unified planning prefers relevant validated image studies and caps the combined systems", () => {
@@ -329,6 +352,257 @@ test("a known distinct sub-area remains usable and older missing metadata keeps 
     coachingDecision: { primaryGoal: "Incomplete old metadata" },
   });
   assert.deepEqual(withInvalid, planPlanningStudies(input));
+});
+
+test("a current image-specific path replaces the identical planning overlay, not a distinct future experiment", () => {
+  const future = {
+    ...flow,
+    priority: "medium",
+    points: [
+      { x: 15, y: 85 },
+      { x: 40, y: 55 },
+      { x: 70, y: 30 },
+    ],
+    action: "Test this alternate approach in a future thumbnail.",
+  };
+  const props = {
+    ...input,
+    focus: "Composition",
+    composition: "Use one diagonal movement.",
+    overlays: [flow, future, crop, value],
+    currentCompositionOverlay: currentDiagonal,
+  };
+  const before = JSON.stringify(props);
+  const cards = planPlanningStudies(props);
+  const flowStudy = cards.find(
+    (card) => card.type === "thumbnail" && card.study.kind === "eye_flow",
+  );
+  assert(flowStudy);
+  assert.deepEqual(flowStudy.study.marks[0].points, future.points);
+  assert(
+    cards.every(
+      (card) => card.type !== "model" || card.model.id !== "diagonal",
+    ),
+  );
+  assert(cards.length >= 2 && cards.length <= 3);
+  assert.equal(JSON.stringify(props), before);
+  const withoutFuture = planPlanningStudies({
+    ...props,
+    overlays: [flow, crop, value],
+  });
+  assert(
+    !withoutFuture.some(
+      (card) => card.type === "thumbnail" && card.study.kind === "eye_flow",
+    ),
+  );
+  assert(
+    withoutFuture.some(
+      (card) => card.type === "thumbnail" && card.study.kind === "crop",
+    ),
+  );
+});
+
+test("a repeated current focal target and generic off-centre model are omitted while a new target remains", () => {
+  const current = {
+    ...currentDiagonal,
+    type: "off_centre",
+    paths: null,
+    focalPoint: { x: 0.175, y: 0.25 },
+  };
+  const future = { ...focal, x: 60, y: 30, priority: "medium" };
+  const props = {
+    ...input,
+    focus: "Composition",
+    composition: "Explore off-centre placement.",
+    overlays: [focal, future, value],
+    currentCompositionOverlay: current,
+  };
+  const cards = planPlanningStudies(props);
+  const focalStudy = cards.find(
+    (card) => card.type === "thumbnail" && card.study.kind === "focal_point",
+  );
+  assert(focalStudy);
+  assert.equal(focalStudy.study.marks[0].x, future.x);
+  assert(
+    cards.every(
+      (card) => card.type !== "model" || card.model.id !== "off_center",
+    ),
+  );
+});
+
+test("equivalent percent-space framing is deduplicated without deleting a different future crop", () => {
+  const current = {
+    ...currentDiagonal,
+    type: "enclosure",
+    paths: [
+      [
+        { x: 0.1, y: 0.15 },
+        { x: 0.85, y: 0.15 },
+        { x: 0.85, y: 0.85 },
+        { x: 0.1, y: 0.85 },
+      ],
+    ],
+  };
+  const future = {
+    ...crop,
+    width: 65,
+    height: 60,
+    priority: "medium",
+    region: { x: 0.1, y: 0.15, width: 0.75, height: 0.7 },
+    regionConfidence: 0.9,
+  };
+  const cards = planPlanningStudies({
+    ...input,
+    focus: "Composition",
+    overlays: [crop, future, value],
+    currentCompositionOverlay: current,
+  });
+  const cropStudy = cards.find(
+    (card) => card.type === "thumbnail" && card.study.kind === "crop",
+  );
+  assert(cropStudy);
+  assert.equal(cropStudy.study.marks[0].width, future.width);
+  assert.equal(cropStudy.study.marks[0].height, future.height);
+});
+
+test("explicit normalized local regions and focal targets participate in current-overlay deduplication", () => {
+  const currentRegion = { x: 0.15, y: 0.2, width: 0.25, height: 0.3 };
+  const current = {
+    ...currentDiagonal,
+    type: "mixed",
+    paths: null,
+    masses: [
+      {
+        role: "supporting",
+        points: [
+          { x: 0.15, y: 0.2 },
+          { x: 0.4, y: 0.2 },
+          { x: 0.4, y: 0.5 },
+          { x: 0.15, y: 0.5 },
+        ],
+      },
+    ],
+  };
+  const cards = planPlanningStudies({
+    ...input,
+    overlays: [
+      { ...value, region: currentRegion, regionConfidence: 0.9 },
+      crop,
+    ],
+    currentCompositionOverlay: current,
+  });
+  assert(
+    !cards.some(
+      (card) => card.type === "thumbnail" && card.study.kind === "value_mass",
+    ),
+  );
+  assert(
+    cards.some(
+      (card) => card.type === "thumbnail" && card.study.kind === "crop",
+    ),
+  );
+  const focalCards = planPlanningStudies({
+    ...input,
+    overlays: [
+      {
+        ...focal,
+        region: { x: 0.5, y: 0.3, width: 0.15, height: 0.1 },
+        regionConfidence: 0.9,
+      },
+      crop,
+    ],
+    currentCompositionOverlay: {
+      ...currentDiagonal,
+      type: "off_centre",
+      paths: null,
+      focalPoint: { x: 0.575, y: 0.35 },
+    },
+  });
+  assert(
+    !focalCards.some(
+      (card) => card.type === "thumbnail" && card.study.kind === "focal_point",
+    ),
+  );
+});
+
+test("a confident secondary interpretation also removes repeats while preserving a different future target", () => {
+  const secondary = {
+    ...currentDiagonal,
+    type: "off_centre",
+    paths: null,
+    focalPoint: { x: 0.175, y: 0.25 },
+  };
+  const future = { ...focal, x: 60, y: 30, priority: "medium" };
+  const props = {
+    ...input,
+    focus: "Composition",
+    composition: "Use one diagonal movement and an off-centre focal point.",
+    overlays: [flow, focal, future, crop, value],
+    currentCompositionOverlay: currentDiagonal,
+  };
+  const baseline = planPlanningStudies(props);
+  const oldFocal = baseline.find(
+    (card) => card.type === "thumbnail" && card.study.kind === "focal_point",
+  );
+  assert.equal(oldFocal.study.marks[0].x, focal.x);
+  const cards = planPlanningStudies({
+    ...props,
+    secondaryCompositionOverlay: secondary,
+  });
+  const futureFocal = cards.find(
+    (card) => card.type === "thumbnail" && card.study.kind === "focal_point",
+  );
+  assert.equal(futureFocal.study.marks[0].x, future.x);
+  assert(
+    !cards.some(
+      (card) => card.type === "thumbnail" && card.study.kind === "eye_flow",
+    ),
+  );
+  assert(
+    cards.every(
+      (card) =>
+        card.type !== "model" ||
+        !["diagonal", "off_center"].includes(card.model.id),
+    ),
+  );
+  assert(cards.length <= 3);
+  assert.deepEqual(
+    planPlanningStudies({
+      ...props,
+      secondaryCompositionOverlay: { ...secondary, confidence: 0.4 },
+    }),
+    baseline,
+  );
+});
+
+test("missing, uncertain, invalid, or unavailable current overlays preserve legacy planning exactly", () => {
+  const baseline = planPlanningStudies(input);
+  for (const currentCompositionOverlay of [
+    undefined,
+    null,
+    {},
+    { ...currentDiagonal, confidence: 0.4 },
+    { ...currentDiagonal, paths: null },
+  ]) {
+    assert.deepEqual(
+      planPlanningStudies({ ...input, currentCompositionOverlay }),
+      baseline,
+    );
+  }
+  for (const patch of [
+    { provider: "mock" },
+    { provider: undefined },
+    { uri: "" },
+  ]) {
+    assert.deepEqual(
+      planPlanningStudies({
+        ...input,
+        ...patch,
+        currentCompositionOverlay: currentDiagonal,
+      }),
+      planPlanningStudies({ ...input, ...patch }),
+    );
+  }
 });
 
 test("unifying planning adds no image processing, calls, secrets, or writes", () => {

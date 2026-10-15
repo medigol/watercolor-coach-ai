@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import Svg, { Path } from "react-native-svg";
 import {
   usableOverlays,
   type CoachingOverlay as CoachingNote,
 } from "../lib/overlays";
-import {
-  markMeaning,
-  timingLabel,
-  studyText,
-  conciseText,
-} from "../lib/coachingPresentation";
+import { timingLabel, conciseText } from "../lib/coachingPresentation";
 import {
   legendGroup,
   markColors,
@@ -18,6 +19,25 @@ import {
   type LegendGroup,
 } from "../lib/overlayDrawing";
 import CoachingMarks from "./CoachingMarks";
+import CompositionStructure from "./CompositionStructure";
+import RegionCrop from "./RegionCrop";
+import VisualRoleMap from "./VisualRoleMap";
+import { planVisualRoles, type VisualRoleRegion } from "../lib/visualRoles";
+import { presentedLocalNote as displayedNote } from "../lib/localNotePresentation";
+import {
+  containFrame,
+  noteRegions,
+  noteGeometryVisible,
+  type NormalizedRect,
+  type ImageSize,
+} from "../shared/imageGeometry";
+import {
+  effectiveClassification,
+  classificationLabel,
+  domainLabel,
+  drawableCompositionOverlay,
+  explicitGuidanceDomain,
+} from "../shared/visualMetadata";
 import { colors, styles } from "./ui";
 const legend: LegendGroup[] = [
   "Focus",
@@ -40,28 +60,13 @@ export function curatedCoachingNotes(notes: unknown): CoachingNote[] {
     .slice(0, 3)
     .map(({ note }) => note);
 }
-function displayedNote(note: CoachingNote, study: boolean): CoachingNote {
-  return study
-    ? {
-        ...note,
-        label: studyText(
-          note.label,
-          `${legendGroup(note) === "Simplify" ? "Shape" : legendGroup(note)} study`,
-        ),
-        shortInstruction: studyText(
-          note.shortInstruction,
-          "Observe this mark within the wider painting.",
-        ),
-        reason: studyText(
-          note.reason,
-          "Compare its relationship with neighbouring shapes, values, and edges.",
-        ),
-        action: studyText(
-          note.action,
-          "If useful, test a modest variation on a separate study sheet.",
-        ),
-      }
-    : note;
+// Reuse image evidence when several concise notes discuss the same passage.
+function matchingRegion(a: NormalizedRect, b: NormalizedRect): boolean {
+  const intersection =
+    Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) *
+    Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
+  const union = a.width * a.height + b.width * b.height - intersection;
+  return union > 0 && intersection / union > 0.9;
 }
 
 // The same panel can live in Explore your feedback or below a standalone image.
@@ -70,12 +75,18 @@ export function VisualCoachingNotes({
   study = false,
   selected,
   onSelect,
+  uri,
+  sourceSize,
 }: {
   notes: unknown;
   study?: boolean;
   selected?: number | null;
   onSelect?: (index: number | null) => void;
+  uri?: string;
+  sourceSize?: ImageSize | null;
 }) {
+  const { width: viewportWidth } = useWindowDimensions();
+  const desktop = viewportWidth >= 960;
   const [localSelected, setLocalSelected] = useState<number | null>(0);
   const [showAll, setShowAll] = useState(false);
   const [allSelection, setAllSelection] = useState<number | null>(null);
@@ -88,6 +99,40 @@ export function VisualCoachingNotes({
       : 0;
   const allVisible = showAll && allSelection === activeIndex;
   const displayed = valid.map((note) => displayedNote(note, study));
+  const visualEvidence: { region: NormalizedRect; owner: number }[] = [];
+  const cropRegions = new Map<number, NormalizedRect[]>();
+  const sharedContext = new Map<number, number>();
+  for (const index of [
+    activeIndex,
+    ...valid.map((_, index) => index).filter((index) => index !== activeIndex),
+  ]) {
+    const regions: NormalizedRect[] = [];
+    const candidates = noteGeometryVisible(valid[index])
+      ? noteRegions(valid[index]).slice(0, 3)
+      : [];
+    const distinctContexts = candidates.filter(
+      (region, position) =>
+        !candidates
+          .slice(0, position)
+          .some((other) => matchingRegion(region, other)),
+    );
+    const contextualRegions =
+      valid[index].scope === "multi_region" && distinctContexts.length < 2
+        ? []
+        : distinctContexts;
+    for (const region of contextualRegions) {
+      const previous = visualEvidence.find((item) =>
+        matchingRegion(item.region, region),
+      );
+      if (previous) {
+        if (previous.owner !== index) sharedContext.set(index, previous.owner);
+      } else {
+        regions.push(region);
+        visualEvidence.push({ region, owner: index });
+      }
+    }
+    cropRegions.set(index, regions);
+  }
   const select = (index: number | null) => {
     setLocalSelected(index);
     onSelect?.(index);
@@ -101,7 +146,12 @@ export function VisualCoachingNotes({
       </Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
         {legend
-          .filter((group) => valid.some((note) => legendGroup(note) === group))
+          .filter((group) =>
+            valid.some(
+              (note) =>
+                noteGeometryVisible(note) && legendGroup(note) === group,
+            ),
+          )
           .map((group) => (
             <View
               key={group}
@@ -151,72 +201,167 @@ export function VisualCoachingNotes({
         if (!allVisible && index !== activeIndex) return null;
         const active = index === activeIndex;
         const group = legendGroup(note);
+        const classification = effectiveClassification(valid[index], study);
+        const domain =
+          note.domain ??
+          explicitGuidanceDomain(
+            `${valid[index].shortInstruction}. ${valid[index].action}`,
+          ) ??
+          (group === "Value"
+            ? "colour_value"
+            : group === "Edge"
+              ? "technique"
+              : "composition");
+        const regions = cropRegions.get(index) ?? [];
+        const sharedOwner = sharedContext.get(index);
+        const evidenceKey = (value: unknown) =>
+          typeof value === "string"
+            ? value.toLowerCase().replace(/\s+/g, " ").trim()
+            : "";
+        const reusedEvidence =
+          sharedOwner != null &&
+          evidenceKey(note.evidence) ===
+            evidenceKey(displayed[sharedOwner].evidence);
+        const evidence =
+          !reusedEvidence && typeof note.evidence === "string"
+            ? conciseText(note.evidence, 2)
+            : "";
+        const futureStudy =
+          study ||
+          classification === "stylistic_alternative" ||
+          classification === "study_experiment";
         return (
-          <Pressable
+          <View
             key={`${note.id ?? "note"}-${index}`}
-            accessibilityRole="button"
-            accessibilityLabel={`Note ${index + 1}: ${note.label}. ${note.shortInstruction}${active ? `. ${markMeaning(note, study)} ${study ? "Study this effect" : "Why it matters"}: ${note.reason} ${timingLabel(note, study)}: ${note.action}` : ""}`}
-            accessibilityState={{ selected: active, expanded: active }}
-            aria-selected={active}
-            aria-expanded={active}
-            onPress={() => select(index)}
+            testID={`coaching-note-${index}`}
             style={[
               styles.card,
               {
                 padding: 18,
-                gap: 10,
+                gap: 14,
+                flexDirection: desktop ? "row" : "column",
                 borderColor: active ? markColors[group] : colors.border,
                 borderWidth: active ? 2 : 1,
                 backgroundColor: active ? colors.pale : colors.paper,
               },
             ]}
           >
-            <Text
-              style={[
-                styles.caption,
-                { color: markColors[group], fontWeight: "600" },
-              ]}
-            >
-              {index + 1} · {study && group === "Simplify" ? "Shapes" : group}
-            </Text>
-            <Text style={[styles.heading, { fontSize: 18, lineHeight: 25 }]}>
-              {note.label}
-            </Text>
-            <Text style={styles.body}>
-              {conciseText(note.shortInstruction)}
-            </Text>
-            {active && (
-              <>
-                <Text
-                  style={[
-                    styles.caption,
-                    { fontWeight: "600", color: colors.ink },
-                  ]}
-                >
-                  {study ? "Observe this decision" : "What this mark means"}
-                </Text>
-                <Text style={styles.body}>{markMeaning(note, study)}</Text>
-                <Text
-                  style={[
-                    styles.caption,
-                    { fontWeight: "600", color: colors.ink },
-                  ]}
-                >
-                  {study ? "Study this effect" : "Why it matters"}
-                </Text>
-                <Text style={styles.body}>{conciseText(note.reason, 2)}</Text>
-                <Text
-                  style={[
-                    styles.caption,
-                    { fontWeight: "600", color: colors.ink },
-                  ]}
-                >
-                  {timingLabel(note, study)}
-                </Text>
-                <Text style={styles.body}>{conciseText(note.action, 2)}</Text>
-              </>
+            {uri && sourceSize && regions.length > 0 && (
+              <View
+                style={{
+                  gap: 8,
+                  flexDirection: desktop ? "column" : "row",
+                  flexWrap: "wrap",
+                  maxWidth: desktop ? 156 : 240,
+                }}
+              >
+                {regions.map((region, regionIndex) => (
+                  <RegionCrop
+                    key={regionIndex}
+                    uri={uri}
+                    sourceSize={sourceSize}
+                    region={region}
+                    label={
+                      regions.length > 1
+                        ? `${note.label} · region ${regionIndex + 1}`
+                        : note.label
+                    }
+                    desktop={desktop}
+                    compact={regions.length > 1}
+                    selected={active}
+                    onPress={() => select(index)}
+                  />
+                ))}
+              </View>
             )}
-          </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Note ${index + 1}: ${note.label}. ${classificationLabel(classification)}. ${evidence ? `What I see: ${evidence}. ` : ""}${note.shortInstruction}${active ? `. ${study ? "Study this effect" : "Why it matters"}: ${note.reason} ${timingLabel(note, futureStudy)}: ${note.action}` : ""}`}
+              accessibilityState={{ selected: active, expanded: active }}
+              aria-selected={active}
+              aria-expanded={active}
+              onPress={() => select(index)}
+              style={{
+                gap: 10,
+                flex: desktop ? 1 : undefined,
+                minWidth: 0,
+                minHeight: 44,
+              }}
+            >
+              <Text
+                style={[
+                  styles.caption,
+                  { color: markColors[group], fontWeight: "600" },
+                ]}
+              >
+                {index + 1} · {domainLabel(domain)}
+                {note.scope === "global"
+                  ? " · Whole painting"
+                  : note.scope === "multi_region"
+                    ? " · Related passages"
+                    : ""}
+              </Text>
+              <Text style={[styles.heading, { fontSize: 18, lineHeight: 25 }]}>
+                {note.label}
+              </Text>
+              <Text
+                style={[
+                  styles.caption,
+                  { color: colors.ink, fontWeight: "600" },
+                ]}
+              >
+                {classificationLabel(classification)}
+              </Text>
+              {note.relatedDomain && note.relatedDomain !== domain && (
+                <Text style={styles.caption}>
+                  Also affects: {domainLabel(note.relatedDomain)}
+                </Text>
+              )}
+              {evidence && (
+                <Text style={styles.body}>What I see: {evidence}</Text>
+              )}
+              {uri && sourceSize && sharedContext.has(index) && (
+                <Text style={styles.caption}>
+                  Shared image context with note{" "}
+                  {(sharedContext.get(index) ?? 0) + 1}.
+                </Text>
+              )}
+              {!active && (
+                <Text style={styles.body}>
+                  {conciseText(note.shortInstruction)}
+                </Text>
+              )}
+              {active && (
+                <>
+                  <Text
+                    style={[
+                      styles.caption,
+                      { fontWeight: "600", color: colors.ink },
+                    ]}
+                  >
+                    {classification === "strength"
+                      ? "Why this works"
+                      : study
+                        ? "Study this effect"
+                        : "Why it matters"}
+                  </Text>
+                  <Text style={styles.body}>{conciseText(note.reason, 2)}</Text>
+                  <Text style={styles.body}>
+                    {conciseText(note.shortInstruction)}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.caption,
+                      { fontWeight: "600", color: colors.ink },
+                    ]}
+                  >
+                    {timingLabel(note, futureStudy)}
+                  </Text>
+                  <Text style={styles.body}>{conciseText(note.action, 2)}</Text>
+                </>
+              )}
+            </Pressable>
+          </View>
         );
       })}
       {valid.length > 1 && (
@@ -264,6 +409,12 @@ export default function CoachingOverlay({
   onSelectNote,
   onOpenNotes,
   onImageError,
+  onImageSize,
+  compositionOverlay,
+  showComposition = false,
+  coachingVisible = true,
+  visualMode,
+  roleRegions,
 }: {
   uri: string;
   notes: unknown;
@@ -274,8 +425,18 @@ export default function CoachingOverlay({
   onSelectNote?: (index: number) => void;
   onOpenNotes?: () => void;
   onImageError?: () => void;
+  onImageSize?: (size: ImageSize | null) => void;
+  compositionOverlay?: unknown;
+  showComposition?: boolean;
+  coachingVisible?: boolean;
+  visualMode?: "notes" | "composition" | "roles";
+  roleRegions?: VisualRoleRegion[];
 }) {
-  const [size, setSize] = useState<{ uri: string; ratio: number }>();
+  const [size, setSize] = useState<{
+    uri: string;
+    width: number;
+    height: number;
+  }>();
   const [failed, setFailed] = useState<string>();
   const [width, setWidth] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -284,9 +445,11 @@ export default function CoachingOverlay({
     let alive = true;
     setSelected(null);
     setNotesOpen(false);
+    onImageSize?.(null);
     const fail = () => {
       if (alive) {
         setFailed(uri);
+        onImageSize?.(null);
         onImageError?.();
       }
     };
@@ -302,9 +465,11 @@ export default function CoachingOverlay({
             h > 0 &&
             Number.isFinite(w / h) &&
             w / h > 0
-          )
-            setSize({ uri, ratio: w / h });
-          else fail();
+          ) {
+            const intrinsic = { width: w, height: h };
+            setSize({ uri, ...intrinsic });
+            onImageSize?.(intrinsic);
+          } else fail();
         },
         fail,
       );
@@ -316,10 +481,25 @@ export default function CoachingOverlay({
     };
   }, [uri]);
   const valid = curatedCoachingNotes(notes);
-  if (!valid.length || failed === uri || size?.uri !== uri) return null;
+  const roles = roleRegions ?? planVisualRoles(valid, compositionOverlay);
+  const mode = visualMode ?? (showComposition ? "composition" : "notes");
+  const notesVisible = coachingVisible && mode === "notes";
+  if (
+    (!valid.length &&
+      !roles.length &&
+      !drawableCompositionOverlay(compositionOverlay)) ||
+    failed === uri ||
+    size?.uri !== uri
+  )
+    return null;
   const activeIndex = selectedNote === undefined ? selected : selectedNote;
-  const imageWidth = Math.min(width, 420 * size.ratio);
-  const imageHeight = imageWidth / size.ratio;
+  const fitted = containFrame(size, { width, height: 420 });
+  const imageWidth = fitted?.width ?? 0;
+  const imageHeight = fitted?.height ?? 0;
+  const imageFrame = containFrame(size, {
+    width: imageWidth,
+    height: imageHeight,
+  });
   const markers = markerPositions(valid, imageWidth, imageHeight);
   const selectNote = (index: number) => {
     if (!Number.isInteger(index) || index < 0 || index >= valid.length) return;
@@ -342,84 +522,110 @@ export default function CoachingOverlay({
         style={{ alignItems: "center", width: "100%" }}
       >
         {width > 0 && (
-          <View style={{ width: imageWidth, height: imageHeight }}>
+          <View
+            testID="coaching-image-frame"
+            style={{ width: imageWidth, height: imageHeight }}
+          >
             <Image
+              testID="coaching-source-image"
               source={{ uri }}
               accessibilityLabel={label}
               resizeMode="contain"
               onError={() => {
                 setFailed(uri);
+                onImageSize?.(null);
                 onImageError?.();
               }}
               style={{ width: "100%", height: "100%", borderRadius: 18 }}
             />
-            <CoachingMarks
-              notes={valid}
-              width={imageWidth}
-              height={imageHeight}
-              selected={activeIndex}
-              onSelect={selectNote}
-            />
-            {valid.map((note, index) => {
-              const { left, top, target } = markers[index];
-              const diameter = Math.min(
-                activeIndex === index ? 32 : 26,
-                target,
-              );
-              return (
-                <Pressable
-                  key={`${note.id ?? "note"}-${index}`}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Note ${index + 1}: ${displayedNote(note, study).label}`}
-                  aria-selected={activeIndex === index}
-                  accessibilityState={{ selected: activeIndex === index }}
-                  onPress={() => selectNote(index)}
-                  style={{
-                    position: "absolute",
-                    left,
-                    top,
-                    width: target,
-                    height: target,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <View
+            {coachingVisible && mode === "composition" && imageFrame && (
+              <CompositionStructure
+                overlay={compositionOverlay}
+                frame={imageFrame}
+              />
+            )}
+            {coachingVisible &&
+              mode === "roles" &&
+              imageFrame &&
+              roles.length > 0 && (
+                <VisualRoleMap regions={roles} frame={imageFrame} />
+              )}
+            {notesVisible && (
+              <CoachingMarks
+                notes={valid}
+                width={imageWidth}
+                height={imageHeight}
+                selected={activeIndex}
+                onSelect={selectNote}
+              />
+            )}
+            {notesVisible &&
+              valid.map((note, index) => {
+                const { left, top, target } = markers[index];
+                if (!target || !noteGeometryVisible(note)) return null;
+                const diameter = Math.min(
+                  activeIndex === index ? 32 : 26,
+                  target,
+                );
+                return (
+                  <Pressable
+                    key={`${note.id ?? "note"}-${index}`}
+                    testID={`coaching-marker-${index}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Note ${index + 1}: ${displayedNote(note, study).label}`}
+                    aria-selected={activeIndex === index}
+                    accessibilityState={{ selected: activeIndex === index }}
+                    onPress={() => selectNote(index)}
                     style={{
-                      width: diameter,
-                      height: diameter,
-                      borderRadius: diameter / 2,
-                      backgroundColor: markColors[legendGroup(note)],
-                      borderWidth: activeIndex === index ? 3 : 2,
-                      borderColor: colors.paper,
+                      position: "absolute",
+                      left,
+                      top,
+                      width: target,
+                      height: target,
                       alignItems: "center",
                       justifyContent: "center",
-                      shadowColor: colors.ink,
-                      shadowOpacity: 0.12,
-                      shadowRadius: 3,
                     }}
                   >
-                    <Text
+                    <View
                       style={{
-                        color: "white",
-                        fontWeight: "700",
-                        fontSize: Math.min(14, diameter / 2),
+                        width: diameter,
+                        height: diameter,
+                        borderRadius: diameter / 2,
+                        backgroundColor: markColors[legendGroup(note)],
+                        borderWidth: activeIndex === index ? 3 : 2,
+                        borderColor: colors.paper,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        shadowColor: colors.ink,
+                        shadowOpacity: 0.12,
+                        shadowRadius: 3,
                       }}
                     >
-                      {index + 1}
-                    </Text>
-                  </View>
-                </Pressable>
-              );
-            })}
+                      <Text
+                        style={{
+                          color: "white",
+                          fontWeight: "700",
+                          fontSize: Math.min(14, diameter / 2),
+                        }}
+                      >
+                        {index + 1}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
           </View>
         )}
       </View>
-      <Text style={styles.caption}>
-        {valid.length} coaching {valid.length === 1 ? "note" : "notes"} · tap a
-        marker or open notes
-      </Text>
-      {(!hideNotes || onOpenNotes) && (
+      {notesVisible && valid.length > 0 && (
+        <Text style={styles.caption}>
+          {valid.length} coaching {valid.length === 1 ? "note" : "notes"} ·{" "}
+          {valid.some(noteGeometryVisible)
+            ? "tap a marker or open notes"
+            : "open notes for whole-painting context"}
+        </Text>
+      )}
+      {notesVisible && valid.length > 0 && (!hideNotes || onOpenNotes) && (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={
@@ -447,12 +653,17 @@ export default function CoachingOverlay({
           </Text>
         </Pressable>
       )}
-      {!hideNotes && notesOpen && (
+      {notesVisible && !hideNotes && notesOpen && (
         <VisualCoachingNotes
           notes={valid}
           study={study}
           selected={activeIndex}
-          onSelect={(index) => setSelected(index)}
+          uri={uri}
+          sourceSize={size}
+          onSelect={(index) => {
+            setSelected(index);
+            if (index != null) onSelectNote?.(index);
+          }}
         />
       )}
     </View>

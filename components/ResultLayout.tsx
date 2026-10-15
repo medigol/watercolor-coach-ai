@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { Platform, ScrollView, useWindowDimensions, View } from "react-native";
 import { colors } from "./ui";
 
@@ -9,6 +9,8 @@ export default function ResultLayout({
   planning,
   painting,
   explore,
+  imageRef,
+  exploreRef,
 }: {
   header: ReactNode;
   image: ReactNode;
@@ -16,6 +18,8 @@ export default function ResultLayout({
   planning?: ReactNode;
   painting?: ReactNode;
   explore?: ReactNode;
+  imageRef?: Ref<View>;
+  exploreRef?: Ref<View>;
 }) {
   const { width } = useWindowDimensions();
   const wide = Platform.OS === "web" && width >= 960;
@@ -41,20 +45,20 @@ export default function ResultLayout({
             style={{ flexDirection: "row", alignItems: "flex-start", gap: 28 }}
           >
             <View testID="result-visual-column" style={column}>
-              {image}
+              <View ref={imageRef}>{image}</View>
               {planning}
             </View>
             <View testID="result-advice-column" style={column}>
               {guidance}
-              {explore}
+              <View ref={exploreRef}>{explore}</View>
               {painting}
             </View>
           </View>
         ) : (
           <View style={{ gap: 20 }}>
-            {image}
+            <View ref={imageRef}>{image}</View>
             {guidance}
-            {explore}
+            <View ref={exploreRef}>{explore}</View>
             {planning}
             {painting}
           </View>

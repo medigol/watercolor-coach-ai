@@ -5,6 +5,7 @@ import type {
   CoachingDecision,
   CoachingMode,
   CompositionDecision,
+  CompositionOverlay,
   PaletteColour,
 } from "../types";
 export type ResultProvider = "mock" | "openai";
@@ -45,6 +46,8 @@ function validSave(
 export type SavedMode = "improve_painting" | "create_reference";
 import type { CoachingOverlay } from "./overlays";
 export type ImproveData = typeof improveResult & {
+  compositionOverlay?: CompositionOverlay | null;
+  secondaryCompositionOverlay?: CompositionOverlay | null;
   coachingDecision?: CoachingDecision | null;
   coachingMode?: CoachingMode | null;
   overlays?: CoachingOverlay[] | null;
@@ -55,6 +58,8 @@ export type ImproveData = typeof improveResult & {
   brushPlan?: BrushWashStep[] | null;
 };
 export type ReferenceData = Omit<typeof referenceResult, "palette"> & {
+  compositionOverlay?: CompositionOverlay | null;
+  secondaryCompositionOverlay?: CompositionOverlay | null;
   coachingDecision?: CoachingDecision | null;
   palette: PaletteColour[];
   coachingMode?: CoachingMode | null;

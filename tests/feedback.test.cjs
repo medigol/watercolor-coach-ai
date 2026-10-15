@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -16,7 +17,7 @@ function load(file, imports = {}) {
     },
   ).outputText;
   new Function("exports", "require", code)(out, (name) => {
-    if (!(name in imports)) throw new Error(`Unexpected import: ${name}`);
+    if (!(name in imports)) return loadShared(name, file);
     return imports[name];
   });
   return out;
@@ -311,6 +312,8 @@ test("strict response schemas reject malformed fields, extra fields, unsafe pale
         "brushPlan",
         "coachingMode",
         "coachingDecision",
+        "compositionOverlay",
+        "secondaryCompositionOverlay",
         ...(mode === "improve_painting"
           ? ["palette"]
           : ["whatWorks", "whatToFix", "practice"]),
@@ -342,7 +345,15 @@ test("deployed server samples stay identical to existing mock flows", () => {
   assert.deepEqual(samples, load("data/mockResults.ts"));
 });
 test("frontend and Pages have no private-key reads or backend imports", () => {
-  const dirs = ["app", "components", "hooks", "lib", "providers", "data", "shared"];
+  const dirs = [
+    "app",
+    "components",
+    "hooks",
+    "lib",
+    "providers",
+    "data",
+    "shared",
+  ];
   function files(dir) {
     return fs
       .readdirSync(dir, { withFileTypes: true })

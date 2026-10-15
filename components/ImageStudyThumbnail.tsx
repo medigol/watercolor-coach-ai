@@ -5,6 +5,7 @@ import { imageStudyMarks, type ThumbnailKind } from "../lib/thumbnailPlanning";
 import CoachingMarks from "./CoachingMarks";
 import ReferenceImage, { supportsImageAdjustments } from "./ReferenceImage";
 import { colors, styles } from "./ui";
+import { containFrame, validSize, type ImageSize } from "../lib/imageGeometry";
 
 export default function ImageStudyThumbnail({
   uri,
@@ -18,7 +19,11 @@ export default function ImageStudyThumbnail({
   fallback: ReactNode;
 }) {
   const marks = imageStudyMarks(kind, notes);
-  const [image, setImage] = useState<{ uri: string; ratio: number }>();
+  const [image, setImage] = useState<{
+    uri: string;
+    ratio: number;
+    source: ImageSize;
+  }>();
   const [failed, setFailed] = useState<string>();
   const [width, setWidth] = useState(0);
   const imageRequest = useRef({ uri, active: false });
@@ -34,8 +39,9 @@ export default function ImageStudyThumbnail({
         (w, h) => {
           if (!request.active) return;
           const ratio = referenceAspectRatio(w, h);
-          if (ratio === undefined) setFailed(uri);
-          else setImage({ uri, ratio });
+          const source = { width: w, height: h };
+          if (ratio === undefined || !validSize(source)) setFailed(uri);
+          else setImage({ uri, ratio, source });
         },
         () => {
           if (request.active) setFailed(uri);
@@ -49,12 +55,11 @@ export default function ImageStudyThumbnail({
     };
   }, [uri, usable]);
   const ready = usable && image?.uri === uri && failed !== uri && width > 0;
-  const frameWidth = ready
-    ? image.ratio >= width / 220
-      ? width
-      : 220 * image.ratio
-    : 0;
-  const frameHeight = ready ? frameWidth / image.ratio : 0;
+  const frame = ready
+    ? containFrame(image.source, { width, height: 220 })
+    : null;
+  const frameWidth = frame?.width ?? 0;
+  const frameHeight = frame?.height ?? 0;
   const filter = supportsImageAdjustments
     ? kind === "value_mass"
       ? "grayscale(1) contrast(1.12)"
@@ -73,6 +78,7 @@ export default function ImageStudyThumbnail({
         <>
           <View style={{ alignItems: "center" }}>
             <View
+              testID="image-study-frame"
               accessible
               accessibilityRole="image"
               accessibilityLabel={`${kind.replace(/_/g, " ")} study overlay on your original image. Use it as a painting guide, not tracing.`}

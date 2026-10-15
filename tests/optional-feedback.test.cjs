@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -6,15 +7,17 @@ const ts = require("typescript");
 const root = path.resolve(__dirname, "..");
 function load(file, imports = {}) {
   const exports = {};
-  const code =
-    ts.transpileModule(fs.readFileSync(path.join(root, file), "utf8"), {
+  const code = ts.transpileModule(
+    fs.readFileSync(path.join(root, file), "utf8"),
+    {
       compilerOptions: {
         module: ts.ModuleKind.CommonJS,
         target: ts.ScriptTarget.ES2022,
       },
-    }).outputText;
+    },
+  ).outputText;
   new Function("exports", "require", code)(exports, (name) => {
-    if (!(name in imports)) throw new Error(`Unexpected import: ${name}`);
+    if (!(name in imports)) return loadShared(name, file);
     return imports[name];
   });
   return exports;
@@ -41,15 +44,17 @@ const stage = {
   edges: "Keep secondary edges soft and focal edges selective.",
   stop: "Stop once the middle value reads as one connected shape.",
 };
-const palette = [{
-  name: "Ultramarine",
-  hex: "#57788b",
-  pigmentCode: "PB29",
-  use: "Cool distance",
-  temperature: "cool",
-  mix: "Test a neutral with Burnt Sienna",
-  tag: "atmospheric_distance",
-}];
+const palette = [
+  {
+    name: "Ultramarine",
+    hex: "#57788b",
+    pigmentCode: "PB29",
+    use: "Cool distance",
+    temperature: "cool",
+    mix: "Test a neutral with Burnt Sienna",
+    tag: "atmospheric_distance",
+  },
+];
 const decision = {
   mainIssue: "A foreground dark competes with the focal area.",
   reason: "It draws attention away from the figures.",
@@ -66,7 +71,10 @@ const note = {
   y: 70,
   width: null,
   height: null,
-  points: [{ x: 15, y: 70 }, { x: 50, y: 50 }],
+  points: [
+    { x: 15, y: 70 },
+    { x: 50, y: 50 },
+  ],
   styleHint: "eye_flow",
   valueGroup: null,
   priority: "high",
@@ -108,12 +116,19 @@ for (const mode of ["improve_painting", "create_reference"]) {
     );
     assert.deepEqual(cleaned.brushPlan, [stages[0], stages[2], stages[3]]);
     assert(validFeedback(cleaned, mode));
-    for (
-      const brushPlan of [false, {}, "plan", [null], [{
-        ...stage,
-        brush: "x".repeat(121),
-      }], [{ ...stage, product: "not allowed" }]]
-    ) {
+    for (const brushPlan of [
+      false,
+      {},
+      "plan",
+      [null],
+      [
+        {
+          ...stage,
+          brush: "x".repeat(121),
+        },
+      ],
+      [{ ...stage, product: "not allowed" }],
+    ]) {
       const result = cleanFeedback({ ...sampleFor(mode), brushPlan }, mode);
       assert(!Object.hasOwn(result, "brushPlan"));
       assert(validFeedback(result, mode));
@@ -132,9 +147,9 @@ for (const mode of ["improve_painting", "create_reference"]) {
       overlays: [note],
       ...(mode === "create_reference"
         ? {
-          whatWorks: ["The photo has a clear light shape."],
-          whatToFix: ["Simplify the competing foreground detail."],
-        }
+            whatWorks: ["The photo has a clear light shape."],
+            whatToFix: ["Simplify the competing foreground detail."],
+          }
         : {}),
     };
     assert.deepEqual(cleanFeedback(valid, mode), valid);
@@ -170,20 +185,24 @@ for (const mode of ["improve_painting", "create_reference"]) {
   });
   test(`${mode}: required text and unknown top-level fields remain strictly rejected`, () => {
     const sample = sampleFor(mode);
-    for (
-      const patch of [
-        { title: "" },
-        { composition: null },
-        { sketch: true },
-        { values: "x".repeat(701) },
-        { unexpected: "not allowed" },
-        ...(mode === "improve_painting"
-          ? [{ mainAdvice: "" }, { whatWorks: [null] }, { whatToFix: [null] }, {
-            practice: [],
-          }, { prompt: "" }]
-          : [{ steps: [] }, { steps: [null] }]),
-      ]
-    ) {
+    for (const patch of [
+      { title: "" },
+      { composition: null },
+      { sketch: true },
+      { values: "x".repeat(701) },
+      { unexpected: "not allowed" },
+      ...(mode === "improve_painting"
+        ? [
+            { mainAdvice: "" },
+            { whatWorks: [null] },
+            { whatToFix: [null] },
+            {
+              practice: [],
+            },
+            { prompt: "" },
+          ]
+        : [{ steps: [] }, { steps: [null] }]),
+    ]) {
       const raw = { ...sample, ...patch, promising: false };
       const cleaned = cleanFeedback(raw, mode);
       assert(!validFeedback(cleaned, mode), JSON.stringify(patch));
@@ -213,23 +232,26 @@ for (const mode of ["improve_painting", "create_reference"]) {
 test("required reference palette keeps core colors while dropping unsafe optional metadata", () => {
   const raw = {
     ...referenceResult,
-    palette: [{
-      name: "Ultramarine",
-      hex: "#57788b",
-      use: ["not text"],
-      mix: "x".repeat(181),
-      temperature: "hot",
-      pigmentCode: "PB999",
-      tag: "purchase",
-      manufacturer: "unverified",
-    }, {
-      name: "Burnt Sienna",
-      hex: "#a87960",
-      pigmentCode: "PB29",
-      use: "Warm walls",
-      temperature: "warm",
-      tag: "accent",
-    }],
+    palette: [
+      {
+        name: "Ultramarine",
+        hex: "#57788b",
+        use: ["not text"],
+        mix: "x".repeat(181),
+        temperature: "hot",
+        pigmentCode: "PB999",
+        tag: "purchase",
+        manufacturer: "unverified",
+      },
+      {
+        name: "Burnt Sienna",
+        hex: "#a87960",
+        pigmentCode: "PB29",
+        use: "Warm walls",
+        temperature: "warm",
+        tag: "accent",
+      },
+    ],
   };
   const cleaned = cleanFeedback(raw, "create_reference");
   assert.deepEqual(cleaned.palette, [
@@ -244,30 +266,28 @@ test("required reference palette keeps core colors while dropping unsafe optiona
   ]);
   assert(validFeedback(cleaned, "create_reference"));
   for (const pigmentCode of ["PB15", ["PB29"], {}, 29]) {
-    const result = cleanFeedback({
-      ...referenceResult,
-      palette: [{ ...palette[0], pigmentCode }],
-    }, "create_reference");
+    const result = cleanFeedback(
+      {
+        ...referenceResult,
+        palette: [{ ...palette[0], pigmentCode }],
+      },
+      "create_reference",
+    );
     assert(!Object.hasOwn(result.palette[0], "pigmentCode"));
     assert(validFeedback(result, "create_reference"));
   }
 });
 test("invalid required reference palette is never repaired, dropped, or shortened", () => {
-  for (
-    const palette of [
-      null,
-      "colors",
-      [],
-      [null],
-      [{ name: "", hex: "#57788b" }],
-      [{ name: "Ultramarine", hex: "url(unsafe)" }],
-      [{ hex: "#57788b" }],
-      Array.from(
-        { length: 9 },
-        () => ({ name: "Ultramarine", hex: "#57788b" }),
-      ),
-    ]
-  ) {
+  for (const palette of [
+    null,
+    "colors",
+    [],
+    [null],
+    [{ name: "", hex: "#57788b" }],
+    [{ name: "Ultramarine", hex: "url(unsafe)" }],
+    [{ hex: "#57788b" }],
+    Array.from({ length: 9 }, () => ({ name: "Ultramarine", hex: "#57788b" })),
+  ]) {
     const cleaned = cleanFeedback(
       { ...referenceResult, palette },
       "create_reference",
@@ -277,16 +297,23 @@ test("invalid required reference palette is never repaired, dropped, or shortene
   }
 });
 test("optional painting palette cleans metadata and drops invalid core as an optional aid", () => {
-  const cleaned = cleanFeedback({
-    ...improveResult,
-    palette: [{ ...palette[0], tag: "unsupported" }],
-  }, "improve_painting");
+  const cleaned = cleanFeedback(
+    {
+      ...improveResult,
+      palette: [{ ...palette[0], tag: "unsupported" }],
+    },
+    "improve_painting",
+  );
   const { tag: _tag, ...expected } = palette[0];
   assert.deepEqual(cleaned.palette, [expected]);
   assert(validFeedback(cleaned, "improve_painting"));
-  for (
-    const palette of [false, {}, [], [{ name: "", hex: "#57788b" }], [null]]
-  ) {
+  for (const palette of [
+    false,
+    {},
+    [],
+    [{ name: "", hex: "#57788b" }],
+    [null],
+  ]) {
     const result = cleanFeedback(
       { ...improveResult, palette },
       "improve_painting",
@@ -313,19 +340,27 @@ test("reference observations clean individually while required painting observat
   ]);
   assert(!Object.hasOwn(cleaned, "whatToFix"));
   assert(validFeedback(cleaned, "create_reference"));
-  const painting = cleanFeedback({
-    ...improveResult,
-    whatWorks: input.whatWorks,
-  }, "improve_painting");
+  const painting = cleanFeedback(
+    {
+      ...improveResult,
+      whatWorks: input.whatWorks,
+    },
+    "improve_painting",
+  );
   assert.deepEqual(painting.whatWorks, input.whatWorks);
   assert(!validFeedback(painting, "improve_painting"));
 });
 test("optional cleaning is idempotent and never fabricates missing core fields", () => {
-  for (
-    const value of [null, true, "feedback", [], {
+  for (const value of [
+    null,
+    true,
+    "feedback",
+    [],
+    {
       promising: "A supported observation.",
-    }, { brushPlan: [stage] }]
-  ) {
+    },
+    { brushPlan: [stage] },
+  ]) {
     const cleaned = cleanFeedback(value, "improve_painting");
     assert(!validFeedback(cleaned, "improve_painting"));
     assert.deepEqual(cleanFeedback(cleaned, "improve_painting"), cleaned);

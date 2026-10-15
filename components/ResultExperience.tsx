@@ -1,5 +1,11 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { Text, View } from "react-native";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { Platform, Pressable, Text, View } from "react-native";
 import type {
   ImproveData,
   ReferenceData,
@@ -25,6 +31,14 @@ import {
   type ExploreKey,
 } from "../lib/resultFocus";
 import { planPlanningStudies } from "../lib/planningStudies";
+import { focusedMainAdvice, guidanceDomain } from "../lib/focusGuidance";
+import {
+  drawableCompositionOverlay,
+  domainLabel,
+} from "../shared/visualMetadata";
+import { archetypeLabel } from "../lib/compositionArchetypes";
+import { planVisualRoles } from "../lib/visualRoles";
+import type { ImageSize } from "../shared/imageGeometry";
 import ResultLayout from "./ResultLayout";
 import ResultProviderLabel from "./ResultProviderLabel";
 import { SavedImage } from "./SavedResultState";
@@ -38,7 +52,7 @@ import BrushWashPlanCard, { usableBrushPlan } from "./BrushWashPlanCard";
 import PaintingStepsCard from "./PaintingStepsCard";
 import ReferencePreparation from "./ReferencePreparation";
 import FollowUpQuestion from "./FollowUpQuestion";
-import { styles } from "./ui";
+import { colors, styles } from "./ui";
 
 type Props = {
   provider: ResultProvider;
@@ -59,6 +73,43 @@ type Row = {
 
 const nextStudyOnly = (text: string) =>
   requiresNewStudy(text) || structuralAction(text);
+
+function VisualChoice({
+  title,
+  label = title,
+  active,
+  onPress,
+}: {
+  title: string;
+  label?: string;
+  active?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: !!active }}
+      aria-pressed={!!active}
+      onPress={onPress}
+      style={{
+        minHeight: 44,
+        paddingHorizontal: 12,
+        justifyContent: "center",
+        borderRadius: 10,
+        backgroundColor: active ? colors.pale : colors.paper,
+        borderWidth: 1,
+        borderColor: active ? colors.accent : colors.border,
+      }}
+    >
+      <Text
+        style={[styles.caption, { color: colors.accent, fontWeight: "600" }]}
+      >
+        {title}
+      </Text>
+    </Pressable>
+  );
+}
 
 function DetailNote({
   title,
@@ -91,11 +142,56 @@ function DetailNote({
 export default function ResultExperience(props: Props) {
   const [chosenSection, setChosenSection] = useState<ExploreKey | null>();
   const [selectedNote, setSelectedNote] = useState<number | null>(null);
+  const [sourceMetrics, setSourceMetrics] = useState<{
+    uri: string;
+    size: ImageSize;
+  } | null>(null);
+  const [coachingVisible, setCoachingVisible] = useState(true);
+  const [chosenMode, setChosenMode] = useState<
+    "notes" | "composition" | "roles"
+  >();
+  const [compositionVariant, setCompositionVariant] = useState<
+    "primary" | "secondary"
+  >("primary");
+  const [pendingScroll, setPendingScroll] = useState<"image" | "notes" | null>(
+    null,
+  );
+  const imageRef = useRef<View>(null);
+  const noteRef = useRef<View>(null);
   useEffect(() => {
     setChosenSection(undefined);
     setSelectedNote(null);
+    setCoachingVisible(true);
+    setChosenMode(undefined);
+    setCompositionVariant("primary");
+    setPendingScroll(null);
   }, [props.result, props.focus]);
+  useEffect(() => {
+    if (!pendingScroll) return;
+    if (Platform.OS === "web") {
+      const ref = pendingScroll === "image" ? imageRef : noteRef;
+      const node = ref.current as unknown as {
+        scrollIntoView?: (options: ScrollIntoViewOptions) => void;
+      } | null;
+      const reduced =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      node?.scrollIntoView?.({
+        behavior: reduced ? "auto" : "smooth",
+        block: "nearest",
+      });
+    }
+    setPendingScroll(null);
+  }, [pendingScroll, chosenSection]);
   const { provider, isSaved, image, warning, mode } = props;
+  const onImageSize = useCallback(
+    (size: ImageSize | null) => {
+      setSourceMetrics(size && image ? { uri: image, size } : null);
+    },
+    [image],
+  );
+  const sourceSize =
+    sourceMetrics && sourceMetrics.uri === image ? sourceMetrics.size : null;
   const live = provider === "openai";
   // Projection only: reading or exploring a result never rewrites saved data.
   const result = live ? coherentFeedback(props.result, mode) : props.result;
@@ -108,9 +204,14 @@ export default function ResultExperience(props: Props) {
   const reference = result as ReferenceData;
   const advice =
     mode === "improve_painting" ? painting.mainAdvice : result.composition;
-  const guardedAdvice = study
+  const fullAdvice = study
     ? studyText(decision?.primaryGoal ?? advice)
     : (decision?.primaryGoal ?? advice);
+  const focused: ReturnType<typeof focusedMainAdvice> =
+    mode === "improve_painting"
+      ? focusedMainAdvice(fullAdvice, decision, focus)
+      : { text: fullAdvice };
+  const guardedAdvice = study ? studyText(focused.text) : focused.text;
   const summary = conciseText(guardedAdvice);
   const priority = nextStudyOnly(summary)
     ? `${study ? "Optional next-study variation" : "Next study"}: ${summary}`
@@ -131,6 +232,35 @@ export default function ResultExperience(props: Props) {
     uniqueGuidance([conciseText(practice, 2)], [summary])[0] ??
     "Spend 15 minutes testing this coaching decision on a separate sheet. Compare its effect with your starting plan.";
   const notes = live && image ? curatedCoachingNotes(result.overlays) : [];
+  const primaryStructure = live
+    ? drawableCompositionOverlay(result.compositionOverlay)
+    : null;
+  const candidateSecondary =
+    live && primaryStructure
+      ? drawableCompositionOverlay(result.secondaryCompositionOverlay)
+      : null;
+  const secondaryStructure =
+    candidateSecondary &&
+    JSON.stringify({
+      ...candidateSecondary,
+      shortExplanation: "",
+      confidence: 0,
+    }) !==
+      JSON.stringify({
+        ...primaryStructure,
+        shortExplanation: "",
+        confidence: 0,
+      })
+      ? candidateSecondary
+      : null;
+  const activeStructure =
+    compositionVariant === "secondary" && secondaryStructure
+      ? secondaryStructure
+      : primaryStructure;
+  const roleRegions = planVisualRoles(
+    notes,
+    live ? result.compositionOverlay : undefined,
+  );
   const brush = usableBrushPlan(result.brushPlan);
   const omit = [summary, shortPractice];
   const planningInput = {
@@ -144,6 +274,8 @@ export default function ResultExperience(props: Props) {
     study,
     focus,
     coachingDecision: decision,
+    currentCompositionOverlay: primaryStructure,
+    secondaryCompositionOverlay: secondaryStructure,
   };
   const studies = planPlanningStudies(planningInput);
   const composition = compositionGuidance({
@@ -167,6 +299,58 @@ export default function ResultExperience(props: Props) {
     ? decision.colourImplication
     : (result.paletteStrategy ?? result.values);
   const techniqueNote = decision?.techniqueImplication;
+  // Legacy implications occasionally contain a physical recipe under a design
+  // heading. Present that paragraph once, in its actual domain; keep the
+  // supplied wording rather than inventing another image observation.
+  const suppliedImplications = [
+    {
+      text: compositionNote,
+      domain: guidanceDomain(compositionNote, "composition"),
+    },
+    { text: colourNote, domain: guidanceDomain(colourNote, "colour_value") },
+    { text: techniqueNote, domain: guidanceDomain(techniqueNote, "technique") },
+  ];
+  const implications = suppliedImplications.filter(
+    (item, index, all) =>
+      typeof item.text === "string" &&
+      uniqueGuidance(
+        [item.text],
+        all.slice(0, index).map((previous) => previous.text ?? ""),
+      ).length > 0,
+  );
+  const domainNotes = (
+    domain: "composition" | "colour_value" | "technique",
+    title: string,
+  ) =>
+    uniqueGuidance(
+      implications
+        .filter((item) => item.domain === domain)
+        .map((item) => (typeof item.text === "string" ? item.text : "")),
+      omit,
+    ).map((text) => {
+      const related = [
+        ...new Set(
+          suppliedImplications
+            .filter(
+              (item) =>
+                item.domain !== domain &&
+                typeof item.text === "string" &&
+                !uniqueGuidance([item.text], [text]).length,
+            )
+            .map((item) => item.domain),
+        ),
+      ];
+      return (
+        <View key={text} style={{ gap: 6 }}>
+          <DetailNote title={title} text={text} study={study} omit={omit} />
+          {related.length > 0 && (
+            <Text style={styles.caption}>
+              Also affects: {related.map(domainLabel).join(", ")}
+            </Text>
+          )}
+        </View>
+      );
+    });
   const currentSource = decision
     ? decision.currentPaintingAction
     : composition.tryNow;
@@ -176,9 +360,25 @@ export default function ResultExperience(props: Props) {
   const current =
     !study && currentActionSafe(currentSource) ? currentSource : "";
   const next = study ? studyText(nextSource, "") : nextSource;
+  const actionDomain =
+    mode === "create_reference" || !decision || focus === "Composition"
+      ? "composition"
+      : focus === "Colour & contrast"
+        ? "colour_value"
+        : focus === "Watercolor technique"
+          ? "technique"
+          : "overall";
+  const hasActions = (domain: "composition" | "colour_value" | "technique") =>
+    (!!current && guidanceDomain(current, actionDomain) === domain) ||
+    (!!next && guidanceDomain(next, actionDomain) === domain);
+  const hasImplication = (
+    domain: "composition" | "colour_value" | "technique",
+  ) => implications.some((item) => item.domain === domain && item.text);
   const actions = (
+    domain: "composition" | "colour_value" | "technique" | "overall",
+  ) => (
     <>
-      {!!current && (
+      {!!current && guidanceDomain(current, actionDomain) === domain && (
         <DetailNote
           title="Current painting"
           text={current}
@@ -186,7 +386,7 @@ export default function ResultExperience(props: Props) {
           omit={omit}
         />
       )}
-      {!!next && (
+      {!!next && guidanceDomain(next, actionDomain) === domain && (
         <DetailNote
           title={study ? "Optional next-study variation" : "Next study"}
           text={next}
@@ -208,12 +408,21 @@ export default function ResultExperience(props: Props) {
             title: "Visual coaching notes",
             helper: `${notes.length} notes`,
             content: (
-              <VisualCoachingNotes
-                notes={notes}
-                study={study}
-                selected={selectedNote}
-                onSelect={setSelectedNote}
-              />
+              <View ref={noteRef}>
+                <VisualCoachingNotes
+                  notes={notes}
+                  study={study}
+                  selected={selectedNote}
+                  uri={live ? image : undefined}
+                  sourceSize={sourceSize}
+                  onSelect={(index) => {
+                    setSelectedNote(index);
+                    setChosenMode("notes");
+                    setCoachingVisible(true);
+                    if (index !== null) setPendingScroll("image");
+                  }}
+                />
+              </View>
             ),
           },
         ]
@@ -221,7 +430,7 @@ export default function ResultExperience(props: Props) {
     {
       key: "planning",
       title: "Planning studies",
-      helper: `${studies.length} ${study ? "optional study variations" : "studies"}`,
+      helper: `${studies.length} ${study ? "optional future variations" : "future study ideas"}`,
       content: <PlanningStudies {...planningInput} />,
     },
     {
@@ -230,24 +439,64 @@ export default function ResultExperience(props: Props) {
       helper: "Eye path, focal placement and large shapes.",
       content: (
         <View style={{ gap: 12 }}>
-          <DetailNote
-            title={study ? "Observe this decision" : "Composition decision"}
-            text={compositionNote}
-            study={study}
-            omit={omit}
-          />
-          <DetailNote
-            title={study ? "Study this effect" : "Why it matters"}
-            text={
-              decision ? decision.compositionImplication : composition.reason
-            }
-            study={study}
-            omit={[...omit, compositionNote ?? ""]}
-          />
-          {(!decision ||
-            focus === "Composition" ||
-            mode === "create_reference") &&
-            actions}
+          {activeStructure && (
+            <View style={{ gap: 10 }}>
+              <Text style={[styles.caption, { fontWeight: "600" }]}>
+                On your painting · {archetypeLabel(activeStructure.type)}
+              </Text>
+              <Text style={styles.body}>
+                {conciseText(activeStructure.shortExplanation, 2)}
+              </Text>
+              {secondaryStructure && (
+                <View
+                  style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
+                >
+                  {(["primary", "secondary"] as const).map((variant) => (
+                    <VisualChoice
+                      key={variant}
+                      title={
+                        variant === "primary"
+                          ? "Primary structure"
+                          : "Secondary structure"
+                      }
+                      active={compositionVariant === variant}
+                      onPress={() => {
+                        setCompositionVariant(variant);
+                        setChosenMode("composition");
+                        setCoachingVisible(true);
+                        setPendingScroll("image");
+                      }}
+                    />
+                  ))}
+                </View>
+              )}
+              <Text style={styles.caption}>
+                This explains the current image. Planning studies explore future
+                variations.
+              </Text>
+            </View>
+          )}
+          {domainNotes(
+            "composition",
+            study ? "Observe this decision" : "Composition decision",
+          )}
+          {!decision &&
+            guidanceDomain(composition.reason, "composition") ===
+              "composition" && (
+              <DetailNote
+                title={study ? "Study this effect" : "Why it matters"}
+                text={composition.reason}
+                study={study}
+                omit={[...omit, compositionNote ?? ""]}
+              />
+            )}
+          {guidanceDomain(compositionNote, "composition") !== "composition" && (
+            <Text style={styles.caption}>
+              Also affects:{" "}
+              {domainLabel(guidanceDomain(compositionNote, "composition"))}
+            </Text>
+          )}
+          {actions("composition")}
         </View>
       ),
     },
@@ -257,26 +506,26 @@ export default function ResultExperience(props: Props) {
       helper: "Value hierarchy, temperature and suggested palette.",
       content: (
         <View style={{ gap: 12 }}>
-          <DetailNote
-            title="Colour & value strategy"
-            text={colourNote}
-            study={study}
-            omit={omit}
-          />
+          {domainNotes("colour_value", "Colour & value strategy")}
+          {guidanceDomain(colourNote, "colour_value") !== "colour_value" && (
+            <Text style={styles.caption}>
+              Also affects:{" "}
+              {domainLabel(guidanceDomain(colourNote, "colour_value"))}
+            </Text>
+          )}
           <PaletteCard
             palette={result.palette}
             strategy={result.paletteStrategy}
             study={study}
             omit={[...omit, typeof colourNote === "string" ? colourNote : ""]}
           />
-          {decision &&
-            focus === "Colour & contrast" &&
-            mode === "improve_painting" &&
-            actions}
+          {decision && actions("colour_value")}
         </View>
       ),
     },
-    ...(brush.length || techniqueNote
+    ...(brush.length ||
+    hasImplication("technique") ||
+    (decision && hasActions("technique"))
       ? [
           {
             key: "technique" as const,
@@ -286,21 +535,19 @@ export default function ResultExperience(props: Props) {
               : "Brush & wash plan · suggested practice method.",
             content: (
               <View style={{ gap: 12 }}>
-                <DetailNote
-                  title="Handling to practise"
-                  text={techniqueNote}
-                  study={study}
-                  omit={omit}
-                />
+                {domainNotes("technique", "Handling to practise")}
+                {guidanceDomain(techniqueNote, "technique") !== "technique" && (
+                  <Text style={styles.caption}>
+                    Also affects:{" "}
+                    {domainLabel(guidanceDomain(techniqueNote, "technique"))}
+                  </Text>
+                )}
                 <BrushWashPlanCard
                   plan={result.brushPlan}
                   study={study}
                   omit={[...omit, guardedAdvice]}
                 />
-                {decision &&
-                  focus === "Watercolor technique" &&
-                  mode === "improve_painting" &&
-                  actions}
+                {decision && actions("technique")}
               </View>
             ),
           },
@@ -317,23 +564,20 @@ export default function ResultExperience(props: Props) {
             values={result.values}
             study={study}
           />
-          {guardedAdvice !== summary && (
+          {fullAdvice !== summary && (
             <FeedbackSection
               title="Full coaching note"
               text={
-                nextStudyOnly(guardedAdvice)
-                  ? `Next study: ${guardedAdvice}`
-                  : guardedAdvice
+                nextStudyOnly(fullAdvice)
+                  ? `Next study: ${fullAdvice}`
+                  : fullAdvice
               }
             />
           )}
           {practice !== conciseText(practice, 2) && (
             <FeedbackSection title="Full practice note" text={practice} />
           )}
-          {decision &&
-            focus === "Overall feedback" &&
-            mode === "improve_painting" &&
-            actions}
+          {decision && actions("overall")}
         </View>
       ),
     },
@@ -393,20 +637,40 @@ export default function ResultExperience(props: Props) {
     if (!decision) return true;
     if (row.key === "composition")
       return (
-        !!compositionNote ||
-        ((focus === "Composition" || mode === "create_reference") &&
-          !!(current || next))
+        !!activeStructure ||
+        hasImplication("composition") ||
+        hasActions("composition")
       );
     if (row.key === "colour")
-      return !!colourNote || usablePalette(result.palette).length > 0;
+      return (
+        hasImplication("colour_value") ||
+        hasActions("colour_value") ||
+        usablePalette(result.palette).length > 0
+      );
     return true;
   });
   const openSection =
     chosenSection === undefined
       ? (visibleRows.find((row) => row.key === promoted)?.key ?? null)
       : chosenSection;
+  const availableModes = [
+    ...(notes.length ? ["notes" as const] : []),
+    ...(activeStructure ? ["composition" as const] : []),
+    ...(roleRegions.length ? ["roles" as const] : []),
+  ];
+  const defaultMode =
+    openSection === "composition" && activeStructure
+      ? "composition"
+      : availableModes.includes("notes")
+        ? "notes"
+        : (availableModes[0] ?? "notes");
+  const visualMode =
+    chosenMode && availableModes.includes(chosenMode)
+      ? chosenMode
+      : defaultMode;
   return (
     <ResultLayout
+      imageRef={imageRef}
       header={
         <>
           <Text style={styles.title}>
@@ -431,19 +695,71 @@ export default function ResultExperience(props: Props) {
       }
       image={
         live ? (
-          <SavedImage
-            uri={image}
-            label={mode === "create_reference" ? "Your photo" : "Your painting"}
-            overlays={notes}
-            study={study}
-            hideNotes
-            selectedNote={selectedNote}
-            onSelectNote={(index) => {
-              setSelectedNote(index);
-              setChosenSection("visual");
-            }}
-            onOpenNotes={() => setChosenSection("visual")}
-          />
+          <View style={{ gap: 10 }}>
+            <SavedImage
+              uri={image}
+              label={
+                mode === "create_reference" ? "Your photo" : "Your painting"
+              }
+              overlays={notes}
+              study={study}
+              hideNotes
+              selectedNote={selectedNote}
+              onImageSize={onImageSize}
+              compositionOverlay={activeStructure}
+              roleRegions={roleRegions}
+              coachingVisible={coachingVisible}
+              visualMode={visualMode}
+              showComposition={coachingVisible && visualMode === "composition"}
+              onSelectNote={(index) => {
+                setSelectedNote(index);
+                setChosenSection("visual");
+                setChosenMode("notes");
+                setCoachingVisible(true);
+                setPendingScroll("notes");
+              }}
+              onOpenNotes={() => {
+                setSelectedNote((index) => index ?? 0);
+                setChosenSection("visual");
+                setChosenMode("notes");
+                setCoachingVisible(true);
+                setPendingScroll("notes");
+              }}
+            />
+            {!!sourceSize && availableModes.length > 0 && (
+              <View
+                testID="visual-layer-controls"
+                style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
+              >
+                <VisualChoice
+                  title={coachingVisible ? "Hide coaching" : "Show coaching"}
+                  onPress={() => setCoachingVisible((value) => !value)}
+                />
+                {coachingVisible &&
+                  availableModes.length > 1 &&
+                  availableModes.map((layer) => (
+                    <VisualChoice
+                      key={layer}
+                      title={
+                        layer === "notes"
+                          ? "Notes"
+                          : layer === "composition"
+                            ? "Composition"
+                            : "Roles"
+                      }
+                      label={`${layer === "notes" ? "Notes" : layer === "composition" ? "Composition" : "Roles"} view`}
+                      active={visualMode === layer}
+                      onPress={() => {
+                        setChosenMode(layer);
+                        if (layer === "composition")
+                          setChosenSection("composition");
+                        if (layer !== "notes") setSelectedNote(null);
+                      }}
+                    />
+                  ))}
+              </View>
+            )}
+          </View>
         ) : null
       }
       guidance={
@@ -459,6 +775,11 @@ export default function ResultExperience(props: Props) {
             text={priority}
             highlight
           />
+          {focused.relatedDomain && (
+            <Text style={styles.caption}>
+              Also affects: {domainLabel(focused.relatedDomain)}
+            </Text>
+          )}
           {mode === "create_reference" && (
             <Text style={styles.caption}>
               A plan for your painting. No new image is generated.
@@ -489,7 +810,13 @@ export default function ResultExperience(props: Props) {
                     title={row.title}
                     helper={row.helper}
                     open={openSection === key}
-                    onOpenChange={(open) => setChosenSection(open ? key : null)}
+                    onOpenChange={(open) => {
+                      setChosenSection(open ? key : null);
+                      if (key === "composition" && open && activeStructure)
+                        setChosenMode("composition");
+                      if (key === "visual" && open) setChosenMode("notes");
+                      if (!open || key !== "visual") setSelectedNote(null);
+                    }}
                   >
                     {row.content}
                   </StudyDisclosure>,

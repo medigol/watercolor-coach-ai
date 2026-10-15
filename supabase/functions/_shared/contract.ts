@@ -1,4 +1,13 @@
 import {
+  compositionArchetypes,
+  feedbackClassifications,
+  feedbackDomains,
+  feedbackScopes,
+  visualRoles,
+  usableCompositionOverlay,
+  validCompositionOverlay,
+} from "../../../shared/visualMetadata.ts";
+import {
   overlayCategories,
   overlayStyleHints,
   overlayTimings,
@@ -220,6 +229,8 @@ export function validFeedback(
       "brushPlan",
       "coachingMode",
       "coachingDecision",
+      "compositionOverlay",
+      "secondaryCompositionOverlay",
       ...(mode === "improve_painting"
         ? ["palette"]
         : ["whatWorks", "whatToFix", "practice"]),
@@ -240,6 +251,10 @@ export function validFeedback(
   }
   if (
     !validCompositionDecision(v.compositionDecision) ||
+    (v.compositionOverlay != null &&
+      !validCompositionOverlay(v.compositionOverlay)) ||
+    (v.secondaryCompositionOverlay != null &&
+      !validCompositionOverlay(v.secondaryCompositionOverlay)) ||
     !validBrushPlan(v.brushPlan) ||
     (v.coachingMode != null &&
       !coachingModes.includes(v.coachingMode as CoachingMode)) ||
@@ -285,7 +300,43 @@ export function validFeedback(
 export function feedbackSchema(mode: Mode) {
   const text = { type: "string" };
   const list = { type: "array", items: text };
+  const unit = { type: "number", minimum: 0, maximum: 1 };
+  const point = {
+    type: "object",
+    properties: { x: unit, y: unit },
+    required: ["x", "y"],
+    additionalProperties: false,
+  };
+  const nullablePoint = { ...point, type: ["object", "null"] };
+  const polygon = { type: "array", minItems: 3, maxItems: 12, items: point };
+  const rect = {
+    type: "object",
+    properties: { x: unit, y: unit, width: unit, height: unit },
+    required: ["x", "y", "width", "height"],
+    additionalProperties: false,
+  };
   const overlayFields = {
+    scope: { type: ["string", "null"], enum: [...feedbackScopes, null] },
+    regions: { type: ["array", "null"], maxItems: 3, items: rect },
+    anchors: { type: ["array", "null"], maxItems: 3, items: point },
+    evidence: { type: ["string", "null"], maxLength: 250 },
+    region: {
+      type: ["object", "null"],
+      properties: { x: unit, y: unit, width: unit, height: unit },
+      required: ["x", "y", "width", "height"],
+      additionalProperties: false,
+    },
+    regionConfidence: { ...unit, type: ["number", "null"] },
+    classification: {
+      type: ["string", "null"],
+      enum: [...feedbackClassifications, null],
+    },
+    domain: { type: ["string", "null"], enum: [...feedbackDomains, null] },
+    relatedDomain: {
+      type: ["string", "null"],
+      enum: [...feedbackDomains, null],
+    },
+    visualRole: { type: ["string", "null"], enum: [...visualRoles, null] },
     type: { type: "string", enum: [...overlayTypes] },
     id: { type: ["string", "null"] },
     category: { type: ["string", "null"], enum: [...overlayCategories, null] },
@@ -361,6 +412,19 @@ export function feedbackSchema(mode: Mode) {
     items: { type: "string", maxLength: 100 },
   };
   const coachingDecisionFields = {
+    visualRoles: {
+      type: ["array", "null"],
+      maxItems: 6,
+      items: {
+        type: "object",
+        properties: {
+          area: { type: "string", maxLength: 100 },
+          role: { type: "string", enum: [...visualRoles] },
+        },
+        required: ["area", "role"],
+        additionalProperties: false,
+      },
+    },
     primaryGoal: { type: "string", maxLength: 350 },
     primarySubjectOrArea: { type: "string", maxLength: 100 },
     areasToEmphasize: areaList,
@@ -385,7 +449,44 @@ export function feedbackSchema(mode: Mode) {
     edges: text,
     stop: text,
   };
+  const compositionOverlayFields = {
+    type: { type: "string", enum: [...compositionArchetypes] },
+    confidence: unit,
+    shortExplanation: { type: "string", maxLength: 350 },
+    paths: {
+      type: ["array", "null"],
+      maxItems: 4,
+      items: { type: "array", minItems: 2, maxItems: 12, items: point },
+    },
+    focalPoint: nullablePoint,
+    secondaryPoints: { type: ["array", "null"], maxItems: 6, items: point },
+    masses: {
+      type: ["array", "null"],
+      maxItems: 3,
+      items: {
+        type: "object",
+        properties: {
+          points: polygon,
+          role: { type: ["string", "null"], enum: [...visualRoles, null] },
+        },
+        required: ["points", "role"],
+        additionalProperties: false,
+      },
+    },
+  };
   const common = {
+    secondaryCompositionOverlay: {
+      type: ["object", "null"],
+      properties: compositionOverlayFields,
+      required: Object.keys(compositionOverlayFields),
+      additionalProperties: false,
+    },
+    compositionOverlay: {
+      type: ["object", "null"],
+      properties: compositionOverlayFields,
+      required: Object.keys(compositionOverlayFields),
+      additionalProperties: false,
+    },
     title: text,
     composition: text,
     sketch: text,
@@ -504,11 +605,7 @@ export function imageMime(bytes: Uint8Array): string | null {
 export function cleanOverlayFeedback(value: unknown): unknown {
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
   const v = value as Record<string, unknown>;
-  if (
-    v.overlays === undefined ||
-    v.overlays === null ||
-    validOverlays(v.overlays)
-  ) {
+  if (v.overlays === undefined || v.overlays === null) {
     return value;
   }
   const { overlays: _invalid, ...text } = v;
@@ -528,6 +625,20 @@ export function cleanFeedback(value: unknown, mode: Mode): unknown {
     return withOverlays;
   }
   const result = { ...(withOverlays as Record<string, unknown>) };
+  for (const field of ["compositionOverlay", "secondaryCompositionOverlay"]) {
+    if (result[field] != null) {
+      const overlay = usableCompositionOverlay(result[field]);
+      if (overlay) result[field] = overlay;
+      else delete result[field];
+    }
+  }
+  if (
+    result.secondaryCompositionOverlay &&
+    result.compositionOverlay &&
+    JSON.stringify(result.secondaryCompositionOverlay) ===
+      JSON.stringify(result.compositionOverlay)
+  )
+    delete result.secondaryCompositionOverlay;
   if (
     result.coachingMode != null &&
     !coachingModes.includes(result.coachingMode as CoachingMode)

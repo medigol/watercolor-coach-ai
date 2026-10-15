@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -24,7 +25,8 @@ function loadComponents() {
       },
     ).outputText;
     new Function("exports", "require", code)(exports, (name) => {
-      if (name === "react" || name === "react/jsx-runtime") return require(name);
+      if (name === "react" || name === "react/jsx-runtime")
+        return require(name);
       if (name === "react-native")
         return {
           Text: (props) => React.createElement("span", null, props.children),
@@ -39,13 +41,12 @@ function loadComponents() {
             ),
           StyleSheet: { create: (value) => value },
         };
-      if (name === "./ui")
-        return { styles: {}, colors: {} };
+      if (name === "./ui") return { styles: {}, colors: {} };
       const full = path.resolve(root, path.dirname(relative), name);
-      const file = [".tsx", ".ts"]
-        .map((ext) => full + ext)
-        .find((f) => fs.existsSync(f));
-      if (!file) throw new Error(`Unexpected import ${name}`);
+      const file = [full, full + ".tsx", full + ".ts"].find((f) =>
+        fs.existsSync(f),
+      );
+      if (!file) return loadShared(name, relative);
       return load(path.relative(root, file));
     });
     return exports;
@@ -62,7 +63,9 @@ test("planning sketch and value studies are abstract adaptable aids, without sub
     ["components/SketchStudyCard.tsx", "Planning sketch aid"],
     ["components/ValueStudyCard.tsx", "Value grouping aid"],
   ]) {
-    const html = render(component, { description: "Connect the larger shapes." });
+    const html = render(component, {
+      description: "Connect the larger shapes.",
+    });
     assert(html.includes(title));
     assert(html.includes("adapt this to your image"));
     assert(html.includes("Abstract"));
@@ -114,9 +117,14 @@ test("palette omits unsupported or mismatched pigment metadata without replacing
     { name: "Red ochre", hex: "#AE6F50", pigmentCode: "PY43" },
     { name: "Payne's Gray", hex: "#475952", pigmentCode: "PBk7" },
     { name: "Yellow ochre", hex: "#CCA55A", pigmentCode: "PY43/PY42" },
-  ]) assert.equal(paletteGuidance(color).pigmentCode, null);
+  ])
+    assert.equal(paletteGuidance(color).pigmentCode, null);
   assert.equal(
-    paletteGuidance({ name: "Yellow ochre", hex: "#CCA55A", pigmentCode: "PY43" }).pigmentCode,
+    paletteGuidance({
+      name: "Yellow ochre",
+      hex: "#CCA55A",
+      pigmentCode: "PY43",
+    }).pigmentCode,
     "PY43",
   );
   assert.equal(
@@ -124,7 +132,8 @@ test("palette omits unsupported or mismatched pigment metadata without replacing
     null,
   );
   assert.equal(
-    paletteGuidance({ name: "Ochre", hex: "#CCA55A", use: "x".repeat(181) }).use,
+    paletteGuidance({ name: "Ochre", hex: "#CCA55A", use: "x".repeat(181) })
+      .use,
     null,
   );
 });
@@ -132,9 +141,14 @@ test("palette omits unsupported or mismatched pigment metadata without replacing
 test("legacy painting steps remain intact; short stage prefixes are displayed separately", () => {
   const { splitPaintingStep } = load("components/PaintingStepsCard.tsx");
   const legacy = "Lay a pale sky wash, then let it dry.";
-  assert.deepEqual(splitPaintingStep(legacy), { stage: null, instruction: legacy });
+  assert.deepEqual(splitPaintingStep(legacy), {
+    stage: null,
+    instruction: legacy,
+  });
   assert.deepEqual(
-    splitPaintingStep("First wash: Use a tea-strength wash; let the shine leave the paper."),
+    splitPaintingStep(
+      "First wash: Use a tea-strength wash; let the shine leave the paper.",
+    ),
     {
       stage: "First wash",
       instruction: "Use a tea-strength wash; let the shine leave the paper.",
