@@ -1,3 +1,4 @@
+const canonicalFixture = require("./helpers/canonical-fixture.cjs");
 const { loadShared } = require("./helpers/shared-loader.cjs");
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -58,7 +59,7 @@ function fixture(overrides = {}) {
     },
     generate: async () => {
       calls.push("generate");
-      return samples.improveResult;
+      return canonicalFixture();
     },
     finish: async (_u, i, result) => {
       calls.push("finish");
@@ -91,7 +92,7 @@ for (const mode of ["improve_painting", "create_reference"]) {
   test(`${mode}: structured OpenAI result is validated and saved`, async () => {
     const result =
       mode === "improve_painting"
-        ? samples.improveResult
+        ? canonicalFixture()
         : samples.referenceResult;
     const f = fixture({ generate: async () => result });
     assert.deepEqual(await (await f.run({ ...input, mode })).json(), {
@@ -262,7 +263,7 @@ test("release failure does not turn saved live feedback into a sample or trigger
   const f = fixture({
     generate: async () => {
       generated++;
-      return samples.improveResult;
+      return canonicalFixture();
     },
     release: async () => {
       throw new Error("private release failure");
@@ -299,7 +300,7 @@ test("strict response schemas reject malformed fields, extra fields, unsafe pale
     assert(
       !contract.validFeedback({ ...result, title: "x".repeat(101) }, mode),
     );
-    const schema = contract.feedbackSchema(mode);
+    const schema = contract.legacyFeedbackSchema(mode);
     assert.equal(schema.additionalProperties, false);
     assert.deepEqual(
       schema.required.sort(),
@@ -384,8 +385,11 @@ test("frontend and Pages have no private-key reads or backend imports", () => {
 test("invalid optional overlays keep validated OpenAI text instead of forcing mock", async () => {
   const f = fixture({
     generate: async () => ({
-      ...samples.improveResult,
-      overlays: [{ x: 200 }],
+      ...canonicalFixture(),
+      canonicalAnalysis: {
+        ...canonicalFixture().canonicalAnalysis,
+        visualEvidence: [{ roleId: null, note: { x: 200 } }],
+      },
     }),
   });
   const r = await f.run();
@@ -597,7 +601,7 @@ test("optional practical palette metadata stays compatible and rejects invented 
         "create_reference",
       ),
     );
-  const schema = contract.feedbackSchema("create_reference");
+  const schema = contract.legacyFeedbackSchema("create_reference");
   assert.deepEqual(schema.properties.palette.items.required, [
     "name",
     "hex",
@@ -619,8 +623,14 @@ test("rich overlay cleanup preserves OpenAI result and calls the model only once
     generate: async () => {
       generated++;
       return {
-        ...samples.improveResult,
-        overlays: [richNote, { ...richNote, x: -3 }],
+        ...canonicalFixture(),
+        canonicalAnalysis: {
+          ...canonicalFixture().canonicalAnalysis,
+          visualEvidence: [
+            { insightId: "whole", roleId: null, note: richNote },
+            { roleId: null, note: { ...richNote, x: -3 } },
+          ],
+        },
       };
     },
     finish: async (_u, _i, result) => {
@@ -632,7 +642,19 @@ test("rich overlay cleanup preserves OpenAI result and calls the model only once
   assert.equal(response.status, 200);
   assert.equal((await response.json()).provider, "openai");
   assert.equal(generated, 1);
-  assert.deepEqual(saved.overlays, [richNote]);
+  assert.equal(saved.canonicalAnalysis.visualEvidence.length, 1);
+  assert.equal(
+    saved.canonicalAnalysis.visualEvidence[0].note.type,
+    richNote.type,
+  );
+  assert.equal(
+    saved.canonicalAnalysis.visualEvidence[0].note.width,
+    richNote.width,
+  );
+  assert.equal(saved.canonicalAnalysis.visualEvidence[0].insightId, "whole");
+  assert(
+    !Object.hasOwn(saved.canonicalAnalysis.visualEvidence[0].note, "action"),
+  );
   assert(!f.calls.includes("mock"));
 });
 
@@ -819,7 +841,7 @@ test("strict model schemas require nullable optional guidance fields without for
     if (schema.items) checkObject(schema.items);
   }
   for (const mode of ["improve_painting", "create_reference"]) {
-    const schema = contract.feedbackSchema(mode);
+    const schema = contract.legacyFeedbackSchema(mode);
     checkObject(schema);
     assert.deepEqual(schema.properties.compositionDecision.type, [
       "object",
@@ -977,7 +999,7 @@ test("extended palette roles validate without removing safe legacy tags", () => 
       assert(contract.validFeedback({ ...sample, palette }, mode));
     }
   for (const mode of ["improve_painting", "create_reference"]) {
-    const schema = contract.feedbackSchema(mode);
+    const schema = contract.legacyFeedbackSchema(mode);
     assert.deepEqual(schema.properties.promising.type, ["string", "null"]);
     assert.deepEqual(schema.properties.brushPlan.type, ["array", "null"]);
     assert.equal(schema.properties.brushPlan.items.additionalProperties, false);
@@ -1013,8 +1035,11 @@ test("invalid optional brush guidance is dropped while the live result is saved"
   let saved;
   const f = fixture({
     generate: async () => ({
-      ...samples.improveResult,
-      brushPlan: [{ ...practicalBrushPlan[0], technique: "unknown" }],
+      ...canonicalFixture(),
+      canonicalAnalysis: {
+        ...canonicalFixture().canonicalAnalysis,
+        brushPlan: [{ ...practicalBrushPlan[0], technique: "unknown" }],
+      },
     }),
     finish: async (_user, _input, result) => {
       saved = result;
@@ -1024,7 +1049,7 @@ test("invalid optional brush guidance is dropped while the live result is saved"
   const response = await f.run();
   assert.equal(response.status, 200);
   assert.equal((await response.json()).provider, "openai");
-  assert(!Object.hasOwn(saved, "brushPlan"));
+  assert.equal(saved.canonicalAnalysis.brushPlan, null);
   assert(contract.validFeedback(saved, "improve_painting"));
   assert(!f.calls.includes("mock"));
   assert(f.calls.includes("release"));

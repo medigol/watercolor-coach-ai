@@ -1,3 +1,8 @@
+import {
+  hasPaintingAnalysis,
+  validPaintingAnalysis,
+  type PaintingAnalysisResult,
+} from "../shared/paintingAnalysis";
 import { requireSupabase } from "./supabase";
 import { improveResult, referenceResult } from "../data/mockResults";
 import type {
@@ -45,7 +50,8 @@ function validSave(
 }
 export type SavedMode = "improve_painting" | "create_reference";
 import type { CoachingOverlay } from "./overlays";
-export type ImproveData = typeof improveResult & {
+export type ImproveData = LegacyImproveData | PaintingAnalysisResult;
+export type LegacyImproveData = typeof improveResult & {
   compositionOverlay?: CompositionOverlay | null;
   secondaryCompositionOverlay?: CompositionOverlay | null;
   coachingDecision?: CoachingDecision | null;
@@ -144,15 +150,18 @@ export async function saveArtwork(
   } catch {
     throw new Error(liveFeedbackErrorMessage);
   }
-  const { data: { user }, error: authError } = identity;
+  const {
+    data: { user },
+    error: authError,
+  } = identity;
   if (
     authError &&
     (authError.name === "AuthRetryableFetchError" ||
-      authError.status === 0 || (authError.status ?? 0) >= 500)
+      authError.status === 0 ||
+      (authError.status ?? 0) >= 500)
   )
     throw new Error(liveFeedbackErrorMessage);
-  if (authError || !user)
-    throw new Error(signInMessage);
+  if (authError || !user) throw new Error(signInMessage);
   const ownerId = user.id;
   if (
     !validArtworkId(attempt.id) ||
@@ -207,7 +216,8 @@ export async function saveArtwork(
       attempt.imagePath = undefined;
       throw new Error(
         error instanceof Error && error.message === signInMessage
-          ? signInMessage : uploadMessage,
+          ? signInMessage
+          : uploadMessage,
       );
     }
   }
@@ -264,10 +274,10 @@ export async function saveArtwork(
     if (context instanceof Response) {
       // Only definite rejections can safely discard an uploaded image.
       definitelyRejected =
-        context.status >= 400 && context.status < 500 &&
+        context.status >= 400 &&
+        context.status < 500 &&
         ![408, 409, 429].includes(context.status);
-      if (definitelyRejected)
-        edgeMayHaveSaved = attempt.mayHaveSaved ?? false;
+      if (definitelyRejected) edgeMayHaveSaved = attempt.mayHaveSaved ?? false;
       const problem = await context
         .clone()
         .json()
@@ -330,6 +340,8 @@ export function validResult(
     (mode !== "improve_painting" && mode !== "create_reference")
   )
     return false;
+  if (hasPaintingAnalysis(value))
+    return mode === "improve_painting" && validPaintingAnalysis(value);
   const v = value as Record<string, unknown>;
   const strings =
     mode === "improve_painting"

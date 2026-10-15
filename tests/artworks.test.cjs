@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -72,7 +73,7 @@ function fixture(options = {}) {
   };
   const api = {};
   new Function("require", "exports", "fetch", source("lib/artworks.ts"))(
-    (name) => name === "./supabase" ? { requireSupabase: () => client } : samples,
+    (name) => name === "./supabase" ? { requireSupabase: () => client } : name.startsWith("../shared/") ? loadShared(name,"lib/artworks.ts") : samples,
     api,
     async () => {
       state.fetches++;

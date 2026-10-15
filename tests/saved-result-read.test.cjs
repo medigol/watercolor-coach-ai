@@ -1,3 +1,4 @@
+const { loadShared } = require("./helpers/shared-loader.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -13,6 +14,7 @@ function load(relative, imports) {
   }).outputText;
   const exports = {};
   new Function("exports", "require", output)(exports, (name) => {
+    if (!(name in imports) && name.startsWith("../shared/")) return loadShared(name, relative);
     assert(name in imports, `Unexpected import: ${name}`);
     return imports[name];
   });
@@ -209,4 +211,8 @@ test("opening the gallery and selecting an existing artwork only reads storage/d
   assert.deepEqual(calls.signs, [row.image_url]);
   assert.equal(calls.model, 0);
   assert.equal(calls.saves, 0);
+});
+
+test("canonical saved results reopen through the real hook without analysis, writes or quota calls",async()=>{
+ const f=fixture('improve_painting','openai');const result=require('./helpers/canonical-fixture.cjs')();f.setRow({provider:'openai',result_json:result,artworks:{image_url:userId+'/painting.png',focus_area:'Colour & contrast'}});assert(f.render().loading);await f.settle();const state=f.render();assert.equal(state.error,'');assert.equal(state.focus,'Colour & contrast');assert.equal(state.result.canonicalAnalysis.version,1);assert.equal(Object.keys(state.result.expertViews).length,4);assert.equal(f.calls.model,0);assert.equal(f.calls.saves,0);state.retry();f.render();await f.settle();assert.equal(f.render().error,'');assert.equal(f.calls.model,0);assert.equal(f.calls.saves,0);
 });

@@ -142,7 +142,10 @@ const handler = createHandler({
             content: [
               {
                 type: "text",
-                text: `Mode: ${input.mode}. Focus: ${input.focus_area ?? "Overall feedback"}. Use the exact response schema.`,
+                text:
+                  input.mode === "improve_painting"
+                    ? "Analyse this painting once. Return the canonical analysis and all four expert views using the exact response schema."
+                    : `Mode: ${input.mode}. Focus: ${input.focus_area ?? "Overall feedback"}. Use the exact response schema.`,
               },
               {
                 type: "image_url",

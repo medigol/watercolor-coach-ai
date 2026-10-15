@@ -2,14 +2,17 @@ import { View } from "react-native";
 import {
   planPlanningStudies,
   type PlanningStudiesInput,
+  type PlanningStudy,
 } from "../lib/planningStudies";
 import { CompositionTeachingCard } from "./CompositionModels";
 import { ThumbnailStudyCard } from "./ThumbnailPlanning";
 
 export { SketchValueNotes } from "./ThumbnailPlanning";
 
-export default function PlanningStudies(props: PlanningStudiesInput) {
-  const studies = planPlanningStudies(props);
+export default function PlanningStudies(
+  props: PlanningStudiesInput & { studies?: PlanningStudy[] },
+) {
+  const studies = props.studies ?? planPlanningStudies(props);
   return (
     <View style={{ gap: 14 }}>
       {studies.map((item) =>

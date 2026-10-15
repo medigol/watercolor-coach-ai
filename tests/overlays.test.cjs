@@ -114,7 +114,7 @@ test("legacy/mocks remain valid; valid overlays survive; malformed optional over
       overlays: notes.slice(1),
     });
     assert(contract.validFeedback(contract.cleanOverlayFeedback(bad), mode));
-    const schema = contract.feedbackSchema(mode);
+    const schema = contract.legacyFeedbackSchema(mode);
     assert(schema.required.includes("overlays"));
     assert.equal(schema.properties.overlays.items.additionalProperties, false);
   }
