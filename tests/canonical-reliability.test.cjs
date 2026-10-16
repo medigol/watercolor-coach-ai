@@ -358,7 +358,7 @@ for (const [code, mutate] of [
     (r) => (r.canonicalAnalysis.visualRoles[1].id = "tower"),
   ],
   [
-    "duplicate_role_areas",
+    "conflicting_roles",
     (r) => (r.canonicalAnalysis.visualRoles[1].area = "tower"),
   ],
   ["fact_reference", (r) => (r.canonicalAnalysis.facts[0].roleId = "missing")],
@@ -396,4 +396,169 @@ test("legacy saved feedback and create_reference cleaning/schema remain unchange
     assert(!painting.hasPaintingAnalysis(value));
   }
   assert(!contract.validFeedback(clean(fixture()), "create_reference"));
+});
+
+for (const [key, domain, index] of [
+  ["colourValue", "colour_value", 2],
+  ["technique", "technique", 3],
+  ["composition", "composition", 1],
+])
+  test(`unique ${key} membership and supplied facts repair misplaced domain metadata`, () => {
+    const raw = fixture();
+    raw.canonicalAnalysis.insights[index].domain = "overall";
+    const before = structuredClone(raw);
+    const value = repaired(raw);
+    assert.equal(value.canonicalAnalysis.insights[index].domain, domain);
+    assert.deepEqual(
+      value.canonicalAnalysis.insights.map(({ domain, ...i }) => i),
+      before.canonicalAnalysis.insights.map(({ domain, ...i }) => i),
+    );
+    assert.deepEqual(
+      value.canonicalAnalysis.facts,
+      before.canonicalAnalysis.facts,
+    );
+  });
+test("ambiguous multi-view domain mismatch cannot invent ownership", () => {
+  const raw = fixture();
+  raw.canonicalAnalysis.insights[2].domain = "overall";
+  raw.expertViews.overall.insightIds.push("temperature");
+  assert(!contract.validFeedback(clean(raw), "improve_painting"));
+});
+test("unique view membership without matching fact domains stays fatal", () => {
+  const raw = fixture();
+  raw.canonicalAnalysis.insights[2].domain = "overall";
+  raw.canonicalAnalysis.insights[2].factIds = ["hierarchy"];
+  assert(!contract.validFeedback(clean(raw), "improve_painting"));
+});
+test("mixed-domain facts cannot provide unique domain repair", () => {
+  const raw = fixture();
+  raw.canonicalAnalysis.insights[2].domain = "overall";
+  raw.canonicalAnalysis.insights[2].factIds.push("path");
+  assert(!contract.validFeedback(clean(raw), "improve_painting"));
+});
+test("domain repair does not invent a genuinely absent expert insight", () => {
+  const raw = fixture();
+  raw.canonicalAnalysis.insights.pop();
+  assert.equal(
+    painting.canonicalValidationIssue(clean(raw)),
+    "missing_domain_insight",
+  );
+});
+function duplicateRole(raw, patch = {}) {
+  const role = {
+    ...structuredClone(raw.canonicalAnalysis.visualRoles[0]),
+    id: "tower-copy",
+    area: "  TOWER  ",
+    confidence: 0.7,
+    ...patch,
+  };
+  raw.canonicalAnalysis.visualRoles.push(role);
+  raw.canonicalAnalysis.facts[0].roleId = role.id;
+  raw.canonicalAnalysis.visualEvidence[0].roleId = role.id;
+  return role;
+}
+test("same-area same-role aliases canonicalize and remap fact/evidence IDs", () => {
+  const raw = fixture();
+  duplicateRole(raw);
+  const value = repaired(raw);
+  assert.equal(value.canonicalAnalysis.visualRoles.length, 3);
+  assert.equal(value.canonicalAnalysis.facts[0].roleId, "tower");
+  assert.equal(value.canonicalAnalysis.visualEvidence[0].roleId, "tower");
+  assert.deepEqual(
+    value.canonicalAnalysis.visualRoles,
+    raw.canonicalAnalysis.visualRoles.slice(0, 3),
+  );
+});
+test("duplicate role selection prefers valid geometry before confidence", () => {
+  const raw = fixture();
+  const supplied = duplicateRole(raw, { confidence: 0.7 });
+  raw.canonicalAnalysis.visualRoles[0].region = { x: 2 };
+  const value = repaired(raw);
+  assert.equal(value.canonicalAnalysis.visualRoles[0].id, supplied.id);
+  assert.deepEqual(
+    value.canonicalAnalysis.visualRoles[0].region,
+    supplied.region,
+  );
+});
+test("duplicate role selection prefers higher confidence with valid geometry", () => {
+  const raw = fixture();
+  duplicateRole(raw, { confidence: 0.98 });
+  const value = repaired(raw);
+  assert.equal(value.canonicalAnalysis.visualRoles[0].id, "tower-copy");
+});
+test("duplicate role selection uses supplied confidence when neither region is usable", () => {
+  const raw = fixture();
+  duplicateRole(raw, { confidence: 0.98, region: null });
+  raw.canonicalAnalysis.visualRoles[0].region = null;
+  assert.equal(repaired(raw).canonicalAnalysis.visualRoles[0].id, "tower-copy");
+});
+test("same-area conflicting roles remain fatal regardless of confidence", () => {
+  const raw = fixture();
+  duplicateRole(raw, { role: "quiet", confidence: 0.1 });
+  assert.equal(
+    painting.canonicalValidationIssue(clean(raw)),
+    "conflicting_roles",
+  );
+});
+test("equal-confidence aliases with different geometry remain ambiguous and fatal", () => {
+  const raw = fixture();
+  duplicateRole(raw, {
+    confidence: 0.92,
+    region: { x: 0.3, y: 0.24, width: 0.2, height: 0.3 },
+  });
+  assert(!contract.validFeedback(clean(raw), "improve_painting"));
+});
+test("role alias repair never adds prose or geometry and survives all four projections", () => {
+  const raw = fixture();
+  duplicateRole(raw);
+  const value = repaired(raw);
+  assert.deepEqual(
+    value.canonicalAnalysis.insights,
+    raw.canonicalAnalysis.insights,
+  );
+  assert.deepEqual(
+    value.canonicalAnalysis.facts.map((f) => f.observation),
+    raw.canonicalAnalysis.facts.map((f) => f.observation),
+  );
+  for (const role of value.canonicalAnalysis.visualRoles)
+    assert(
+      raw.canonicalAnalysis.visualRoles.some(
+        (r) => JSON.stringify(r.region) === JSON.stringify(role.region),
+      ),
+    );
+  for (const key of painting.expertViewKeys)
+    assert.deepEqual(
+      painting.projectPaintingAnalysis(value, key).compositionOverlay,
+      value.canonicalAnalysis.composition.primary,
+    );
+});
+test("role aliases remap optional colour IDs without creating a second role map", () => {
+  const raw = fixture();
+  duplicateRole(raw);
+  raw.canonicalAnalysis.colourAnalysis =
+    require("./helpers/colour-fixture.cjs")();
+  raw.canonicalAnalysis.colourAnalysis.visibleColours[0].roleId = "tower-copy";
+  assert.equal(
+    repaired(raw).canonicalAnalysis.colourAnalysis.visibleColours[0].roleId,
+    "tower",
+  );
+});
+test("a malformed optional colour aid cannot defeat structural domain repair", () => {
+  const raw = fixture();
+  raw.canonicalAnalysis.insights[2].domain = "overall";
+  raw.canonicalAnalysis.colourAnalysis = {
+    visibleColours: [null],
+    valueHierarchy: {},
+  };
+  raw.canonicalAnalysis.visualEvidence = [
+    null,
+    { note: { region: { x: 20 } } },
+  ];
+  raw.canonicalAnalysis.brushPlan = [null];
+  raw.canonicalAnalysis.composition.secondary = { type: "unknown" };
+  const value = repaired(raw).canonicalAnalysis;
+  assert.equal(value.colourAnalysis, null);
+  assert.deepEqual(value.visualEvidence, []);
+  assert.equal(value.brushPlan, null);
+  assert.equal(value.composition.secondary, null);
 });

@@ -135,6 +135,17 @@ export function cleanColourAnalysis(
         !item.pigments.every((p) => text(p, 40))
       )
         return [];
+      const opaqueVariation =
+        /\b(?:opaque|gouache) (?:variation|study|mix|passage|technique)|\b(?:with|using|use) gouache\b/i.test(
+          `${item.target} ${item.use}`,
+        );
+      // Drop the complete optional mix: removing one pigment would leave its
+      // supplied ratio/use referring to a different, invented formula.
+      if (
+        !opaqueVariation &&
+        item.pigments.some((p) => /\b(?:white|PW\s*(?:4|6))\b/i.test(p))
+      )
+        return [];
       return [
         {
           target: text(item.target, 50),
