@@ -20,6 +20,7 @@ const input = {
 const fakePublic = "sb_publishable_test_only";
 const fakeServer = "sb_secret_test_only";
 const fakeOpenAI = "test-only-openai-placeholder";
+const providerDraftFixture = require("./helpers/provider-draft-fixture.cjs");
 const focusCases = [
   [
     "Overall feedback",
@@ -42,9 +43,146 @@ const focusCases = [
     "Practise one soft-to-sharp transition on a separate sheet.",
   ],
 ];
+
+for (const [name, mutate] of [
+  ["normal domain blocks", () => {}],
+  [
+    "optional conflicting role meanings",
+    (r) => r.visualRoles.push({ ...r.visualRoles[0], role: "quiet" }),
+  ],
+  [
+    "optional multiple focal candidates",
+    (r) => (r.visualRoles[1].role = "focal"),
+  ],
+  [
+    "compatible role aliases",
+    (r) => r.visualRoles.push({ ...r.visualRoles[0], confidence: 0.99 }),
+  ],
+  ["malformed role rectangle", (r) => (r.visualRoles[0].region = { x: 9 })],
+  ["malformed visual aid", (r) => (r.overall.visualAids = [{ bad: true }])],
+  [
+    "invalid optional visual linkage",
+    (r) => (r.overall.visualAids[0].insightIndex = 999),
+  ],
+  [
+    "malformed optional composition",
+    (r) => (r.compositionStructure.primary = { bad: true }),
+  ],
+  [
+    "malformed optional colour",
+    (r) => (r.colourValue.colourAnalysis = { bad: true }),
+  ],
+  [
+    "invalid colour role index",
+    (r) => (r.colourValue.colourAnalysis.visibleColours[0].roleIndex = 999),
+  ],
+  [
+    "missing practice text",
+    (r) =>
+      Object.keys(r).forEach((key) => {
+        if (r[key]?.facts) r[key].practice = null;
+      }),
+  ],
+])
+  test(`actual Edge SDK normalizes provider draft ${name} in one call and quota completion`, async () => {
+    const raw = providerDraftFixture();
+    mutate(raw);
+    const f = fixture({ draft: raw });
+    const response = await f.run();
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { id, provider: "openai" });
+    const models = f.calls.filter((c) => c.path === "/v1/chat/completions");
+    assert.equal(models.length, 1);
+    assert(
+      !Object.hasOwn(
+        models[0].body.response_format.json_schema.schema.properties,
+        "expertViews",
+      ),
+    );
+    assert(
+      models[0].body.response_format.json_schema.schema.properties.overall
+        .properties.facts,
+    );
+    const completed = f.calls.filter((c) =>
+      c.path.endsWith("/complete_openai_feedback"),
+    );
+    assert.equal(completed.length, 1);
+    const saved = completed[0].body.p_result;
+    assert.equal(saved.canonicalAnalysis.version, 1);
+    assert.equal(Object.keys(saved.expertViews).length, 4);
+    for (const key of Object.keys(saved.expertViews)) {
+      const view = saved.expertViews[key];
+      assert(view.insightIds.includes(view.summaryId));
+    }
+    assert.deepEqual(f.providerDiagnostics, [["provider_finish:stop"]]);
+    assert.deepEqual(f.diagnostics, []);
+    assert(!f.calls.some((c) => /save_mock|images\/generations/.test(c.path)));
+  });
+for (const [reason, mutate] of [
+  ["missing_domain", (r) => delete r.technique],
+  ["core_text", (r) => (r.overall.insights[0].lesson = "")],
+  [
+    "unrecoverable_reference",
+    (r) => (r.colourValue.insights[0].factRefs = [99]),
+  ],
+  ["empty_analysis", (r) => (r.composition.insights = [])],
+  ["provider_structure", (r) => (r.compositionStructure = null)],
+])
+  test(`actual Edge SDK core draft failure returns fixed safe ${reason} and consumes no successful quota`, async () => {
+    const raw = providerDraftFixture();
+    raw.title = "PRIVATE MODEL TITLE";
+    mutate(raw);
+    const f = fixture({ draft: raw });
+    const response = await f.run();
+    assert.equal(response.status, 422);
+    assert.deepEqual(await response.json(), {
+      code: "unavailable",
+      reason_code: reason,
+      message: "Live AI feedback could not be prepared. Please try again.",
+    });
+    assert.deepEqual(f.diagnostics, [[`canonical_invalid:${reason}`]]);
+    assert.deepEqual(f.providerDiagnostics, [["provider_finish:stop"]]);
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert(
+      !f.calls.some((c) => /complete_openai_feedback|save_mock/.test(c.path)),
+    );
+    assert(f.calls.some((c) => c.path.endsWith("/release_feedback_request")));
+  });
+for (const [finish, code, status] of [
+  ["stop", "stop", 200],
+  ["length", "length", 503],
+  ["PRIVATE FINISH CONTENT", "other", 503],
+  [{}, "other", 503],
+])
+  test(`provider finish diagnostic is fixed ${code} (${JSON.stringify(finish)})`, async () => {
+    const f = fixture({ draft: providerDraftFixture(), finishReason: finish });
+    assert.equal((await f.run()).status, status);
+    assert.deepEqual(f.providerDiagnostics, [[`provider_finish:${code}`]]);
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+  });
+test("provider draft saved result reopens idempotently with no second paid call or quota completion", async () => {
+  const f = fixture({ draft: providerDraftFixture() });
+  assert.equal((await f.run()).status, 200);
+  assert.equal((await f.run()).status, 200);
+  assert.equal(
+    f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+    1,
+  );
+  assert.equal(
+    f.calls.filter((c) => c.path.endsWith("/complete_openai_feedback")).length,
+    1,
+  );
+});
 function fixture(options = {}) {
   const calls = [];
   const diagnostics = [];
+  const providerDiagnostics = [];
   const boundaryErrors = [];
   let stored = options.existingProvider
     ? {
@@ -65,7 +203,9 @@ function fixture(options = {}) {
   const modelResult =
     options.mode === "create_reference"
       ? load(path.join(root, "data/mockResults.ts")).referenceResult
-      : (options.canonical ?? canonicalFixture());
+      : Object.hasOwn(options, "draft")
+        ? options.draft
+        : (options.canonical ?? canonicalFixture());
   if (options.overlays) modelResult.overlays = options.overlays;
   if (options.palette) modelResult.palette = options.palette;
   if (options.compositionDecision)
@@ -131,7 +271,11 @@ function fixture(options = {}) {
       assert(prompt.includes("never invent precise geometry"));
       assert(prompt.includes("without another analysis or a new image"));
       assert(
-        prompt.includes("category focal_point/composition/value_structure"),
+        prompt.includes(
+          options.mode === "create_reference"
+            ? "category focal_point/composition/value_structure"
+            : "The server derives note IDs, role links, categories",
+        ),
       );
       if (options.mode === "create_reference") {
         assert(prompt.includes("keep, simplify, remove, or merge"));
@@ -240,7 +384,14 @@ function fixture(options = {}) {
           body.p_result,
           load(
             path.join(root, "supabase/functions/_shared/contract.ts"),
-          ).cleanFeedback(modelResult, options.mode ?? input.mode),
+          ).cleanFeedback(
+            Object.hasOwn(options, "draft")
+              ? load(
+                  path.join(root, "shared/providerPaintingAnalysis.ts"),
+                ).normalizeProviderPaintingAnalysis(modelResult).result
+              : modelResult,
+            options.mode ?? input.mode,
+          ),
         );
         if (options.saveError)
           return json({ message: "private database failure" }, 500);
@@ -300,7 +451,11 @@ function fixture(options = {}) {
         },
       },
       network,
-      { ...console, warn: (...args) => diagnostics.push(args) },
+      {
+        ...console,
+        warn: (...args) => diagnostics.push(args),
+        info: (...args) => providerDiagnostics.push(args),
+      },
     );
     return exports;
   }
@@ -308,6 +463,7 @@ function fixture(options = {}) {
   return {
     calls,
     diagnostics,
+    providerDiagnostics,
     run: async (body) => {
       const response = await handler(
         new Request(
@@ -374,10 +530,11 @@ for (const [name, options] of [
   test(`actual Edge SDK runtime: ${name} returns live failure without any mock save`, async () => {
     const f = fixture(options);
     const r = await f.run();
-    assert.equal(r.status, 503);
+    assert.equal(r.status, options.invalidJSON ? 422 : 503);
     const value = await r.json();
     assert.deepEqual(value, {
       code: "unavailable",
+      ...(options.invalidJSON ? { reason_code: "provider_structure" } : {}),
       message: "Live AI feedback could not be prepared. Please try again.",
     });
     assert(!JSON.stringify(value).includes("private"));
@@ -1068,9 +1225,7 @@ for (const focus of [
     );
     assert.equal(calls.length, 1);
     assert(
-      calls[0].body.messages[0].content.includes(
-        "ALL FOUR compact expertViews",
-      ),
+      calls[0].body.messages[0].content.includes("ALL FOUR domain blocks"),
     );
     assert.equal(calls[0].body.max_completion_tokens, 3000);
     assert.equal(
@@ -1496,6 +1651,17 @@ for (const [reason, mutate] of [
     assert.equal(response.status, 422);
     assert.deepEqual(await response.json(), {
       code: "unavailable",
+      reason_code: [
+        "conflicting_roles",
+        "duplicate_role_ids",
+        "multiple_focal_roles",
+      ].includes(reason)
+        ? "unrecoverable_roles"
+        : reason === "missing_domain_insight"
+          ? "missing_domain"
+          : reason === "core_text_cleaning"
+            ? "core_text"
+            : "unrecoverable_reference",
       message: "Live AI feedback could not be prepared. Please try again.",
     });
     assert.deepEqual(f.diagnostics, [[`canonical_invalid:${reason}`]]);

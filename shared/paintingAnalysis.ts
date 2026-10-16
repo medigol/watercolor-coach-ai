@@ -28,6 +28,7 @@ import {
   objectDesignSuggestion,
   qualityRationaleText,
   unsupportedPlacementAdvice,
+  purposefulFigureAdvice,
 } from "./coachingLanguage.ts";
 
 // A saved, versioned document; no I/O and no inferred geometry or extra analysis.
@@ -779,6 +780,14 @@ export function cleanPaintingAnalysis(
       )
         return [];
       const role = roles.find((r) => r.id === item.roleId);
+      const linkedInsight = insights.find((i) => i.id === item.insightId);
+      if (
+        linkedInsight &&
+        !purposefulFigureAdvice(
+          `${linkedInsight.lesson} ${linkedInsight.action}`,
+        )
+      )
+        return [];
       if (
         role?.region &&
         (role.confidence ?? 0) >= 0.65 &&

@@ -2,9 +2,13 @@ import { observationText } from "./coachingEvidence.ts";
 
 /** Display safeguards use supplied words, never new observations or geometry. */
 export function qualityRationaleText(value: string): string {
-  return observationText(value)
+  const cleaned = observationText(value)
     .replace(
       /[,;]?\s+\b(?:though|although|but|however|yet)\b[^.!?]*\b(?:could|might|may|refin\w*|would benefit)\b[^.!?]*[.!?]?/gi,
+      ".",
+    )
+    .replace(
+      /[,;]?\s+\b(?:though|although|but|however)\b[^.!?]*\b(?:inaccurac\w*|errors?|weakens?|limits?|disrupt\w*)\b[^.!?]*[.!?]?/gi,
       ".",
     )
     .split(/(?<=[.!?])\s+/)
@@ -14,8 +18,45 @@ export function qualityRationaleText(value: string): string {
           sentence,
         ),
     )
+    .filter(
+      (sentence, index) =>
+        index === 0 ||
+        !/\b(?:perspective|proportion|drawing)\b[^.!?]*\b(?:inaccurac\w*|errors?|limits?|weakens?)\b/i.test(
+          sentence,
+        ),
+    )
     .join(" ")
     .trim();
+  const sentences =
+    cleaned.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((s) => s.trim()) ?? [];
+  const complete = sentences.filter((s) => /[.!?]$/.test(s));
+  // A supplied complete sentence is preferable to an unfinished extra clause.
+  if (complete.length) return complete.slice(0, 2).join(" ");
+  return /\b(?:and|or|a|an|the|with|of|for|to)\s*$/i.test(cleaned)
+    ? ""
+    : cleaned;
+}
+
+export function transferablePreservation(value: string): string {
+  if (!/^(?:preserve|keep|retain|maintain)\b/i.test(value)) return value;
+  return value
+    .replace(
+      /\s+and\s+(?:(?:its|the|their)\s+)?(?:central|centred|centered) placement(?=[,.!?]|$)/gi,
+      "",
+    )
+    .replace(/\b(?:central|centred|centered) placement\s+and\s+/gi, "");
+}
+
+export function purposefulFigureAdvice(value: string): boolean {
+  if (
+    !/\b(?:add|place|introduce|insert)\b[^.!?]{0,65}\b(?:figures?|people|person)\b/i.test(
+      value,
+    )
+  )
+    return true;
+  return /\b(?:human scale|scale|spatial transition|visual (?:flow|step)|rhythm|balance|narrative|hierarchy|lead\w* toward|subordinate)\b/i.test(
+    value,
+  );
 }
 
 export function separateStudyText(value: string): string {

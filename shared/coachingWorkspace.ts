@@ -12,13 +12,17 @@ import {
   variableStudy,
   exerciseTeaching,
   unsupportedPlacementAdvice,
+  transferablePreservation,
+  purposefulFigureAdvice,
 } from "./coachingLanguage.ts";
 
 /** Presentation is derived once from the canonical classifications, not a lens. */
 export function workspaceTeaching(value: PaintingAnalysisResult) {
   const c = value.canonicalAnalysis;
-  const supplied = c.insights.filter((i) =>
-    i.factIds.some((id) => c.facts.some((f) => f.id === id)),
+  const supplied = c.insights.filter(
+    (i) =>
+      i.factIds.some((id) => c.facts.some((f) => f.id === id)) &&
+      purposefulFigureAdvice(`${i.lesson} ${i.action}`),
   );
   const insights = supplied.map((i) =>
     unsupportedPlacementAdvice(
@@ -55,7 +59,7 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
       (i) =>
         i.classification === "optional_refinement" &&
         (changeRecommendation(i.action) ||
-          /\b(?:compare|test|try|consider|compress|connect|group|merge|integrate|rebalance|vary)\b/i.test(
+          /\b(?:compare|test|try|consider|compress|connect|group|merge|integrate|rebalance|vary|clarify|align|correct|remove|add)\b/i.test(
             i.action,
           )),
     ),
@@ -94,7 +98,7 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
       elevationPriority(b) - elevationPriority(a),
   );
   const recommendations = ranked
-    .slice(0, level === "highly_resolved" ? 2 : 3)
+    .slice(0, ["highly_resolved", "strong"].includes(level) ? 2 : 3)
     .map((insight, index) => {
       const significant =
         (index === 0 && clear.length > 0) ||
@@ -143,7 +147,9 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
                   .filter(Boolean)
                   .join(" ")
               : i.lesson,
-            action: exerciseTeaching(i.action) ? "" : i.action,
+            action: exerciseTeaching(i.action)
+              ? ""
+              : transferablePreservation(i.action),
           },
     )
     .filter(

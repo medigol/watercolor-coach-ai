@@ -2,7 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.117.3";
 import { createHandler, type User, type Claim } from "./handler.ts";
 import { coachingPrompt } from "../_shared/prompts.ts";
 import {
-  feedbackSchema,
+  providerFeedbackSchema,
   imageMime,
   readLimited,
   uuid,
@@ -144,7 +144,7 @@ const handler = createHandler({
                 type: "text",
                 text:
                   input.mode === "improve_painting"
-                    ? "Analyse this painting once. Return the canonical analysis and all four expert views using the exact response schema."
+                    ? "Analyse this painting once. Return the domain-grouped provider draft using the exact response schema; the server builds IDs and expert views."
                     : `Mode: ${input.mode}. Focus: ${input.focus_area ?? "Overall feedback"}. Use the exact response schema.`,
               },
               {
@@ -162,7 +162,7 @@ const handler = createHandler({
           json_schema: {
             name: "watercolor_feedback",
             strict: true,
-            schema: feedbackSchema(input.mode),
+            schema: providerFeedbackSchema(input.mode),
           },
         },
       }),
@@ -171,15 +171,35 @@ const handler = createHandler({
       void response.body?.cancel();
       throw new Error("Feedback unavailable");
     }
-    const payload = JSON.parse(await readLimited(response.body, 65536));
-    const choice = payload.choices?.[0];
+    let payload: unknown;
+    try {
+      payload = JSON.parse(await readLimited(response.body, 65536));
+    } catch {
+      console.info("provider_finish:other");
+      throw new Error("Unreadable provider envelope");
+    }
+    const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+    const candidate = object(payload) && Array.isArray(payload.choices) ? payload.choices[0] : null;
+    const choice = object(candidate) ? candidate : {};
+    const message = object(choice.message) ? choice.message : {};
+    const finishReason =
+      choice?.finish_reason === "stop"
+        ? "stop"
+        : choice?.finish_reason === "length"
+          ? "length"
+          : "other";
+    console.info(`provider_finish:${finishReason}`);
     if (
       choice?.finish_reason !== "stop" ||
-      typeof choice?.message?.content !== "string" ||
-      choice.message.refusal
+      typeof message.content !== "string" ||
+      message.refusal
     )
       throw new Error("Incomplete feedback");
-    return JSON.parse(choice.message.content);
+    try {
+      return JSON.parse(message.content);
+    } catch {
+      return null;
+    } // malformed required JSON is a core 422, never a retry
   },
   async finish(user, input, result) {
     return saved(

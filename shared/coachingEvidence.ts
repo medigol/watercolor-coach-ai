@@ -2,6 +2,8 @@
 // cleaner. They neither inspect pixels nor reconstruct how a painting was made.
 const sentences = (value: string) =>
   value.split(/(?<=[.!?])\s+|\n+/).filter(Boolean);
+const explicitPractice =
+  /^(?:on|in|for)\b[^.!?]{0,50}\bstudy\b|^on scrap\b|^(?:a|the)\b[^.!?]{0,45}\bstudy (?:could|can|might)\b|^(?:a |the )?(?:suggested|recommended)\b|^(?:try|test|practi[cs]e)\b|^to (?:reproduce|recreate)\b/i;
 export function recommendedMethod(value: string): boolean {
   return /\b(?:could|might|can be practised|recommended|suggested|practi[cs]e|exercise|try|test|next study|separate study|to reproduce|to recreate)\b/i.test(
     value,
@@ -11,6 +13,13 @@ export function unsupportedProcess(value: string): boolean {
   const history =
     /\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:the|original|actual|exact) (?:brush|pigment|paper moisture|wash order|glazing sequence)\b[^.!?]{0,40}\b(?:was|is|were)\b/i;
   if (history.test(value)) return true;
+  if (
+    /\bsolid control of watercolou?r techniques\b|\busing layered washes\b/i.test(
+      value,
+    ) &&
+    !explicitPractice.test(value)
+  )
+    return true;
   if (recommendedMethod(value)) return false;
   if (
     /\bwash application\b|\bwashes? (?:are|is) applied\b|\b(?:some )?layering and soft blending\b/i.test(
@@ -30,8 +39,31 @@ export function unsupportedProcess(value: string): boolean {
 }
 /** Restate only supplied visible qualities, never reconstruct a method. */
 export function observableEffectText(value: string): string {
-  if (recommendedMethod(value)) return value;
+  value = value
+    .replace(
+      /\banatomical (inaccuracies|accuracy|errors?|structure|proportions?) (in|of|around) (the |a |this )?(van|car|vehicle|boat|building|object)\b/gi,
+      (
+        match,
+        kind: string,
+        preposition: string,
+        article: string | undefined,
+        object: string,
+      ) =>
+        `${/^[A-Z]/.test(match) ? "Drawing" : "drawing"} ${kind} ${preposition} ${article ?? ""}${object}`,
+    )
+    .replace(
+      /\banatomy of (the |a |this )?(van|car|vehicle|boat|building|object)\b/gi,
+      (match, article: string | undefined, object: string) =>
+        `${/^[A-Z]/.test(match) ? "Structure" : "structure"} of ${article ?? ""}${object}`,
+    );
+  if (explicitPractice.test(value)) return value;
   return value
+    .replace(
+      /\beffective use of soft washes(?:\s+(creates?|gives?|supports?))?/gi,
+      (_, verb: string | undefined) =>
+        `Soft-edged colour passages${verb ? ` ${verb.replace(/s$/i, "")}` : ""}`,
+    )
+    .replace(/\s+(?:using|through) layered washes\b/gi, "")
     .replace(
       /\b(?:the )?wash application is (controlled|loose|even) with transparent layering\b/gi,
       (_, quality: string) =>
@@ -50,6 +82,7 @@ export function observationText(value: unknown): string {
   if (typeof value !== "string") return "";
   return sentences(value)
     .flatMap((raw) => {
+      if (/^\s*with more controlled (?:for|in)\b/i.test(raw)) return [];
       const sentence = observableEffectText(raw);
       if (!unsupportedProcess(sentence)) return [sentence];
       // Keep an explicitly supplied visible quality; remove the inferred method.

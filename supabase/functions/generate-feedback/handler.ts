@@ -12,6 +12,10 @@ import {
   canonicalValidationIssue,
   hasPaintingAnalysis,
 } from "../../../shared/paintingAnalysis.ts";
+import {
+  normalizeProviderPaintingAnalysis,
+  safeProviderFailureReason,
+} from "../../../shared/providerPaintingAnalysis.ts";
 export interface User {
   id: string;
   token: string;
@@ -138,23 +142,36 @@ export function createHandler(deps: Dependencies) {
       claimed = true;
       const bytes = await deps.download(user, input.image_path);
       const generated = await deps.generate(input, bytes);
-      const data = cleanFeedback(generated, input.mode);
+      // Canonical responses remain readable for existing server/test adapters;
+      // the production provider schema now emits the simpler grouped draft.
+      const normalized =
+        input.mode === "improve_painting" && !hasPaintingAnalysis(generated)
+          ? normalizeProviderPaintingAnalysis(generated)
+          : { ok: true as const, result: generated };
+      const data = normalized.ok
+        ? cleanFeedback(normalized.result, input.mode)
+        : null;
       if (
         !validFeedback(data, input.mode) ||
         (input.mode === "improve_painting" && !hasPaintingAnalysis(data))
       ) {
+        const diagnostic = !normalized.ok
+          ? normalized.reason
+          : input.mode === "improve_painting"
+            ? (canonicalValidationIssue(
+                data === null ? normalized.result : data,
+              ) ?? "core_text_cleaning")
+            : "required_structure";
+        const reasonCode = safeProviderFailureReason(diagnostic);
         if (input.mode === "improve_painting") {
           // Private, fixed reason codes only. Never log model prose, images,
           // identifiers, upstream errors or credentials; keep the reply generic.
-          const reason =
-            data === null
-              ? (canonicalValidationIssue(generated) ?? "core_text_cleaning")
-              : (canonicalValidationIssue(data) ?? "required_structure");
-          console.warn(`canonical_invalid:${reason}`);
+          console.warn(`canonical_invalid:${diagnostic}`);
         }
         return reply(
           {
             code: "unavailable",
+            reason_code: reasonCode,
             message:
               "Live AI feedback could not be prepared. Please try again.",
           },

@@ -6,6 +6,112 @@ const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "..");
+test("a generic figure study cannot leak back through overall assessment or domain prose", () => {
+  const canonical = require("./helpers/canonical-fixture.cjs")();
+  Object.assign(canonical.canonicalAnalysis.insights[0], {
+    classification: "stylistic_alternative",
+    lesson: "A figure could add decorative interest.",
+    action: "Add figures and compare with no figures.",
+  });
+  const html = render(
+    "improve_painting",
+    "openai",
+    "https://example.invalid/original.png",
+    undefined,
+    { canonicalResult: canonical, viewportWidth: 1440 },
+  );
+  assert(!html.includes("decorative interest"));
+  assert(!html.includes("Add figures"));
+  assert(html.includes("Complete Painting Analysis"));
+});
+for (const focus of [
+  "Overall feedback",
+  "Composition",
+  "Colour & contrast",
+  "Watercolor technique",
+])
+  test(`server-normalized draft remains compatible with saved result presentation: ${focus}`, () => {
+    const { loadShared } = require("./helpers/shared-loader.cjs");
+    const normalized = loadShared(
+      "../shared/providerPaintingAnalysis.ts",
+      "lib/overlays.ts",
+    ).normalizeProviderPaintingAnalysis(
+      require("./helpers/provider-draft-fixture.cjs")(),
+    );
+    assert(normalized.ok);
+    const html = render(
+      "improve_painting",
+      "openai",
+      "https://example.invalid/original.png",
+      undefined,
+      { canonicalResult: normalized.result, viewportWidth: 1440, focus },
+    );
+    for (const text of [
+      "Complete Painting Analysis",
+      "Highly resolved painting",
+      "What works",
+      "Composition",
+      "Colour &amp; Value",
+      "Watercolor technique",
+    ])
+      assert(html.includes(text), text);
+    assert(!html.includes("saved analysis could not"));
+  });
+test("zero located colours show one shared confidence note with compact colour labels", () => {
+  const canonical = require("./helpers/canonical-fixture.cjs")();
+  canonical.canonicalAnalysis.colourAnalysis =
+    require("./helpers/colour-fixture.cjs")();
+  canonical.canonicalAnalysis.colourAnalysis.visibleColours.forEach(
+    (c) => (c.roleId = null),
+  );
+  const html = render(
+    "improve_painting",
+    "openai",
+    "https://example.invalid/original.png",
+    undefined,
+    { canonicalResult: canonical, viewportWidth: 1440 },
+  );
+  assert.equal(
+    (
+      html.match(
+        /Source regions were not located confidently for these colours\./g,
+      ) ?? []
+    ).length,
+    1,
+  );
+  assert(
+    !html.includes("No confidently located source detail for this colour."),
+  );
+  for (const colour of canonical.canonicalAnalysis.colourAnalysis
+    .visibleColours)
+    assert(html.includes(colour.label));
+});
+test("mixed colour evidence retains its own labels and a single individual confidence note", () => {
+  const canonical = require("./helpers/canonical-fixture.cjs")();
+  canonical.canonicalAnalysis.colourAnalysis =
+    require("./helpers/colour-fixture.cjs")();
+  canonical.canonicalAnalysis.colourAnalysis.visibleColours[1].roleId = null;
+  const html = render(
+    "improve_painting",
+    "openai",
+    "https://example.invalid/original.png",
+    undefined,
+    { canonicalResult: canonical, viewportWidth: 1440 },
+  );
+  assert.equal(
+    (
+      html.match(/No confidently located source detail for this colour\./g) ??
+      []
+    ).length,
+    1,
+  );
+  assert(
+    !html.includes(
+      "Source regions were not located confidently for these colours.",
+    ),
+  );
+  assert(html.includes("Original painting evidence: Reserved warm light"));
+});
 
 test("colour rows sharing one source region render their own labelled original evidence", () => {
   const canonical = require("./helpers/canonical-fixture.cjs")();

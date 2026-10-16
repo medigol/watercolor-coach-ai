@@ -4,6 +4,7 @@ import {
   paintingAnalysisSchema,
   validPaintingAnalysis,
 } from "../../../shared/paintingAnalysis.ts";
+import { providerPaintingAnalysisSchema } from "../../../shared/providerPaintingAnalysis.ts";
 import {
   compositionArchetypes,
   compositionIdentity,
@@ -584,8 +585,7 @@ export function legacyFeedbackSchema(mode: Mode) {
     additionalProperties: false,
   };
 }
-// Legacy schema remains available for compatibility tests and reference plans;
-// newly generated painting feedback always requires the canonical v1 envelope.
+// Persisted/public canonical contract remains available for legacy validation.
 export function feedbackSchema(mode: Mode) {
   const legacy = legacyFeedbackSchema(mode);
   if (mode === "create_reference") return legacy;
@@ -610,6 +610,15 @@ export function feedbackSchema(mode: Mode) {
       required: Object.keys(note),
       additionalProperties: false,
     },
+    structure: legacy.properties.compositionOverlay,
+    brush: { ...legacy.properties.brushPlan, maxItems: 2 },
+  });
+}
+// Only the provider sees the domain-grouped draft; clients still receive v1.
+export function providerFeedbackSchema(mode: Mode) {
+  if (mode === "create_reference") return feedbackSchema(mode);
+  const legacy = legacyFeedbackSchema(mode);
+  return providerPaintingAnalysisSchema({
     structure: legacy.properties.compositionOverlay,
     brush: { ...legacy.properties.brushPlan, maxItems: 2 },
   });
