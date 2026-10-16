@@ -12,6 +12,12 @@ export function unsupportedProcess(value: string): boolean {
     /\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:the|original|actual|exact) (?:brush|pigment|paper moisture|wash order|glazing sequence)\b[^.!?]{0,40}\b(?:was|is|were)\b/i;
   if (history.test(value)) return true;
   if (recommendedMethod(value)) return false;
+  if (
+    /\b(?:effective|confident|controlled|successful)\s+(?:use|handling|application)\s+of\s+(?:watercolou?r\s+)?(?:layering|glazing|wet blending)\b|\bcontrolled (?:glazing|layering)\b|\bareas? of wet blending\b|\b(?:glazing|layering) sequence\b/i.test(
+      value,
+    )
+  )
+    return true;
   return /\b(?:wet[- ]on[- ]wet|wet[- ]on[- ]dry|damp[- ]on[- ]damp)\b|\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:was|were|must have been)\s+(?:(?:originally|fully|still|evenly)\s+)?(?:painted|applied|wetted|damp|soaked|glazed|layered)\b|\b(?:original|exact|actual)\s+(?:brush|pigment|paper moisture|wash order|glazing sequence)\b/i.test(
     value,
   );

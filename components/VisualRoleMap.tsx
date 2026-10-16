@@ -11,9 +11,9 @@ import { colors } from "./theme";
 const ink = "#496B63";
 const paper = "#FFFEF8";
 const treatment = {
-  focal: { width: 1.6, dash: undefined, fill: 0.04 },
-  supporting: { width: 1.2, dash: "6 4", fill: 0.025 },
-  quiet: { width: 1, dash: "1 4", fill: 0.012 },
+  focal: { width: 1.3, dash: undefined, fill: 0.025 },
+  supporting: { width: 1, dash: "6 4", fill: 0.015 },
+  quiet: { width: 0.8, dash: "1 4", fill: 0.008 },
 };
 
 /** An optional exclusive layer: labels and line styles convey roles together. */
@@ -85,8 +85,8 @@ export default function VisualRoleMap({
                     {...rect}
                     fill="none"
                     stroke={paper}
-                    strokeWidth={3.4}
-                    strokeOpacity={0.7}
+                    strokeWidth={2.5}
+                    strokeOpacity={0.55}
                   />
                   <Rect
                     {...rect}
@@ -95,7 +95,7 @@ export default function VisualRoleMap({
                     fillOpacity={style.fill}
                     stroke={colors[region.role]}
                     strokeWidth={style.width}
-                    strokeOpacity={0.85}
+                    strokeOpacity={0.72}
                     strokeDasharray={style.dash}
                   />
                 </>
@@ -105,8 +105,8 @@ export default function VisualRoleMap({
                     points={points!}
                     fill="none"
                     stroke={paper}
-                    strokeWidth={3.4}
-                    strokeOpacity={0.7}
+                    strokeWidth={2.5}
+                    strokeOpacity={0.55}
                   />
                   <Polygon
                     points={points!}
@@ -114,7 +114,7 @@ export default function VisualRoleMap({
                     fillOpacity={style.fill}
                     stroke={colors[region.role]}
                     strokeWidth={style.width}
-                    strokeOpacity={0.85}
+                    strokeOpacity={0.72}
                     strokeDasharray={style.dash}
                   />
                 </>

@@ -53,7 +53,12 @@ export function planCanonicalVisualRoles(
       validRect(role.region) &&
       typeof role.confidence === "number" &&
       role.confidence >= 0.65 &&
-      role.confidence <= 1,
+      role.confidence <= 1 &&
+      // Very broad or uncertain boxes communicate false localisation. The
+      // canonical role text remains visible even when its geometry is omitted.
+      role.region!.width * role.region!.height < 0.8 &&
+      (role.confidence >= 0.8 ||
+        role.region!.width * role.region!.height < 0.5),
   );
   const candidates = located.map((role) => ({
     kind: "rectangle" as const,

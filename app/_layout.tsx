@@ -66,7 +66,7 @@ function AppRoutes() {
         />
         <Stack.Screen
           name="result/improve-painting"
-          options={{ title: "Painting analysis" }}
+          options={{ title: "Analysis", headerTitleStyle: { fontSize: 16 } }}
         />
         <Stack.Screen
           name="result/create-reference"

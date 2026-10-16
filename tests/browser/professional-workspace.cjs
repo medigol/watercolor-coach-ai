@@ -73,7 +73,7 @@ let signalFeedbackHeld;
   const aspectFiles = {};
   for (const [name, w, h] of [
     ["landscape", 800, 600],
-    ["portrait", 600, 800],
+    ["portrait", 600, 1000],
     ["square", 800, 800],
     ["wide", 1200, 400],
   ]) {
@@ -90,6 +90,15 @@ let signalFeedbackHeld;
     await scene.locator("svg").screenshot({ path: file });
     aspectFiles[name] = file;
   }
+  // Original technical vehicle fixture, drawn here solely for layout/evidence checks.
+  await scene.setViewportSize({ width: 600, height: 1000 });
+  await scene.setContent(
+    '<body style="margin:0"><svg width="600" height="1000" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="1000" fill="#dce8e2"/><path d="M0 480L170 180L285 365L400 100L600 480Z" fill="#7d9395"/><path d="M0 450L100 395L220 520L340 430L600 465V1000H0Z" fill="#738572"/><path d="M120 1000L270 535H350L490 1000Z" fill="#b7b7a4"/><path d="M225 510H350L380 590V670H205V575Z" fill="#9b4e3f"/><path d="M239 535H338L354 580H225Z" fill="#b8c8c3"/><g fill="#3e5050"><circle cx="230" cy="670" r="19"/><circle cx="357" cy="670" r="19"/></g><path d="M50 370V650M530 350V590" stroke="#4a6458" stroke-width="18"/></svg>',
+  );
+  aspectFiles["portrait-vehicle"] = artifactDir + "/portrait-vehicle.png";
+  await scene
+    .locator("svg")
+    .screenshot({ path: aspectFiles["portrait-vehicle"] });
   await scene.close();
   const page = await browser.newPage({ viewport: { width: 375, height: 900 } });
   debugPage = page;
@@ -448,6 +457,7 @@ let signalFeedbackHeld;
     errors.push("Blocked unexpected external endpoint: " + url.origin);
     await route.abort("blockedbyclient");
   });
+  const artwork = page.getByTestId("coaching-image-frame");
   const button = (name) => page.getByRole("button", { name, exact: true });
   const shot = async (name) =>
     page.screenshot({ path: artifactDir + "/" + name + ".png" });
@@ -549,6 +559,15 @@ let signalFeedbackHeld;
   await shot("highly-resolved-desktop");
   await page.setViewportSize({ width: 390, height: 950 });
   await shot("highly-resolved-mobile");
+  const localEvidenceButton = page
+    .getByRole("button", { name: /^Locate evidence in your painting:/ })
+    .first();
+  const beforeKeyboardEvidence = snapshot();
+  await localEvidenceButton.focus();
+  await page.keyboard.press("Enter");
+  await page.getByTestId("coaching-note-0").waitFor();
+  assert.deepEqual(snapshot(), beforeKeyboardEvidence);
+  await button("Clean view").click();
   const matrix = [];
   for (const [aspect, file] of Object.entries(aspectFiles)) {
     imageFile = file;
@@ -559,8 +578,55 @@ let signalFeedbackHeld;
     await page.getByTestId("coaching-source-image").waitFor();
     for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
       await page.setViewportSize({ width, height: 1000 });
+      await page.waitForFunction((width) => {
+        const frame = document
+          .querySelector('[data-testid="coaching-image-frame"]')
+          ?.getBoundingClientRect();
+        const layout = document.querySelector(
+          `[data-testid="${width >= 1024 ? "result-columns" : "result-stack"}"]`,
+        );
+        return (
+          !!layout &&
+          !!frame &&
+          (width >= 1024 || frame.height <= innerHeight * 0.6)
+        );
+      }, width);
       await noOverflow();
       const before = snapshot();
+      const primaryFrame = await artwork.boundingBox();
+      if (width < 1024)
+        assert(primaryFrame.height <= 1000 * 0.6, "mobile artwork height");
+      if (width < 600) {
+        const controls = page.getByLabel("Artwork overlay controls");
+        const boxes = await controls
+          .getByRole("button")
+          .evaluateAll((elements) =>
+            elements.map((el) => {
+              const r = el.getBoundingClientRect();
+              return {
+                x: r.x,
+                y: r.y,
+                width: r.width,
+                height: r.height,
+                text: el.textContent,
+              };
+            }),
+          );
+        assert.equal(boxes.length, 4);
+        assert(boxes.every((b) => b.height >= 44));
+        assert(Math.abs(boxes[0].y - boxes[1].y) < 1);
+        assert(Math.abs(boxes[2].y - boxes[3].y) < 1);
+        assert(boxes[2].y > boxes[0].y);
+        assert(Math.abs(boxes[0].width - boxes[1].width) < 1);
+        assert.deepEqual(
+          boxes.map((b) => b.text),
+          ["Clean", "Notes", "Composition", "Roles"],
+        );
+        const title = page.getByText("Complete Painting Analysis", {
+          exact: true,
+        });
+        assert((await title.boundingBox()).height <= 60);
+      }
       for (const section of [
         "Composition",
         "Colour & Value",
@@ -572,17 +638,26 @@ let signalFeedbackHeld;
         await page.getByText("Suggested palette", { exact: true }).count(),
         0,
       );
+      const thumbnails = page.getByTestId("teaching-evidence");
+      assert((await thumbnails.count()) > 0);
+      const evidenceBoxes = await thumbnails.evaluateAll((elements) =>
+        elements.map((el) => {
+          const r = el.getBoundingClientRect();
+          return { x: r.x, right: r.right };
+        }),
+      );
+      assert(evidenceBoxes.every((b) => b.x >= 0 && b.right <= width + 1));
       await button("Composition overlay").click();
-      await page.getByTestId("composition-structure").waitFor();
+      await artwork.getByTestId("composition-structure").waitFor();
       const image = await page
           .getByTestId("coaching-source-image")
           .boundingBox(),
-        svg = await page.getByTestId("composition-structure").boundingBox();
+        svg = await artwork.getByTestId("composition-structure").boundingBox();
       assert(Math.abs(image.width - svg.width) < 1);
       assert(Math.abs(image.height - svg.height) < 1);
       assert(Math.abs(image.x - svg.x) < 1);
       assert(Math.abs(image.y - svg.y) < 1);
-      const circle = page
+      const circle = artwork
         .getByTestId("composition-structure")
         .locator("circle")
         .first();
@@ -595,13 +670,13 @@ let signalFeedbackHeld;
           Number(await circle.getAttribute("cy")) - 0.36 * image.height,
         ) < 1,
       );
-      const firstGeometry = await page
+      const firstGeometry = await artwork
         .getByTestId("composition-structure")
         .innerHTML();
       await button("Colour & Value").click();
       await button("Colour & Value").click();
       assert.equal(
-        await page.getByTestId("composition-structure").innerHTML(),
+        await artwork.getByTestId("composition-structure").innerHTML(),
         firstGeometry,
       );
       await button("Roles").click();
@@ -626,7 +701,10 @@ let signalFeedbackHeld;
         "true",
       );
       await button("Clean view").click();
-      assert.equal(await page.getByTestId("composition-structure").count(), 0);
+      assert.equal(
+        await artwork.getByTestId("composition-structure").count(),
+        0,
+      );
       assert.equal(await page.getByTestId("visual-role-map").count(), 0);
       await noOverflow();
       assert.deepEqual(snapshot(), before);
@@ -638,7 +716,7 @@ let signalFeedbackHeld;
   await page.reload();
   await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
   await button("Composition overlay").click();
-  await page.getByTestId("composition-structure").waitFor();
+  await artwork.getByTestId("composition-structure").waitFor();
   await shot("composition-directional");
   await open("Colour & Value");
   await button("Colour & Value").scrollIntoViewIfNeeded();
@@ -696,7 +774,7 @@ let signalFeedbackHeld;
   await page.reload();
   await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
   await button("Composition overlay").click();
-  await page.getByTestId("composition-structure").waitFor();
+  await artwork.getByTestId("composition-structure").waitFor();
   assert.equal(
     await page.getByText(/This directional|This landing/).count(),
     0,
@@ -717,9 +795,200 @@ let signalFeedbackHeld;
     .getByText("Main opportunity to explore", { exact: true })
     .waitFor();
   assert.equal(await page.getByText(/No significant correction/).count(), 0);
+  await page
+    .getByTestId("recommendation-0")
+    .getByTestId("teaching-evidence")
+    .waitFor();
+  const beforeEvidence = snapshot();
+  const recommendation = page.getByTestId("recommendation-0");
+  const crops = recommendation.getByTestId("evidence-crop");
+  assert.equal(await crops.count(), 2);
+  const cropTransforms = await recommendation
+    .getByTestId("evidence-source-frame")
+    .evaluateAll((elements) => elements.map((el) => el.getAttribute("style")));
+  assert.equal(cropTransforms[0], cropTransforms[1]);
+  assert.equal(
+    await recommendation.locator('img[style*="grayscale(1)"]').count(),
+    1,
+  );
+  assert.deepEqual(snapshot(), beforeEvidence);
+  await recommendation.scrollIntoViewIfNeeded();
+  await shot("main-opportunity-value-evidence");
   await shot("competent-result");
   await page.setViewportSize({ width: 390, height: 950 });
   await shot("competent-mobile");
+  const evidenceMatrix = [];
+  for (const [aspect, file] of Object.entries(aspectFiles)) {
+    imageFile = file;
+    await page.reload();
+    await page.getByTestId("recommendation-0").waitFor();
+    for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await open("Colour & Value");
+      const before = snapshot();
+      const card = page.getByTestId("recommendation-0");
+      await card.getByTestId("evidence-crop").first().waitFor();
+      assert.equal(await card.getByTestId("evidence-crop").count(), 2);
+      const transforms = await card
+        .getByTestId("evidence-source-frame")
+        .evaluateAll((els) => els.map((el) => el.getAttribute("style")));
+      assert.equal(transforms[0], transforms[1]);
+      const boxes = await card.getByTestId("evidence-crop").evaluateAll((els) =>
+        els.map((el) => {
+          const r = el.getBoundingClientRect();
+          return {
+            left: r.left,
+            right: r.right,
+            width: r.width,
+            height: r.height,
+          };
+        }),
+      );
+      assert(
+        boxes.every(
+          (b) =>
+            b.left >= 0 &&
+            b.right <= width + 1 &&
+            b.width >= 32 &&
+            b.height >= 32,
+        ),
+      );
+      const sources = await card
+        .locator("img")
+        .evaluateAll((els) => els.map((el) => el.src));
+      assert(
+        sources.every(
+          (src) => src === sources[0] && src.includes("/object/sign/artworks/"),
+        ),
+      );
+      await noOverflow();
+      assert.deepEqual(snapshot(), before);
+      evidenceMatrix.push({
+        aspect,
+        width,
+        original: true,
+        sameRegion: true,
+        grayscaleOnly: true,
+        readonly: true,
+      });
+      if (width === 390 && ["portrait", "portrait-vehicle"].includes(aspect)) {
+        await page
+          .getByText("Complete Painting Analysis", { exact: true })
+          .scrollIntoViewIfNeeded();
+        await shot(aspect + "-mobile-top");
+        await card.scrollIntoViewIfNeeded();
+        await shot(aspect + "-mobile-evidence");
+      }
+    }
+  }
+  imageFile = aspectFiles.landscape;
+  const beforeVisualExamples = structuredClone(saved);
+  const edgeInsight = saved.canonicalAnalysis.insights.find(
+    (i) => i.id === "handling",
+  );
+  Object.assign(edgeInsight, {
+    classification: "optional_refinement",
+    factIds: ["edges", "path"],
+    lesson: "Softer bank edges could support the crisp focal corner.",
+    action:
+      "In a separate study, compare soft versus current bank edges; hold the focal corner fixed and choose the clearer separation.",
+  });
+  saved.canonicalAnalysis.visualEvidence.push({
+    insightId: "handling",
+    roleId: "tower",
+    note: {
+      ...saved.canonicalAnalysis.visualEvidence[0].note,
+      id: "edge-comparison",
+      label: "Focal and supporting edges",
+      scope: "multi_region",
+      regions: [
+        { x: 0.56, y: 0.24, width: 0.2, height: 0.3 },
+        { x: 0.08, y: 0.59, width: 0.27, height: 0.22 },
+      ],
+      region: null,
+      priority: "high",
+    },
+  });
+  await page.setViewportSize({ width: 390, height: 950 });
+  await page.reload();
+  await page
+    .getByTestId("recommendation-0")
+    .getByTestId("evidence-crop")
+    .first()
+    .waitFor();
+  assert.equal(
+    await page
+      .getByTestId("recommendation-0")
+      .getByTestId("evidence-crop")
+      .count(),
+    2,
+  );
+  assert.equal(
+    await page
+      .getByTestId("recommendation-0")
+      .locator('img[style*="grayscale"]')
+      .count(),
+    0,
+  );
+  await page.getByTestId("recommendation-0").scrollIntoViewIfNeeded();
+  await shot("mobile-edge-comparison");
+  Object.assign(saved, structuredClone(beforeVisualExamples));
+  saved.canonicalAnalysis.insights.push({
+    id: "figure-study",
+    domain: "composition",
+    classification: "study_experiment",
+    factIds: ["path"],
+    lesson: "A subordinate scale cue could clarify the bank's depth.",
+    action:
+      "In a separate study, compare one tiny muted figure at the lower bank with no figure; keep tower contrast strongest and assess human scale.",
+  });
+  saved.canonicalAnalysis.visualEvidence.push({
+    insightId: "figure-study",
+    roleId: "bank",
+    note: {
+      ...saved.canonicalAnalysis.visualEvidence[0].note,
+      id: "figure-location",
+      type: "region_highlight",
+      category: "composition",
+      label: "Possible figure area",
+      shortInstruction: "Possible subordinate figure area · future study.",
+      x: 10,
+      y: 64,
+      width: 10,
+      height: 10,
+      scope: "local",
+      region: { x: 0.1, y: 0.64, width: 0.1, height: 0.1 },
+      regionConfidence: 0.9,
+      timing: "next_study",
+    },
+  });
+  await page.reload();
+  await open("Practice & Studies");
+  await page.getByTestId("future-study-location").waitFor();
+  assert(
+    await page
+      .getByText("Possible figure area · future study", { exact: true })
+      .count(),
+  );
+  await page.getByTestId("future-study-location").scrollIntoViewIfNeeded();
+  await shot("future-study-location");
+  Object.assign(saved, structuredClone(beforeVisualExamples));
+  const beforeTextRoles = snapshot();
+  saved.canonicalAnalysis.visualRoles.forEach((r) => (r.confidence = 0.2));
+  await page.reload();
+  await button("Roles").click();
+  await page
+    .getByText(
+      "Role locations are uncertain. These roles are text guidance only.",
+      { exact: true },
+    )
+    .waitFor();
+  assert.equal(await page.getByTestId("visual-role-map").count(), 0);
+  assert(await page.getByText("Supporting · bank", { exact: true }).count());
+  assert.equal(edgeCalls, beforeTextRoles.edgeCalls);
+  assert.equal(used, beforeTextRoles.used);
+  assert.equal(uploads.length, beforeTextRoles.uploads);
+  Object.assign(saved, structuredClone(beforeVisualExamples));
   // A legacy saved response opens without reanalysis; reference flow remains available.
   const canonicalSaved = results.get(id).value;
   results.set(id, { provider: "openai", value: samples.improveResult });
@@ -816,6 +1085,7 @@ let signalFeedbackHeld;
     JSON.stringify(
       {
         matrix,
+        evidenceMatrix,
         calls: snapshot(),
         errors,
         requests: requests.map((r) => ({
@@ -830,7 +1100,7 @@ let signalFeedbackHeld;
     ),
   );
   console.log(
-    "PASS: professional workspace; 28 responsive/aspect cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; zero automatic mock fallback; no live paid calls.",
+    "PASS: professional workspace; 70 responsive/aspect cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; zero automatic mock fallback; no live paid calls.",
   );
   await browser.close();
 })().catch(async (error) => {
