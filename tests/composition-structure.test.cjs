@@ -404,3 +404,279 @@ test("a triangle template uses three non-collinear supplied anchors even if extr
     "rendering cannot mutate saved geometry",
   );
 });
+
+const teaching = (patch = {}) => ({
+  elements: ["Tower", "Bank"],
+  entry: "Lower left bank",
+  path: "Bank toward tower",
+  landing: "Pale tower",
+  supportingMass: "Muted bank",
+  quietMass: "Open water",
+  counterbalance: "Bank balances tower",
+  risk: "Keep the tower dominant",
+  ...patch,
+});
+const directionalLabels = ["Entry", "Path", "Landing"];
+const hasDirectionalRows = (rows) =>
+  rows.some(([label]) => directionalLabels.includes(label));
+const nonDirectionalStudies = [
+  {
+    type: "u_frame",
+    paths: [[p(0.1, 0.2), p(0.1, 0.8), p(0.9, 0.8), p(0.9, 0.2)]],
+    relationship: "Side trees frame the open water around the tower",
+    label: "Framing relationship",
+    elementsLabel: "Framing elements",
+  },
+  {
+    type: "cross",
+    paths: [
+      [p(0.4, 0.1), p(0.4, 0.9)],
+      [p(0.1, 0.6), p(0.9, 0.6)],
+    ],
+    relationship: "Upright tower intersects the horizontal bank",
+    label: "Axis relationship",
+    elementsLabel: "Intersecting elements",
+  },
+  {
+    type: "radiating",
+    paths: [
+      [first, last],
+      [p(0.9, 0.8), last],
+    ],
+    relationship: "The two bank edges converge near the tower",
+    label: "Directional relationship",
+    elementsLabel: "Directional elements",
+  },
+];
+for (const study of nonDirectionalStudies) {
+  test(`${study.type}: supplied relationships never become Entry/Path/Landing`, () => {
+    const overlay = fixture({
+      type: study.type,
+      paths: study.paths,
+      teaching: teaching({ path: study.relationship }),
+    });
+    const rows = library.compositionTeachingRows(overlay);
+    assert.equal(hasDirectionalRows(rows), false);
+    assert.deepEqual(rows.slice(0, 2), [
+      [study.elementsLabel, "Tower, Bank"],
+      [study.label, study.relationship],
+    ]);
+    const suppliedText = new Set([
+      ...Object.values(overlay.teaching),
+      overlay.teaching.elements.join(", "),
+    ]);
+    assert(rows.every(([, text]) => suppliedText.has(text)));
+    assert(!rows.some(([, text]) => text === overlay.teaching.entry));
+    assert(!rows.some(([, text]) => text === overlay.teaching.landing));
+    if (study.type === "u_frame") {
+      assert(rows.some(([label]) => label === "Supporting frame"));
+      assert(rows.some(([label]) => label === "Open space"));
+    }
+    if (study.type === "cross")
+      assert(rows.some(([label]) => label === "Countering relationship"));
+  });
+  test(`${study.type}: absent teaching stays absent instead of inventing an explanation`, () => {
+    const rows = library.compositionTeachingRows(
+      fixture({
+        type: study.type,
+        paths: study.paths,
+        teaching: teaching({
+          elements: [],
+          entry: null,
+          path: null,
+          landing: null,
+          supportingMass: null,
+          quietMass: null,
+          counterbalance: null,
+          risk: null,
+        }),
+      }),
+    );
+    assert.deepEqual(rows, []);
+  });
+}
+for (const type of ["diagonal", "s_curve"]) {
+  test(`${type}: supported directional teaching retains Entry/Path/Landing`, () => {
+    const rows = library.compositionTeachingRows(
+      fixture({
+        type,
+        paths: [[first, middle, last]],
+        teaching: teaching(),
+      }),
+    );
+    assert.deepEqual(
+      rows.filter(([label]) => directionalLabels.includes(label)),
+      [
+        ["Entry", "Lower left bank"],
+        ["Path", "Bank toward tower"],
+        ["Landing", "Pale tower"],
+      ],
+    );
+  });
+}
+test("L-shape opts into directional labels only with a saved open path, focal landing and complete teaching", () => {
+  const overlay = fixture({
+    type: "l_shape",
+    paths: [[first, middle, last]],
+    teaching: teaching(),
+  });
+  const rows = library.compositionTeachingRows(overlay);
+  assert.deepEqual(
+    rows.filter(([label]) => directionalLabels.includes(label)),
+    [
+      ["Entry", "Lower left bank"],
+      ["Path", "Bank toward tower"],
+      ["Landing", "Pale tower"],
+    ],
+  );
+});
+for (const [reason, patch] of [
+  ["no saved path", { paths: null }],
+  ["only two ordered anchors", { paths: [[first, last]] }],
+  ["repeated anchors", { paths: [[first, first, last]] }],
+  [
+    "closed framing path",
+    { paths: [[first, middle, last, first]], focalPoint: first },
+  ],
+  ["invalid coordinates", { paths: [[first, p(2, 0.5), last]] }],
+  ["low confidence", { confidence: 0.5 }],
+  ["no supplied focal anchor", { focalPoint: null }],
+  ["path ends away from the focal anchor", { focalPoint: middle }],
+  ["missing entry teaching", { teaching: teaching({ entry: null }) }],
+  ["missing path teaching", { teaching: teaching({ path: null }) }],
+  ["missing landing teaching", { teaching: teaching({ landing: null }) }],
+  ["blank teaching", { teaching: teaching({ landing: " " }) }],
+]) {
+  test(`L-shape with ${reason} does not force directional terminology`, () => {
+    const overlay = fixture({
+      type: "l_shape",
+      paths: [[first, middle, last]],
+      teaching: teaching(),
+      ...patch,
+    });
+    const rows = library.compositionTeachingRows(overlay);
+    assert.equal(hasDirectionalRows(rows), false);
+    assert.deepEqual(rows[0], ["L-shaped elements", "Tower, Bank"]);
+    assert(rows.some(([label]) => label === "Open space"));
+    if (overlay.teaching.path)
+      assert(
+        rows.some(
+          ([label, text]) =>
+            label === "L-shaped relationship" && text === overlay.teaching.path,
+        ),
+      );
+  });
+}
+for (const type of ["balanced_masses", "steelyard"]) {
+  test(`${type}: mass/counterbalance/negative-space teaching remains unchanged`, () => {
+    assert.deepEqual(
+      library.compositionTeachingRows(fixture({ type, teaching: teaching() })),
+      [
+        ["Major masses", "Tower, Bank"],
+        ["Supporting weight", "Muted bank"],
+        ["Negative space", "Open water"],
+        ["Counterbalance", "Bank balances tower"],
+        ["Watch", "Keep the tower dominant"],
+      ],
+    );
+  });
+}
+test("rule of thirds retains its grid/focal geometry and existing teaching labels", () => {
+  const overlay = fixture({
+    type: "rule_of_thirds",
+    paths: null,
+    teaching: teaching(),
+  });
+  assert.deepEqual(library.compositionTeachingRows(overlay), [
+    ["Visible elements", "Tower, Bank"],
+    ["Supporting mass", "Muted bank"],
+    ["Quiet space", "Open water"],
+    ["Counterbalance", "Bank balances tower"],
+    ["Watch", "Keep the tower dominant"],
+  ]);
+  const plan = library.createCompositionStructurePlan(overlay);
+  assert.equal(plan.thirdsGrid, true);
+  assert.deepEqual(plan.anchors, [{ point: last, role: "focal" }]);
+  assert.deepEqual(plan.strokes, []);
+});
+test("none stays text-only even if older saved data contains directional teaching", () => {
+  const overlay = fixture({ type: "none", teaching: teaching() });
+  assert.deepEqual(library.compositionTeachingRows(overlay), []);
+  assert.equal(library.createCompositionStructurePlan(overlay), null);
+});
+test("archetype-specific teaching preserves canonical geometry across all four views with zero extra calls", () => {
+  const painting = load("shared/paintingAnalysis.ts");
+  const canonicalFixture = require("./helpers/canonical-fixture.cjs");
+  const originalFetch = global.fetch;
+  let calls = 0;
+  global.fetch = () => {
+    calls++;
+    throw new Error("Teaching must remain local");
+  };
+  try {
+    for (const study of [
+      ...nonDirectionalStudies,
+      ...[
+        "diagonal",
+        "s_curve",
+        "l_shape",
+        "balanced_masses",
+        "rule_of_thirds",
+      ].map((type) => ({
+        type,
+        paths: [[first, middle, last]],
+        relationship: "Bank toward tower",
+      })),
+    ]) {
+      const saved = canonicalFixture();
+      const overlay = fixture({
+        type: study.type,
+        paths: study.paths,
+        teaching: teaching({ path: study.relationship }),
+      });
+      saved.canonicalAnalysis.composition.primary = overlay;
+      const before = structuredClone(saved);
+      const plan = library.createCompositionStructurePlan(overlay);
+      for (const view of painting.expertViewKeys) {
+        const projection = painting.projectPaintingAnalysis(saved, view);
+        const projected = projection.compositionOverlay;
+        library.compositionTeachingRows(projected);
+        assert.equal(
+          metadata.compositionIdentity(projected),
+          metadata.compositionIdentity(overlay),
+        );
+        assert.deepEqual(
+          library.createCompositionStructurePlan(projected),
+          plan,
+        );
+      }
+      assert.deepEqual(saved, before);
+    }
+    assert.equal(calls, 0);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+test("canonical prompt teaches archetype-specific relationships instead of a universal eye-flow journey", () => {
+  const prompt = load(
+    "supabase/functions/_shared/prompts.ts",
+  ).paintingAnalysisPrompt;
+  for (const instruction of [
+    "Entry / Path / Landing belong only to genuinely directional structures",
+    "l_shape only when a saved open ordered path reaches its supplied focalPoint",
+    "mass / counterbalance / negative space",
+    "frame / opening / enclosed space",
+    "Cross uses intersecting primary and countering axes",
+    "Radiating uses convergence/divergence around a supported focal area",
+    "Triangle uses three-point grouping/stability",
+    "Repetition structures (three_spot/rhythm) use cadence / spacing",
+    "Rule_of_thirds uses grid/focal placement; none stays text-only",
+    "teaching.entry and teaching.landing are null",
+  ])
+    assert(prompt.includes(instruction), instruction);
+  assert(
+    !prompt.includes(
+      "Composition explains the canonical structure, entry→path→landing",
+    ),
+  );
+});

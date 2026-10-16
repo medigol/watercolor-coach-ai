@@ -254,23 +254,48 @@ export function compositionTeachingRows(
   overlay: CompositionOverlay,
 ): [string, string][] {
   const t = overlay.teaching;
-  if (!t) return [];
-  const directional = [
-    "diagonal",
-    "s_curve",
-    "l_shape",
-    "u_frame",
-    "cross",
-    "radiating",
-  ].includes(overlay.type);
+  if (!t || overlay.type === "none") return [];
+  // An L can frame space without describing a journey. Opt in only when
+  // complete directional teaching accompanies a saved open path to its focal
+  // anchor. Inspect the geometry without changing the canonical overlay.
+  const lShape =
+    overlay.type === "l_shape" &&
+    [t.entry, t.path, t.landing].every((text) => text?.trim())
+      ? drawableCompositionOverlay(overlay)
+      : null;
+  const directionalL = lShape?.paths?.some((points) => {
+    const start = points[0];
+    const end = points[points.length - 1];
+    return (
+      new Set(points.map((p) => `${p.x},${p.y}`)).size >= 3 &&
+      (start.x !== end.x || start.y !== end.y) &&
+      end.x === lShape.focalPoint?.x &&
+      end.y === lShape.focalPoint?.y
+    );
+  });
+  const directional =
+    overlay.type === "diagonal" || overlay.type === "s_curve" || directionalL;
   const balance = ["balanced_masses", "steelyard"].includes(overlay.type);
+  const relationshipLabels: Partial<Record<CompositionArchetype, string>> = {
+    l_shape: "L-shaped relationship",
+    u_frame: "Framing relationship",
+    cross: "Axis relationship",
+    radiating: "Directional relationship",
+  };
+  const elementLabels: Partial<Record<CompositionArchetype, string>> = {
+    l_shape: "L-shaped elements",
+    u_frame: "Framing elements",
+    cross: "Intersecting elements",
+    radiating: "Directional elements",
+  };
+  const relationshipLabel = relationshipLabels[overlay.type];
   const rows: [string, string | null | undefined][] = [
     [
       balance
         ? "Major masses"
         : overlay.type === "three_spot" || overlay.type === "rhythm"
           ? "Accents"
-          : "Visible elements",
+          : (elementLabels[overlay.type] ?? "Visible elements"),
       t.elements.join(", "),
     ],
     ...(directional
@@ -279,17 +304,31 @@ export function compositionTeachingRows(
           ["Path", t.path],
           ["Landing", t.landing],
         ] as [string, string | null | undefined][])
-      : []),
-    [balance ? "Supporting weight" : "Supporting mass", t.supportingMass],
+      : relationshipLabel
+        ? [[relationshipLabel, t.path] as [string, string | null]]
+        : []),
+    [
+      balance
+        ? "Supporting weight"
+        : overlay.type === "u_frame"
+          ? "Supporting frame"
+          : "Supporting mass",
+      t.supportingMass,
+    ],
     [
       balance
         ? "Negative space"
         : overlay.type === "enclosure"
           ? "Enclosed space"
-          : "Quiet space",
+          : overlay.type === "u_frame" || overlay.type === "l_shape"
+            ? "Open space"
+            : "Quiet space",
       t.quietMass,
     ],
-    ["Counterbalance", t.counterbalance],
+    [
+      overlay.type === "cross" ? "Countering relationship" : "Counterbalance",
+      t.counterbalance,
+    ],
     ["Watch", t.risk],
   ];
   return rows.filter((r): r is [string, string] => !!r[1]);
