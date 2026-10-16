@@ -1,4 +1,11 @@
-import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Platform,
   Pressable,
@@ -16,6 +23,11 @@ import {
 import { workspaceTeaching } from "../shared/coachingWorkspace";
 import { sameLearningInsight } from "../shared/coachingEvidence";
 import {
+  objectDesignSuggestion,
+  qualityRationaleText,
+  separateStudyText,
+} from "../shared/coachingLanguage";
+import {
   drawableCompositionOverlay,
   compositionIdentity,
 } from "../shared/visualMetadata";
@@ -28,6 +40,15 @@ import { curatedCoachingNotes, VisualCoachingNotes } from "./CoachingOverlay";
 import { SavedImage } from "./SavedResultState";
 import type { ImageSize } from "../shared/imageGeometry";
 import ColourValueAnalysis from "./ColourValueAnalysis";
+import EvidenceVisual from "./EvidenceVisual";
+import {
+  allocateEvidence,
+  insightEvidence,
+  colourEvidence,
+  compositionEvidence,
+  evidenceIdentity,
+  type EvidencePlacement,
+} from "../lib/teachingEvidence";
 import BrushWashPlanCard from "./BrushWashPlanCard";
 import { colors, styles } from "./ui";
 import { design } from "./theme";
@@ -37,14 +58,19 @@ function Section({
   icon,
   children,
   initiallyOpen = false,
+  reveal,
 }: {
   title: string;
   icon: React.ComponentProps<typeof Ionicons>["name"];
   children: ReactNode;
   initiallyOpen?: boolean;
+  reveal?: number;
 }) {
   const { width } = useWindowDimensions();
   const [choice, setChoice] = useState<boolean>();
+  useEffect(() => {
+    if (reveal) setChoice(true);
+  }, [reveal]);
   const open = choice ?? (initiallyOpen || width >= 960);
   return (
     <View
@@ -87,16 +113,20 @@ function Choice({
   active,
   onPress,
   disabled = false,
+  accessibilityLabel,
+  grid = false,
 }: {
   title: string;
   active?: boolean;
   onPress: () => void;
   disabled?: boolean;
+  accessibilityLabel?: string;
+  grid?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={accessibilityLabel ?? title}
       aria-pressed={!!active}
       accessibilityState={{ selected: !!active, disabled }}
       disabled={disabled}
@@ -110,6 +140,10 @@ function Choice({
         borderColor: active ? colors.accent : colors.border,
         backgroundColor: active ? colors.pale : colors.elevated,
         opacity: disabled ? 0.45 : 1,
+        flexBasis: grid ? "47%" : undefined,
+        flexGrow: grid ? 1 : undefined,
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
       <Text
@@ -131,7 +165,7 @@ export default function PaintingAnalysisWorkspace({
   isSaved: boolean;
   warning?: string;
 }) {
-  const { width } = useWindowDimensions(),
+  const { width, height } = useWindowDimensions(),
     wide = Platform.OS === "web" && width >= 1024;
   const c = source.canonicalAnalysis,
     teaching = workspaceTeaching(source);
@@ -141,6 +175,7 @@ export default function PaintingAnalysisWorkspace({
   const overallObservation =
     !teaching.opportunity &&
     overall &&
+    !teaching.recommendations.some((r) => r.insight.id === overall.id) &&
     !teaching.strengths.some((i) => i.id === overall.id) &&
     !teaching.studies.some((i) => i.id === overall.id) &&
     !sameLearningInsight(overall.lesson, c.qualityAssessment.rationale)
@@ -177,6 +212,141 @@ export default function PaintingAnalysisWorkspace({
     secondary && distinctSecondary ? distinctSecondary : primary;
   const roles = planCanonicalVisualRoles(c.visualRoles);
   const notesRef = useRef<View>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const evidenceRefs = useRef<Record<string, View | null>>({});
+  const [revealed, setRevealed] = useState({ key: "", revision: 0 });
+  const firstRecommendation = teaching.recommendations[0];
+  const colourInsight = c.insights.find((i) => i.domain === "colour_value");
+  const valueEvidence = colourInsight
+    ? insightEvidence(source, colourInsight)
+    : null;
+  const requests = [
+    {
+      key: "composition",
+      label: "Composition",
+      plan: compositionEvidence(structure),
+    },
+    ...(firstRecommendation
+      ? [
+          {
+            key: `insight:${firstRecommendation.insight.id}`,
+            label: firstRecommendation.label,
+            plan: insightEvidence(source, firstRecommendation.insight),
+          },
+        ]
+      : []),
+    ...teaching.strengths.slice(0, 1).map((i) => ({
+      key: `insight:${i.id}`,
+      label: "What works",
+      plan: insightEvidence(source, i),
+    })),
+    {
+      key: "value",
+      label: "Value hierarchy",
+      plan: valueEvidence ? { ...valueEvidence, value: true } : null,
+    },
+    ...teaching.studies
+      .filter((i) => objectDesignSuggestion(i.action))
+      .map((i) => ({
+        key: `insight:${i.id}`,
+        label: "Future study location",
+        plan: insightEvidence(source, i),
+      })),
+    ...(c.colourAnalysis?.visibleColours.slice(0, 3).map((colour, index) => ({
+      key: `colour-${index}`,
+      label: colour.label,
+      plan: colourEvidence(source, colour.roleId, colour.label),
+    })) ?? []),
+    ...teaching.recommendations.slice(1).map(({ insight, label }) => ({
+      key: `insight:${insight.id}`,
+      label,
+      plan: insightEvidence(source, insight),
+    })),
+    ...c.insights
+      .filter((i) => i.domain === "technique")
+      .slice(0, 1)
+      .map((i) => ({
+        key: "technique",
+        label: "Technique evidence",
+        plan: insightEvidence(source, i),
+      })),
+  ];
+  const placements = allocateEvidence(requests);
+  const showEvidence = (key: string) => {
+    setRevealed((previous) => ({ key, revision: previous.revision + 1 }));
+    setTimeout(() => {
+      if (Platform.OS === "web") {
+        const node = evidenceRefs.current[key] as unknown as {
+          scrollIntoView?: (o: ScrollIntoViewOptions) => void;
+        } | null;
+        node?.scrollIntoView?.({ behavior: "auto", block: "center" });
+      } else {
+        const node = evidenceRefs.current[key],
+          scroll = scrollRef.current;
+        const inner = scroll?.getInnerViewNode();
+        if (node && inner)
+          node.measureLayout(
+            inner,
+            (_x, y) => scroll?.scrollTo({ y, animated: false }),
+            () => {},
+          );
+      }
+    }, 50);
+  };
+  const noteReferences = Object.fromEntries(
+    notes.flatMap((note) => {
+      const linked = c.visualEvidence?.find((e) => e.note.id === note.id);
+      const insight = c.insights.find((i) => i.id === linked?.insightId);
+      const plan = insight && insightEvidence(source, insight);
+      const owner =
+        plan &&
+        Object.entries(placements).find(
+          ([, p]) =>
+            "plan" in p && evidenceIdentity(p.plan) === evidenceIdentity(plan),
+        );
+      return owner && note.id ? [[note.id, owner[0]]] : [];
+    }),
+  );
+  const evidence = (key: string) => {
+    const placement: EvidencePlacement | undefined = placements[key];
+    if (!placement || !image) return null;
+    if ("reference" in placement)
+      return (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`See image evidence: ${placement.reference.label}`}
+          onPress={() => showEvidence(placement.reference.key)}
+          style={{ minHeight: 44, justifyContent: "center" }}
+        >
+          <Text style={[styles.caption, { color: colors.accent }]}>
+            See image evidence · {placement.reference.label}
+          </Text>
+        </Pressable>
+      );
+    const noteIndex = notes.findIndex((n) => n.id === placement.plan.noteId);
+    return (
+      <View
+        ref={(node) => {
+          evidenceRefs.current[key] = node;
+        }}
+      >
+        <EvidenceVisual
+          uri={image}
+          sourceSize={sourceSize}
+          plan={placement.plan}
+          onSelect={
+            noteIndex >= 0
+              ? () => {
+                  setSelected(noteIndex);
+                  setMode("notes");
+                  setShowNotes(true);
+                }
+              : undefined
+          }
+        />
+      </View>
+    );
+  };
   const selectNote = (index: number | null) => {
     setSelected(index);
     setShowNotes(true);
@@ -195,7 +365,10 @@ export default function PaintingAnalysisWorkspace({
         i.domain === domain &&
         !teaching.strengths.some((s) => s.id === i.id) &&
         !teaching.studies.some((s) => s.id === i.id) &&
-        i.id !== teaching.opportunity?.id,
+        !teaching.recommendations.some((r) => r.insight.id === i.id) &&
+        !["clear_issue", "optional_refinement", "study_experiment"].includes(
+          i.classification,
+        ),
     );
   const lessons = (domain: string, omit: string[] = []) =>
     domainInsights(domain)
@@ -232,7 +405,11 @@ export default function PaintingAnalysisWorkspace({
             }
           </Text>
           <Text style={styles.body}>{i.lesson}</Text>
-          <Text style={styles.body}>{i.action}</Text>
+          <Text style={styles.body}>
+            {i.classification === "strength"
+              ? i.action
+              : separateStudyText(i.action)}
+          </Text>
         </View>
       ));
   const assessment = (
@@ -265,7 +442,7 @@ export default function PaintingAnalysisWorkspace({
       </Text>
       <Text style={styles.body}>
         {c.qualityAssessment.confidence < 0.65 ? "One useful reading: " : ""}
-        {c.qualityAssessment.rationale}
+        {qualityRationaleText(c.qualityAssessment.rationale)}
       </Text>
       <Text style={[styles.body, { color: colors.accent, fontWeight: "600" }]}>
         {teaching.status}
@@ -277,6 +454,7 @@ export default function PaintingAnalysisWorkspace({
   );
   return (
     <ScrollView
+      ref={scrollRef}
       style={{ flex: 1, width: "100%", backgroundColor: colors.background }}
       contentContainerStyle={{
         alignItems: "center",
@@ -292,7 +470,14 @@ export default function PaintingAnalysisWorkspace({
           <Text style={styles.caption}>
             WATERCOLOR COACH · {isSaved ? "SAVED ANALYSIS" : "PAINTING STUDY"}
           </Text>
-          <Text style={styles.title}>Complete Painting Analysis</Text>
+          <Text
+            style={[
+              styles.title,
+              width < 600 ? { fontSize: 23, lineHeight: 29 } : undefined,
+            ]}
+          >
+            Complete Painting Analysis
+          </Text>
           <Text style={styles.body}>{source.title}</Text>
           {!!warning && <Text style={styles.caption}>{warning}</Text>}
         </View>
@@ -305,6 +490,9 @@ export default function PaintingAnalysisWorkspace({
           }}
         >
           <View
+            ref={(node) => {
+              evidenceRefs.current.artwork = node;
+            }}
             testID="result-visual-column"
             style={[
               { gap: 12, minWidth: 0 },
@@ -342,7 +530,11 @@ export default function PaintingAnalysisWorkspace({
                   visualMode={mode === "clean" ? "notes" : mode}
                   coachingVisible={mode !== "clean"}
                   roleRegions={roles}
-                  maxImageHeight={wide ? 720 : 560}
+                  maxImageHeight={
+                    wide
+                      ? Math.min(720, height - 160)
+                      : Math.floor(height * 0.58)
+                  }
                 />
               ) : (
                 <Text style={[styles.body, { padding: 20 }]}>
@@ -356,7 +548,9 @@ export default function PaintingAnalysisWorkspace({
               style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
             >
               <Choice
-                title="Clean view"
+                title={width < 600 ? "Clean" : "Clean view"}
+                accessibilityLabel="Clean view"
+                grid={width < 600}
                 active={mode === "clean"}
                 onPress={() => {
                   setMode("clean");
@@ -364,7 +558,13 @@ export default function PaintingAnalysisWorkspace({
                 }}
               />
               <Choice
-                title={`Notes${notes.length ? ` · ${notes.length}` : ""}`}
+                title={
+                  width < 600
+                    ? "Notes"
+                    : `Notes${notes.length ? ` · ${notes.length}` : ""}`
+                }
+                accessibilityLabel={`Notes${notes.length ? ` · ${notes.length}` : ""}`}
+                grid={width < 600}
                 active={mode === "notes"}
                 disabled={!notes.length}
                 onPress={() => {
@@ -373,15 +573,18 @@ export default function PaintingAnalysisWorkspace({
                 }}
               />
               <Choice
-                title="Composition overlay"
+                title={width < 600 ? "Composition" : "Composition overlay"}
+                accessibilityLabel="Composition overlay"
+                grid={width < 600}
                 active={mode === "composition"}
                 disabled={!structure}
                 onPress={() => setMode("composition")}
               />
               <Choice
                 title="Roles"
+                grid={width < 600}
                 active={mode === "roles"}
-                disabled={!roles.length}
+                disabled={!c.visualRoles.length}
                 onPress={() => setMode("roles")}
               />
             </View>
@@ -392,6 +595,12 @@ export default function PaintingAnalysisWorkspace({
             )}
             {mode === "roles" && (
               <View style={{ gap: 4 }}>
+                {!roles.length && (
+                  <Text style={styles.caption}>
+                    Role locations are uncertain. These roles are text guidance
+                    only.
+                  </Text>
+                )}
                 {c.visualRoles.map((r) => (
                   <Text key={r.id} style={styles.caption}>
                     {r.role[0].toUpperCase() + r.role.slice(1)} · {r.area}
@@ -412,6 +621,8 @@ export default function PaintingAnalysisWorkspace({
                   uri={image}
                   sourceSize={sourceSize}
                   study={projection.coachingMode === "study"}
+                  evidenceReferences={noteReferences}
+                  onShowEvidence={showEvidence}
                 />
               </View>
             )}
@@ -447,32 +658,74 @@ export default function PaintingAnalysisWorkspace({
                       {i.lesson}
                     </Text>
                     <Text style={styles.caption}>{i.action}</Text>
+                    {evidence(`insight:${i.id}`)}
                   </View>
                 ))}
               </View>
             )}
-            {!!teaching.opportunity && (
-              <View
-                style={{
-                  gap: 8,
-                  padding: 16,
-                  backgroundColor: "#F8F1E5",
-                  borderRadius: design.radius.control,
-                }}
-              >
-                <Text style={[styles.heading, { fontSize: 18 }]}>
-                  {teaching.opportunity.classification === "clear_issue"
-                    ? "Main opportunity"
-                    : "Optional refinement"}
-                </Text>
-                <Text style={styles.body}>{teaching.opportunity.lesson}</Text>
-                <Text style={styles.body}>{teaching.opportunity.action}</Text>
+            {!!teaching.recommendations.length && (
+              <View testID="elevation-recommendations" style={{ gap: 18 }}>
+                <Text style={styles.heading}>How to elevate this painting</Text>
+                {teaching.recommendations.map(({ insight, label }, index) => (
+                  <View
+                    key={insight.id}
+                    testID={`recommendation-${index}`}
+                    style={{
+                      gap: 8,
+                      borderLeftWidth: 2,
+                      borderColor:
+                        insight.classification === "clear_issue"
+                          ? colors.warning
+                          : colors.ochre,
+                      paddingLeft: 12,
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.body,
+                        { fontWeight: "600", color: colors.ink },
+                      ]}
+                    >
+                      {index + 1}. {label}
+                    </Text>
+                    <Text style={styles.caption}>
+                      {insight.classification === "clear_issue"
+                        ? "Visible technical issue"
+                        : "An elevation idea, not a defect"}
+                    </Text>
+                    {evidence(`insight:${insight.id}`)}
+                    <Text style={[styles.caption, { fontWeight: "600" }]}>
+                      What I see
+                    </Text>
+                    <Text style={styles.body}>
+                      {insight.factIds
+                        .map(
+                          (id) => c.facts.find((f) => f.id === id)?.observation,
+                        )
+                        .filter(Boolean)
+                        .join(" ")}
+                    </Text>
+                    <Text style={[styles.caption, { fontWeight: "600" }]}>
+                      Why it matters
+                    </Text>
+                    <Text style={styles.body}>{insight.lesson}</Text>
+                    <Text style={[styles.caption, { fontWeight: "600" }]}>
+                      Try in a separate study
+                    </Text>
+                    <Text style={styles.body}>
+                      {separateStudyText(insight.action)}
+                    </Text>
+                  </View>
+                ))}
               </View>
             )}
             <Section
               title="Composition"
               icon="git-network-outline"
               initiallyOpen
+              reveal={
+                revealed.key === "composition" ? revealed.revision : undefined
+              }
             >
               {structure && (
                 <Text
@@ -485,6 +738,7 @@ export default function PaintingAnalysisWorkspace({
                 </Text>
               )}
               <Text style={styles.body}>{c.composition.observation}</Text>
+              {evidence("composition")}
               {structure && (
                 <>
                   {!sameLearningInsight(
@@ -528,14 +782,32 @@ export default function PaintingAnalysisWorkspace({
                 structure?.shortExplanation ?? "",
               ])}
             </Section>
-            <Section title="Colour & Value" icon="color-palette-outline">
-              <ColourValueAnalysis source={source} />
+            <Section
+              title="Colour & Value"
+              icon="color-palette-outline"
+              reveal={
+                revealed.key.startsWith("colour-") || revealed.key === "value"
+                  ? revealed.revision
+                  : undefined
+              }
+            >
+              <ColourValueAnalysis
+                source={source}
+                renderEvidence={(index) => evidence(`colour-${index}`)}
+                renderValueEvidence={() => evidence("value")}
+              />
               {lessons("colour_value", [
                 c.colourAnalysis?.colourStrategy ?? "",
                 c.colourAnalysis?.valueHierarchy ?? "",
               ])}
             </Section>
-            <Section title="Watercolor technique" icon="brush-outline">
+            <Section
+              title="Watercolor technique"
+              icon="brush-outline"
+              reveal={
+                revealed.key === "technique" ? revealed.revision : undefined
+              }
+            >
               <Text
                 style={[
                   styles.caption,
@@ -544,6 +816,7 @@ export default function PaintingAnalysisWorkspace({
               >
                 Observed effect · what I see
               </Text>
+              {evidence("technique")}
               {c.facts
                 .filter((f) => f.domain === "technique")
                 .map((f) => (
@@ -555,7 +828,11 @@ export default function PaintingAnalysisWorkspace({
               {!!c.brushPlan?.length && (
                 <>
                   <Text style={[styles.heading, { fontSize: 17 }]}>
-                    Suggested practice approach
+                    Suggested practice method
+                  </Text>
+                  <Text style={styles.caption}>
+                    A way to test a similar effect on separate paper, not a
+                    reconstruction of the original process.
                   </Text>
                   <BrushWashPlanCard plan={c.brushPlan} hideHeading study />
                 </>
@@ -605,6 +882,7 @@ export default function PaintingAnalysisWorkspace({
                       future experiment
                     </Text>
                     <Text style={styles.body}>{i.lesson}</Text>
+                    {evidence(`insight:${i.id}`)}
                     <Text style={styles.body}>{i.action}</Text>
                   </View>
                 ))}

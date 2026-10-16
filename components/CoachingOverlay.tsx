@@ -77,6 +77,8 @@ export function VisualCoachingNotes({
   onSelect,
   uri,
   sourceSize,
+  evidenceReferences = {},
+  onShowEvidence,
 }: {
   notes: unknown;
   study?: boolean;
@@ -84,6 +86,8 @@ export function VisualCoachingNotes({
   onSelect?: (index: number | null) => void;
   uri?: string;
   sourceSize?: ImageSize | null;
+  evidenceReferences?: Record<string, string>;
+  onShowEvidence?: (key: string) => void;
 }) {
   const { width: viewportWidth } = useWindowDimensions();
   const desktop = viewportWidth >= 960;
@@ -213,6 +217,9 @@ export function VisualCoachingNotes({
               ? "technique"
               : "composition");
         const regions = cropRegions.get(index) ?? [];
+        const linkedEvidence = note.id
+          ? evidenceReferences[note.id]
+          : undefined;
         const sharedOwner = sharedContext.get(index);
         const evidenceKey = (value: unknown) =>
           typeof value === "string"
@@ -246,7 +253,7 @@ export function VisualCoachingNotes({
               },
             ]}
           >
-            {uri && sourceSize && regions.length > 0 && (
+            {!linkedEvidence && uri && sourceSize && regions.length > 0 && (
               <View
                 style={{
                   gap: 8,
@@ -331,7 +338,7 @@ export function VisualCoachingNotes({
                   {conciseText(note.shortInstruction)}
                 </Text>
               )}
-              {active && (
+              {active && !linkedEvidence && (
                 <>
                   <Text
                     style={[
@@ -361,6 +368,18 @@ export function VisualCoachingNotes({
                 </>
               )}
             </Pressable>
+            {linkedEvidence && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="See this note's teaching evidence"
+                onPress={() => onShowEvidence?.(linkedEvidence)}
+                style={{ minHeight: 44, justifyContent: "center" }}
+              >
+                <Text style={[styles.caption, { color: colors.accent }]}>
+                  See this note’s teaching evidence
+                </Text>
+              </Pressable>
+            )}
           </View>
         );
       })}

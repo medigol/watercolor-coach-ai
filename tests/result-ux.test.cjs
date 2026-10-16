@@ -1108,7 +1108,7 @@ test("unified Colour & Value renders visible relationships and possible mixes wi
     viewportWidth: 1440,
   });
   for (const text of [
-    "Visible colour structure",
+    "Visible colour evidence",
     "Value hierarchy",
     "Chroma hierarchy",
     "Recreate this look",
@@ -1118,6 +1118,23 @@ test("unified Colour & Value renders visible relationships and possible mixes wi
     assert(html.includes(text));
   assert(!html.includes("Suggested palette"));
   assert(!html.includes("expert-view-controls"));
+});
+
+test("an optional overall refinement is taught once instead of repeated in the assessment", () => {
+  const fixture = require("./helpers/canonical-fixture.cjs")();
+  const insight = fixture.canonicalAnalysis.insights[0];
+  insight.classification = "optional_refinement";
+  insight.lesson =
+    "A smaller light accent could make the existing hierarchy more selective.";
+  insight.action =
+    "On a separate study, compare two sizes of the reserved light; keep the bank unchanged and choose the clearer hierarchy.";
+  const html = render("improve_painting", "openai", image, undefined, {
+    canonicalResult: fixture,
+    viewportWidth: 1440,
+  });
+  assert.equal(html.split(insight.lesson).length - 1, 1);
+  assert(html.includes("How to elevate this painting"));
+  assert(html.includes("Optional refinement"));
 });
 test("repeated colour prose is shown once while the value hierarchy remains first-class", () => {
   const fixture = require("./helpers/canonical-fixture.cjs")();

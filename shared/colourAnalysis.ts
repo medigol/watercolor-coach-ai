@@ -4,6 +4,10 @@ import {
   type CoachingDecision,
 } from "./coachingDecision.ts";
 import type { PaintingInsight, PaintingRole } from "./paintingAnalysis.ts";
+import {
+  approximateMixRatio,
+  colourRelationshipText,
+} from "./coachingLanguage.ts";
 
 export interface ColourAnalysis {
   visibleColours: {
@@ -38,7 +42,7 @@ function safeText(v: unknown, max: number, decision: CoachingDecision): string {
     /\b(?:painted by|the artist is|in the style of)\b|\b(?:you|the user|the artist|the painter|they)\b[^.!?]{0,50}\b(?:expert|professional|skill|experienced)\b/i.test(
       v,
     ) ||
-    /\b(?:painted with|original pigments? (?:is|are|was|were)|exact (?:pigment|formula)|the artist used)\b/i.test(
+    /\b(?:painted with|(?:original|actual|exact) (?:pigments?|formula|mixture)|the artist used)\b/i.test(
       v,
     ) ||
     conflictsWithDecision(v, decision)
@@ -55,7 +59,15 @@ export function cleanColourAnalysis(
   decision: CoachingDecision,
 ): ColourAnalysis | null {
   if (!record(value)) return null;
-  const text = (v: unknown, max = 180) => safeText(v, max, decision);
+  const hues = Array.isArray(value.visibleColours)
+    ? value.visibleColours.flatMap((c) =>
+        record(c) && typeof c.approximateHex === "string"
+          ? [c.approximateHex]
+          : [],
+      )
+    : [];
+  const text = (v: unknown, max = 180) =>
+    colourRelationshipText(safeText(v, max, decision), hues);
   const valueHierarchy = text(value.valueHierarchy);
   if (!valueHierarchy) return null;
   const visibleColours = (
@@ -127,7 +139,7 @@ export function cleanColourAnalysis(
         {
           target: text(item.target, 50),
           pigments: item.pigments.map((p) => text(p, 40)),
-          startingRatio: text(item.startingRatio, 40) || null,
+          startingRatio: approximateMixRatio(item.startingRatio),
           use: text(item.use, 100),
         },
       ];

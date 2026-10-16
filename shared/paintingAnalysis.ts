@@ -23,6 +23,11 @@ import {
   type ColourAnalysis,
 } from "./colourAnalysis.ts";
 import { correctiveTeaching } from "./coachingWorkspace.ts";
+import {
+  colourRelationshipText,
+  objectDesignSuggestion,
+  qualityRationaleText,
+} from "./coachingLanguage.ts";
 
 // A saved, versioned document; no I/O and no inferred geometry or extra analysis.
 export const expertViewKeys = [
@@ -537,12 +542,12 @@ export function cleanPaintingAnalysis(
   const c = value.canonicalAnalysis;
   const facts = c.facts.map((f) => ({
     ...f,
-    observation: observationText(f.observation),
+    observation: colourRelationshipText(observationText(f.observation)),
   }));
   if (facts.some((f) => !f.observation)) return null;
   const quality = {
     ...c.qualityAssessment,
-    rationale: observationText(c.qualityAssessment.rationale),
+    rationale: qualityRationaleText(c.qualityAssessment.rationale),
   };
   if (!quality.rationale) return null;
   const strengths = c.insights
@@ -555,8 +560,8 @@ export function cleanPaintingAnalysis(
     );
   const decision = roleDecision(c);
   const insights = c.insights.map((i) => {
-    const lesson = observationText(i.lesson),
-      action = observationText(i.action);
+    const lesson = colourRelationshipText(observationText(i.lesson)),
+      action = colourRelationshipText(observationText(i.action));
     let classification = i.classification;
     if (
       classification === "strength" &&
@@ -591,6 +596,7 @@ export function cleanPaintingAnalysis(
     const roleConflict =
       guarded.whatToFix.length === 0 || guarded.mainAdvice !== lesson;
     if (roleConflict) classification = "study_experiment";
+    if (objectDesignSuggestion(action)) classification = "study_experiment";
     const safeAction =
       contradiction || roleConflict
         ? "In a separate study, compare this alternative while preserving the original focal hierarchy."

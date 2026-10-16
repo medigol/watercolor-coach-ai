@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import type { PaintingAnalysisResult } from "../shared/paintingAnalysis";
 import { colors, styles } from "./ui";
@@ -6,8 +7,12 @@ import { sameLearningInsight } from "../shared/coachingEvidence";
 
 export default function ColourValueAnalysis({
   source,
+  renderEvidence,
+  renderValueEvidence,
 }: {
   source: PaintingAnalysisResult;
+  renderEvidence?: (index: number) => ReactNode;
+  renderValueEvidence?: () => ReactNode;
 }) {
   const c = source.canonicalAnalysis,
     colour = c.colourAnalysis;
@@ -39,44 +44,63 @@ export default function ColourValueAnalysis({
       {!!colour?.visibleColours.length && (
         <View style={{ gap: 10 }}>
           <Text style={[styles.body, { color: colors.ink, fontWeight: "600" }]}>
-            Visible colour structure
+            Visible colour evidence
           </Text>
           <Text style={styles.caption}>
-            Approximate colours from the image analysis · not original pigment
-            identification
+            Original painting details where confidently located. Small colour
+            indicators are approximate, not original pigment identification.
           </Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {colour.visibleColours.map((item, index) => (
-              <View
-                key={index}
-                style={{
-                  flexGrow: 1,
-                  flexBasis: 76,
-                  minWidth: 70,
-                  maxWidth: 140,
-                  gap: 5,
-                }}
-              >
+          <View style={{ gap: 14 }}>
+            {colour.visibleColours.map((item, index) => {
+              const sourceEvidence = renderEvidence?.(index);
+              return (
                 <View
-                  accessibilityLabel={item.label}
+                  key={index}
                   style={{
-                    height: 48,
-                    borderRadius: 8,
-                    backgroundColor: item.approximateHex,
-                    borderWidth: 1,
-                    borderColor: colors.border,
+                    width: "100%",
+                    minWidth: 0,
+                    gap: 5,
                   }}
-                />
-                <Text style={[styles.caption, { color: colors.ink }]}>
-                  {item.label}
-                </Text>
-                {item.roleId && (
-                  <Text style={styles.caption}>
-                    {c.visualRoles.find((r) => r.id === item.roleId)?.role} area
-                  </Text>
-                )}
-              </View>
-            ))}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 7,
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      accessibilityLabel={`Approximate analysis colour: ${item.label}`}
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 3,
+                        backgroundColor: item.approximateHex,
+                        borderWidth: 0.5,
+                        borderColor: colors.border,
+                      }}
+                    />
+                    <Text
+                      style={[styles.caption, { color: colors.ink, flex: 1 }]}
+                    >
+                      {item.label}
+                    </Text>
+                  </View>
+                  {sourceEvidence}
+                  {!sourceEvidence && (
+                    <Text style={styles.caption}>
+                      Source detail is unavailable for this saved colour.
+                    </Text>
+                  )}
+                  {item.roleId && (
+                    <Text style={styles.caption}>
+                      {c.visualRoles.find((r) => r.id === item.roleId)?.role}{" "}
+                      area
+                    </Text>
+                  )}
+                </View>
+              );
+            })}
           </View>
         </View>
       )}
@@ -90,6 +114,7 @@ export default function ColourValueAnalysis({
               {title}
             </Text>
             <Text style={styles.body}>{text}</Text>
+            {title === "Value hierarchy" && renderValueEvidence?.()}
           </View>
         ))}
       {!!colour?.technicalAssessment && (

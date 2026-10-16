@@ -74,7 +74,16 @@ export function SavedImage({
     Image.getSize(
       uri,
       (width, height) => {
-        if (alive && width > 0 && height > 0) setAspect(width / height);
+        if (
+          alive &&
+          Number.isFinite(width) &&
+          Number.isFinite(height) &&
+          width > 0 &&
+          height > 0
+        ) {
+          setAspect(width / height);
+          onImageSize?.({ width, height });
+        }
       },
       () => {},
     );

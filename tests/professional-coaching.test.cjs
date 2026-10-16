@@ -198,7 +198,7 @@ test("colour UI distinguishes visible image colours, possible recreation pigment
       "utf8",
     )
     .replace(/\s+/g, " ");
-  assert(ui.includes("Visible colour structure"));
+  assert(ui.includes("Visible colour evidence"));
   assert(ui.includes("not original pigment identification"));
   assert(ui.includes("Possible watercolor pigments"));
   assert(ui.includes("Approximate starting ratio"));
