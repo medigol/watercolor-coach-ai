@@ -415,6 +415,7 @@ export default function CoachingOverlay({
   coachingVisible = true,
   visualMode,
   roleRegions,
+  maxImageHeight = 420,
 }: {
   uri: string;
   notes: unknown;
@@ -431,6 +432,7 @@ export default function CoachingOverlay({
   coachingVisible?: boolean;
   visualMode?: "notes" | "composition" | "roles";
   roleRegions?: VisualRoleRegion[];
+  maxImageHeight?: number;
 }) {
   const [size, setSize] = useState<{
     uri: string;
@@ -493,7 +495,7 @@ export default function CoachingOverlay({
   )
     return null;
   const activeIndex = selectedNote === undefined ? selected : selectedNote;
-  const fitted = containFrame(size, { width, height: 420 });
+  const fitted = containFrame(size, { width, height: maxImageHeight });
   const imageWidth = fitted?.width ?? 0;
   const imageHeight = fitted?.height ?? 0;
   const imageFrame = containFrame(size, {

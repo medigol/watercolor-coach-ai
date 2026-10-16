@@ -1479,3 +1479,30 @@ test("actual Edge SDK upstream truncation remains 503, distinct from canonical 4
     !f.calls.some((c) => /complete_openai_feedback|save_mock/.test(c.path)),
   );
 });
+
+for (const malformed of [false, true])
+  test(`actual Edge SDK: ${malformed ? "malformed optional" : "compact"} Colour & Value saves in the same one-call canonical result`, async () => {
+    const canonical = canonicalFixture();
+    canonical.canonicalAnalysis.colourAnalysis = malformed
+      ? { bad: true }
+      : require("./helpers/colour-fixture.cjs")();
+    const f = fixture({ canonical });
+    assert.equal((await f.run()).status, 200);
+    const saves = f.calls.filter((c) =>
+      c.path.endsWith("/complete_openai_feedback"),
+    );
+    assert.equal(saves.length, 1);
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert.deepEqual(
+      saves[0].body.p_result.canonicalAnalysis.colourAnalysis,
+      malformed ? null : canonical.canonicalAnalysis.colourAnalysis,
+    );
+    assert.deepEqual(
+      saves[0].body.p_result.canonicalAnalysis.visualRoles,
+      canonical.canonicalAnalysis.visualRoles,
+    );
+    assert(!f.calls.some((c) => c.path.includes("save_mock")));
+  });

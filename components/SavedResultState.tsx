@@ -2,7 +2,7 @@ import CoachingOverlay from "./CoachingOverlay";
 import { usableOverlays } from "../lib/overlays";
 import { ActivityIndicator, Text, Image } from "react-native";
 import { Button, Screen, styles, colors } from "./ui";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ImageSize } from "../shared/imageGeometry";
 import { drawableCompositionOverlay } from "../shared/visualMetadata";
 import { planVisualRoles, type VisualRoleRegion } from "../lib/visualRoles";
@@ -48,6 +48,7 @@ export function SavedImage({
   coachingVisible = true,
   visualMode,
   roleRegions,
+  maxImageHeight,
 }: {
   uri?: string;
   label?: string;
@@ -63,8 +64,24 @@ export function SavedImage({
   coachingVisible?: boolean;
   visualMode?: "notes" | "composition" | "roles";
   roleRegions?: VisualRoleRegion[];
+  maxImageHeight?: number;
 }) {
   const [failedUri, setFailedUri] = useState<string>();
+  const [aspect, setAspect] = useState(1.4);
+  useEffect(() => {
+    if (!uri || !maxImageHeight) return;
+    let alive = true;
+    Image.getSize(
+      uri,
+      (width, height) => {
+        if (alive && width > 0 && height > 0) setAspect(width / height);
+      },
+      () => {},
+    );
+    return () => {
+      alive = false;
+    };
+  }, [uri, maxImageHeight]);
   if (uri && failedUri === uri)
     return (
       <>
@@ -95,6 +112,7 @@ export function SavedImage({
         coachingVisible={coachingVisible}
         visualMode={visualMode}
         roleRegions={roleRegions}
+        maxImageHeight={maxImageHeight}
         onImageError={() => setFailedUri(uri)}
       />
     );
@@ -104,7 +122,16 @@ export function SavedImage({
       <Image
         source={{ uri }}
         accessibilityLabel={label}
-        style={{ height: 210, width: "100%", borderRadius: 18 }}
+        style={
+          maxImageHeight
+            ? {
+                width: "100%",
+                aspectRatio: aspect,
+                maxHeight: maxImageHeight,
+                borderRadius: 12,
+              }
+            : { height: 210, width: "100%", borderRadius: 18 }
+        }
         resizeMode="contain"
         onError={() => {
           setFailedUri(uri);

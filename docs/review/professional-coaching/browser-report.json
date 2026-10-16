@@ -1,0 +1,229 @@
+{
+  "matrix": [
+    {
+      "aspect": "landscape",
+      "width": 375,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 390,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 430,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 768,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 1024,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 1440,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 1800,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 375,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 390,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 430,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 768,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 1024,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 1440,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 1800,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 375,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 390,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 430,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 768,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 1024,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 1440,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 1800,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 375,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 390,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 430,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 768,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 1024,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 1440,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 1800,
+      "aligned": true,
+      "readonly": true
+    }
+  ],
+  "calls": {
+    "edgeCalls": 9,
+    "used": 3,
+    "rpcCalls": 0,
+    "reads": 13,
+    "uploads": 4,
+    "removed": 1
+  },
+  "errors": [],
+  "requests": [
+    {
+      "id": "f063456e-cb26-4920-91cb-0e22c6edcdf4",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "19e694ed-ff6e-4498-96ed-2dca5d654f9b",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "19e694ed-ff6e-4498-96ed-2dca5d654f9b",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "19e694ed-ff6e-4498-96ed-2dca5d654f9b",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "19e694ed-ff6e-4498-96ed-2dca5d654f9b",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "19e694ed-ff6e-4498-96ed-2dca5d654f9b",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "19e694ed-ff6e-4498-96ed-2dca5d654f9b",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "19e694ed-ff6e-4498-96ed-2dca5d654f9b",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "a765a562-e8aa-4408-a93c-212776cb31e5",
+      "focus": null,
+      "mode": "create_reference"
+    }
+  ],
+  "controlled": true
+}

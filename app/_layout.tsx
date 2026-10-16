@@ -66,7 +66,7 @@ function AppRoutes() {
         />
         <Stack.Screen
           name="result/improve-painting"
-          options={{ title: "Painting feedback" }}
+          options={{ title: "Painting analysis" }}
         />
         <Stack.Screen
           name="result/create-reference"

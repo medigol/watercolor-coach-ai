@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import {
   saveArtwork,
   createSaveAttempt,
@@ -16,11 +16,13 @@ export default function SaveResultButton({
   focus,
   image,
   title,
+  onBusyChange,
 }: {
   mode: SavedMode;
   focus?: string;
   image?: ArtworkImage;
   title: string;
+  onBusyChange?: (busy: boolean) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -41,6 +43,7 @@ export default function SaveResultButton({
     saving.current = true;
     const userId = account.current;
     setBusy(true);
+    onBusyChange?.(true);
     setError("");
     try {
       const key = JSON.stringify([
@@ -75,15 +78,36 @@ export default function SaveResultButton({
     } finally {
       saving.current = false;
       if (active.current) setBusy(false);
+      if (active.current) onBusyChange?.(false);
     }
   }
   return (
     <View style={{ gap: 12 }}>
       <Button
-        title={busy ? "Preparing…" : title}
+        title={
+          busy
+            ? mode === "improve_painting"
+              ? "Preparing your complete painting analysis…"
+              : "Preparing…"
+            : error && mode === "improve_painting"
+              ? "Retry analysis"
+              : title
+        }
         onPress={save}
-        disabled={busy}
+        disabled={busy || (mode === "improve_painting" && !image)}
       />
+      {busy && (
+        <View
+          accessibilityLiveRegion="polite"
+          style={{ gap: 8, alignItems: "center" }}
+        >
+          <ActivityIndicator />
+          <Text style={styles.caption}>
+            Reviewing structure, colour and value, and preparing coaching notes
+            in one analysis.
+          </Text>
+        </View>
+      )}
       {!!error && (
         <Text accessibilityRole="alert" style={styles.body}>
           {error}

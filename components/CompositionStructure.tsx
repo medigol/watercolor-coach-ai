@@ -141,6 +141,16 @@ export default function CompositionStructure({
             </G>
           );
         })}
+        {plan.balanceAxis?.length === 2 && (
+          <Path
+            d={`M${projected(plan.balanceAxis[0]).x} ${projected(plan.balanceAxis[0]).y} L${projected(plan.balanceAxis[1]).x} ${projected(plan.balanceAxis[1]).y}`}
+            stroke={paper}
+            strokeWidth={2}
+            strokeOpacity={0.85}
+            strokeDasharray="3 5"
+            fill="none"
+          />
+        )}
         {plan.strokes.map((stroke, index) => {
           const d = pathData(stroke, localFrame);
           return (
@@ -161,7 +171,7 @@ export default function CompositionStructure({
                 stroke={ink}
                 strokeWidth={1.6}
                 strokeOpacity={0.9}
-                strokeDasharray="7 4"
+                strokeDasharray={plan.type === "mixed" ? "7 4" : undefined}
               />
             </G>
           );
