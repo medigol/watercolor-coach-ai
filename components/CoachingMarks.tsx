@@ -109,10 +109,12 @@ export default function CoachingMarks({
                 y={region.y}
                 width={region.width}
                 height={region.height}
+                rx={8}
                 fill={color}
                 fillOpacity={0.035}
                 stroke={color}
-                strokeWidth={1.5}
+                strokeWidth={1}
+                strokeOpacity={0.55}
                 strokeDasharray="4 4"
               />
             ))}
@@ -152,7 +154,7 @@ export default function CoachingMarks({
                   stroke={reserveLight ? "#F7EDD4" : color}
                   strokeWidth={strokeWidth}
                 />
-                {(active || reserveLight) && (
+                {reserveLight && (
                   <Ellipse
                     cx={g.x + g.width / 2}
                     cy={g.y + g.height / 2}

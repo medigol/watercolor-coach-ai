@@ -1,0 +1,841 @@
+// Optional browser verification: provide Playwright on NODE_PATH; no production dependency.
+const pathModule = require("node:path");
+const root = pathModule.resolve(__dirname, "../..");
+const artifactDir = pathModule.resolve(
+  process.argv[3] || "/tmp/watercolor-professional-preview",
+);
+require("node:fs").mkdirSync(artifactDir, { recursive: true });
+const originalFixture = require(root + "/tests/helpers/canonical-fixture.cjs");
+const colourFixture = require(root + "/tests/helpers/colour-fixture.cjs");
+const canonicalFixture = () => {
+  const r = originalFixture();
+  r.canonicalAnalysis.colourAnalysis = colourFixture();
+  r.expertViews.overall.practice =
+    "On scrap, paint three tower silhouettes against a soft wash. Keep one edge crisp. Compare which version holds the light most clearly at arm’s length.";
+  return r;
+};
+const { chromium } = require("playwright");
+const assert = require("node:assert/strict"),
+  fs = require("node:fs");
+const ts = require("typescript");
+const samples = {};
+new Function(
+  "exports",
+  ts.transpileModule(fs.readFileSync(root + "/data/mockResults.ts", "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText,
+)(samples);
+const uid = "10000000-0000-4000-8000-000000000001";
+const user = {
+  id: uid,
+  aud: "authenticated",
+  role: "authenticated",
+  email: "learner@example.invalid",
+  email_confirmed_at: new Date().toISOString(),
+  app_metadata: { provider: "email", providers: ["email"] },
+  user_metadata: { display_name: "Learner" },
+  created_at: new Date().toISOString(),
+};
+const token = [
+  { alg: "HS256", typ: "JWT" },
+  {
+    sub: uid,
+    aud: "authenticated",
+    role: "authenticated",
+    exp: Math.floor(Date.now() / 1000) + 3600,
+  },
+  "signature",
+]
+  .map((v, i) =>
+    i < 2 ? Buffer.from(JSON.stringify(v)).toString("base64url") : v,
+  )
+  .join(".");
+let debugPage;
+let imageFile = artifactDir + "/technical-scene.png";
+let releaseFeedback;
+let signalFeedbackHeld;
+(async () => {
+  const browser = await chromium.launch({
+    ...(fs.existsSync("/usr/bin/chromium")
+      ? { executablePath: "/usr/bin/chromium" }
+      : {}),
+    args: ["--no-sandbox"],
+  });
+  const scene = await browser.newPage({
+    viewport: { width: 640, height: 400 },
+  });
+  await scene.setContent(
+    '<body style="margin:0"><svg width="640" height="400" viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg"><rect width="640" height="400" fill="#F5F0DF"/><path d="M0 0H640V220Q490 210 320 210T0 210Z" fill="#B9D0CC"/><path d="M0 205Q150 170 300 202T640 198V400H0Z" fill="#8DAFAC"/><path d="M0 160L140 130L230 147L300 115L430 125L640 156V210H0Z" fill="#95A49B"/><g fill="#D0BC98"><path d="M80 153L115 120L155 153V215H80Z"/><path d="M150 162L185 135L215 160V215H150Z"/><path d="M300 165L340 130L370 153V214H300Z"/></g><path d="M360 142L410 110L458 142V222H360Z" fill="#F0DEC1"/><path d="M350 142L410 105L468 142Z" fill="#607674"/><path d="M385 167H399V199H385Z M421 159H436V184H421Z" fill="#668582"/><path d="M0 320Q165 278 235 310Q405 356 640 305V400H0Z" fill="#526D68"/><path d="M80 362Q210 289 280 294Q390 263 414 225" fill="none" stroke="#D3D0B6" stroke-width="18"/><g stroke="#F0ECE0" stroke-width="4"><path d="M160 246H272 M307 271H435 M434 241H537"/></g></svg>',
+  );
+  await scene
+    .locator("svg")
+    .screenshot({ path: artifactDir + "/technical-scene.png" });
+  const aspectFiles = {};
+  for (const [name, w, h] of [
+    ["landscape", 800, 600],
+    ["portrait", 600, 800],
+    ["square", 800, 800],
+    ["wide", 1200, 400],
+  ]) {
+    await scene.setViewportSize({ width: w, height: h });
+    await scene.locator("svg").evaluate(
+      (el, { w, h }) => {
+        el.setAttribute("width", w);
+        el.setAttribute("height", h);
+        el.setAttribute("preserveAspectRatio", "none");
+      },
+      { w, h },
+    );
+    const file = artifactDir + "/" + name + ".png";
+    await scene.locator("svg").screenshot({ path: file });
+    aspectFiles[name] = file;
+  }
+  await scene.close();
+  const page = await browser.newPage({ viewport: { width: 375, height: 900 } });
+  debugPage = page;
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  const rows = [],
+    results = new Map();
+  let forceStudy = false,
+    edgeMode = "success",
+    uploadFails = false,
+    brokenImages = false,
+    used = 0,
+    edgeCalls = 0,
+    rpcCalls = 0,
+    reads = 0;
+  const requests = [],
+    uploads = [],
+    removed = [];
+  await page.route("https://watercolor-test.supabase.co/**", async (route) => {
+    const req = route.request(),
+      u = new URL(req.url()),
+      path = u.pathname;
+    let body = {};
+    try {
+      body = req.postDataJSON() || {};
+    } catch {}
+    const reply = (value, status = 200) =>
+      route.fulfill({
+        status,
+        contentType: "application/json",
+        body: JSON.stringify(value),
+      });
+    if (path.endsWith("/token"))
+      return reply({
+        access_token: token,
+        refresh_token: "fake-refresh-token",
+        expires_in: 3600,
+        token_type: "bearer",
+        user,
+      });
+    if (path.endsWith("/user")) return reply(user);
+    if (path.endsWith("/logout")) return route.fulfill({ status: 204 });
+    if (path.endsWith("/profiles")) return reply({ display_name: "Learner" });
+    if (path.endsWith("/functions/v1/generate-feedback")) {
+      edgeCalls++;
+      requests.push(body);
+      if (body.mode === "improve_painting")
+        assert.equal(body.focus_area, "Overall feedback");
+      assert.equal(body.expected_user_id, uid);
+      assert.equal(req.headers().authorization, "Bearer " + token);
+      if (edgeMode === "hold")
+        await new Promise((resolve) => {
+          releaseFeedback = resolve;
+          signalFeedbackHeld?.();
+        });
+      if (edgeMode === "missing")
+        return reply({ message: "Function not found" }, 404);
+      if (edgeMode === "unavailable")
+        return reply({ code: "unavailable" }, 503);
+      if (edgeMode === "invalid_core")
+        return reply({ code: "unavailable" }, 422);
+      if (edgeMode === "busy") return reply({ code: "busy" }, 409);
+      if (edgeMode === "auth") return reply({ code: "auth" }, 401);
+      if (edgeMode === "stale_mock") {
+        const value =
+          body.mode === "create_reference"
+            ? samples.referenceResult
+            : samples.improveResult;
+        rows.push({
+          id: body.request_id,
+          user_id: uid,
+          mode: body.mode,
+          title: value.title,
+          image_url: body.image_path,
+          focus_area: body.focus_area,
+          created_at: new Date().toISOString(),
+        });
+        results.set(body.request_id, { provider: "mock", value });
+        return reply({ id: body.request_id, provider: "mock" });
+      }
+      if (results.has(body.request_id))
+        return reply({
+          id: body.request_id,
+          provider: results.get(body.request_id).provider,
+        });
+      if (used >= 3) return reply({ code: "usage_limit" }, 403);
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      const base = {
+        x: 20,
+        y: 20,
+        priority: "high",
+        classification: "optional_refinement",
+        evidence: "The dark lower marks compete with the small roof light.",
+        shortInstruction: "Keep supporting shapes quiet.",
+        reason: "This supports the focal roof light.",
+        action: "Test a connected shadow on scrap before touching dry paint.",
+        timing: "current_painting",
+      };
+      const overlays = [
+        {
+          ...base,
+          id: "crop",
+          type: "crop_box",
+          category: "composition",
+          label: "Test this framing",
+          x: 8,
+          y: 6,
+          width: 84,
+          height: 82,
+          timing: "next_study",
+          action: "Test this crop in the next study.",
+        },
+        {
+          ...base,
+          id: "value",
+          type: "value_mass",
+          category: "value_structure",
+          label: "Connect lower shadows",
+          points: [
+            { x: 0, y: 72 },
+            { x: 38, y: 66 },
+            { x: 62, y: 80 },
+            { x: 100, y: 78 },
+            { x: 100, y: 100 },
+            { x: 0, y: 100 },
+          ],
+          valueGroup: "dark",
+        },
+        {
+          ...base,
+          id: "flow",
+          type: "eye_flow_arrow",
+          category: "composition",
+          label: "Follow the shoreline",
+          points: [
+            { x: 12, y: 89 },
+            { x: 43, y: 72 },
+            { x: 64, y: 53 },
+          ],
+          action:
+            "Quiet the lower-left marks and lead the eye along the shoreline.",
+        },
+        {
+          ...base,
+          id: "focus",
+          type: "focal_ring",
+          category: "focal_point",
+          label: "Keep the roof light",
+          x: 55,
+          y: 25,
+          width: 20,
+          height: 33,
+        },
+        {
+          ...base,
+          id: "quiet",
+          type: "simplify_region",
+          category: "simplification",
+          label: "Quiet distant roofs",
+          x: 3,
+          y: 28,
+          width: 42,
+          height: 24,
+          styleHint: "simplify",
+        },
+      ];
+      const value = {
+        ...(body.mode === "create_reference"
+          ? samples.referenceResult
+          : samples.improveResult),
+        title:
+          body.mode === "create_reference"
+            ? "Harbour painting plan"
+            : "Harbour painting feedback",
+        overlays,
+        whatWorks: [
+          "The roof light separates clearly from the distant water.",
+          "The shoreline provides a natural eye path.",
+        ],
+        promising: "The connected foreground can support this existing light.",
+        whatToFix: ["Connect the lower shadows and keep the roofs quieter."],
+        palette: samples.referenceResult.palette.map((item, i) => ({
+          ...item,
+          tag: i === 0 ? "main_wash" : i === 1 ? "shadow_mix" : "focal_accent",
+          use: "Support a quiet warm/cool relationship.",
+          mix: "Test a muted blue and earth mixture.",
+        })),
+        paletteStrategy:
+          "Keep the background cool and muted; reserve one warm dark focal accent.",
+        brushPlan: [
+          {
+            stage: "First atmosphere wash",
+            brush: "Large soft brush",
+            wash: "Tea-strength blue wash",
+            technique: "wet_on_wet",
+            timing: "Lay the wash while the paper has an even shine.",
+            edges: "Keep the distant roofs soft.",
+            stop: "Leave the roof light untouched.",
+          },
+          {
+            stage: "Connected shadow",
+            brush: "Medium round brush",
+            wash: "Milk-strength blue and earth mix",
+            technique: "wet_on_dry",
+            timing: "Wait until the first wash is dry.",
+            edges: "Keep one focal corner sharp and soften the outer edge.",
+            stop: "Stop before scattering small darks.",
+          },
+        ],
+        compositionDecision: {
+          mainIssue: "The foreground competes with the roof light.",
+          reason: "One quiet mass supports the focal area.",
+          tryNow: "Avoid adding more small darks to the outer foreground.",
+          nextStudy: "Test the crop in a small thumbnail.",
+        },
+      };
+      value.coachingMode = forceStudy ? "study" : "constructive";
+      value.coachingDecision = {
+        primaryGoal: forceStudy
+          ? "Reserved roof light and connected shadows create a clear value hierarchy."
+          : "Keep the roof light as the one crisp focal point.",
+        primarySubjectOrArea: "roof light",
+        areasToEmphasize: ["roof light"],
+        areasToQuiet: ["pier"],
+        currentPaintingAction: forceStudy
+          ? null
+          : "Test one small focal accent on scrap first.",
+        nextStudyAction:
+          "In a separate study, test one connected shadow beside the roof light.",
+        supportingObservations: [
+          "The shoreline carries attention toward the roof light.",
+        ],
+        compositionImplication:
+          "The shoreline leads the eye toward the roof light between quieter masses.",
+        colourImplication:
+          "Warm roof light stands against the muted cool distance.",
+        techniqueImplication:
+          "A practical way to practise this handling is a soft-to-sharp edge transition.",
+      };
+      value.practice =
+        "Spend 15 minutes testing one soft-to-sharp edge transition on a separate sheet. Keep one focal accent.";
+      value.whatToFix.push("Sharpen the pier.");
+
+      if (forceStudy)
+        Object.assign(value, {
+          mainAdvice:
+            "Reserved roof light and connected shadows give this scene a clear value hierarchy.",
+          composition:
+            "The off-centre roof light is held by quiet connected masses. The shoreline gives the eye a clear path.",
+          whatWorks: [
+            "The soft background leaves the roof light easy to read.",
+            "One sharp roof corner anchors the focal group.",
+          ],
+          promising: "The lost shoreline edge offers a useful handling lesson.",
+          whatToFix: [
+            "One possible variation would be a quieter foreground in a separate study.",
+          ],
+          practice:
+            "For 15 minutes, test one lost edge against a sharp focal corner in a small study. Compare the effect at arm’s length.",
+          prompt: "How can I practise this kind of edge control?",
+          compositionDecision: {
+            mainIssue: null,
+            reason:
+              "Connected shadows link quieter support to the focal light.",
+            tryNow: null,
+            nextStudy:
+              "One possible variation would be a narrower foreground in a separate study.",
+          },
+        });
+      if (body.mode === "improve_painting") {
+        for (const key of Object.keys(value)) delete value[key];
+        Object.assign(value, canonicalFixture());
+      }
+      rows.push({
+        id: body.request_id,
+        user_id: uid,
+        mode: body.mode,
+        title: value.title,
+        image_url: body.image_path,
+        focus_area: body.focus_area,
+        created_at: new Date().toISOString(),
+      });
+      results.set(body.request_id, { provider: "openai", value });
+      used++;
+      if (edgeMode === "lost") return reply({ code: "unavailable" }, 503);
+      return reply({ id: body.request_id, provider: "openai" });
+    }
+    if (path.endsWith("/rpc/save_mock_feedback")) {
+      rpcCalls++;
+      throw Error("Production must not save a mock result");
+    }
+    if (path.endsWith("/artworks") && req.method() === "GET") {
+      reads++;
+      assert.equal(u.searchParams.get("user_id"), "eq." + uid);
+      return reply(rows);
+    }
+    if (path.endsWith("/ai_results")) {
+      reads++;
+      const id = u.searchParams.get("artwork_id").slice(3),
+        row = rows.find((r) => r.id === id),
+        saved = results.get(id);
+      assert(row && saved);
+      return reply({
+        provider: saved.provider,
+        result_json: saved.value,
+        artworks: { image_url: row.image_url, focus_area: row.focus_area },
+      });
+    }
+    if (path.startsWith("/storage/v1/object/sign/") && req.method() === "POST")
+      return reply({
+        signedURL:
+          "/object/sign/artworks/" +
+          path.split("/artworks/")[1] +
+          "?token=fake-signed",
+      });
+    if (path.startsWith("/storage/v1/object/sign/") && req.method() === "GET")
+      return brokenImages
+        ? reply({ error: "Image unavailable" }, 403)
+        : route.fulfill({
+            status: 200,
+            contentType: "image/png",
+            body: fs.readFileSync(imageFile),
+          });
+    if (
+      path.startsWith("/storage/v1/object/artworks/") &&
+      req.method() === "POST"
+    ) {
+      uploads.push(path);
+      return uploadFails
+        ? reply({ statusCode: "500", message: "upload unavailable" }, 500)
+        : reply({ Key: path.split("/object/")[1] });
+    }
+    if (
+      path.endsWith("/storage/v1/object/artworks") &&
+      req.method() === "DELETE"
+    ) {
+      removed.push(...body.prefixes);
+      return reply([]);
+    }
+    throw Error("Unexpected request " + req.method() + " " + path);
+  });
+
+  const base = process.argv[2] || "http://localhost:8091/watercolor-coach-ai";
+  // Never let this optional harness send even an auth request to a live project.
+  // Export with the documented fake public Supabase values before running it.
+  await page.route("**/*", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.hostname === "watercolor-test.supabase.co") return route.fallback();
+    if (
+      url.origin === new URL(base).origin ||
+      url.protocol === "blob:" ||
+      url.protocol === "data:"
+    )
+      return route.continue();
+    errors.push("Blocked unexpected external endpoint: " + url.origin);
+    await route.abort("blockedbyclient");
+  });
+  const button = (name) => page.getByRole("button", { name, exact: true });
+  const shot = async (name) =>
+    page.screenshot({ path: artifactDir + "/" + name + ".png" });
+  const snapshot = () => ({
+    edgeCalls,
+    used,
+    rpcCalls,
+    reads,
+    uploads: uploads.length,
+    removed: removed.length,
+  });
+  const open = async (title) => {
+    if ((await button(title).getAttribute("aria-expanded")) !== "true")
+      await button(title).click();
+  };
+  const noOverflow = async () =>
+    assert(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    );
+  await page.goto(base + "/");
+  await button("Sign in").waitFor();
+  await page
+    .getByRole("textbox", { name: "Email", exact: true })
+    .fill(user.email);
+  await page
+    .locator('input[aria-label="Password"]:visible')
+    .last()
+    .fill("test-password-only");
+  await button("Sign in").click();
+  await button("Improve my painting").click();
+  await button("Choose painting").waitFor();
+  await button("Choose painting").focus();
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  assert(
+    await button("Choose painting").evaluate(
+      (el) =>
+        document.activeElement === el &&
+        parseFloat(getComputedStyle(el).outlineWidth) >= 2,
+    ),
+  );
+  assert.equal(await page.getByRole("radio").count(), 0);
+  assert.equal(await page.getByText(/Lake House|Which view/).count(), 0);
+  assert.equal(
+    await button("Analyse painting").getAttribute("aria-disabled"),
+    "true",
+  );
+  await shot("upload-empty");
+  const choose = async () => {
+    const event = page.waitForEvent("filechooser");
+    await button("Choose painting").click();
+    await (await event).setFiles(artifactDir + "/technical-scene.png");
+    await button("Choose another image").waitFor();
+  };
+  await choose();
+  await shot("upload-selected");
+  edgeMode = "hold";
+  const feedbackHeld = new Promise((resolve, reject) => {
+    const deadline = setTimeout(
+      () =>
+        reject(new Error("Feedback fixture did not receive the held request")),
+      15000,
+    );
+    signalFeedbackHeld = () => {
+      clearTimeout(deadline);
+      resolve();
+    };
+  });
+  await button("Analyse painting").click();
+  const pending = page.getByRole("button", {
+    name: "Preparing your complete painting analysis…",
+    exact: true,
+  });
+  await pending.waitFor();
+  await pending.evaluate((el) => el.click());
+  await feedbackHeld;
+  assert.equal(edgeCalls, 1);
+  assert.equal(used, 0);
+  assert.equal(await pending.getAttribute("aria-disabled"), "true");
+  assert.equal(
+    await button("Choose another image").getAttribute("aria-disabled"),
+    "true",
+  );
+  await shot("loading");
+  edgeMode = "success";
+  releaseFeedback();
+  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  assert.equal(edgeCalls, 1);
+  assert.equal(used, 1);
+  assert.equal(rows.length, 1);
+  assert.equal(rpcCalls, 0);
+  assert.equal(await page.getByTestId("expert-view-controls").count(), 0);
+  const id = rows[0].id;
+  const saved = results.get(id).value;
+  await page.getByTestId("coaching-source-image").waitFor();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await shot("highly-resolved-desktop");
+  await page.setViewportSize({ width: 390, height: 950 });
+  await shot("highly-resolved-mobile");
+  const matrix = [];
+  for (const [aspect, file] of Object.entries(aspectFiles)) {
+    imageFile = file;
+    await page.reload();
+    await page
+      .getByText("Complete Painting Analysis", { exact: true })
+      .waitFor();
+    await page.getByTestId("coaching-source-image").waitFor();
+    for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await noOverflow();
+      const before = snapshot();
+      for (const section of [
+        "Composition",
+        "Colour & Value",
+        "Watercolor technique",
+        "Practice & Studies",
+      ])
+        await open(section);
+      assert.equal(
+        await page.getByText("Suggested palette", { exact: true }).count(),
+        0,
+      );
+      await button("Composition overlay").click();
+      await page.getByTestId("composition-structure").waitFor();
+      const image = await page
+          .getByTestId("coaching-source-image")
+          .boundingBox(),
+        svg = await page.getByTestId("composition-structure").boundingBox();
+      assert(Math.abs(image.width - svg.width) < 1);
+      assert(Math.abs(image.height - svg.height) < 1);
+      assert(Math.abs(image.x - svg.x) < 1);
+      assert(Math.abs(image.y - svg.y) < 1);
+      const circle = page
+        .getByTestId("composition-structure")
+        .locator("circle")
+        .first();
+      assert(
+        Math.abs(Number(await circle.getAttribute("cx")) - 0.67 * image.width) <
+          1,
+      );
+      assert(
+        Math.abs(
+          Number(await circle.getAttribute("cy")) - 0.36 * image.height,
+        ) < 1,
+      );
+      const firstGeometry = await page
+        .getByTestId("composition-structure")
+        .innerHTML();
+      await button("Colour & Value").click();
+      await button("Colour & Value").click();
+      assert.equal(
+        await page.getByTestId("composition-structure").innerHTML(),
+        firstGeometry,
+      );
+      await button("Roles").click();
+      await page.getByTestId("visual-role-map").waitFor();
+      assert(
+        (
+          await page.getByTestId("visual-role-map").getAttribute("aria-label")
+        ).includes("Supporting"),
+      );
+      await page.getByRole("button", { name: /^Notes ·/ }).click();
+      await page.getByTestId("coaching-marker-0").click();
+      await page.getByTestId("coaching-note-0").waitFor();
+      await page
+        .getByTestId("coaching-note-0")
+        .getByRole("button")
+        .last()
+        .click();
+      assert.equal(
+        await page
+          .getByTestId("coaching-marker-0")
+          .getAttribute("aria-selected"),
+        "true",
+      );
+      await button("Clean view").click();
+      assert.equal(await page.getByTestId("composition-structure").count(), 0);
+      assert.equal(await page.getByTestId("visual-role-map").count(), 0);
+      await noOverflow();
+      assert.deepEqual(snapshot(), before);
+      matrix.push({ aspect, width, aligned: true, readonly: true });
+    }
+  }
+  imageFile = aspectFiles.landscape;
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.reload();
+  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  await button("Composition overlay").click();
+  await page.getByTestId("composition-structure").waitFor();
+  await shot("composition-directional");
+  await open("Colour & Value");
+  await button("Colour & Value").scrollIntoViewIfNeeded();
+  await shot("colour-value");
+  await page.getByRole("button", { name: /^Notes ·/ }).click();
+  await page.getByTestId("coaching-marker-0").click();
+  await page.getByTestId("coaching-note-0").waitFor();
+  await shot("notes");
+  await button("Roles").click();
+  await page.getByTestId("visual-role-map").waitFor();
+  await shot("roles");
+  const originalPrimary = structuredClone(
+    saved.canonicalAnalysis.composition.primary,
+  );
+  saved.canonicalAnalysis.composition.primary = {
+    ...originalPrimary,
+    type: "balanced_masses",
+    shortExplanation:
+      "The smaller tower light is counterbalanced by a wider muted bank across open water.",
+    paths: null,
+    secondaryPoints: [{ x: 0.215, y: 0.7 }],
+    masses: [
+      {
+        role: "focal",
+        points: [
+          { x: 0.56, y: 0.24 },
+          { x: 0.76, y: 0.24 },
+          { x: 0.76, y: 0.54 },
+          { x: 0.56, y: 0.54 },
+        ],
+      },
+      {
+        role: "supporting",
+        points: [
+          { x: 0.08, y: 0.59 },
+          { x: 0.35, y: 0.59 },
+          { x: 0.35, y: 0.81 },
+          { x: 0.08, y: 0.81 },
+        ],
+      },
+    ],
+    teaching: {
+      elements: ["Tower light", "Bank mass"],
+      entry: "This directional field must be hidden for balance",
+      path: "This directional path must be hidden",
+      landing: "This landing must be hidden",
+      supportingMass: "Muted lower bank",
+      quietMass: "Open water between the masses",
+      counterbalance: "Smaller bank counters the tower light",
+      risk: null,
+    },
+  };
+  saved.canonicalAnalysis.composition.observation =
+    "Separate masses hold a quiet stretch of water between the tower light and the bank.";
+  await page.reload();
+  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  await button("Composition overlay").click();
+  await page.getByTestId("composition-structure").waitFor();
+  assert.equal(
+    await page.getByText(/This directional|This landing/).count(),
+    0,
+  );
+  assert(await page.getByText("Negative space", { exact: true }).count());
+  await shot("composition-balanced-masses");
+  saved.canonicalAnalysis.composition.primary = originalPrimary;
+  saved.canonicalAnalysis.composition.observation =
+    "The low bank leads toward the pale tower.";
+  saved.canonicalAnalysis.qualityAssessment.level = "competent";
+  saved.canonicalAnalysis.insights[2].classification = "optional_refinement";
+  saved.canonicalAnalysis.insights[2].lesson =
+    "A quieter bank value group could give the small focal light more breathing room.";
+  saved.canonicalAnalysis.insights[2].action =
+    "In a separate study, compare one connected bank shadow with fewer dark accents.";
+  await page.reload();
+  await page
+    .getByText("Main opportunity to explore", { exact: true })
+    .waitFor();
+  assert.equal(await page.getByText(/No significant correction/).count(), 0);
+  await shot("competent-result");
+  await page.setViewportSize({ width: 390, height: 950 });
+  await shot("competent-mobile");
+  // A legacy saved response opens without reanalysis; reference flow remains available.
+  const canonicalSaved = results.get(id).value;
+  results.set(id, { provider: "openai", value: samples.improveResult });
+  await page.reload();
+  await page.getByText(samples.improveResult.title, { exact: true }).waitFor();
+  assert.equal(edgeCalls, 1);
+  assert.equal(used, 1);
+  results.set(id, { provider: "openai", value: canonicalSaved });
+  // Exercise distinct public error states and same-identity manual retries.
+  await page.goto(base + "/upload/improve-painting");
+  await choose();
+  const errorCases = [
+    ["invalid_core", "reliable analysis"],
+    ["unavailable", "AI service could not complete"],
+    ["busy", "already being analysed"],
+    ["auth", "session has expired"],
+  ];
+  let retryId;
+  for (const [mode, text] of errorCases) {
+    edgeMode = mode;
+    const before = used;
+    const n = edgeCalls;
+    await page
+      .getByRole("button", { name: /^(Analyse painting|Retry analysis)$/ })
+      .click();
+    await page.getByRole("alert").filter({ hasText: text }).waitFor();
+    assert.equal(edgeCalls, n + 1);
+    assert.equal(used, before);
+    retryId ??= requests.at(-1).request_id;
+    assert.equal(requests.at(-1).request_id, retryId);
+    await shot("error-" + mode);
+  }
+  const oldUsed = used;
+  used = 3;
+  edgeMode = "success";
+  await button("Retry analysis").click();
+  await page
+    .getByRole("alert")
+    .filter({ hasText: "current analysis limit" })
+    .waitFor();
+  used = oldUsed;
+  edgeMode = "lost";
+  await button("Retry analysis").click();
+  await page
+    .getByRole("alert")
+    .filter({ hasText: "Check My Artworks" })
+    .waitFor();
+  assert.equal(used, 2);
+  const beforeRecovery = edgeCalls;
+  edgeMode = "success";
+  await button("Retry analysis").click();
+  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  assert.equal(edgeCalls, beforeRecovery + 1);
+  assert.equal(used, 2);
+  assert.equal(rows.length, 2);
+  assert.equal(rpcCalls, 0);
+  await page.goto(base + "/upload/create-reference");
+  const photoChooser = page.waitForEvent("filechooser");
+  await button("Choose photo").click();
+  await (await photoChooser).setFiles(artifactDir + "/technical-scene.png");
+  const beforeReference = edgeCalls;
+  await button("Create Reference").click();
+  await page.getByText("Painting plan", { exact: true }).first().waitFor();
+  assert.equal(edgeCalls, beforeReference + 1);
+  assert.equal(used, 3);
+  assert.equal(rows.length, 3);
+  assert.equal(rpcCalls, 0);
+  const beforeGallery = {
+    edgeCalls,
+    used,
+    rpcCalls,
+    uploads: uploads.length,
+    removed: removed.length,
+  };
+  await page.goto(base + "/artworks");
+  await page
+    .getByRole("button", { name: /Tower study/ })
+    .first()
+    .click();
+  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  assert.deepEqual(
+    {
+      edgeCalls,
+      used,
+      rpcCalls,
+      uploads: uploads.length,
+      removed: removed.length,
+    },
+    beforeGallery,
+  );
+  assert.deepEqual(errors, []);
+  fs.writeFileSync(
+    artifactDir + "/report.json",
+    JSON.stringify(
+      {
+        matrix,
+        calls: snapshot(),
+        errors,
+        requests: requests.map((r) => ({
+          id: r.request_id,
+          focus: r.focus_area,
+          mode: r.mode,
+        })),
+        controlled: true,
+      },
+      null,
+      2,
+    ),
+  );
+  console.log(
+    "PASS: professional workspace; 28 responsive/aspect cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; zero automatic mock fallback; no live paid calls.",
+  );
+  await browser.close();
+})().catch(async (error) => {
+  console.error(error);
+  if (debugPage)
+    console.error((await debugPage.locator("body").innerText()).slice(0, 7000));
+  process.exit(1);
+});

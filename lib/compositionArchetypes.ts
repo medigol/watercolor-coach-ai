@@ -2,6 +2,7 @@ import {
   drawableCompositionOverlay,
   type CompositionArchetype,
   type CompositionMass,
+  type CompositionOverlay,
 } from "../shared/visualMetadata";
 import { validPolygon, type NormalizedPoint } from "./imageGeometry";
 
@@ -119,6 +120,7 @@ export interface CompositionStructurePlan {
   masses: CompositionMass[];
   anchors: CompositionAnchor[];
   thirdsGrid: boolean;
+  balanceAxis?: NormalizedPoint[];
 }
 
 /**
@@ -153,29 +155,36 @@ export function createCompositionStructurePlan(
     if (overlay.type === "u_frame") return points.length >= 4;
     return true;
   });
+  if (["diagonal", "s_curve"].includes(overlay.type) && paths[0]?.[0]) {
+    const entry = paths[0][0];
+    if (!anchors.some((a) => a.point.x === entry.x && a.point.y === entry.y))
+      anchors.push({ point: entry, role: "supporting" });
+  }
   let strokes = paths.map((points) => ({
     points,
     closed: overlay.type === "triangle" || overlay.type === "enclosure",
     smooth: overlay.type === "s_curve",
   }));
-  if (overlay.type === "triangle" && !strokes.length) {
+  if (overlay.type === "triangle") {
+    const candidates = paths[0] ?? anchors.map((anchor) => anchor.point);
+    strokes = [];
     // Find three non-collinear supplied anchors. Earlier anchors can share a
     // line even when the complete supplied grouping has a meaningful area.
     for (
       let first = 0;
-      first < anchors.length - 2 && !strokes.length;
+      first < candidates.length - 2 && !strokes.length;
       first++
     ) {
       for (
         let second = first + 1;
-        second < anchors.length - 1 && !strokes.length;
+        second < candidates.length - 1 && !strokes.length;
         second++
       ) {
-        for (let third = second + 1; third < anchors.length; third++) {
+        for (let third = second + 1; third < candidates.length; third++) {
           const points = [
-            anchors[first].point,
-            anchors[second].point,
-            anchors[third].point,
+            candidates[first],
+            candidates[second],
+            candidates[third],
           ];
           if (validPolygon(points)) {
             strokes = [{ points, closed: true, smooth: false }];
@@ -210,15 +219,78 @@ export function createCompositionStructurePlan(
       : (overlay.masses ?? [])
           .filter((mass) => mass.role === "supporting")
           .slice(0, 1),
-    anchors: [
-      "triangle",
-      "three_spot",
-      "balanced_masses",
-      "steelyard",
-      "rhythm",
-    ].includes(overlay.type)
-      ? anchors.slice(0, 3)
-      : anchors.filter((anchor) => anchor.role === "focal").slice(0, 1),
+    balanceAxis: ["balanced_masses", "steelyard"].includes(overlay.type)
+      ? overlay.masses?.length === 2
+        ? overlay.masses.map((m) => ({
+            x: m.points.reduce((n, p) => n + p.x, 0) / m.points.length,
+            y: m.points.reduce((n, p) => n + p.y, 0) / m.points.length,
+          }))
+        : anchors.slice(0, 2).map((a) => a.point)
+      : undefined,
+    anchors: ["diagonal", "s_curve"].includes(overlay.type)
+      ? anchors
+          .filter(
+            (a) =>
+              a.role === "focal" ||
+              (paths[0]?.[0] &&
+                a.point.x === paths[0][0].x &&
+                a.point.y === paths[0][0].y),
+          )
+          .slice(0, 2)
+      : [
+            "triangle",
+            "three_spot",
+            "balanced_masses",
+            "steelyard",
+            "rhythm",
+          ].includes(overlay.type)
+        ? anchors.slice(0, 3)
+        : anchors.filter((anchor) => anchor.role === "focal").slice(0, 1),
     thirdsGrid: overlay.type === "rule_of_thirds",
   };
+}
+
+export function compositionTeachingRows(
+  overlay: CompositionOverlay,
+): [string, string][] {
+  const t = overlay.teaching;
+  if (!t) return [];
+  const directional = [
+    "diagonal",
+    "s_curve",
+    "l_shape",
+    "u_frame",
+    "cross",
+    "radiating",
+  ].includes(overlay.type);
+  const balance = ["balanced_masses", "steelyard"].includes(overlay.type);
+  const rows: [string, string | null | undefined][] = [
+    [
+      balance
+        ? "Major masses"
+        : overlay.type === "three_spot" || overlay.type === "rhythm"
+          ? "Accents"
+          : "Visible elements",
+      t.elements.join(", "),
+    ],
+    ...(directional
+      ? ([
+          ["Entry", t.entry],
+          ["Path", t.path],
+          ["Landing", t.landing],
+        ] as [string, string | null | undefined][])
+      : []),
+    [balance ? "Supporting weight" : "Supporting mass", t.supportingMass],
+    [
+      balance
+        ? "Negative space"
+        : overlay.type === "enclosure"
+          ? "Enclosed space"
+          : "Quiet space",
+      t.quietMass,
+    ],
+    ["Counterbalance", t.counterbalance],
+    ["Watch", t.risk],
+  ];
+  return rows.filter((r): r is [string, string] => !!r[1]);
 }

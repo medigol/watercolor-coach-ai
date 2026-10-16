@@ -14,13 +14,16 @@ import type {
   PaletteColour,
 } from "../types";
 export type ResultProvider = "mock" | "openai";
-export const freeLimitMessage =
-  "You have used your 3 free AI feedback results. More feedback will be available after subscriptions are added.";
+export const freeLimitMessage = "You've reached the current analysis limit.";
 export const liveFeedbackErrorMessage =
   "Live AI feedback could not be prepared. Please try again.";
-const signInMessage = "Please sign in again before requesting feedback.";
+export const serviceFeedbackErrorMessage =
+  "The AI service could not complete this analysis. Please retry in a moment.";
+export const validationFeedbackErrorMessage =
+  "We couldn't prepare a reliable analysis from that response. Please retry. Failed attempts do not use a successful-analysis quota unit.";
+const signInMessage = "Your session has expired. Please sign in again.";
 const busyMessage =
-  "Feedback is already being prepared. Check My Artworks in a moment.";
+  "Your painting is already being analysed. Check My Artworks in a moment.";
 export function createSaveAttempt(): SaveAttempt {
   return { id: requestId() };
 }
@@ -286,6 +289,10 @@ export async function saveArtwork(
       else if (problem?.code === "auth" || context.status === 401)
         message = signInMessage;
       else if (problem?.code === "busy") message = busyMessage;
+      else if (context.status === 422) message = validationFeedbackErrorMessage;
+      else if (context.status === 503) message = serviceFeedbackErrorMessage;
+      else if (context.status === 403) message = freeLimitMessage;
+      else if (context.status === 409) message = busyMessage;
     }
     // HTTP 200 with a sample/invalid provider can come from a stale deployment.
     // Reject it instead of navigating to a critique that never analysed the image.
@@ -304,7 +311,9 @@ export async function saveArtwork(
         .catch(() => {});
     }
     throw new Error(
-      message === liveFeedbackErrorMessage && attempt.mayHaveSaved
+      (message === liveFeedbackErrorMessage ||
+        message === serviceFeedbackErrorMessage) &&
+      attempt.mayHaveSaved
         ? `${message} Check My Artworks before requesting it again; your result may already be saved.`
         : message,
     );

@@ -6,13 +6,14 @@ import {
   type ImageFrame,
 } from "../lib/imageGeometry";
 import { visualRoleLabel, type VisualRoleRegion } from "../lib/visualRoles";
+import { colors } from "./theme";
 
 const ink = "#496B63";
 const paper = "#FFFEF8";
 const treatment = {
-  focal: { width: 1.8, dash: undefined, fill: 0.035 },
-  supporting: { width: 1.4, dash: "6 4", fill: 0.025 },
-  quiet: { width: 1.2, dash: "1 4", fill: 0.012 },
+  focal: { width: 1.6, dash: undefined, fill: 0.04 },
+  supporting: { width: 1.2, dash: "6 4", fill: 0.025 },
+  quiet: { width: 1, dash: "1 4", fill: 0.012 },
 };
 
 /** An optional exclusive layer: labels and line styles convey roles together. */
@@ -89,9 +90,10 @@ export default function VisualRoleMap({
                   />
                   <Rect
                     {...rect}
-                    fill={ink}
+                    rx={10}
+                    fill={colors[region.role]}
                     fillOpacity={style.fill}
-                    stroke={ink}
+                    stroke={colors[region.role]}
                     strokeWidth={style.width}
                     strokeOpacity={0.85}
                     strokeDasharray={style.dash}
@@ -108,9 +110,9 @@ export default function VisualRoleMap({
                   />
                   <Polygon
                     points={points!}
-                    fill={ink}
+                    fill={colors[region.role]}
                     fillOpacity={style.fill}
-                    stroke={ink}
+                    stroke={colors[region.role]}
                     strokeWidth={style.width}
                     strokeOpacity={0.85}
                     strokeDasharray={style.dash}

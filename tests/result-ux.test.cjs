@@ -1021,7 +1021,7 @@ for (const focus of [
   "Colour & contrast",
   "Watercolor technique",
 ])
-  test(`canonical saved result: ${focus} renders its own view without forced correction`, () => {
+  test(`canonical saved result: ${focus} opens the same unified analysis without forced correction`, () => {
     const fixture = require("./helpers/canonical-fixture.cjs")();
     const key = {
       "Overall feedback": "overall",
@@ -1032,9 +1032,11 @@ for (const focus of [
     const html = render("improve_painting", "openai", image, undefined, {
       focus,
       canonicalResult: fixture,
+      viewportWidth: 1440,
       expandedAids: false,
     });
-    assert(html.includes('data-testid="expert-view-controls"'));
+    assert(html.includes("Complete Painting Analysis"));
+    assert(!html.includes('data-testid="expert-view-controls"'));
     assert(html.includes("Highly resolved painting"));
     assert(html.includes("No significant correction is needed"));
     assert(!html.includes("What to improve"));
@@ -1042,10 +1044,8 @@ for (const focus of [
       (i) => i.id === fixture.expertViews[key].summaryId,
     ).lesson;
     assert(html.includes(lesson));
-    assert.equal(
-      (html.match(/guidance" aria-pressed="true"/g) || []).length,
-      1,
-    );
+    assert(!html.includes("Your selected view"));
+    assert(html.includes("Colour &amp; Value"));
     assert(!html.includes("Open notes"));
   });
 test("canonical optional alternatives are explicitly labelled, not presented as defects", () => {
@@ -1065,7 +1065,7 @@ test("canonical optional alternatives are explicitly labelled, not presented as 
     expandedAids: false,
   });
   assert(html.includes("Stylistic alternative"));
-  assert(html.includes("For a separate study"));
+  assert(html.includes("a future experiment"));
   assert(!html.includes("What to improve"));
 });
 test("canonical invalid required data renders an explicit saved-analysis error", () => {
@@ -1090,11 +1090,50 @@ test("canonical developing analysis without strengths renders its supplied lesso
     canonicalResult: fixture,
     expandedAids: false,
   });
-  assert(html.includes('data-testid="expert-view-controls"'));
+  assert(html.includes("Complete Painting Analysis"));
+  assert(!html.includes('data-testid="expert-view-controls"'));
   assert(html.includes(fixture.canonicalAnalysis.insights[0].lesson));
   assert(!html.includes("What works well"));
   assert(!html.includes("What makes this work"));
+  assert(!html.includes(">What works<"));
   assert(!html.includes("We could not open this saved analysis"));
+});
+
+test("unified Colour & Value renders visible relationships and possible mixes without duplicating Suggested Palette", () => {
+  const fixture = require("./helpers/canonical-fixture.cjs")();
+  fixture.canonicalAnalysis.colourAnalysis =
+    require("./helpers/colour-fixture.cjs")();
+  const html = render("improve_painting", "openai", image, undefined, {
+    canonicalResult: fixture,
+    viewportWidth: 1440,
+  });
+  for (const text of [
+    "Visible colour structure",
+    "Value hierarchy",
+    "Chroma hierarchy",
+    "Recreate this look",
+    "Approximate starting ratio",
+    "Possible watercolor pigments",
+  ])
+    assert(html.includes(text));
+  assert(!html.includes("Suggested palette"));
+  assert(!html.includes("expert-view-controls"));
+});
+test("repeated colour prose is shown once while the value hierarchy remains first-class", () => {
+  const fixture = require("./helpers/canonical-fixture.cjs")();
+  const colour = require("./helpers/colour-fixture.cjs")();
+  const sentence =
+    "The reserved light separates from a broad cool middle-value group.";
+  colour.colourStrategy = sentence;
+  colour.valueHierarchy = sentence;
+  colour.technicalAssessment.explanation = sentence;
+  fixture.canonicalAnalysis.colourAnalysis = colour;
+  const html = render("improve_painting", "openai", image, undefined, {
+    canonicalResult: fixture,
+    viewportWidth: 1440,
+  });
+  assert.equal(html.split(sentence).length - 1, 1);
+  assert(html.includes("Value hierarchy"));
 });
 
 test("canonical composition retains distinct text teaching when optional structure is absent", () => {

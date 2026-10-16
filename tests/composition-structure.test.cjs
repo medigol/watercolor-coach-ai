@@ -110,7 +110,10 @@ test("diagonal uses only saved image-specific geometry, not a library template",
   assert.deepEqual(plan.strokes, [
     { points: [first, last], closed: false, smooth: false },
   ]);
-  assert.deepEqual(plan.anchors, [{ point: last, role: "focal" }]);
+  assert.deepEqual(plan.anchors, [
+    { point: last, role: "focal" },
+    { point: first, role: "supporting" },
+  ]);
   assert.equal(plan.thirdsGrid, false);
   const shifted = fixture({ paths: [[p(0.3, 0.1), p(0.9, 0.5)]] });
   assert.notDeepEqual(
@@ -265,7 +268,7 @@ test("malformed optional geometry is dropped individually while valid saved geom
   const plan = library.createCompositionStructurePlan(overlay);
   assert.equal(plan.strokes.length, 1);
   assert.equal(plan.masses.length, 0); // Unrelated quiet polygon is not the diagonal lesson.
-  assert.equal(plan.anchors.length, 1);
+  assert.equal(plan.anchors.length, 2);
   assert.equal(plan.explanation, overlay.shortExplanation);
   assert(!render(overlay).includes("NaN"));
 });
@@ -286,7 +289,7 @@ test("a current diagonal teaches one path and landing, without unrelated grids o
     }),
   );
   assert.equal(plan.strokes.length, 1);
-  assert.equal(plan.anchors.length, 1);
+  assert.equal(plan.anchors.length, 2);
   assert.equal(plan.masses.length, 1);
   assert.equal(plan.masses[0].role, "supporting");
   assert.equal(plan.thirdsGrid, false);
@@ -336,4 +339,68 @@ test("wrapper describes current image structure while SVG graphics are decorativ
       file,
     );
   }
+});
+
+for (const type of [
+  "balanced_masses",
+  "steelyard",
+  "enclosure",
+  "triangle",
+  "three_spot",
+  "rhythm",
+])
+  test(`${type}: teaching labels omit irrelevant directional Entry/Path/Landing`, () => {
+    const overlay = fixture({
+      type,
+      teaching: {
+        elements: ["Tower", "Bank"],
+        entry: "Bottom left",
+        path: "Across the water",
+        landing: "Tower",
+        supportingMass: "Muted bank",
+        quietMass: "Open water",
+        counterbalance: "Bank balances tower",
+        risk: null,
+      },
+    });
+    const rows = library.compositionTeachingRows(overlay);
+    assert(
+      !rows.some(([label]) => ["Entry", "Path", "Landing"].includes(label)),
+    );
+    if (["balanced_masses", "steelyard"].includes(type))
+      assert(rows.some(([label]) => label === "Negative space"));
+  });
+test("balance diagram connects supplied masses without inventing an eye-flow route", () => {
+  const overlay = fixture({
+    type: "balanced_masses",
+    paths: null,
+    masses: [
+      mass(triangle, "focal"),
+      mass([p(0.05, 0.6), p(0.3, 0.65), p(0.15, 0.9)], "supporting"),
+    ],
+  });
+  const plan = library.createCompositionStructurePlan(overlay);
+  assert.equal(plan.balanceAxis.length, 2);
+  assert.equal(plan.strokes.length, 0);
+  assert.equal(plan.thirdsGrid, false);
+  assert.equal(plan.masses.length, 2);
+});
+test("a triangle template uses three non-collinear supplied anchors even if extra points were saved", () => {
+  const supplied = [p(0.1, 0.8), p(0.3, 0.8), p(0.6, 0.8), p(0.7, 0.2)];
+  const overlay = fixture({ type: "triangle", paths: [supplied] });
+  const plan = library.createCompositionStructurePlan(overlay);
+  assert.equal(plan.strokes[0].points.length, 3);
+  assert(
+    plan.strokes[0].points.every(
+      (point) =>
+        supplied.includes(point) ||
+        supplied.some((p) => p.x === point.x && p.y === point.y),
+    ),
+  );
+  assert.equal(plan.strokes[0].closed, true);
+  assert.deepEqual(
+    overlay.paths,
+    [supplied],
+    "rendering cannot mutate saved geometry",
+  );
 });

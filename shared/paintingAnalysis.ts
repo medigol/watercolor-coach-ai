@@ -17,6 +17,12 @@ import {
   sameLearningInsight,
 } from "./coachingEvidence.ts";
 import { coherentFeedback, type CoachingDecision } from "./coachingDecision.ts";
+import {
+  cleanColourAnalysis,
+  colourAnalysisSchema,
+  type ColourAnalysis,
+} from "./colourAnalysis.ts";
+import { correctiveTeaching } from "./coachingWorkspace.ts";
 
 // A saved, versioned document; no I/O and no inferred geometry or extra analysis.
 export const expertViewKeys = [
@@ -114,6 +120,7 @@ export interface PaintingAnalysisResult {
     }[];
     palette?: { name: string; hex: string; use: string }[] | null;
     brushPlan?: PracticeBrush[] | null;
+    colourAnalysis?: ColourAnalysis | null;
   };
   expertViews: Record<ExpertViewKey, ExpertView>;
 }
@@ -195,7 +202,7 @@ export function canonicalValidationIssue(
         "composition",
         "insights",
       ],
-      ["visualEvidence", "palette", "brushPlan"],
+      ["visualEvidence", "palette", "brushPlan", "colourAnalysis"],
     )
   )
     return "required_structure";
@@ -296,7 +303,8 @@ export function canonicalValidationIssue(
     if (
       !record(v) ||
       !keys(v, ["summaryId", "insightIds", "practice"]) ||
-      !text(v.practice, 240)
+      typeof v.practice !== "string" ||
+      v.practice.length > 240
     )
       return "expert_views";
     if (
@@ -566,6 +574,11 @@ export function cleanPaintingAnalysis(
       strengths,
     );
     if (contradiction) classification = "study_experiment";
+    if (
+      classification === "strength" &&
+      (correctiveTeaching(lesson) || correctiveTeaching(action))
+    )
+      classification = "study_experiment";
     const guarded = coherentFeedback(
       {
         mainAdvice: lesson,
@@ -759,6 +772,16 @@ export function cleanPaintingAnalysis(
       visualEvidence,
       palette: palette?.length ? palette : null,
       brushPlan: brushPlan?.length ? brushPlan : null,
+      ...(Object.hasOwn(c, "colourAnalysis")
+        ? {
+            colourAnalysis: cleanColourAnalysis(
+              c.colourAnalysis,
+              roles,
+              insights,
+              decision,
+            ),
+          }
+        : {}),
     },
     expertViews: views,
   };
@@ -878,7 +901,7 @@ export function paintingAnalysisSchema(aids: {
     object({
       summaryId: string(40),
       insightIds: array(string(40), max, 1),
-      practice: string(240),
+      practice: { type: "string", maxLength: 240 },
     });
   return object({
     title: string(100),
@@ -938,6 +961,7 @@ export function paintingAnalysisSchema(aids: {
         type: ["array", "null"],
       },
       brushPlan: aids.brush,
+      colourAnalysis: colourAnalysisSchema(),
     }),
     expertViews: object({
       overall: view(2),

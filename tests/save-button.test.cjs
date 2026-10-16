@@ -90,7 +90,7 @@ function fixture() {
     },
     errorText: (props = {}) => {
       index = 0;
-      return exports.default({ ...initial, ...props }).props.children[1]?.props?.children;
+      return exports.default({ ...initial, ...props }).props.children[2]?.props?.children;
     },
     setAccount: (id) => {
       account = id;
