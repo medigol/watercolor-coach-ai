@@ -1,7 +1,13 @@
 import {
   changeRecommendation,
   sameLearningInsight,
+  temperatureConflict,
 } from "./coachingEvidence.ts";
+import {
+  unsafeHierarchyAdvice,
+  sameFocalRecommendation,
+  relationalRecommendation,
+} from "./coachingCalibration.ts";
 import type {
   PaintingAnalysisResult,
   PaintingInsight,
@@ -19,10 +25,35 @@ import {
 /** Presentation is derived once from the canonical classifications, not a lens. */
 export function workspaceTeaching(value: PaintingAnalysisResult) {
   const c = value.canonicalAnalysis;
+  const successful = c.insights
+    .filter((i) => i.classification === "strength")
+    .flatMap((i) => [
+      i.lesson,
+      ...i.factIds.flatMap((id) =>
+        c.facts.filter((f) => f.id === id).map((f) => f.observation),
+      ),
+    ]);
   const supplied = c.insights.filter(
     (i) =>
       i.factIds.some((id) => c.facts.some((f) => f.id === id)) &&
-      purposefulFigureAdvice(`${i.lesson} ${i.action}`),
+      purposefulFigureAdvice(`${i.lesson} ${i.action}`) &&
+      (i.classification === "strength" ||
+        (!unsafeHierarchyAdvice(
+          i.action,
+          [
+            i.lesson,
+            ...i.factIds.flatMap((id) =>
+              c.facts.filter((f) => f.id === id).map((f) => f.observation),
+            ),
+          ].join(" "),
+        ) &&
+          !temperatureConflict(
+            `${i.lesson}. ${i.action}`,
+            successful,
+            i.factIds.flatMap((id) =>
+              c.facts.filter((f) => f.id === id).map((f) => f.observation),
+            ),
+          ))),
   );
   const insights = supplied.map((i) =>
     unsupportedPlacementAdvice(
@@ -51,10 +82,21 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
           .slice(0, index)
           .some((p) => sameLearningInsight(p.lesson, i.lesson)),
     );
-  const clear = unique(
+  const uniqueAdvice = (items: PaintingInsight[]) =>
+    items.filter(
+      (i, index) =>
+        !items
+          .slice(0, index)
+          .some(
+            (p) =>
+              sameLearningInsight(p.lesson, i.lesson) &&
+              sameLearningInsight(p.action, i.action),
+          ),
+    );
+  const clear = uniqueAdvice(
     insights.filter((i) => i.classification === "clear_issue"),
   );
-  const optional = unique(
+  const optional = uniqueAdvice(
     insights.filter(
       (i) =>
         i.classification === "optional_refinement" &&
@@ -90,14 +132,20 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
       ? 1
       : 0;
   };
-  const ranked = unique([...clear, ...optional]).sort(
+  const ranked = uniqueAdvice([...clear, ...optional]).sort(
     (a, b) =>
+      Number(relationalRecommendation(b)) -
+        Number(relationalRecommendation(a)) ||
       specificPriority(b) - specificPriority(a) ||
       Number(b.classification === "clear_issue") -
         Number(a.classification === "clear_issue") ||
       elevationPriority(b) - elevationPriority(a),
   );
-  const recommendations = ranked
+  const distinct = ranked.filter(
+    (i, index) =>
+      !ranked.slice(0, index).some((p) => sameFocalRecommendation(p, i)),
+  );
+  const recommendations = distinct
     .slice(0, ["highly_resolved", "strong"].includes(level) ? 2 : 3)
     .map((insight, index) => {
       const significant =
@@ -175,6 +223,9 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
         ) && !all.slice(0, index).some((a) => sameLearningInsight(a, p)),
     );
   return {
+    omittedInsightIds: c.insights
+      .filter((i) => !supplied.some((s) => s.id === i.id))
+      .map((i) => i.id),
     status,
     opportunity,
     recommendations,

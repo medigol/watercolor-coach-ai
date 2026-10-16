@@ -14,7 +14,7 @@ export function unsupportedProcess(value: string): boolean {
     /\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:the|original|actual|exact) (?:brush|pigment|paper moisture|wash order|glazing sequence)\b[^.!?]{0,40}\b(?:was|is|were)\b/i;
   if (history.test(value)) return true;
   if (
-    /\bsolid control of watercolou?r techniques\b|\busing layered washes\b/i.test(
+    /\bsolid control of watercolou?r techniques\b|\busing layered washes\b|\b(?:more )?controlled brush\s*strokes\b|\bbroad,? loose horizontal washes\b/i.test(
       value,
     ) &&
     !explicitPractice.test(value)
@@ -57,26 +57,39 @@ export function observableEffectText(value: string): string {
         `${/^[A-Z]/.test(match) ? "Structure" : "structure"} of ${article ?? ""}${object}`,
     );
   if (explicitPractice.test(value)) return value;
-  return value
-    .replace(
-      /\beffective use of soft washes(?:\s+(creates?|gives?|supports?))?/gi,
-      (_, verb: string | undefined) =>
-        `Soft-edged colour passages${verb ? ` ${verb.replace(/s$/i, "")}` : ""}`,
-    )
-    .replace(/\s+(?:using|through) layered washes\b/gi, "")
-    .replace(
-      /\b(?:the )?wash application is (controlled|loose|even) with transparent layering\b/gi,
-      (_, quality: string) =>
-        `Visible colour passages are ${quality.toLowerCase()}, with transparent-looking overlaps`,
-    )
-    .replace(
-      /\b(?:watercolou?r )?washes are applied loosely with (?:some )?layering and soft blending\b/gi,
-      "Visible washes appear loose, with overlapping colour and soft blended transitions",
-    )
-    .replace(
-      /\b(?:some )?layering and soft blending\b/gi,
-      "overlapping colour and soft blended transitions",
-    );
+  return (
+    value
+      .replace(
+        /\bbroad,? loose horizontal washes\b/gi,
+        (m) =>
+          `${/^[A-Z]/.test(m) ? "Broad" : "broad"} horizontal colour bands`,
+      )
+      // Retain supplied shape/edge adjectives; never translate control into an
+      // invented crispness or softness that the sentence did not describe.
+      .replace(
+        /\b(?:more )?controlled brush\s*strokes\b/gi,
+        (m) => `${/^[A-Z]/.test(m) ? "Visible" : "visible"} marks`,
+      )
+      .replace(
+        /\beffective use of soft washes(?:\s+(creates?|gives?|supports?))?/gi,
+        (_, verb: string | undefined) =>
+          `Soft-edged colour passages${verb ? ` ${verb.replace(/s$/i, "")}` : ""}`,
+      )
+      .replace(/\s+(?:using|through) layered washes\b/gi, "")
+      .replace(
+        /\b(?:the )?wash application is (controlled|loose|even) with transparent layering\b/gi,
+        (_, quality: string) =>
+          `Visible colour passages are ${quality.toLowerCase()}, with transparent-looking overlaps`,
+      )
+      .replace(
+        /\b(?:watercolou?r )?washes are applied loosely with (?:some )?layering and soft blending\b/gi,
+        "Visible washes appear loose, with overlapping colour and soft blended transitions",
+      )
+      .replace(
+        /\b(?:some )?layering and soft blending\b/gi,
+        "overlapping colour and soft blended transitions",
+      )
+  );
 }
 export function observationText(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -155,7 +168,7 @@ export function sameLearningInsight(first: string, second: string): boolean {
 }
 
 const subjects =
-  /\b(?:(upper|lower|left|right|near|far)\s+)?(house|pavilion|roof|bridge|pier|building|boat|figure|bird|tree|trees|sky|water|background|foreground|reflection|shoreline)(?:s)?\b/gi;
+  /\b(?:(upper|lower|left|right|near|far)\s+)?(house|pavilion|church|tower|street|road|mountain|van|vehicle|roof|bridge|pier|building|boat|figure|bird|tree|trees|sky|water|background|foreground|reflection|shoreline|shadow|wire|pole)(?:s)?\b/gi;
 function areas(value: string): string[] {
   return [...value.matchAll(subjects)].map(
     (match) =>
@@ -196,7 +209,9 @@ function qualities(value: string): Set<string> {
 export function conflictsWithStrength(
   value: string,
   strengths: readonly string[],
+  observations: readonly string[] = [],
 ): boolean {
+  if (temperatureConflict(value, strengths, observations)) return true;
   if (
     /\b(?:separate|future|next|new) study\b/i.test(value) &&
     /\b(?:test|compare|experiment|variation|could|might|optional)\b/i.test(
@@ -248,6 +263,101 @@ export function conflictsWithStrength(
   }
   return false;
 }
+
+const temperatureSubject =
+  "house|church|tower|street|road|mountain|van|vehicle|boat|water|shadow|wire|pole|roof|foreground|background|light";
+function temperatureTargets(
+  text: string,
+): { area: string; temperature: string }[] {
+  const claims = new RegExp(
+    `\\b(warm|cool)(?:er)?(?:[- ]toned)?\\s+((?:(?!(?:and|with|in|on|at|behind|around|of|for|to|contrasts?|warm|cool)\\b)[a-z-]+\\s+){0,3}(?:${temperatureSubject})s?)\\b|\\b((?:${temperatureSubject})s?)\\s+(?:is|are|remains?|reads?)\\s+(warm|cool)\\b`,
+    "gi",
+  );
+  return [...text.matchAll(claims)].map((m) => {
+    const phrase = m[2] ?? m[3];
+    const nouns = [
+      ...phrase.matchAll(new RegExp(`\\b(?:${temperatureSubject})s?\\b`, "gi")),
+    ];
+    const location = phrase.match(
+      /\b(?:upper|lower|left|right|near|far)\b/i,
+    )?.[0];
+    return {
+      area: `${location ? location.toLowerCase() + " " : ""}${nouns.at(-1)![0].toLowerCase().replace(/s$/, "")}`,
+      temperature: (m[1] ?? m[4]).toLowerCase(),
+    };
+  });
+}
+/** Opposite-temperature advice needs local evidence, not generic palette unity.
+ * An arbitrary separate-study prefix is not evidence of reflected warmth. */
+export function temperatureConflict(
+  value: string,
+  strengths: readonly string[],
+  observations: readonly string[] = [],
+): boolean {
+  const supportedReflection =
+    /\b(?:separate|future|next|small) study\b/i.test(value) &&
+    /\b(?:compare|test|experiment)\b/i.test(value) &&
+    /\breflected (?:warmth|warm light)\b/i.test(value) &&
+    /\b(?:upper|lower|left|right|underside|base|small|selected)\b/i.test(
+      value,
+    ) &&
+    /\b(?:keep\w*|retain\w*|preserv\w*)\b[^.!?]{0,70}\bcool\b/i.test(value) &&
+    observations.some(
+      (o) =>
+        /\breflected (?:warmth|warm light)\b/i.test(o) &&
+        areas(o).some((a) =>
+          areas(value).some(
+            (b) =>
+              a.replace(/^(?:upper|lower|left|right|near|far) /, "") ===
+              b.replace(/^(?:upper|lower|left|right|near|far) /, ""),
+          ),
+        ),
+    );
+  if (supportedReflection) return false;
+  for (const clause of clausesForTemperature(value)) {
+    // Express a proposed temperature change as an adjective solely to match
+    // it to a supplied successful property. Nothing is rewritten for display.
+    const proposed = clause
+      .replace(/\b(?:warm|cool)\s+(?:the|these|those)\s+/gi, (m) =>
+        m.replace(/\s+(?:the|these|those)\s+/i, " "),
+      )
+      .replace(
+        /\bmake\s+(?:the\s+)?([^.!?]{1,65})\s+(warmer|cooler)\b/gi,
+        (_, target: string, temp: string) =>
+          `${temp.replace(/er$/, "")} ${target}`,
+      )
+      .replace(
+        /\b(?:increase|add)\s+warmth\s+(?:to|in)\s+(?:the\s+)?/gi,
+        "warm ",
+      )
+      .replace(
+        /\b(?:increase|add)\s+coolness\s+(?:to|in)\s+(?:the\s+)?/gi,
+        "cool ",
+      );
+    if (
+      !/\b(?:warm|cool)\s+(?:the|these|those)\b|\b(?:warmer|cooler|increase warmth|add warmth|increase coolness|add coolness)\b|^\s*(?:warm|cool)\b|\b(?:should|could|try to)\s+(?:warm|cool)\b/i.test(
+        clause,
+      )
+    )
+      continue;
+    for (const change of temperatureTargets(proposed))
+      for (const strength of strengths)
+        for (const seen of temperatureTargets(strength)) {
+          const a = change.area.replace(
+              /^(?:upper|lower|left|right|near|far) /,
+              "",
+            ),
+            b = seen.area.replace(/^(?:upper|lower|left|right|near|far) /, "");
+          if (a !== b || change.temperature === seen.temperature) continue;
+          if (change.area !== a && seen.area !== b && change.area !== seen.area)
+            continue;
+          return true;
+        }
+  }
+  return false;
+}
+const clausesForTemperature = (value: string) =>
+  value.split(/[.;!?]|\b(?:but|while|and)\b/i);
 
 /** Shared facts stay descriptive. Focus-specific interpretations are not
  * rewritten to a single goal; only unsupported/conflicting claims are omitted. */

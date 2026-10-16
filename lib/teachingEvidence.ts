@@ -168,7 +168,7 @@ export function insightEvidence(
         region,
         label:
           all.length > 1
-            ? `Related passage ${index + 1}`
+            ? `${typeof note.label === "string" && note.label.trim() ? note.label.trim() : base.label} · area ${index + 1}`
             : typeof note.label === "string"
               ? note.label
               : "Located passage",

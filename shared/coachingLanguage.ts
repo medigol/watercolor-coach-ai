@@ -14,6 +14,12 @@ export function qualityRationaleText(value: string): string {
     .split(/(?<=[.!?])\s+/)
     .filter(
       (sentence) =>
+        !/\b(?:could|should|needs? to|would benefit from)\b[^.!?]*\b(?:refin\w*|soft\w*|sharp\w*|contrast|grad\w*|quiet\w*|improv\w*|warm\w*|cool\w*)\b/i.test(
+          sentence,
+        ),
+    )
+    .filter(
+      (sentence) =>
         !/^(?:(?:minor|optional|further) refinements?\b|(?:some|a few) (?:edges|areas|passages)\b)[^.!?]*\b(?:could|might|may|would benefit)\b/i.test(
           sentence,
         ),

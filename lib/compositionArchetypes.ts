@@ -317,7 +317,7 @@ export function compositionTeachingRows(
     ],
     [
       balance
-        ? "Negative space"
+        ? "Open / quieter space"
         : overlay.type === "enclosure"
           ? "Enclosed space"
           : overlay.type === "u_frame" || overlay.type === "l_shape"

@@ -368,7 +368,7 @@ for (const type of [
       !rows.some(([label]) => ["Entry", "Path", "Landing"].includes(label)),
     );
     if (["balanced_masses", "steelyard"].includes(type))
-      assert(rows.some(([label]) => label === "Negative space"));
+      assert(rows.some(([label]) => label === "Open / quieter space"));
   });
 test("balance diagram connects supplied masses without inventing an eye-flow route", () => {
   const overlay = fixture({
@@ -568,13 +568,13 @@ for (const [reason, patch] of [
   });
 }
 for (const type of ["balanced_masses", "steelyard"]) {
-  test(`${type}: mass/counterbalance/negative-space teaching remains unchanged`, () => {
+  test(`${type}: mass/counterbalance teaching retains supplied quiet/open space`, () => {
     assert.deepEqual(
       library.compositionTeachingRows(fixture({ type, teaching: teaching() })),
       [
         ["Major masses", "Tower, Bank"],
         ["Supporting weight", "Muted bank"],
-        ["Negative space", "Open water"],
+        ["Open / quieter space", "Open water"],
         ["Counterbalance", "Bank balances tower"],
         ["Watch", "Keep the tower dominant"],
       ],
@@ -680,3 +680,29 @@ test("canonical prompt teaches archetype-specific relationships instead of a uni
     ),
   );
 });
+
+for (const type of ["balanced_masses", "steelyard"])
+  test(`${type}: quietMass does not assert uncertain structural mass is textbook negative space`, () => {
+    const overlay = fixture({
+      type,
+      teaching: {
+        ...teaching(),
+        quietMass: "Road / foreground mass; open-space reading uncertain",
+      },
+    });
+    const before = structuredClone(overlay);
+    const rows = library.compositionTeachingRows(overlay);
+    assert(!rows.some(([label]) => label === "Negative space"));
+    assert(
+      rows.some(
+        ([label, text]) =>
+          label === "Open / quieter space" &&
+          text === overlay.teaching.quietMass,
+      ),
+    );
+    assert.deepEqual(
+      overlay,
+      before,
+      "presentation leaves canonical geometry and teaching unchanged",
+    );
+  });
