@@ -685,6 +685,7 @@ export function cleanPaintingAnalysis(
     const contradiction = conflictsWithStrength(
       `${lesson}. ${action}`,
       strengths,
+      i.factIds.map((ref) => facts.find((f) => f.id === ref)!.observation),
     );
     if (contradiction) classification = "study_experiment";
     if (

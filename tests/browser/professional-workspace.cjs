@@ -886,6 +886,89 @@ let signalFeedbackHeld;
     0,
   );
   Object.assign(saved, structuredClone(beforeCalibration));
+  const finalCalibrationMatrix = [];
+  const beforeFinalCalibration = structuredClone(saved);
+  saved.canonicalAnalysis.qualityAssessment.level = "strong";
+  Object.assign(saved.canonicalAnalysis.insights[0], {
+    classification: "optional_refinement",
+    lesson: "The foreground-shadow gradation could be softer.",
+    action: "Review this gradation.",
+  });
+  Object.assign(saved.canonicalAnalysis.insights[3], {
+    classification: "optional_refinement",
+    lesson:
+      "The bank's edge sharpness approaches the focal tower's crisp corner.",
+    action:
+      "On a separate study, soften selected lower bank edges; compare the separation from the focal tower.",
+  });
+  saved.canonicalAnalysis.insights.push({
+    id: "unsafe-depth",
+    domain: "overall",
+    classification: "optional_refinement",
+    factIds: ["hierarchy"],
+    lesson: "Mountain contrast affects atmospheric recession.",
+    action: "Darken the distant mountain to improve depth.",
+  });
+  saved.canonicalAnalysis.visualEvidence = [
+    {
+      ...saved.canonicalAnalysis.visualEvidence[0],
+      insightId: "handling",
+      note: {
+        ...saved.canonicalAnalysis.visualEvidence[0].note,
+        id: "calibrated-comparison",
+        label: "Focal and supporting edge relationship",
+        scope: "multi_region",
+        region: null,
+        regions: [
+          { x: 0.56, y: 0.24, width: 0.2, height: 0.3 },
+          { x: 0.08, y: 0.59, width: 0.27, height: 0.22 },
+        ],
+      },
+    },
+  ];
+  imageFile = aspectFiles.portrait;
+  for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
+    await page.setViewportSize({ width, height: 950 });
+    await page.reload();
+    await page.getByTestId("recommendation-0").waitFor();
+    const assessment = await page.getByTestId("overall-assessment").innerText();
+    assert(!/foreground-shadow gradation|Mountain contrast/.test(assessment));
+    assert.equal(await page.getByTestId("recommendation-1").count(), 0);
+    assert(
+      !/Related passage|Darken the distant mountain/.test(
+        await page.locator("body").innerText(),
+      ),
+    );
+    for (const area of [1, 2])
+      await page
+        .getByText(`Focal and supporting edge relationship · area ${area}`, {
+          exact: true,
+        })
+        .waitFor();
+    const before = snapshot();
+    await button("Composition overlay").click();
+    await button("Roles").click();
+    await page.getByRole("button", { name: /^Notes ·/ }).click();
+    await page.getByTestId("coaching-marker-0").click();
+    await button("Clean view").click();
+    await noOverflow();
+    assert.deepEqual(
+      snapshot(),
+      before,
+      "calibrated evidence interactions cannot call models, upload or write",
+    );
+    finalCalibrationMatrix.push({
+      width,
+      cleanAssessment: true,
+      relationshipLabels: true,
+      unsafeDepthOmitted: true,
+      readonly: true,
+    });
+    await page.getByTestId("recommendation-0").scrollIntoViewIfNeeded();
+    if ([390, 1440].includes(width)) await shot(`final-calibration-${width}`);
+  }
+  Object.assign(saved, structuredClone(beforeFinalCalibration));
+  imageFile = aspectFiles.landscape;
   const originalPrimary = structuredClone(
     saved.canonicalAnalysis.composition.primary,
   );
@@ -937,7 +1020,7 @@ let signalFeedbackHeld;
     await page.getByText(/This directional|This landing/).count(),
     0,
   );
-  assert(await page.getByText("Negative space", { exact: true }).count());
+  assert(await page.getByText("Open / quieter space", { exact: true }).count());
   await shot("composition-balanced-masses");
   saved.canonicalAnalysis.composition.primary = originalPrimary;
   saved.canonicalAnalysis.composition.observation =
@@ -1251,6 +1334,7 @@ let signalFeedbackHeld;
         evidenceMatrix,
         calibrationMatrix,
         providerMatrix,
+        finalCalibrationMatrix,
         calls: snapshot(),
         errors,
         requests: requests.map((r) => ({
@@ -1265,7 +1349,7 @@ let signalFeedbackHeld;
     ),
   );
   console.log(
-    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
+    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
   );
   await browser.close();
 })().catch(async (error) => {

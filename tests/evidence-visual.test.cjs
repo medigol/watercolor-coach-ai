@@ -578,3 +578,44 @@ test("three explicitly supplied depth planes can be compared without guessing re
   const html = render(p);
   assert.equal((html.match(/data-testid="evidence-crop"/g) || []).length, 3);
 });
+
+for (const label of [
+  "Focal boat and surrounding water",
+  "Warm light / cool shadow",
+]) {
+  test(`multi-region comparison uses supplied relationship captions: ${label}`, () => {
+    const r = fixture(),
+      note = r.canonicalAnalysis.visualEvidence[0].note;
+    note.scope = "multi_region";
+    note.label = label;
+    note.regions = [region, { x: 0.08, y: 0.59, width: 0.27, height: 0.22 }];
+    const before = structuredClone(note.regions);
+    const plan = helper.insightEvidence(r, r.canonicalAnalysis.insights[0]);
+    assert.equal(plan.kind, "comparison");
+    assert.deepEqual(
+      plan.regions.map((r) => r.label),
+      [`${label} · area 1`, `${label} · area 2`],
+    );
+    assert.deepEqual(
+      plan.regions.map((r) => r.region),
+      before,
+    );
+    const html = render(plan);
+    assert(!html.includes("Related passage"));
+    assert(html.includes(`${label} · area 1`));
+    assert(html.includes("area 2"));
+  });
+}
+test("legacy multi-region note without a label uses its supplied fact, never guessed region identities", () => {
+  const r = fixture(),
+    note = r.canonicalAnalysis.visualEvidence[0].note;
+  delete note.label;
+  note.scope = "multi_region";
+  note.regions = [region, { x: 0.08, y: 0.59, width: 0.27, height: 0.22 }];
+  const plan = helper.insightEvidence(r, r.canonicalAnalysis.insights[0]);
+  assert.equal(
+    plan.regions[0].label,
+    `${r.canonicalAnalysis.facts[0].observation} · area 1`,
+  );
+  assert(!JSON.stringify(plan).includes("Related passage"));
+});

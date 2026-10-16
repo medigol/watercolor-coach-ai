@@ -1213,7 +1213,7 @@ test("canonical invalid required data renders an explicit saved-analysis error",
   assert(!html.includes("Lake House"));
 });
 
-test("canonical developing analysis without strengths renders its supplied lesson without a strength section", () => {
+test("canonical developing analysis stays readable without leaking an unselected refinement into assessment", () => {
   const fixture = require("./helpers/canonical-fixture.cjs")();
   fixture.canonicalAnalysis.qualityAssessment.level = "developing";
   fixture.canonicalAnalysis.insights.forEach(
@@ -1226,7 +1226,7 @@ test("canonical developing analysis without strengths renders its supplied lesso
   });
   assert(html.includes("Complete Painting Analysis"));
   assert(!html.includes('data-testid="expert-view-controls"'));
-  assert(html.includes(fixture.canonicalAnalysis.insights[0].lesson));
+  assert(!html.includes(fixture.canonicalAnalysis.insights[0].lesson));
   assert(!html.includes("What works well"));
   assert(!html.includes("What makes this work"));
   assert(!html.includes(">What works<"));
@@ -1358,4 +1358,59 @@ test("canonical Overall renders at most one supported planning card", () => {
   const labels = (html.match(/Study overlay on your image/g) || []).length;
   assert(labels <= 1);
   assert(!html.includes("2 future study ideas"));
+});
+
+for (const [name, classification, action] of [
+  [
+    "unselected optional critique",
+    "optional_refinement",
+    "Review the foreground gradation.",
+  ],
+  [
+    "selected optional critique",
+    "optional_refinement",
+    "On a separate study, soften the lower foreground transition; compare the focal separation.",
+  ],
+  ["unselected clear issue", "clear_issue", "Review the supplied gradation."],
+])
+  test(`assessment never hides ${name} beneath status`, () => {
+    const r = require("./helpers/canonical-fixture.cjs")();
+    r.canonicalAnalysis.qualityAssessment.level = "strong";
+    const i = r.canonicalAnalysis.insights[0];
+    Object.assign(i, {
+      classification,
+      lesson: "The foreground-shadow gradation could be softer.",
+      action,
+    });
+    const html = render("improve_painting", "openai", undefined, undefined, {
+      canonicalResult: r,
+    });
+    const assessment = html
+      .split('data-testid="overall-assessment"')[1]
+      .split('data-testid="elevation-recommendations"')[0];
+    // What works follows assessment, but it contains no corrective overall insight.
+    assert(!assessment.includes(i.lesson));
+    if (name === "selected optional critique") {
+      assert.equal(html.split(i.lesson).length - 1, 1);
+      assert(
+        html.indexOf(i.lesson) >
+          html.indexOf('data-testid="elevation-recommendations"'),
+      );
+    }
+  });
+
+test("unsafe depth advice is absent from recommendations and linked Notes on saved-result reopen", () => {
+  const r = require("./helpers/canonical-fixture.cjs")();
+  Object.assign(r.canonicalAnalysis.insights[0], {
+    classification: "optional_refinement",
+    lesson: "Mountain contrast affects atmospheric recession.",
+    action: "Darken the distant mountain to improve depth.",
+  });
+  r.canonicalAnalysis.visualEvidence[0].note.label = "Unsafe mountain advice";
+  const html = render("improve_painting", "openai", undefined, undefined, {
+    canonicalResult: r,
+  });
+  assert(!html.includes("Unsafe mountain advice"));
+  assert(!html.includes("Darken the distant mountain"));
+  assert(!html.includes('data-testid="elevation-recommendations"'));
 });

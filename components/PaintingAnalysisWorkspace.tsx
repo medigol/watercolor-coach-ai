@@ -170,26 +170,21 @@ export default function PaintingAnalysisWorkspace({
     wide = Platform.OS === "web" && width >= 1024;
   const c = source.canonicalAnalysis,
     teaching = workspaceTeaching(source);
-  const overall = c.insights.find(
-    (i) => i.id === source.expertViews.overall.summaryId,
-  );
-  const overallObservation =
-    !teaching.opportunity &&
-    overall &&
-    purposefulFigureAdvice(`${overall.lesson} ${overall.action}`) &&
-    !teaching.recommendations.some((r) => r.insight.id === overall.id) &&
-    !teaching.strengths.some((i) => i.id === overall.id) &&
-    !teaching.studies.some((i) => i.id === overall.id) &&
-    !sameLearningInsight(overall.lesson, c.qualityAssessment.rationale)
-      ? overall.lesson
-      : "";
   const projection = useMemo(
     () => projectPaintingAnalysis(source, "overall"),
     [source],
   );
   const notes = useMemo(
-    () => curatedCoachingNotes(projection.overlays),
-    [projection],
+    () =>
+      curatedCoachingNotes(projection.overlays).filter(
+        (note) =>
+          !c.visualEvidence?.some(
+            (e) =>
+              e.note.id === note.id &&
+              teaching.omittedInsightIds.includes(e.insightId),
+          ),
+      ),
+    [projection, c.visualEvidence, teaching.omittedInsightIds],
   );
   const [mode, setMode] = useState<"clean" | "notes" | "composition" | "roles">(
     "clean",
@@ -360,6 +355,7 @@ export default function PaintingAnalysisWorkspace({
     c.insights.filter(
       (i) =>
         i.domain === domain &&
+        !teaching.omittedInsightIds.includes(i.id) &&
         purposefulFigureAdvice(`${i.lesson} ${i.action}`) &&
         !teaching.strengths.some((s) => s.id === i.id) &&
         !teaching.studies.some((s) => s.id === i.id) &&
@@ -445,9 +441,6 @@ export default function PaintingAnalysisWorkspace({
       <Text style={[styles.body, { color: colors.accent, fontWeight: "600" }]}>
         {teaching.status}
       </Text>
-      {!!overallObservation && (
-        <Text style={styles.body}>{overallObservation}</Text>
-      )}
     </View>
   );
   return (
