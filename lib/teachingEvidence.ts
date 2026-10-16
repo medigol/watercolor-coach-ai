@@ -36,6 +36,16 @@ export type EvidencePlacement =
   | { plan: TeachingEvidence }
   | { reference: { key: string; label: string } };
 
+/** Number source areas without inferring subject identities from their order. */
+export function sourceAreaCaption(label: unknown, index?: number): string {
+  const supplied = typeof label === "string" ? label.trim() : "";
+  const semantic = /\brelated passages?\b/i.test(supplied) ? "" : supplied;
+  if (index === undefined) return semantic || "Multiple source areas";
+  return semantic
+    ? `${semantic} · area ${index + 1}`
+    : `Source area ${index + 1}`;
+}
+
 function reliable(confidence: unknown): boolean {
   return (
     typeof confidence === "number" &&
@@ -168,10 +178,13 @@ export function insightEvidence(
         region,
         label:
           all.length > 1
-            ? `${typeof note.label === "string" && note.label.trim() ? note.label.trim() : base.label} · area ${index + 1}`
-            : typeof note.label === "string"
-              ? note.label
-              : "Located passage",
+            ? sourceAreaCaption(
+                typeof note.label === "string" && note.label.trim()
+                  ? note.label
+                  : base.label,
+                index,
+              )
+            : sourceAreaCaption(note.label || base.label),
       }));
     if (note.scope === "multi_region" && regions.length < 2)
       return { ...base, kind: "whole", regions: [] };

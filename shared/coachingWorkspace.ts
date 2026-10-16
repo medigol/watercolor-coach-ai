@@ -8,6 +8,14 @@ import {
   sameFocalRecommendation,
   relationalRecommendation,
 } from "./coachingCalibration.ts";
+import {
+  insightAlignment,
+  sameTeaching,
+  materialInsight,
+  teachingRank,
+  evidenceTargets,
+} from "./coachingAlignment.ts";
+import { assessCoaching } from "./coachingAssessment.ts";
 import type {
   PaintingAnalysisResult,
   PaintingInsight,
@@ -55,7 +63,17 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
             ),
           ))),
   );
-  const insights = supplied.map((i) =>
+  const aligned = supplied.flatMap((i) => {
+    const alignment = insightAlignment(i, c.facts);
+    return alignment === "omit"
+      ? []
+      : [
+          alignment === "study"
+            ? { ...i, classification: "study_experiment" as const }
+            : i,
+        ];
+  });
+  const insights = aligned.map((i) =>
     unsupportedPlacementAdvice(
       `${i.lesson} ${i.action}`,
       i.factIds
@@ -80,33 +98,22 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
       (i, index) =>
         !items
           .slice(0, index)
-          .some((p) => sameLearningInsight(p.lesson, i.lesson)),
-    );
-  const uniqueAdvice = (items: PaintingInsight[]) =>
-    items.filter(
-      (i, index) =>
-        !items
-          .slice(0, index)
           .some(
             (p) =>
-              sameLearningInsight(p.lesson, i.lesson) &&
-              sameLearningInsight(p.action, i.action),
+              sameLearningInsight(p.lesson, i.lesson) ||
+              sameTeaching(p, i, i.classification === "strength"),
           ),
     );
-  const clear = uniqueAdvice(
-    insights.filter((i) => i.classification === "clear_issue"),
+  const clear = insights.filter((i) => i.classification === "clear_issue");
+  const optional = insights.filter(
+    (i) =>
+      i.classification === "optional_refinement" &&
+      (changeRecommendation(i.action) ||
+        /\b(?:compare|test|try|consider|compress|connect|group|merge|integrate|rebalance|vary|clarify|align|correct|remove|add)\b/i.test(
+          i.action,
+        )),
   );
-  const optional = uniqueAdvice(
-    insights.filter(
-      (i) =>
-        i.classification === "optional_refinement" &&
-        (changeRecommendation(i.action) ||
-          /\b(?:compare|test|try|consider|compress|connect|group|merge|integrate|rebalance|vary|clarify|align|correct|remove|add)\b/i.test(
-            i.action,
-          )),
-    ),
-  );
-  const level = c.qualityAssessment.level;
+  let level = c.qualityAssessment.level;
   const elevationPriority = (i: PaintingInsight) =>
     i.id === value.expertViews.overall.summaryId ||
     c.visualEvidence?.some(
@@ -117,6 +124,7 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
   const specificPriority = (i: PaintingInsight) => {
     const action = i.action;
     const located =
+      evidenceTargets(action).length > 0 ||
       /\b(?:background|foreground|middle[- ]?ground|distant|upper|lower|left|right|behind|beside|between|surrounding)\b/i.test(
         action,
       ) ||
@@ -132,19 +140,52 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
       ? 1
       : 0;
   };
-  const ranked = uniqueAdvice([...clear, ...optional]).sort(
+  const ranked = [...clear, ...optional].sort(
     (a, b) =>
-      Number(relationalRecommendation(b)) -
-        Number(relationalRecommendation(a)) ||
       specificPriority(b) - specificPriority(a) ||
       Number(b.classification === "clear_issue") -
         Number(a.classification === "clear_issue") ||
+      Number(materialInsight(b, c.facts)) -
+        Number(materialInsight(a, c.facts)) ||
+      Number(
+        c.visualEvidence?.some(
+          (e) => e.insightId === b.id && e.note.priority === "high",
+        ),
+      ) -
+        Number(
+          c.visualEvidence?.some(
+            (e) => e.insightId === a.id && e.note.priority === "high",
+          ),
+        ) ||
+      teachingRank(a) - teachingRank(b) ||
+      Number(relationalRecommendation(b)) -
+        Number(relationalRecommendation(a)) ||
+      specificPriority(b) - specificPriority(a) ||
+      Number(
+        /\b(?:selected|upper|lower|left|right|near|around|beside|fewer|below)\b/i.test(
+          b.action,
+        ),
+      ) -
+        Number(
+          /\b(?:selected|upper|lower|left|right|near|around|beside|fewer|below)\b/i.test(
+            a.action,
+          ),
+        ) ||
       elevationPriority(b) - elevationPriority(a),
   );
   const distinct = ranked.filter(
     (i, index) =>
-      !ranked.slice(0, index).some((p) => sameFocalRecommendation(p, i)),
+      !ranked
+        .slice(0, index)
+        .some(
+          (p) =>
+            (sameLearningInsight(p.lesson, i.lesson) &&
+              sameLearningInsight(p.action, i.action)) ||
+            sameFocalRecommendation(p, i) ||
+            sameTeaching(p, i),
+        ),
   );
+  level = assessCoaching(value, distinct).level;
   const recommendations = distinct
     .slice(0, ["highly_resolved", "strong"].includes(level) ? 2 : 3)
     .map((insight, index) => {
@@ -222,58 +263,78 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
           (s) => p.trim() === s.lesson.trim() || p.trim() === s.action.trim(),
         ) && !all.slice(0, index).some((a) => sameLearningInsight(a, p)),
     );
+  const selectedStrengths = unique(strengths).slice(0, 3);
+  const selectedStudies = unique(
+    insights.filter(
+      (i) =>
+        ["study_experiment", "stylistic_alternative"].includes(
+          i.classification,
+        ) &&
+        (!objectDesignSuggestion(i.action) ||
+          ["overall", "composition"].includes(i.domain)) &&
+        (i.classification === "stylistic_alternative" ||
+          variableStudy(i.action)),
+    ),
+  )
+    .filter(
+      (i) =>
+        (!practices[0] || !sameLearningInsight(i.action, practices[0])) &&
+        !recommendations.some((r) =>
+          sameLearningInsight(r.insight.action, i.action),
+        ),
+    )
+    .slice(0, 2)
+    .map((i) => ({ ...i, action: separateStudyText(i.action) }));
+  const rendered = [
+    ...recommendations.map((r) => r.insight),
+    ...unique(strengths),
+    ...selectedStudies,
+  ];
+  const omittedInsightIds = c.insights
+    .filter((i) => !rendered.some((r) => r.id === i.id))
+    .map((i) => i.id);
+  const noteExcludedInsightIds = c.insights
+    .filter(
+      (i) =>
+        omittedInsightIds.includes(i.id) ||
+        rendered.some(
+          (r) => r.id === i.id && r.classification !== i.classification,
+        ),
+    )
+    .map((i) => i.id);
   return {
-    omittedInsightIds: c.insights
-      .filter((i) => !supplied.some((s) => s.id === i.id))
-      .map((i) => i.id),
+    assessment: assessCoaching(
+      value,
+      recommendations.map((r) => r.insight),
+    ),
+    noteExcludedInsightIds,
+    omittedInsightIds,
     status,
     opportunity,
     recommendations,
     clear,
-    strengths: unique(strengths)
-      .slice(0, 3)
-      .map((i) => {
-        if (
-          !/^(?:preserve|keep|retain) (?:the )?(?:central|centred|centered) placement[.!]?$/i.test(
-            i.action.trim(),
-          )
+    strengths: selectedStrengths.map((i) => {
+      if (
+        !/^(?:preserve|keep|retain) (?:the )?(?:central|centred|centered) placement[.!]?$/i.test(
+          i.action.trim(),
         )
-          return i;
-        const relationship = i.factIds
-          .map((id) => c.facts.find((f) => f.id === id)?.observation)
-          .find(
-            (text) =>
-              text &&
-              /\b(?:value|contrast|chroma|edge|balance|separat\w*|stands? apart|hierarchy)\b/i.test(
-                text,
-              ),
-          );
-        return relationship
-          ? { ...i, action: `Preserve this relationship: ${relationship}` }
-          : { ...i, action: "" };
-      }),
-    practice: practices[0] ? separateStudyText(practices[0]) : "",
-    studies: unique(
-      insights.filter(
-        (i) =>
-          ["study_experiment", "stylistic_alternative"].includes(
-            i.classification,
-          ) &&
-          (!objectDesignSuggestion(i.action) ||
-            ["overall", "composition"].includes(i.domain)) &&
-          (i.classification === "stylistic_alternative" ||
-            variableStudy(i.action)),
-      ),
-    )
-      .filter(
-        (i) =>
-          (!practices[0] || !sameLearningInsight(i.action, practices[0])) &&
-          !recommendations.some((r) =>
-            sameLearningInsight(r.insight.action, i.action),
-          ),
       )
-      .slice(0, 2)
-      .map((i) => ({ ...i, action: separateStudyText(i.action) })),
+        return i;
+      const relationship = i.factIds
+        .map((id) => c.facts.find((f) => f.id === id)?.observation)
+        .find(
+          (text) =>
+            text &&
+            /\b(?:value|contrast|chroma|edge|balance|separat\w*|stands? apart|hierarchy)\b/i.test(
+              text,
+            ),
+        );
+      return relationship
+        ? { ...i, action: `Preserve this relationship: ${relationship}` }
+        : { ...i, action: "" };
+    }),
+    practice: practices[0] ? separateStudyText(practices[0]) : "",
+    studies: selectedStudies,
   };
 }
 export function correctiveTeaching(value: string): boolean {

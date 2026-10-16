@@ -5,6 +5,11 @@ import {
   type CompositionOverlay,
 } from "../shared/visualMetadata";
 import { validPolygon, type NormalizedPoint } from "./imageGeometry";
+import {
+  coarseFocalPosition,
+  neutralizeFocalPositionText,
+  type CoarseFocalPosition,
+} from "../shared/focalPosition";
 
 /**
  * Original teaching vocabulary, independent of any sample image or artwork.
@@ -99,7 +104,12 @@ export const compositionArchetypeIds = Object.keys(
   compositionArchetypes,
 ) as CompositionArchetype[];
 
-export function archetypeLabel(type: CompositionArchetype): string {
+export function archetypeLabel(
+  type: CompositionArchetype,
+  position?: CoarseFocalPosition,
+): string {
+  if (type === "off_centre" && position && position !== "off_centre")
+    return "Focal placement";
   return compositionArchetypes[type].label;
 }
 
@@ -130,9 +140,11 @@ export interface CompositionStructurePlan {
  */
 export function createCompositionStructurePlan(
   value: unknown,
+  position?: CoarseFocalPosition,
 ): CompositionStructurePlan | null {
   const overlay = drawableCompositionOverlay(value);
   if (!overlay) return null;
+  const focalPosition = position ?? coarseFocalPosition([], overlay);
   const anchors: CompositionAnchor[] = [];
   if (overlay.focalPoint) {
     anchors.push({ point: overlay.focalPoint, role: "focal" });
@@ -196,8 +208,11 @@ export function createCompositionStructurePlan(
   }
   return {
     type: overlay.type,
-    label: archetypeLabel(overlay.type),
-    explanation: overlay.shortExplanation,
+    label: archetypeLabel(overlay.type, focalPosition),
+    explanation: neutralizeFocalPositionText(
+      overlay.shortExplanation,
+      focalPosition,
+    ),
     strokes:
       overlay.type === "rule_of_thirds" ||
       overlay.type === "off_centre" ||
@@ -252,6 +267,7 @@ export function createCompositionStructurePlan(
 
 export function compositionTeachingRows(
   overlay: CompositionOverlay,
+  position?: CoarseFocalPosition,
 ): [string, string][] {
   const t = overlay.teaching;
   if (!t || overlay.type === "none") return [];
@@ -331,5 +347,11 @@ export function compositionTeachingRows(
     ],
     ["Watch", t.risk],
   ];
-  return rows.filter((r): r is [string, string] => !!r[1]);
+  const focalPosition = position ?? coarseFocalPosition([], overlay);
+  return rows
+    .filter((r): r is [string, string] => !!r[1])
+    .map(([label, text]) => [
+      label,
+      neutralizeFocalPositionText(text, focalPosition),
+    ]);
 }

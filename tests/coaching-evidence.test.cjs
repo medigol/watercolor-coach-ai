@@ -102,7 +102,7 @@ test("different explicit subregions and optional future experiments remain valid
 test("observed appearance survives while original process/equipment claims do not", () => {
   assert.equal(
     evidence.observationText("Soft wet-on-wet washes create atmosphere."),
-    "Soft washes create atmosphere.",
+    "Soft colour passages create atmosphere.",
   );
   for (const claim of [
     "Effective use of wet-on-wet washes in the background.",

@@ -20,11 +20,14 @@ import {
   type PaintingAnalysisResult,
   projectPaintingAnalysis,
 } from "../shared/paintingAnalysis";
+import {
+  coarseFocalPosition,
+  neutralizeFocalPositionText,
+} from "../shared/focalPosition";
 import { workspaceTeaching } from "../shared/coachingWorkspace";
 import { sameLearningInsight } from "../shared/coachingEvidence";
 import {
   objectDesignSuggestion,
-  qualityRationaleText,
   separateStudyText,
   purposefulFigureAdvice,
 } from "../shared/coachingLanguage";
@@ -171,20 +174,24 @@ export default function PaintingAnalysisWorkspace({
   const c = source.canonicalAnalysis,
     teaching = workspaceTeaching(source);
   const projection = useMemo(
-    () => projectPaintingAnalysis(source, "overall"),
-    [source],
+    () =>
+      projectPaintingAnalysis(
+        {
+          ...source,
+          canonicalAnalysis: {
+            ...source.canonicalAnalysis,
+            visualEvidence: source.canonicalAnalysis.visualEvidence?.filter(
+              (e) => !teaching.noteExcludedInsightIds.includes(e.insightId),
+            ),
+          },
+        },
+        "overall",
+      ),
+    [source, teaching.noteExcludedInsightIds],
   );
   const notes = useMemo(
-    () =>
-      curatedCoachingNotes(projection.overlays).filter(
-        (note) =>
-          !c.visualEvidence?.some(
-            (e) =>
-              e.note.id === note.id &&
-              teaching.omittedInsightIds.includes(e.insightId),
-          ),
-      ),
-    [projection, c.visualEvidence, teaching.omittedInsightIds],
+    () => curatedCoachingNotes(projection.overlays),
+    [projection],
   );
   const [mode, setMode] = useState<"clean" | "notes" | "composition" | "roles">(
     "clean",
@@ -207,35 +214,64 @@ export default function PaintingAnalysisWorkspace({
       : null;
   const structure =
     secondary && distinctSecondary ? distinctSecondary : primary;
+  const focalPosition = coarseFocalPosition(c.visualRoles, structure);
+  const text = (value: string) =>
+    neutralizeFocalPositionText(value, focalPosition);
+  const displayNotes = notes.map(
+    (note) =>
+      Object.fromEntries(
+        Object.entries(note).map(([key, value]) => [
+          key,
+          typeof value === "string" ? text(value) : value,
+        ]),
+      ) as typeof note,
+  );
+  const evidenceSource = {
+    ...source,
+    canonicalAnalysis: {
+      ...c,
+      visualEvidence: c.visualEvidence?.filter(
+        (e) => !teaching.noteExcludedInsightIds.includes(e.insightId),
+      ),
+    },
+  };
+  const visualStructure =
+    structure?.type === "off_centre" && focalPosition !== "off_centre"
+      ? null
+      : structure;
   const roles = planCanonicalVisualRoles(c.visualRoles);
   const notesRef = useRef<View>(null);
   const scrollRef = useRef<ScrollView>(null);
   const evidenceRefs = useRef<Record<string, View | null>>({});
   const [revealed, setRevealed] = useState({ key: "", revision: 0 });
   const firstRecommendation = teaching.recommendations[0];
-  const colourInsight = c.insights.find((i) => i.domain === "colour_value");
+  const colourInsight = c.insights.find(
+    (i) =>
+      i.domain === "colour_value" &&
+      !teaching.noteExcludedInsightIds.includes(i.id),
+  );
   const valueEvidence = colourInsight
-    ? insightEvidence(source, colourInsight)
+    ? insightEvidence(evidenceSource, colourInsight)
     : null;
   const requests = [
     {
       key: "composition",
       label: "Composition",
-      plan: compositionEvidence(structure),
+      plan: compositionEvidence(visualStructure),
     },
     ...(firstRecommendation
       ? [
           {
             key: `insight:${firstRecommendation.insight.id}`,
             label: firstRecommendation.label,
-            plan: insightEvidence(source, firstRecommendation.insight),
+            plan: insightEvidence(evidenceSource, firstRecommendation.insight),
           },
         ]
       : []),
     ...teaching.strengths.slice(0, 1).map((i) => ({
       key: `insight:${i.id}`,
       label: "What works",
-      plan: insightEvidence(source, i),
+      plan: insightEvidence(evidenceSource, i),
     })),
     {
       key: "value",
@@ -247,20 +283,24 @@ export default function PaintingAnalysisWorkspace({
       .map((i) => ({
         key: `insight:${i.id}`,
         label: "Future study location",
-        plan: insightEvidence(source, i),
+        plan: insightEvidence(evidenceSource, i),
       })),
     ...teaching.recommendations.slice(1).map(({ insight, label }) => ({
       key: `insight:${insight.id}`,
       label,
-      plan: insightEvidence(source, insight),
+      plan: insightEvidence(evidenceSource, insight),
     })),
     ...c.insights
-      .filter((i) => i.domain === "technique")
+      .filter(
+        (i) =>
+          i.domain === "technique" &&
+          !teaching.noteExcludedInsightIds.includes(i.id),
+      )
       .slice(0, 1)
       .map((i) => ({
         key: "technique",
         label: "Technique evidence",
-        plan: insightEvidence(source, i),
+        plan: insightEvidence(evidenceSource, i),
       })),
   ];
   const placements = allocateEvidence(requests);
@@ -289,7 +329,7 @@ export default function PaintingAnalysisWorkspace({
     notes.flatMap((note) => {
       const linked = c.visualEvidence?.find((e) => e.note.id === note.id);
       const insight = c.insights.find((i) => i.id === linked?.insightId);
-      const plan = insight && insightEvidence(source, insight);
+      const plan = insight && insightEvidence(evidenceSource, insight);
       const owner =
         plan &&
         Object.entries(placements).find(
@@ -325,7 +365,14 @@ export default function PaintingAnalysisWorkspace({
         <EvidenceVisual
           uri={image}
           sourceSize={sourceSize}
-          plan={placement.plan}
+          plan={{
+            ...placement.plan,
+            label: text(placement.plan.label),
+            regions: placement.plan.regions.map((r) => ({
+              ...r,
+              label: text(r.label),
+            })),
+          }}
           onSelect={
             noteIndex >= 0
               ? () => {
@@ -356,7 +403,7 @@ export default function PaintingAnalysisWorkspace({
       (i) =>
         i.domain === domain &&
         !teaching.omittedInsightIds.includes(i.id) &&
-        purposefulFigureAdvice(`${i.lesson} ${i.action}`) &&
+        purposefulFigureAdvice(`${text(i.lesson)} ${text(i.action)}`) &&
         !teaching.strengths.some((s) => s.id === i.id) &&
         !teaching.studies.some((s) => s.id === i.id) &&
         !teaching.recommendations.some((r) => r.insight.id === i.id) &&
@@ -398,11 +445,11 @@ export default function PaintingAnalysisWorkspace({
               }[i.classification]
             }
           </Text>
-          <Text style={styles.body}>{i.lesson}</Text>
+          <Text style={styles.body}>{text(i.lesson)}</Text>
           <Text style={styles.body}>
             {i.classification === "strength"
-              ? i.action
-              : separateStudyText(i.action)}
+              ? text(i.action)
+              : text(separateStudyText(i.action))}
           </Text>
         </View>
       ));
@@ -430,13 +477,13 @@ export default function PaintingAnalysisWorkspace({
             strong: "Strong",
             competent: "Competent",
             developing: "Developing",
-          }[c.qualityAssessment.level]
+          }[teaching.assessment.level]
         }{" "}
         painting
       </Text>
       <Text style={styles.body}>
-        {c.qualityAssessment.confidence < 0.65 ? "One useful reading: " : ""}
-        {qualityRationaleText(c.qualityAssessment.rationale)}
+        {teaching.assessment.confidence < 0.65 ? "One useful reading: " : ""}
+        {text(teaching.assessment.rationale)}
       </Text>
       <Text style={[styles.body, { color: colors.accent, fontWeight: "600" }]}>
         {teaching.status}
@@ -510,14 +557,14 @@ export default function PaintingAnalysisWorkspace({
                 <SavedImage
                   uri={image}
                   label="Your painting"
-                  overlays={notes}
+                  overlays={displayNotes}
                   hideNotes
                   study={projection.coachingMode === "study"}
                   selectedNote={selected}
                   onSelectNote={(index) => selectNote(index)}
                   onOpenNotes={() => setShowNotes(true)}
                   onImageSize={onSize}
-                  compositionOverlay={structure}
+                  compositionOverlay={visualStructure}
                   visualMode={mode === "clean" ? "notes" : mode}
                   coachingVisible={mode !== "clean"}
                   roleRegions={roles}
@@ -581,7 +628,8 @@ export default function PaintingAnalysisWorkspace({
             </View>
             {mode === "composition" && structure && (
               <Text style={styles.caption}>
-                {archetypeLabel(structure.type)} · {structure.shortExplanation}
+                {archetypeLabel(structure.type, focalPosition)} ·{" "}
+                {text(structure.shortExplanation)}
               </Text>
             )}
             {mode === "roles" && (
@@ -594,7 +642,7 @@ export default function PaintingAnalysisWorkspace({
                 )}
                 {c.visualRoles.map((r) => (
                   <Text key={r.id} style={styles.caption}>
-                    {r.role[0].toUpperCase() + r.role.slice(1)} · {r.area}
+                    {r.role[0].toUpperCase() + r.role.slice(1)} · {text(r.area)}
                   </Text>
                 ))}
                 <Text style={styles.caption}>
@@ -606,7 +654,7 @@ export default function PaintingAnalysisWorkspace({
             {showNotes && (
               <View ref={notesRef}>
                 <VisualCoachingNotes
-                  notes={notes}
+                  notes={displayNotes}
                   selected={selected}
                   onSelect={selectNote}
                   uri={image}
@@ -646,9 +694,9 @@ export default function PaintingAnalysisWorkspace({
                     }}
                   >
                     <Text style={[styles.body, { color: colors.ink }]}>
-                      {i.lesson}
+                      {text(i.lesson)}
                     </Text>
-                    <Text style={styles.caption}>{i.action}</Text>
+                    <Text style={styles.caption}>{text(i.action)}</Text>
                     {evidence(`insight:${i.id}`)}
                   </View>
                 ))}
@@ -681,7 +729,7 @@ export default function PaintingAnalysisWorkspace({
                     </Text>
                     <Text style={styles.caption}>
                       {insight.classification === "clear_issue"
-                        ? "Visible technical issue"
+                        ? "A material issue to address"
                         : "An elevation idea, not a defect"}
                     </Text>
                     {evidence(`insight:${insight.id}`)}
@@ -689,22 +737,25 @@ export default function PaintingAnalysisWorkspace({
                       What I see
                     </Text>
                     <Text style={styles.body}>
-                      {insight.factIds
-                        .map(
-                          (id) => c.facts.find((f) => f.id === id)?.observation,
-                        )
-                        .filter(Boolean)
-                        .join(" ")}
+                      {text(
+                        insight.factIds
+                          .map(
+                            (id) =>
+                              c.facts.find((f) => f.id === id)?.observation,
+                          )
+                          .filter(Boolean)
+                          .join(" "),
+                      )}
                     </Text>
                     <Text style={[styles.caption, { fontWeight: "600" }]}>
                       Why it matters
                     </Text>
-                    <Text style={styles.body}>{insight.lesson}</Text>
+                    <Text style={styles.body}>{text(insight.lesson)}</Text>
                     <Text style={[styles.caption, { fontWeight: "600" }]}>
                       Try in a separate study
                     </Text>
                     <Text style={styles.body}>
-                      {separateStudyText(insight.action)}
+                      {text(separateStudyText(insight.action))}
                     </Text>
                   </View>
                 ))}
@@ -725,10 +776,10 @@ export default function PaintingAnalysisWorkspace({
                     { fontWeight: "600", color: colors.accent },
                   ]}
                 >
-                  {archetypeLabel(structure.type)}
+                  {archetypeLabel(structure.type, focalPosition)}
                 </Text>
               )}
-              <Text style={styles.body}>{c.composition.observation}</Text>
+              <Text style={styles.body}>{text(c.composition.observation)}</Text>
               {evidence("composition")}
               {structure && (
                 <>
@@ -737,22 +788,24 @@ export default function PaintingAnalysisWorkspace({
                     c.composition.observation,
                   ) && (
                     <Text style={styles.body}>
-                      {structure.shortExplanation}
+                      {text(structure.shortExplanation)}
                     </Text>
                   )}
-                  {compositionTeachingRows(structure).map(([label, text]) => (
-                    <View key={label} style={{ gap: 3 }}>
-                      <Text
-                        style={[
-                          styles.caption,
-                          { fontWeight: "600", color: colors.ink },
-                        ]}
-                      >
-                        {label}
-                      </Text>
-                      <Text style={styles.body}>{text}</Text>
-                    </View>
-                  ))}
+                  {compositionTeachingRows(structure, focalPosition).map(
+                    ([label, text]) => (
+                      <View key={label} style={{ gap: 3 }}>
+                        <Text
+                          style={[
+                            styles.caption,
+                            { fontWeight: "600", color: colors.ink },
+                          ]}
+                        >
+                          {label}
+                        </Text>
+                        <Text style={styles.body}>{text}</Text>
+                      </View>
+                    ),
+                  )}
                 </>
               )}
               {!!distinctSecondary && (
@@ -784,11 +837,17 @@ export default function PaintingAnalysisWorkspace({
             >
               <ColourValueAnalysis
                 source={source}
+                omittedInsightIds={teaching.noteExcludedInsightIds}
+                displayText={text}
                 renderEvidence={(index) => {
                   const colour = c.colourAnalysis?.visibleColours[index];
                   const plan =
                     colour &&
-                    colourEvidence(source, colour.roleId, colour.label);
+                    colourEvidence(
+                      evidenceSource,
+                      colour.roleId,
+                      text(colour.label),
+                    );
                   return plan && image ? (
                     <EvidenceVisual
                       uri={image}
@@ -824,7 +883,7 @@ export default function PaintingAnalysisWorkspace({
                 .filter((f) => f.domain === "technique")
                 .map((f) => (
                   <Text key={f.id} style={styles.body}>
-                    {f.observation}
+                    {text(f.observation)}
                   </Text>
                 ))}
               {lessons("technique")}
@@ -864,7 +923,7 @@ export default function PaintingAnalysisWorkspace({
                     >
                       Your next 15 minutes
                     </Text>
-                    <Text style={styles.body}>{teaching.practice}</Text>
+                    <Text style={styles.body}>{text(teaching.practice)}</Text>
                   </View>
                 )}
                 {teaching.studies.map((i, index) => (
@@ -884,9 +943,9 @@ export default function PaintingAnalysisWorkspace({
                       · {i.domain.replace("colour_value", "Colour & Value")} · a
                       future experiment
                     </Text>
-                    <Text style={styles.body}>{i.lesson}</Text>
+                    <Text style={styles.body}>{text(i.lesson)}</Text>
                     {evidence(`insight:${i.id}`)}
-                    <Text style={styles.body}>{i.action}</Text>
+                    <Text style={styles.body}>{text(i.action)}</Text>
                   </View>
                 ))}
               </Section>

@@ -619,3 +619,28 @@ test("legacy multi-region note without a label uses its supplied fact, never gue
   );
   assert(!JSON.stringify(plan).includes("Related passage"));
 });
+for (const label of [
+  "Related passage",
+  "Related passage 2",
+  "Related passages",
+]) {
+  test(`generic saved evidence caption '${label}' uses neutral source numbering without region guesses`, () => {
+    const r = fixture(),
+      note = r.canonicalAnalysis.visualEvidence[0].note;
+    note.scope = "multi_region";
+    note.label = label;
+    note.regions = [region, { x: 0.08, y: 0.59, width: 0.27, height: 0.22 }];
+    const before = structuredClone(r);
+    const plan = helper.insightEvidence(r, r.canonicalAnalysis.insights[0]);
+    assert.deepEqual(
+      plan.regions.map((r) => r.label),
+      ["Source area 1", "Source area 2"],
+    );
+    assert(!render(plan).includes("Related passage"));
+    assert.deepEqual(
+      plan.regions.map((r) => r.region),
+      note.regions,
+    );
+    assert.deepEqual(r, before);
+  });
+}

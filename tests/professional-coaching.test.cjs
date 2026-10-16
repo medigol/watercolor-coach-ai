@@ -57,6 +57,10 @@ test("competent meaningful opportunity never receives no-correction language", (
   r.canonicalAnalysis.insights[2].classification = "optional_refinement";
   r.canonicalAnalysis.insights[2].action =
     "In a separate study, compare a quieter bank shadow against the reserved tower light.";
+  r.canonicalAnalysis.facts[2].observation =
+    "The fragmented bank shadow competes with the tower and weakens spatial integration.";
+  r.canonicalAnalysis.insights[2].lesson =
+    "The fragmented bank shadow weakens spatial integration around the tower light.";
   const v = teaching.workspaceTeaching(clean(r));
   assert(v.opportunity);
   assert.match(v.status, /Main opportunity/);
@@ -74,7 +78,7 @@ test("developing material issue is prioritised rather than hidden by praise", ()
   const r = fixture();
   r.canonicalAnalysis.qualityAssessment.level = "developing";
   r.canonicalAnalysis.facts[2].observation =
-    "Scattered dark water marks compete with the tower light and weaken readability.";
+    "Scattered dark water-shadow marks compete with the tower light and weaken readability.";
   Object.assign(r.canonicalAnalysis.insights[2], {
     classification: "clear_issue",
     lesson: "Scattered dark marks interrupt value grouping.",

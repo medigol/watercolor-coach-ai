@@ -191,6 +191,7 @@ function fixture(fail = false) {
     "../lib/overlays": overlay,
     "../lib/coachingPresentation": presentation,
     "../lib/localNotePresentation": localPresentation,
+    "../lib/teachingEvidence": load("lib/teachingEvidence.ts"),
     "../lib/visualRoles": roles,
     "react-native-svg": { default: "Svg", Path: "Path" },
     "../lib/overlayDrawing": drawing,

@@ -3,26 +3,31 @@
 const sentences = (value: string) =>
   value.split(/(?<=[.!?])\s+|\n+/).filter(Boolean);
 const explicitPractice =
-  /^(?:on|in|for)\b[^.!?]{0,50}\bstudy\b|^on scrap\b|^(?:a|the)\b[^.!?]{0,45}\bstudy (?:could|can|might)\b|^(?:a |the )?(?:suggested|recommended)\b|^(?:try|test|practi[cs]e)\b|^to (?:reproduce|recreate)\b/i;
+  /^(?:on|in|for)\b[^.!?]{0,50}\bstudy\b|^on scrap\b|^(?:a|an|the)\b[^.!?]{0,45}\b(?:study|exercise) (?:could|can|might)\b|^(?:a |the )?(?:suggested|recommended)\b|^(?:try|test|practi[cs]e)\b|^to (?:reproduce|recreate)\b/i;
 export function recommendedMethod(value: string): boolean {
-  return /\b(?:could|might|can be practised|recommended|suggested|practi[cs]e|exercise|try|test|next study|separate study|to reproduce|to recreate)\b/i.test(
-    value,
+  return (
+    explicitPractice.test(value) ||
+    (/^(?:use|paint|compare|experiment)\b/i.test(value) &&
+      /\b(?:separate|future|next|new) stud(?:y|ies)\b|\bon scrap(?: watercolou?r)? paper\b/i.test(
+        value,
+      ))
   );
 }
 export function unsupportedProcess(value: string): boolean {
   const history =
     /\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:the|original|actual|exact) (?:brush|pigment|paper moisture|wash order|glazing sequence)\b[^.!?]{0,40}\b(?:was|is|were)\b/i;
   if (history.test(value)) return true;
-  if (
-    /\bsolid control of watercolou?r techniques\b|\busing layered washes\b|\b(?:more )?controlled brush\s*strokes\b|\bbroad,? loose horizontal washes\b/i.test(
-      value,
-    ) &&
-    !explicitPractice.test(value)
-  )
-    return true;
+  // A modal such as “could” does not by itself make an observation a proposed
+  // method. Retain methods only when explicitly framed as future practice.
   if (recommendedMethod(value)) return false;
   if (
-    /\bwash application\b|\bwashes? (?:are|is) applied\b|\b(?:some )?layering and soft blending\b/i.test(
+    /\bsolid control of watercolou?r techniques\b|\busing layered washes\b|\b(?:more )?controlled brush\s*strokes\b|\bbroad,? loose horizontal washes\b|\b(?:loose|controlled|confident|defined|sharp(?:er)?) brushwork\b|\b(?:confident|skilful|skillful|expert) handling\b|\btechnique control\b|\bcontrolled edges\b|\b(?:strong|good|solid) control of (?:brushwork|techniques?|washes|edges)\b|\bedges? (?:are|is|were|was) (?:\w+ )?controlled\b/i.test(
+      value,
+    )
+  )
+    return true;
+  if (
+    /\bwash application\b|\bwashes? (?:are|is) applied\b|\b(?:some )?layering and soft blending\b|\b(?:using|applied with|painted with) (?:soft |loose |transparent )?washes\b/i.test(
       value,
     )
   )
@@ -56,7 +61,7 @@ export function observableEffectText(value: string): string {
       (match, article: string | undefined, object: string) =>
         `${/^[A-Z]/.test(match) ? "Structure" : "structure"} of ${article ?? ""}${object}`,
     );
-  if (explicitPractice.test(value)) return value;
+  if (recommendedMethod(value)) return value;
   return (
     value
       .replace(
@@ -64,30 +69,92 @@ export function observableEffectText(value: string): string {
         (m) =>
           `${/^[A-Z]/.test(m) ? "Broad" : "broad"} horizontal colour bands`,
       )
-      // Retain supplied shape/edge adjectives; never translate control into an
-      // invented crispness or softness that the sentence did not describe.
       .replace(
-        /\b(?:more )?controlled brush\s*strokes\b/gi,
-        (m) => `${/^[A-Z]/.test(m) ? "Visible" : "visible"} marks`,
+        /\b(?:the )?wash application is (controlled|loose|even) with transparent layering\b/gi,
+        (_, quality: string) =>
+          quality.toLowerCase() === "controlled"
+            ? "Visible colour passages have transparent-looking overlaps"
+            : `Visible colour passages appear ${quality.toLowerCase()}, with transparent-looking overlaps`,
+      )
+      .replace(
+        /\b(?:watercolou?r )?washes are applied loosely with (?:some )?layering and soft blending\b/gi,
+        "Visible colour passages appear loose, with overlapping colour and soft blended transitions",
+      )
+      .replace(
+        /\b(?:some )?layering and soft blending\b/gi,
+        "overlapping colour and soft blended transitions",
       )
       .replace(
         /\beffective use of soft washes(?:\s+(creates?|gives?|supports?))?/gi,
         (_, verb: string | undefined) =>
           `Soft-edged colour passages${verb ? ` ${verb.replace(/s$/i, "")}` : ""}`,
       )
+      // Preservation concerns the visible effect, not a claim that the user
+      // previously used a particular method. No new edge quality is supplied.
+      .replace(
+        /\b(?:continue|keep) (?:using|with) (soft|loose|broad) washes\b/gi,
+        (_, quality: string) =>
+          `Preserve ${quality.toLowerCase()} colour passages`,
+      )
+      .replace(
+        /\b(?:continue|keep) using (?:more )?controlled brush\s*strokes\b/gi,
+        "Preserve visible marks",
+      )
+      .replace(
+        /\b(soft|loose|broad) washes\b/gi,
+        (_, quality: string) => `${quality} colour passages`,
+      )
       .replace(/\s+(?:using|through) layered washes\b/gi, "")
       .replace(
-        /\b(?:the )?wash application is (controlled|loose|even) with transparent layering\b/gi,
-        (_, quality: string) =>
-          `Visible colour passages are ${quality.toLowerCase()}, with transparent-looking overlaps`,
+        /\b((?:the |a |this )?(?:boat|van|vehicle|car|building|tower|church)) (?:is|was) painted with ((?:more )?(?:defined|sharp|sharper|dark|darker)) brush\s*strokes\b/gi,
+        (_, subject: string, quality: string) =>
+          `${subject} has ${quality} visible marks`,
+      )
+      // Keep only explicit visual adjectives. “Loose” or “controlled” handling
+      // does not establish crispness, darkness, mark size or brush identity.
+      .replace(
+        /\b(?:more )?controlled brush\s*strokes\b/gi,
+        (m) => `${/^[A-Z]/.test(m) ? "Visible" : "visible"} marks`,
       )
       .replace(
-        /\b(?:watercolou?r )?washes are applied loosely with (?:some )?layering and soft blending\b/gi,
-        "Visible washes appear loose, with overlapping colour and soft blended transitions",
+        /\b(?:(?:carefully|confidently|well) )?(?:loose|controlled|confident) (?:watercolou?r )?brushwork\b/gi,
+        (m) => `${/^[A-Z]/.test(m) ? "Visible" : "visible"} marks`,
       )
       .replace(
-        /\b(?:some )?layering and soft blending\b/gi,
-        "overlapping colour and soft blended transitions",
+        /\b(defined|sharp|sharper|dark|darker) brush(?:work|\s*strokes)\b/gi,
+        "$1 visible marks",
+      )
+      .replace(
+        /\b(?:brushwork|brush\s*strokes)\b/gi,
+        (m) => `${/^[A-Z]/.test(m) ? "Visible" : "visible"} marks`,
+      )
+      .replace(
+        /^((?:(?:defined|sharp|sharper|dark|darker) )?visible marks) (creates|defines|separates|supports|gives|establishes)\b/i,
+        (_, subject: string, verb: string) =>
+          `${subject} ${verb.toLowerCase() === "establishes" ? "establish" : verb.slice(0, -1)}`,
+      )
+      .replace(
+        /\b(edge|edges) (?:is|was|are|were) unevenly controlled\b/gi,
+        (_, subject: string) =>
+          `${subject} ${subject.toLowerCase() === "edge" ? "varies" : "vary"} unevenly in definition`,
+      )
+      .replace(
+        /\b(edge|edges) (?:is|was|are|were) (?:well |carefully |evenly )?controlled\b/gi,
+        (_, subject: string) =>
+          `${subject} ${subject.toLowerCase() === "edge" ? "has" : "have"} consistent definition`,
+      )
+      .replace(
+        /\b(unevenly |poorly |well[- ]|carefully |evenly )?controlled edges\b/gi,
+        (match, qualifier: string | undefined) => {
+          // “Poorly controlled” supplies no safe visible replacement quality.
+          if (/^poorly/i.test(qualifier ?? "")) return match;
+          const label = /^unevenly/i.test(qualifier ?? "")
+            ? "unevenly defined edges"
+            : "consistently defined edges";
+          return /^[A-Z]/.test(match)
+            ? label[0].toUpperCase() + label.slice(1)
+            : label;
+        },
       )
   );
 }
@@ -103,7 +170,9 @@ export function observationText(value: unknown): string {
         /\b(?:soft|diffused|crisp|sharp)\b/i.test(sentence) &&
         /\bwet[- ]on[- ](?:wet|dry)\b/i.test(sentence)
       ) {
-        const visible = sentence.replace(/\bwet[- ]on[- ](?:wet|dry)\s*/gi, "");
+        const visible = observableEffectText(
+          sentence.replace(/\bwet[- ]on[- ](?:wet|dry)\s*/gi, ""),
+        );
         if (!unsupportedProcess(visible)) return [visible];
       }
       return [];

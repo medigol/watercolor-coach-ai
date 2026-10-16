@@ -14,6 +14,207 @@ const canonicalFixture = () => {
     "On scrap, paint three tower silhouettes against a soft wash. Keep one edge crisp. Compare which version holds the light most clearly at arm’s length.";
   return r;
 };
+// Sanitized live-output text over original technical assets. These fixtures
+// exercise presentation consistency, not another assessment of image pixels.
+function liveFreezeFixture(kind) {
+  const value = canonicalFixture(),
+    c = value.canonicalAnalysis;
+  c.qualityAssessment = {
+    level: "competent",
+    confidence: 0.88,
+    rationale:
+      "Clear focal hierarchy, coherent values and balanced light give the scene readable depth.",
+  };
+  c.colourAnalysis.visibleColours = [
+    {
+      label: "Reserved warm light",
+      approximateHex: "#e5c58c",
+      roleId: "tower",
+    },
+    { label: "Muted blue-grey", approximateHex: "#819395", roleId: null },
+    { label: "Soft ochre", approximateHex: "#c2a878", roleId: null },
+  ];
+  const noteFor = (insightId, id, label, roleId = "tower") => ({
+    insightId,
+    roleId,
+    note: {
+      ...structuredClone(c.visualEvidence[0].note),
+      id,
+      label,
+      type: "region_highlight",
+      category: "edge_control",
+      scope: "multi_region",
+      region: null,
+      regions: [
+        structuredClone(c.visualRoles[0].region),
+        structuredClone(c.visualRoles[1].region),
+      ],
+      shortInstruction: label,
+    },
+  });
+  if (kind === "church") {
+    c.facts.push({
+      id: "wire-evidence",
+      domain: "technique",
+      roleId: "tower",
+      observation:
+        "The upper-left wires have sharper edge contrast than the tower silhouette and compete with its focal separation.",
+    });
+    c.insights.push(
+      {
+        id: "wire-quiet",
+        domain: "technique",
+        classification: "optional_refinement",
+        factIds: ["wire-evidence"],
+        lesson:
+          "Some upper-left wires compete with the tower silhouette and weaken focal separation.",
+        action:
+          "In a separate study, simplify some upper-left wires to reduce competition with the tower.",
+      },
+      {
+        id: "wire-soften",
+        domain: "technique",
+        classification: "optional_refinement",
+        factIds: ["wire-evidence"],
+        lesson:
+          "Selected upper-left wire edges compete with the tower silhouette.",
+        action:
+          "In a separate study, soften selected upper-left wire edges so the tower silhouette remains dominant.",
+      },
+      {
+        id: "unsupported-base",
+        domain: "overall",
+        classification: "optional_refinement",
+        factIds: ["hierarchy"],
+        lesson:
+          "The tower's base and surrounding shadows feel compressed, limiting spatial depth.",
+        action:
+          "In a separate study, simplify shadow masses at the tower base to improve depth.",
+      },
+    );
+    c.visualEvidence = [
+      noteFor("wire-quiet", "wire-quiet-note", "Related passages"),
+      noteFor("wire-soften", "wire-soften-note", "Related passages"),
+      noteFor(
+        "unsupported-base",
+        "unsupported-base-note",
+        "Unsupported base-shadow claim",
+      ),
+    ];
+  } else if (kind === "van") {
+    c.visualRoles[0].area = "van";
+    c.visualRoles[0].region = { x: 0.44, y: 0.4, width: 0.12, height: 0.2 };
+    Object.assign(c.composition.primary, {
+      type: "off_centre",
+      focalPoint: { x: 0.5, y: 0.5 },
+      shortExplanation:
+        "Off-centre focus; van centrally placed against the mountain.",
+    });
+    c.composition.observation =
+      "Central vertical focus; van centrally placed against the mountain.";
+    c.qualityAssessment.rationale =
+      "Clear value grouping supports focal separation. Perspective and value transitions need refinement for depth.";
+    c.facts[0].observation =
+      "The warm van stands apart from the cooler quiet mountain.";
+    c.facts.push(
+      {
+        id: "mountain-values",
+        domain: "colour_value",
+        roleId: "bank",
+        observation:
+          "The mountain's internal dark values compete with the van and flatten depth.",
+      },
+      {
+        id: "road-values",
+        domain: "composition",
+        roleId: "bank",
+        observation:
+          "The near foreground road has abrupt value transitions and weak taper toward the distant van, flattening recession.",
+      },
+    );
+    c.insights.push(
+      {
+        id: "mountain-grouping",
+        domain: "colour_value",
+        classification: "clear_issue",
+        factIds: ["mountain-values"],
+        lesson:
+          "The mountain's internal dark values compete with the van and flatten spatial depth.",
+        action:
+          "On a separate study, compress mountain internal values into a narrower middle-value range; compare van separation without losing mountain scale.",
+      },
+      {
+        id: "unsafe-road",
+        domain: "composition",
+        classification: "optional_refinement",
+        factIds: ["road-values"],
+        lesson:
+          "Abrupt foreground road values weaken recession toward the van.",
+        action:
+          "Introduce more value contrast and subtle chroma shifts in road and foreground to enhance depth.",
+      },
+    );
+    c.visualEvidence = [
+      noteFor(
+        "mountain-grouping",
+        "mountain-grouping-note",
+        "Mountain / focal vehicle",
+        "bank",
+      ),
+      noteFor(
+        "unsafe-road",
+        "unsafe-road-note",
+        "Unsafe road amplification",
+        "bank",
+      ),
+    ];
+  } else {
+    c.visualRoles[0].area = "boat";
+    c.visualRoles[0].region = { x: 0.72, y: 0.66, width: 0.18, height: 0.2 };
+    Object.assign(c.composition.primary, {
+      type: "off_centre",
+      focalPoint: { x: 0.81, y: 0.76 },
+      shortExplanation:
+        "Central boat focal point within broad horizontal bands.",
+    });
+    c.composition.observation =
+      "A central boat focal point sits within horizontal colour bands.";
+    c.facts[0].observation =
+      "Broad horizontal colour bands frame a lower-right boat with darker contours against soft background passages.";
+    c.facts[1].observation =
+      "The boat sits lower-right among broad horizontal bands.";
+    c.facts[3].observation =
+      "The boat is painted with more defined brush strokes against soft horizontal background bands.";
+    Object.assign(c.insights[0], {
+      lesson:
+        "Horizontal bands and boat placement give the scene a calm rhythm.",
+      action: "Preserve the calm spacing of the bands around the boat.",
+    });
+    Object.assign(c.insights[1], {
+      lesson:
+        "Boat placement within horizontal bands maintains the calm rhythm.",
+      action: "Keep the bands calm around the boat.",
+    });
+    c.insights[3].lesson =
+      "Combining loose washes for background with sharper brushwork gives focal separation.";
+    c.insights.push({
+      id: "unsupported-soften",
+      domain: "technique",
+      classification: "optional_refinement",
+      factIds: ["edges"],
+      lesson: "The soft background edges could be softer.",
+      action: "Soften the background edges further.",
+    });
+    c.visualEvidence = [
+      noteFor(
+        "unsupported-soften",
+        "unsupported-soften-note",
+        "Unsupported extra softness",
+      ),
+    ];
+  }
+  return value;
+}
 const { chromium } = require("playwright");
 const assert = require("node:assert/strict"),
   fs = require("node:fs");
@@ -802,7 +1003,7 @@ let signalFeedbackHeld;
     );
     assert(
       body.includes(
-        "Visible washes appear loose, with overlapping colour and soft blended transitions.",
+        "Visible colour passages appear loose, with overlapping colour and soft blended transitions.",
       ),
     );
     assert(!body.includes("Ultramarine + Burnt Sienna + white"));
@@ -901,6 +1102,8 @@ let signalFeedbackHeld;
     action:
       "On a separate study, soften selected lower bank edges; compare the separation from the focal tower.",
   });
+  saved.canonicalAnalysis.facts[3].observation =
+    "The bank's lower edges are too sharp and compete with the crisp focal tower corner, weakening separation.";
   saved.canonicalAnalysis.insights.push({
     id: "unsafe-depth",
     domain: "overall",
@@ -968,6 +1171,140 @@ let signalFeedbackHeld;
     if ([390, 1440].includes(width)) await shot(`final-calibration-${width}`);
   }
   Object.assign(saved, structuredClone(beforeFinalCalibration));
+  const liveFreezeMatrix = [];
+  for (const kind of ["church", "van", "boat"]) {
+    Object.assign(saved, liveFreezeFixture(kind));
+    imageFile =
+      kind === "van"
+        ? aspectFiles["portrait-vehicle"]
+        : kind === "church"
+          ? aspectFiles.portrait
+          : aspectFiles.landscape;
+    for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
+      await page.setViewportSize({ width, height: 950 });
+      await page.reload();
+      await page
+        .getByText("Complete Painting Analysis", { exact: true })
+        .waitFor();
+      await page.getByTestId("coaching-source-image").waitFor();
+      await open("Composition");
+      await open("Colour & Value");
+      await open("Watercolor technique");
+      const assessment = await page
+        .getByTestId("overall-assessment")
+        .innerText();
+      assert(
+        assessment.includes(
+          kind === "van" ? "Competent painting" : "Strong painting",
+        ),
+      );
+      assert(
+        !/perspective|value transitions need refinement/i.test(assessment),
+      );
+      const recommendations = page.locator('[data-testid^="recommendation-"]');
+      assert.equal(await recommendations.count(), kind === "boat" ? 0 : 1);
+      const colours = page.getByTestId("colour-value-analysis");
+      await colours
+        .locator('img[alt="Original painting evidence: Reserved warm light"]')
+        .waitFor();
+      assert.equal(
+        await colours
+          .getByText(
+            "Some listed colours are visible in the painting, but their exact source regions were not located confidently.",
+            { exact: true },
+          )
+          .count(),
+        1,
+      );
+      assert.equal(
+        await colours
+          .getByText("No confidently located source detail for this colour.", {
+            exact: true,
+          })
+          .count(),
+        0,
+      );
+      for (const label of [
+        "Reserved warm light",
+        "Muted blue-grey",
+        "Soft ochre",
+      ])
+        assert(await colours.getByText(label, { exact: true }).count());
+      const before = snapshot();
+      await button("Composition overlay").click();
+      if (kind === "van") {
+        assert(
+          !/Off-centre focus/i.test(await page.locator("body").innerText()),
+        );
+        assert(await page.getByText(/Focal placement/).count());
+      }
+      await button("Roles").click();
+      const notes = page.getByRole("button", { name: /^Notes(?: · \d+)?$/ });
+      assert.equal(
+        await notes.getAttribute("aria-label"),
+        kind === "boat" ? "Notes" : "Notes · 1",
+      );
+      if (kind !== "boat") {
+        await notes.click();
+        assert.equal(await page.getByTestId("coaching-marker-0").count(), 1);
+        assert.equal(await page.getByTestId("coaching-marker-1").count(), 0);
+        await page.getByTestId("coaching-marker-0").click();
+        await page.getByTestId("coaching-note-0").waitFor();
+      } else assert.equal(await notes.getAttribute("aria-disabled"), "true");
+      const body = await page.locator("body").innerText();
+      assert(
+        !/Related passages?|Unsupported base-shadow claim|surrounding shadows feel compressed|Unsafe road amplification|Introduce more value contrast|Unsupported extra softness|Soften the background edges further/i.test(
+          body,
+        ),
+      );
+      assert.equal(
+        await page.locator('[aria-label*="Related passage"]').count(),
+        0,
+      );
+      if (kind === "church") {
+        assert(/wire/i.test(await recommendations.first().innerText()));
+        assert(body.includes("Multiple source areas"));
+      }
+      if (kind === "boat") {
+        assert(
+          !/central boat focal point|painted with|brushwork|brush strokes|loose washes/i.test(
+            body,
+          ),
+        );
+        assert(
+          body.includes(
+            "Horizontal bands and boat placement give the scene a calm rhythm.",
+          ),
+        );
+        assert(
+          !body.includes(
+            "Boat placement within horizontal bands maintains the calm rhythm.",
+          ),
+        );
+      }
+      await button("Clean view").click();
+      await noOverflow();
+      assert.deepEqual(
+        snapshot(),
+        before,
+        "freeze result controls cannot add model calls, uploads or database writes",
+      );
+      liveFreezeMatrix.push({
+        kind,
+        width,
+        evidenceAligned: true,
+        deduplicated: true,
+        noOrphanNotes: true,
+        geometryConsistent: true,
+        assessmentConsistent: true,
+        sharedColourNotice: true,
+        readonly: true,
+      });
+      if ([390, 1440].includes(width))
+        await shot(`live-freeze-${kind}-${width}`);
+    }
+  }
+  Object.assign(saved, structuredClone(beforeFinalCalibration));
   imageFile = aspectFiles.landscape;
   const originalPrimary = structuredClone(
     saved.canonicalAnalysis.composition.primary,
@@ -1031,6 +1368,11 @@ let signalFeedbackHeld;
     "A quieter bank value group could give the small focal light more breathing room.";
   saved.canonicalAnalysis.insights[2].action =
     "In a separate study, compare one connected bank shadow with fewer dark accents.";
+  Object.assign(saved.canonicalAnalysis.facts[2], {
+    observation:
+      "The lower bank's dark accents compete with the reserved tower light and fragment the value grouping.",
+    roleId: "bank",
+  });
   await page.reload();
   await page
     .getByText("Main opportunity to explore", { exact: true })
@@ -1134,6 +1476,16 @@ let signalFeedbackHeld;
     action:
       "In a separate study, compare soft versus current bank edges; hold the focal corner fixed and choose the clearer separation.",
   });
+  saved.canonicalAnalysis.facts[3].observation =
+    "The lower bank edge is too sharp and competes with the crisp focal tower corner, weakening separation.";
+  Object.assign(
+    saved.canonicalAnalysis.facts[2],
+    structuredClone(beforeCalibration.canonicalAnalysis.facts[2]),
+  );
+  Object.assign(
+    saved.canonicalAnalysis.insights[2],
+    structuredClone(beforeCalibration.canonicalAnalysis.insights[2]),
+  );
   saved.canonicalAnalysis.visualEvidence.push({
     insightId: "handling",
     roleId: "tower",
@@ -1335,6 +1687,7 @@ let signalFeedbackHeld;
         calibrationMatrix,
         providerMatrix,
         finalCalibrationMatrix,
+        liveFreezeMatrix,
         calls: snapshot(),
         errors,
         requests: requests.map((r) => ({
@@ -1349,7 +1702,7 @@ let signalFeedbackHeld;
     ),
   );
   console.log(
-    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
+    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration + 21 live-freeze cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
   );
   await browser.close();
 })().catch(async (error) => {

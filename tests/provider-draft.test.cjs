@@ -386,7 +386,7 @@ test("developing draft can prioritise supplied foundational value grouping", () 
   const raw = fixture();
   raw.qualityAssessment.level = "developing";
   raw.colourValue.facts[0].observation =
-    "Disconnected shadow shapes compete with the tower and weaken focal separation.";
+    "Disconnected foreground shadow shapes compete with the tower and weaken focal separation.";
   Object.assign(raw.colourValue.insights[0], {
     classification: "clear_issue",
     lesson: "Connected shadow values would clarify the focal light.",
@@ -437,6 +437,12 @@ test("strong-work elevation is capped at two sophisticated opportunities", () =>
       lesson,
       action,
     });
+  raw.composition.facts[0].observation =
+    "Overly regular foreground bank mark spacing flattens its visual rhythm.";
+  raw.colourValue.facts[0].observation =
+    "The bank's cool passages compete with the focal tower through excessive chroma.";
+  raw.technique.facts[0].observation =
+    "Hard upper background contours are abrupt and flatten atmospheric recession.";
   assert.equal(
     teaching.workspaceTeaching(normalized(raw)).recommendations.length,
     2,
