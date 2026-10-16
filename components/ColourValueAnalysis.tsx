@@ -9,8 +9,12 @@ export default function ColourValueAnalysis({
   source,
   renderEvidence,
   renderValueEvidence,
+  omittedInsightIds = [],
+  displayText = (value: string) => value,
 }: {
   source: PaintingAnalysisResult;
+  omittedInsightIds?: readonly string[];
+  displayText?: (value: string) => string;
   renderEvidence?: (index: number) => ReactNode;
   renderValueEvidence?: () => ReactNode;
 }) {
@@ -19,6 +23,8 @@ export default function ColourValueAnalysis({
   const evidence = colour?.visibleColours.map((_, index) =>
     renderEvidence?.(index),
   );
+  const missingColourCount =
+    colour?.visibleColours.filter((_, index) => !evidence?.[index]).length ?? 0;
   const hasLocatedColours = evidence?.some(Boolean) ?? false;
   const value =
     colour?.valueHierarchy ||
@@ -43,6 +49,11 @@ export default function ColourValueAnalysis({
               sameLearningInsight(previous || "", text || ""),
             )),
     );
+  const assessment = colour?.technicalAssessment;
+  const showAssessment =
+    assessment &&
+    (!assessment.insightId ||
+      !omittedInsightIds.includes(assessment.insightId));
   return (
     <View testID="colour-value-analysis" style={{ gap: design.space.lg }}>
       {!!colour?.visibleColours.length && (
@@ -57,6 +68,7 @@ export default function ColourValueAnalysis({
           <View style={{ gap: 14 }}>
             {colour.visibleColours.map((item, index) => {
               const sourceEvidence = evidence?.[index];
+              const role = c.visualRoles.find((r) => r.id === item.roleId);
               return (
                 <View
                   key={index}
@@ -91,24 +103,21 @@ export default function ColourValueAnalysis({
                     </Text>
                   </View>
                   {sourceEvidence}
-                  {hasLocatedColours && !sourceEvidence && (
+                  {missingColourCount === 1 && !sourceEvidence && (
                     <Text style={styles.caption}>
                       No confidently located source detail for this colour.
                     </Text>
                   )}
-                  {item.roleId && (
-                    <Text style={styles.caption}>
-                      {c.visualRoles.find((r) => r.id === item.roleId)?.role}{" "}
-                      area
-                    </Text>
-                  )}
+                  {role && <Text style={styles.caption}>{role.role} area</Text>}
                 </View>
               );
             })}
           </View>
-          {!hasLocatedColours && (
+          {missingColourCount >= 2 && (
             <Text style={styles.caption}>
-              Source regions were not located confidently for these colours.
+              {hasLocatedColours
+                ? "Some listed colours are visible in the painting, but their exact source regions were not located confidently."
+                : "Source regions were not located confidently for these colours."}
             </Text>
           )}
         </View>
@@ -122,19 +131,17 @@ export default function ColourValueAnalysis({
             >
               {title}
             </Text>
-            <Text style={styles.body}>{text}</Text>
+            <Text style={styles.body}>{displayText(text || "")}</Text>
             {title === "Value hierarchy" && renderValueEvidence?.()}
           </View>
         ))}
-      {!!colour?.technicalAssessment && (
+      {showAssessment && assessment && (
         <View
           style={{
             padding: 14,
             borderRadius: design.radius.control,
             backgroundColor:
-              colour.technicalAssessment.kind === "issue"
-                ? "#F9F0E2"
-                : colors.pale,
+              assessment.kind === "issue" ? "#F9F0E2" : colors.pale,
             gap: 6,
           }}
         >
@@ -145,16 +152,13 @@ export default function ColourValueAnalysis({
                 issue: "Technical opportunity",
                 stylistic_alternative: "Stylistic alternative",
                 uncertain: "A tentative interpretation",
-              }[colour.technicalAssessment.kind]
+              }[assessment.kind]
             }
           </Text>
           <Text style={styles.body}>
             {!paragraphs.some(([, text]) =>
-              sameLearningInsight(
-                text || "",
-                colour.technicalAssessment!.explanation,
-              ),
-            ) && colour.technicalAssessment.explanation}
+              sameLearningInsight(text || "", assessment.explanation),
+            ) && displayText(assessment.explanation)}
           </Text>
         </View>
       )}

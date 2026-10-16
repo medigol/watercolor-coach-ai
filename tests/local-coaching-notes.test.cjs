@@ -43,6 +43,7 @@ const drawing = load("lib/overlayDrawing.ts", {
 const presentation = load("lib/coachingPresentation.ts", {
   "./overlays": overlays,
 });
+const teachingEvidence = load("lib/teachingEvidence.ts");
 const localPresentation = load("lib/localNotePresentation.ts", {
   "./overlayDrawing": drawing,
   "./coachingPresentation": presentation,
@@ -127,6 +128,7 @@ function components(width = 375) {
     "../lib/overlayDrawing": drawing,
     "../lib/coachingPresentation": presentation,
     "../lib/localNotePresentation": localPresentation,
+    "../lib/teachingEvidence": teachingEvidence,
     "../lib/visualRoles": roles,
     "../shared/imageGeometry": geometry,
     "../shared/visualMetadata": metadata,
@@ -163,6 +165,75 @@ const note = (patch = {}) => ({
   domain: "composition",
   relatedDomain: "colour_value",
   ...patch,
+});
+for (const label of [
+  "Related passage",
+  "Related passage 1",
+  "Related passages",
+]) {
+  test(`generic note caption '${label}' becomes neutral without changing supplied source areas`, () => {
+    const f = components();
+    const regions = [
+      { x: 0.1, y: 0.2, width: 0.18, height: 0.2 },
+      { x: 0.6, y: 0.25, width: 0.2, height: 0.18 },
+    ];
+    const supplied = [
+      note({
+        label,
+        scope: "multi_region",
+        region: null,
+        regions,
+        anchors: null,
+      }),
+    ];
+    const before = structuredClone(supplied);
+    const tree = f.render(f.VisualCoachingNotes, {
+      notes: supplied,
+      uri: "same-original",
+      sourceSize: { width: 1200, height: 900 },
+    });
+    assert(!text(tree).includes("Related passage"));
+    assert(text(tree).includes("Multiple source areas"));
+    const crops = nodes(tree).filter((n) => n.type === "RegionCrop");
+    assert.deepEqual(
+      crops.map((n) => n.props.label),
+      ["Source area 1", "Source area 2"],
+    );
+    assert.deepEqual(
+      crops.map((n) => n.props.region),
+      regions,
+    );
+    assert.deepEqual(supplied, before);
+  });
+}
+test("supplied semantic relationship labels remain available in Notes and numbered source captions", () => {
+  const f = components();
+  const tree = f.render(f.VisualCoachingNotes, {
+    notes: [
+      note({
+        label: "Focal contour / distant passage",
+        scope: "multi_region",
+        region: null,
+        regions: [
+          { x: 0.1, y: 0.2, width: 0.18, height: 0.2 },
+          { x: 0.6, y: 0.25, width: 0.2, height: 0.18 },
+        ],
+        anchors: null,
+      }),
+    ],
+    uri: "same-original",
+    sourceSize: { width: 1200, height: 900 },
+  });
+  assert(text(tree).includes("Focal contour / distant passage"));
+  assert.deepEqual(
+    nodes(tree)
+      .filter((n) => n.type === "RegionCrop")
+      .map((n) => n.props.label),
+    [
+      "Focal contour / distant passage · area 1",
+      "Focal contour / distant passage · area 2",
+    ],
+  );
 });
 test("local notes use the original URI, intrinsic size and shared target, with mobile crop above text", () => {
   const f = components(375);
@@ -424,7 +495,8 @@ test("multi-region notes show several contexts while anchors-only and global obs
     regions,
   );
   assert(crops.every((n) => n.props.compact));
-  assert(text(tree).includes("Related passages"));
+  assert(text(tree).includes("Sunlit roof"));
+  assert(!text(tree).includes("Related passages"));
   for (const patch of [
     {
       scope: "multi_region",
@@ -650,4 +722,25 @@ test("whole-painting and low-confidence notes retain text without false numbered
     );
     assert(text(tree).includes("choose Notes for whole-painting context"));
   }
+});
+
+test("generic source wording is removed from selected-note accessibility instructions as well as headings", () => {
+  const f = components();
+  const tree = f.render(f.VisualCoachingNotes, {
+    notes: [
+      note({
+        label: "Related passages",
+        shortInstruction: "Related passages",
+        scope: "multi_region",
+        regions: [
+          { x: 0.1, y: 0.1, width: 0.2, height: 0.2 },
+          { x: 0.5, y: 0.5, width: 0.2, height: 0.2 },
+        ],
+      }),
+    ],
+    selected: 0,
+  });
+  assert(!/Related passages?/i.test(text(tree)));
+  for (const item of nodes(tree))
+    assert(!/Related passages?/i.test(item.props?.accessibilityLabel ?? ""));
 });

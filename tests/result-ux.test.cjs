@@ -1262,6 +1262,8 @@ test("an optional overall refinement is taught once instead of repeated in the a
     "A smaller light accent could make the existing hierarchy more selective.";
   insight.action =
     "On a separate study, compare two sizes of the reserved light; keep the bank unchanged and choose the clearer hierarchy.";
+  fixture.canonicalAnalysis.facts[0].observation =
+    "Additional pale light marks compete with the tower and weaken its selective hierarchy.";
   const html = render("improve_painting", "openai", image, undefined, {
     canonicalResult: fixture,
     viewportWidth: 1440,
@@ -1382,6 +1384,9 @@ for (const [name, classification, action] of [
       lesson: "The foreground-shadow gradation could be softer.",
       action,
     });
+    if (name === "selected optional critique")
+      r.canonicalAnalysis.facts[0].observation =
+        "The lower foreground-shadow edge is abrupt and weakens spatial depth.";
     const html = render("improve_painting", "openai", undefined, undefined, {
       canonicalResult: r,
     });
@@ -1413,4 +1418,89 @@ test("unsafe depth advice is absent from recommendations and linked Notes on sav
   assert(!html.includes("Unsafe mountain advice"));
   assert(!html.includes("Darken the distant mountain"));
   assert(!html.includes('data-testid="elevation-recommendations"'));
+});
+
+for (const [position, region, point] of [
+  ["central", { x: 0.4, y: 0.4, width: 0.2, height: 0.2 }, { x: 0.5, y: 0.5 }],
+  [
+    "off_centre",
+    { x: 0.72, y: 0.65, width: 0.16, height: 0.2 },
+    { x: 0.8, y: 0.75 },
+  ],
+  ["uncertain", null, null],
+])
+  test(`saved focal-placement copy is consistent with ${position} supplied geometry`, () => {
+    const r = require("./helpers/canonical-fixture.cjs")(),
+      c = r.canonicalAnalysis;
+    c.visualRoles[0].region = region;
+    c.visualRoles[0].confidence = region ? 0.9 : null;
+    c.composition.primary = {
+      ...c.composition.primary,
+      type: "off_centre",
+      paths: null,
+      masses: null,
+      focalPoint: point,
+    };
+    c.composition.observation =
+      "Central vertical focus around the boat focal point.";
+    c.insights[0].lesson =
+      "A central boat focal point holds the surrounding shapes together.";
+    c.facts[0].observation =
+      "The boat is centrally placed against quiet surrounding water.";
+    const before = structuredClone(r);
+    const html = render("improve_painting", "openai", image, undefined, {
+      canonicalResult: r,
+      viewportWidth: 1440,
+    });
+    if (position !== "central")
+      assert(
+        !/central boat focal point|Central vertical focus|centrally placed/.test(
+          html,
+        ),
+      );
+    if (position !== "off_centre") assert(!html.includes("Off-centre focus"));
+    assert(html.includes("Complete Painting Analysis"));
+    assert.deepEqual(
+      r,
+      before,
+      "position presentation cannot move canonical geometry",
+    );
+  });
+
+test("an omitted recommendation cannot retain its technical colour assessment", () => {
+  const r = require("./helpers/canonical-fixture.cjs")(),
+    c = r.canonicalAnalysis;
+  c.colourAnalysis = require("./helpers/colour-fixture.cjs")();
+  Object.assign(c.insights[2], {
+    classification: "optional_refinement",
+    lesson: "The tower perspective is inconsistent.",
+    action: "Correct the tower perspective.",
+  });
+  c.colourAnalysis.technicalAssessment = {
+    kind: "issue",
+    insightId: "temperature",
+    explanation: "ORPHAN_COLOUR_ASSESSMENT",
+  };
+  const html = render("improve_painting", "openai", image, undefined, {
+    canonicalResult: r,
+    viewportWidth: 1440,
+  });
+  assert(!html.includes("ORPHAN_COLOUR_ASSESSMENT"));
+  assert(!html.includes("The tower perspective is inconsistent"));
+  assert(html.includes("Visible colour evidence"));
+});
+
+test("confident positive competent assessment is derived as Strong without changing saved v1", () => {
+  const r = require("./helpers/canonical-fixture.cjs")();
+  r.canonicalAnalysis.qualityAssessment.level = "competent";
+  r.canonicalAnalysis.qualityAssessment.rationale =
+    "Clear focal hierarchy and coherent values create balanced structure.";
+  const before = structuredClone(r);
+  const html = render("improve_painting", "openai", image, undefined, {
+    canonicalResult: r,
+  });
+  assert(html.includes("Strong painting"));
+  assert(!html.includes("Competent painting"));
+  assert.deepEqual(r, before);
+  assert.equal(r.canonicalAnalysis.version, 1);
 });

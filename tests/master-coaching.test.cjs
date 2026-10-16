@@ -226,11 +226,11 @@ for (const text of [
 for (const [raw, expected] of [
   [
     "The wash application is controlled with transparent layering.",
-    "Visible colour passages are controlled, with transparent-looking overlaps.",
+    "Visible colour passages have transparent-looking overlaps.",
   ],
   [
     "Watercolor washes are applied loosely with some layering and soft blending.",
-    "Visible washes appear loose, with overlapping colour and soft blended transitions.",
+    "Visible colour passages appear loose, with overlapping colour and soft blended transitions.",
   ],
 ])
   test(`production process assertion becomes a supplied visible effect: ${raw.slice(0, 30)}`, () => {
@@ -277,10 +277,53 @@ test("an explicitly labelled opaque gouache variation may use white", () => {
     2,
   );
 });
+// These presentation tests supply the visible problem as a real linked fact;
+// lessons/actions alone may no longer manufacture their own evidence.
+const suppliedEvidence = {
+  integration:
+    "Disconnected middle-ground water bands isolate the boat, weakening spatial integration.",
+  connect:
+    "Disconnected middle-ground value bands weaken the connected spatial field around the boat.",
+  "generic-issue":
+    "The surrounding value masses have weak contrast and unclear separation.",
+  "specific-elevation":
+    "Background dark accents compete with the tower's focal contrast.",
+  generic:
+    "The surrounding value masses have weak contrast and unclear separation.",
+  specific: "Background dark accents compete with the tower's focal contrast.",
+  elevate:
+    "Numerous small bank marks compete with the tower's focal hierarchy.",
+  small: "Numerous small bank marks compete with the tower's focal hierarchy.",
+  value:
+    "Internal distant mountain darks compete with focal contrast and flatten recession.",
+  duplicate:
+    "Internal distant mountain darks compete with focal contrast and flatten recession.",
+  edges: "Sharp upper background contours flatten spatial recession.",
+  rhythm:
+    "Repeated foreground marks crowd the open water with excessive repetition.",
+  detail: "Numerous small wires create visual noise across the reserved sky.",
+  atmosphere:
+    "Sharp internal background edges limit atmospheric recession beside the focal contours.",
+};
 function result(level = "competent", items = []) {
   const r = fixture();
   r.canonicalAnalysis.qualityAssessment.level = level;
-  r.canonicalAnalysis.insights.push(...items);
+  for (const item of items) {
+    const observation = suppliedEvidence[item.id];
+    if (
+      observation &&
+      ["clear_issue", "optional_refinement"].includes(item.classification)
+    ) {
+      const id = `supplied-${item.id}`;
+      r.canonicalAnalysis.facts.push({
+        id,
+        domain: item.domain,
+        observation,
+        roleId: null,
+      });
+      r.canonicalAnalysis.insights.push({ ...item, factIds: [id] });
+    } else r.canonicalAnalysis.insights.push(item);
+  }
   return r;
 }
 

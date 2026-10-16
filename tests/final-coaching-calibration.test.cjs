@@ -32,7 +32,30 @@ function advice(
 function result(items, level = "competent") {
   const r = fixture();
   r.canonicalAnalysis.qualityAssessment.level = level;
-  r.canonicalAnalysis.insights.push(...items);
+  const suppliedEvidence = {
+    road: "The foreground road's value cue is weak and lacks a clear lead-in toward the focal subject.",
+    integration:
+      "Disconnected horizontal water bands isolate the boat's reflection, weakening spatial integration.",
+    "boat-value":
+      "The boat's weak value contrast with the water causes its focal contours to merge unintentionally.",
+    "boat-edge":
+      "The boat's weak value contrast with the water causes its focal contours to merge unintentionally.",
+    "boat-drawing":
+      "The boat's deck contour has inconsistent perspective alignment, weakening its plane relationship.",
+  };
+  for (const item of items) {
+    const observation = suppliedEvidence[item.id];
+    if (observation) {
+      const id = `supplied-${item.id}`;
+      r.canonicalAnalysis.facts.push({
+        id,
+        domain: item.domain,
+        observation,
+        roleId: null,
+      });
+      r.canonicalAnalysis.insights.push({ ...item, factIds: [id] });
+    } else r.canonicalAnalysis.insights.push(item);
+  }
   r.expertViews.overall.summaryId = items[0]?.id ?? "whole";
   r.expertViews.overall.insightIds = [r.expertViews.overall.summaryId];
   return r;
@@ -54,15 +77,31 @@ for (const action of [
     assert(t.omittedInsightIds.includes("unsafe"));
     assert.deepEqual(r, before);
   });
-for (const action of [
-  "On a separate study, darken selected mountain shadows, keeping them below focal contrast with soft atmospheric edges. Compare recession.",
-  "On a separate study, compress the mountain's internal values; compare its depth behind the focal vehicle.",
-  "On a separate study, retain the dark background silhouette and soften internal edges; compare depth.",
+for (const [action, observation] of [
+  [
+    "On a separate study, darken selected mountain shadows, keeping them below focal contrast with soft atmospheric edges. Compare recession.",
+    "Selected mountain shadows at the lower boundary merge and lack value separation while remaining below focal contrast.",
+  ],
+  [
+    "On a separate study, compress the mountain's internal values; compare its depth behind the focal vehicle.",
+    "Internal mountain darks compete with focal vehicle contrast and limit atmospheric recession.",
+  ],
+  [
+    "On a separate study, retain the dark background silhouette and soften internal edges; compare depth.",
+    "Sharp internal background edges flatten recession beneath the dark background silhouette.",
+  ],
 ])
   test(`qualified/non-formulaic background guidance remains: ${action}`, () => {
+    const r = result([advice("safe", action)]);
+    r.canonicalAnalysis.facts.push({
+      id: "mountain-evidence",
+      domain: "overall",
+      observation,
+      roleId: null,
+    });
+    r.canonicalAnalysis.insights.at(-1).factIds = ["mountain-evidence"];
     assert.equal(
-      workspace.workspaceTeaching(result([advice("safe", action)]))
-        .recommendations[0]?.insight.id,
+      workspace.workspaceTeaching(r).recommendations[0]?.insight.id,
       "safe",
     );
   });

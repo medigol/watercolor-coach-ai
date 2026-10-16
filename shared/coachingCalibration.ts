@@ -4,10 +4,10 @@ import type { PaintingInsight } from "./paintingAnalysis.ts";
 // Only supplied advice is suppressed/ranked; no replacement diagnosis is made.
 const clauses = (text: string) =>
   text
-    .split(/[.!?;]|\b(?:but|while|and)\b/i)
+    .split(/[.!?;]|\b(?:but|while)\b/i)
     .map((c) => c.split(/\bagainst\b/i)[0]);
 const amplification =
-  /\b(?:darken|sharpen|strengthen|intensify|saturate)\b|\b(?:increase|add|boost|enhance)\b[^.!?;]{0,50}\b(?:dark\w*|contrast|sharp\w*|chroma|saturation)\b|\b(?:darker|sharper|more (?:contrast|saturated))\b/i;
+  /\b(?:darken|sharpen|strengthen|intensify|saturate|heighten|accentuate|reinforce)\b|\b(?:increase|add|boost|enhance|introduce|raise)\b[^.!?;]{0,50}\b(?:dark\w*|contrast|sharp\w*|chroma|saturation|prominence|visibility)\b|\b(?:darker|sharper|stronger|more (?:contrast|saturated))\b/i;
 const explicitLimit =
   /\b(?:keep\w*|remain\w*|stay\w*|retain\w*|limit\w*)\b[^.!?;]{0,100}\b(?:below|less than|lower than|subordinate to|quieter than|without exceeding)\b[^.!?;]{0,50}\b(?:focal|foreground|subject|vehicle|van|boat)\b/i;
 const limitedToHierarchy = (action: string, context: string) =>
@@ -31,7 +31,9 @@ export function unsafeHierarchyAdvice(
   );
   if (depth && background && !limitedToHierarchy(action, context)) return true;
   const road = amplified.some((c) =>
-    /\b(?:road|path|lead[- ]in|cent(?:re|er)[- ]?line)\b/i.test(c),
+    /\b(?:road|street|path|lead[- ]in|directional edge|cent(?:re|er)[- ]?line)\b/i.test(
+      c,
+    ),
   );
   if (!road) return false;
   // A foreground cue is not permission to strengthen an entire receding path.

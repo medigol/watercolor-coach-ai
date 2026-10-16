@@ -24,6 +24,7 @@ import RegionCrop from "./RegionCrop";
 import VisualRoleMap from "./VisualRoleMap";
 import { planVisualRoles, type VisualRoleRegion } from "../lib/visualRoles";
 import { presentedLocalNote as displayedNote } from "../lib/localNotePresentation";
+import { sourceAreaCaption } from "../lib/teachingEvidence";
 import {
   containFrame,
   noteRegions,
@@ -102,7 +103,20 @@ export function VisualCoachingNotes({
       ? requested
       : 0;
   const allVisible = showAll && allSelection === activeIndex;
-  const displayed = valid.map((note) => displayedNote(note, study));
+  const displayed = valid.map((note) => {
+    const presented = displayedNote(note, study);
+    const label = sourceAreaCaption(presented.label);
+    const clean = (value?: string | null) =>
+      (value ?? "").replace(/\brelated passages?(?:\s+\d+)?\b/gi, label);
+    return {
+      ...presented,
+      label,
+      shortInstruction: clean(presented.shortInstruction),
+      evidence: clean(presented.evidence),
+      reason: clean(presented.reason),
+      action: clean(presented.action),
+    };
+  });
   const visualEvidence: { region: NormalizedRect; owner: number }[] = [];
   const cropRegions = new Map<number, NormalizedRect[]>();
   const sharedContext = new Map<number, number>();
@@ -270,7 +284,7 @@ export function VisualCoachingNotes({
                     region={region}
                     label={
                       regions.length > 1
-                        ? `${note.label} · region ${regionIndex + 1}`
+                        ? sourceAreaCaption(valid[index].label, regionIndex)
                         : note.label
                     }
                     desktop={desktop}
@@ -305,7 +319,7 @@ export function VisualCoachingNotes({
                 {note.scope === "global"
                   ? " · Whole painting"
                   : note.scope === "multi_region"
-                    ? " · Related passages"
+                    ? ` · ${sourceAreaCaption(valid[index].label)}`
                     : ""}
               </Text>
               <Text style={[styles.heading, { fontSize: 18, lineHeight: 25 }]}>
@@ -593,7 +607,7 @@ export default function CoachingOverlay({
                     key={`${note.id ?? "note"}-${index}`}
                     testID={`coaching-marker-${index}`}
                     accessibilityRole="button"
-                    accessibilityLabel={`Note ${index + 1}: ${displayedNote(note, study).label}`}
+                    accessibilityLabel={`Note ${index + 1}: ${sourceAreaCaption(displayedNote(note, study).label)}`}
                     aria-selected={activeIndex === index}
                     accessibilityState={{ selected: activeIndex === index }}
                     onPress={() => selectNote(index)}
