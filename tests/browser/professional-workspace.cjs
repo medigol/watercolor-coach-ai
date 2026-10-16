@@ -728,6 +728,101 @@ let signalFeedbackHeld;
   await button("Roles").click();
   await page.getByTestId("visual-role-map").waitFor();
   await shot("roles");
+  // Reproduce live calibration failures with original technical assets only.
+  const calibrationMatrix = [];
+  const beforeCalibration = structuredClone(saved);
+  const calibration = saved.canonicalAnalysis;
+  calibration.qualityAssessment.rationale =
+    "Clear value grouping supports the focal light. Minor refinements could enhance spatial clarity.";
+  calibration.facts[3].observation =
+    "Watercolor washes are applied loosely with some layering and soft blending.";
+  calibration.insights[3].lesson =
+    "The wash application is controlled with transparent layering.";
+  calibration.insights[0].action =
+    "On scrap paper, paint two value versions; compare which holds the focal light.";
+  calibration.colourAnalysis.visibleColours = [
+    { label: "Muted green", approximateHex: "#819582", roleId: "tower" },
+    { label: "Muted orange", approximateHex: "#b9876a", roleId: "tower" },
+    { label: "Off-white", approximateHex: "#efeadd", roleId: null },
+  ];
+  calibration.colourAnalysis.recreationMixes[0].pigments.push("white");
+  calibration.visualRoles[0].region = {
+    x: 0.65,
+    y: 0.24,
+    width: 0.03,
+    height: 0.45,
+  };
+  Object.assign(calibration.visualEvidence[0].note, {
+    x: 65,
+    y: 24,
+    width: 3,
+    height: 45,
+    region: calibration.visualRoles[0].region,
+  });
+  imageFile = aspectFiles.portrait;
+  for (const width of [375, 390, 430, 1440]) {
+    await page.setViewportSize({ width, height: 950 });
+    await page.reload();
+    await page
+      .getByText("Complete Painting Analysis", { exact: true })
+      .waitFor();
+    await open("Colour & Value");
+    await open("Watercolor technique");
+    const colours = page.getByTestId("colour-value-analysis");
+    const before = snapshot();
+    for (const label of ["Muted green", "Muted orange"]) {
+      const crop = colours.locator(
+        `img[alt="Original painting evidence: ${label}"]`,
+      );
+      await crop.waitFor();
+      assert.equal(await crop.count(), 1);
+      const bounds = await crop.locator("..").locator("..").boundingBox();
+      assert(
+        bounds.width / bounds.height >= 0.6,
+        "narrow role needs recognisable display context",
+      );
+      assert.equal(
+        await colours
+          .getByRole("button", { name: `See image evidence: ${label}` })
+          .count(),
+        0,
+      );
+    }
+    await colours
+      .getByText("No confidently located source detail for this colour.", {
+        exact: true,
+      })
+      .waitFor();
+    const body = await page.locator("body").innerText();
+    assert(
+      !/wash application|washes are applied|Minor refinements could/.test(body),
+    );
+    assert(
+      body.includes(
+        "Visible washes appear loose, with overlapping colour and soft blended transitions.",
+      ),
+    );
+    assert(!body.includes("Ultramarine + Burnt Sienna + white"));
+    await noOverflow();
+    assert.deepEqual(
+      snapshot(),
+      before,
+      "colour/technique evidence cannot create provider calls or writes",
+    );
+    calibrationMatrix.push({
+      width,
+      labelIsolation: true,
+      contextualCrop: true,
+      processSafety: true,
+      readonly: true,
+    });
+    await colours.evaluate((element) =>
+      element.scrollIntoView({ block: "start" }),
+    );
+    await shot(`hotfix-colour-evidence-${width}`);
+  }
+  Object.assign(saved, structuredClone(beforeCalibration));
+  imageFile = aspectFiles.landscape;
   const originalPrimary = structuredClone(
     saved.canonicalAnalysis.composition.primary,
   );
@@ -1086,6 +1181,7 @@ let signalFeedbackHeld;
       {
         matrix,
         evidenceMatrix,
+        calibrationMatrix,
         calls: snapshot(),
         errors,
         requests: requests.map((r) => ({
@@ -1100,7 +1196,7 @@ let signalFeedbackHeld;
     ),
   );
   console.log(
-    "PASS: professional workspace; 70 responsive/aspect cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; zero automatic mock fallback; no live paid calls.",
+    "PASS: professional workspace; 70 responsive/aspect cases + 4 production calibration cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; zero automatic mock fallback; no live paid calls.",
   );
   await browser.close();
 })().catch(async (error) => {

@@ -119,6 +119,62 @@ const render = (plan, props = {}) =>
     }),
   );
 
+test("two colours sharing a role keep their own semantic evidence labels", () => {
+  const r = fixture();
+  for (const label of ["Muted green", "Muted orange", "Off-white", "Red"]) {
+    const plan = helper.colourEvidence(r, "tower", label);
+    assert.equal(plan.label, label);
+    assert.equal(plan.regions[0].label, label);
+    assert(render(plan).includes(label));
+    assert(!render(plan).includes("See image evidence"));
+  }
+});
+test("role fallback also uses the requested colour label, not another evidence owner", () => {
+  const r = fixture();
+  r.canonicalAnalysis.visualEvidence = [];
+  assert.equal(
+    helper.colourEvidence(r, "bank", "Muted green").regions[0].label,
+    "Muted green",
+  );
+});
+test("narrow tower evidence retains target geometry but displays contextual neighbours", () => {
+  const target = { x: 0.6, y: 0.2, width: 0.03, height: 0.45 };
+  const before = structuredClone(target);
+  const crop = helper.evidenceCrop(
+    target,
+    { width: 600, height: 1000 },
+    { width: 260, height: 150 },
+  );
+  assert(crop);
+  assert(crop.bounds.width >= 0.4);
+  assert(crop.viewport.width / crop.viewport.height >= 0.6);
+  assert(crop.bounds.width * crop.bounds.height < 0.72);
+  assert.deepEqual(crop.target, geometry.projectRect(target, crop.image));
+  assert.deepEqual(target, before);
+  const html = render(
+    {
+      label: "Tower",
+      kind: "local",
+      regions: [{ region: target, label: "Tower" }],
+    },
+    { sourceSize: { width: 600, height: 1000 } },
+  );
+  assert(html.includes(uri));
+});
+for (const target of [
+  { x: 0, y: 0, width: 0.03, height: 0.45 },
+  { x: 0.97, y: 0.55, width: 0.03, height: 0.45 },
+  { x: 0.2, y: 0.97, width: 0.6, height: 0.03 },
+])
+  test(`narrow context stays bounded at ${target.x},${target.y}`, () => {
+    const c = helper.evidenceCrop(target, size, { width: 260, height: 150 });
+    assert(c);
+    assert(geometry.validRect(c.bounds));
+    assert(c.bounds.x <= target.x && c.bounds.y <= target.y);
+    assert(c.bounds.x + c.bounds.width >= target.x + target.width - 1e-9);
+    assert(c.bounds.y + c.bounds.height >= target.y + target.height - 1e-9);
+  });
+
 test("a confident insight renders a crop from the original signed URI", () => {
   const html = render(local());
   assert(html.includes('data-testid="evidence-crop"'));

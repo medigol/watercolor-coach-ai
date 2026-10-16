@@ -7,16 +7,40 @@ export function qualityRationaleText(value: string): string {
       /[,;]?\s+\b(?:though|although|but|however|yet)\b[^.!?]*\b(?:could|might|may|refin\w*|would benefit)\b[^.!?]*[.!?]?/gi,
       ".",
     )
+    .split(/(?<=[.!?])\s+/)
+    .filter(
+      (sentence) =>
+        !/^(?:(?:minor|optional|further) refinements?\b|(?:some|a few) (?:edges|areas|passages)\b)[^.!?]*\b(?:could|might|may|would benefit)\b/i.test(
+          sentence,
+        ),
+    )
+    .join(" ")
     .trim();
 }
 
 export function separateStudyText(value: string): string {
   const text = observationText(value).trim();
   if (!text) return "";
-  const safe = text.replace(
+  let safe = text.replace(
     /\b(?:your|the) (?:current |finished |existing )?painting\b/gi,
     "the study",
   );
+  const framing =
+    /\b(?:on|in|for) (?:a |the )?(?:(?:separate|small|new|future|next|\d+[–-]?\d*[- ]minute) ){0,3}(?:study|studies)\b|\bon scrap(?: watercolou?r)?(?: paper)?\b/gi;
+  let hasFrame = false;
+  safe = safe
+    .replace(framing, (match, offset: number) => {
+      if (!hasFrame && offset === 0) {
+        hasFrame = true;
+        return match;
+      }
+      return "";
+    })
+    .replace(/\s+([,.;!?])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .replace(/^\s*[,;]\s*/, "")
+    .trim();
+  if (!safe) return "";
   if (
     /^(?:on|in|for)\b[^.!?]{0,65}\b(?:scrap|separate|study|studies)\b/i.test(
       safe,
@@ -24,6 +48,38 @@ export function separateStudyText(value: string): string {
   )
     return safe;
   return `On a separate small study, ${safe[0].toLowerCase()}${safe.slice(1)}`;
+}
+
+export const exerciseTeaching = (value: string): boolean =>
+  /\b(?:on scrap(?: watercolou?r)?(?: paper)?|(?:on|in) a (?:separate |small |\d+[- ]minute )*study|paint (?:a |two |three )?(?:study|studies|versions?|thumbnails?)|practi[cs]e|exercise)\b/i.test(
+    value,
+  ) || /^(?:try|test|compare|paint|use)\b/i.test(value.trim());
+
+/** Position alone is taste. Only explicitly supplied visual harm supports correction. */
+export function unsupportedPlacementAdvice(
+  value: string,
+  observations: string,
+): boolean {
+  const positional =
+    /\b(?:off[- ]cent(?:re|er)|cent(?:ral|red|ered|re|er) (?:placement|position)|move\b[^.!?]{0,45}\b(?:left|right|side|thirds))\b/i.test(
+      value,
+    );
+  const positionalEvidence =
+    /\b(?:cent(?:ral|red|ered|re|er)|placement|position|overlap\w*|crowd\w*|tangen\w*|blocks?|cuts? off|collid\w*|equal (?:masses|spaces|gaps|weight)|symmetr\w*)\b/i.test(
+      observations,
+    );
+  const harm =
+    positionalEvidence &&
+    /\b(?:obscur\w*|unreadable|confus\w*|blocks?|cuts? off|competes?|collid\w*|weakens?|flattens?|disrupts?|harms?)\b/i.test(
+      observations,
+    );
+  return (
+    positional &&
+    /\b(?:move|relocat\w*|shift|off[- ]cent(?:re|er)|risks?|static|weakens?|improve)\b/i.test(
+      value,
+    ) &&
+    !harm
+  );
 }
 
 /** A repeatable experiment needs a supplied change and something to compare. */

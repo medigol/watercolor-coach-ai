@@ -13,6 +13,12 @@ export function unsupportedProcess(value: string): boolean {
   if (history.test(value)) return true;
   if (recommendedMethod(value)) return false;
   if (
+    /\bwash application\b|\bwashes? (?:are|is) applied\b|\b(?:some )?layering and soft blending\b/i.test(
+      value,
+    )
+  )
+    return true;
+  if (
     /\b(?:effective|confident|controlled|successful)\s+(?:use|handling|application)\s+of\s+(?:watercolou?r\s+)?(?:layering|glazing|wet blending)\b|\bcontrolled (?:glazing|layering)\b|\bareas? of wet blending\b|\b(?:glazing|layering) sequence\b/i.test(
       value,
     )
@@ -22,10 +28,29 @@ export function unsupportedProcess(value: string): boolean {
     value,
   );
 }
+/** Restate only supplied visible qualities, never reconstruct a method. */
+export function observableEffectText(value: string): string {
+  if (recommendedMethod(value)) return value;
+  return value
+    .replace(
+      /\b(?:the )?wash application is (controlled|loose|even) with transparent layering\b/gi,
+      (_, quality: string) =>
+        `Visible colour passages are ${quality.toLowerCase()}, with transparent-looking overlaps`,
+    )
+    .replace(
+      /\b(?:watercolou?r )?washes are applied loosely with (?:some )?layering and soft blending\b/gi,
+      "Visible washes appear loose, with overlapping colour and soft blended transitions",
+    )
+    .replace(
+      /\b(?:some )?layering and soft blending\b/gi,
+      "overlapping colour and soft blended transitions",
+    );
+}
 export function observationText(value: unknown): string {
   if (typeof value !== "string") return "";
   return sentences(value)
-    .flatMap((sentence) => {
+    .flatMap((raw) => {
+      const sentence = observableEffectText(raw);
       if (!unsupportedProcess(sentence)) return [sentence];
       // Keep an explicitly supplied visible quality; remove the inferred method.
       if (

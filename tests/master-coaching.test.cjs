@@ -37,6 +37,246 @@ const insight = (id, patch = {}) => ({
   action: `On a separate study, reduce ${id} bank detail; compare which version keeps the tower dominant.`,
   ...patch,
 });
+
+test("production competent refinement is shown without requiring a defect", () => {
+  const t = workspace.workspaceTeaching(
+    result("competent", [
+      insight("integration", {
+        lesson: "The separate bands weaken the connected spatial field.",
+        action:
+          "On scrap, connect adjacent band values; compare whether the boat sits within the surrounding space.",
+      }),
+    ]),
+  );
+  assert.equal(t.recommendations[0].label, "Main opportunity");
+  assert.equal(
+    t.recommendations[0].insight.classification,
+    "optional_refinement",
+  );
+});
+test("a supplied integration instruction need not say increase/reduce to be a useful priority", () => {
+  const r = result("competent", [
+    insight("connect", {
+      lesson: "Disconnected bands weaken the common spatial field.",
+      action: "Connect the middle-ground value bands on scrap paper.",
+    }),
+  ]);
+  assert.equal(
+    workspace.workspaceTeaching(r).recommendations[0].insight.id,
+    "connect",
+  );
+});
+test("removing empty repeated study framing cannot crash presentation", () => {
+  assert.equal(language.separateStudyText("; in a small study"), "");
+});
+for (const classification of ["clear_issue", "optional_refinement"])
+  test(`central placement alone is a study alternative even if labelled ${classification}`, () => {
+    const r = result("competent", [
+      insight("position", {
+        classification,
+        lesson: "Central placement risks a static feel.",
+        action: "Move the focal tower off-centre in a separate study.",
+      }),
+    ]);
+    const v = clean(r);
+    assert.equal(
+      v.canonicalAnalysis.insights.at(-1).classification,
+      "stylistic_alternative",
+    );
+    const t = workspace.workspaceTeaching(v);
+    assert.equal(t.recommendations.length, 0);
+    assert(t.studies.some((i) => i.id === "position"));
+  });
+test("positive central-placement strength remains allowed", () => {
+  const r = result();
+  r.canonicalAnalysis.insights[0].lesson =
+    "Central placement works with unequal supporting masses.";
+  assert.equal(
+    clean(r).canonicalAnalysis.insights[0].classification,
+    "strength",
+  );
+});
+test("concrete supplied placement harm can still support a correction", () => {
+  assert.equal(
+    language.unsupportedPlacementAdvice(
+      "Move the focal tower off-centre.",
+      "The tower overlaps the bank and obscures its silhouette.",
+    ),
+    false,
+  );
+});
+test("unrelated background competition does not prove central-placement harm", () => {
+  assert.equal(
+    language.unsupportedPlacementAdvice(
+      "Move the central van off-centre.",
+      "Mountain darks compete with the focal vehicle.",
+    ),
+    true,
+  );
+});
+test("a specific leading refinement retains the main priority above generic issue wording", () => {
+  const r = result("strong", [
+    insight("generic-issue", {
+      classification: "clear_issue",
+      lesson: "The pattern needs more clarity.",
+      action: "Increase contrast.",
+    }),
+    insight("specific-elevation", {
+      lesson: "Background darks compete with the tower.",
+      action: "Compress background values on scrap; compare focal separation.",
+    }),
+  ]);
+  const t = workspace.workspaceTeaching(r);
+  assert.equal(t.recommendations[0].insight.id, "specific-elevation");
+  assert.equal(t.recommendations[0].label, "Main opportunity");
+});
+test("specific background/focal relationship outranks positioning taste and generic contrast", () => {
+  const r = result("competent", [
+    insight("position", {
+      lesson: "Central placement risks a static feel.",
+      action: "Move the focal tower off-centre.",
+    }),
+    insight("generic", {
+      lesson: "The scene could use more contrast.",
+      action: "Increase contrast.",
+    }),
+    insight("specific", {
+      lesson: "Background dark accents compete with the focal tower.",
+      action: "Compress background values on scrap; compare focal separation.",
+    }),
+  ]);
+  r.expertViews.overall.summaryId = "generic";
+  const t = workspace.workspaceTeaching(r);
+  assert.equal(t.recommendations[0].insight.id, "specific");
+  assert(!t.recommendations.some((i) => i.insight.id === "position"));
+});
+test("What works omits exercise action and keeps the supplied successful observation", () => {
+  const r = result();
+  r.canonicalAnalysis.insights[0].action =
+    "On scrap paper, paint two values and compare which version holds the focal light.";
+  const t = workspace.workspaceTeaching(clean(r));
+  const strength = t.strengths.find((i) => i.id === "whole");
+  assert(strength);
+  assert.equal(strength.action, "");
+  assert(!/scrap|paint two/.test(strength.lesson));
+});
+for (const imperative of [
+  "Use a soft edge.",
+  "Paint a study.",
+  "Try a different wash.",
+  "Practice the focal contrast.",
+])
+  test(`imperative Strength uses existing fact rather than instructions: ${imperative}`, () => {
+    const r = result();
+    r.canonicalAnalysis.insights[0].lesson = imperative;
+    const t = workspace.workspaceTeaching(r);
+    assert.equal(
+      t.strengths[0].lesson,
+      r.canonicalAnalysis.facts[0].observation,
+    );
+  });
+test("an exercise supplied on a Strength can be owned by Practice", () => {
+  const r = result();
+  Object.values(r.expertViews).forEach((v) => (v.practice = ""));
+  r.canonicalAnalysis.insights[0].action =
+    "On scrap paper, paint two value versions; compare which gives clearer focal separation.";
+  const t = workspace.workspaceTeaching(r);
+  assert.equal(t.strengths[0].action, "");
+  assert.match(t.practice, /^On scrap paper/);
+});
+for (const trailing of [
+  "Minor refinements could enhance spatial clarity.",
+  "Some edges could be refined.",
+  "A few areas might benefit from softer contours.",
+])
+  test(`quality rationale omits separate critique: ${trailing}`, () => {
+    assert.equal(
+      language.qualityRationaleText(
+        `Coherent light and clear hierarchy create strong depth. ${trailing}`,
+      ),
+      "Coherent light and clear hierarchy create strong depth.",
+    );
+  });
+test("positive quality evidence is retained after omitted optional criticism", () => {
+  assert.equal(
+    language.qualityRationaleText(
+      "Clear shapes create depth. Minor refinements could improve edges. Unequal masses maintain balance.",
+    ),
+    "Clear shapes create depth. Unequal masses maintain balance.",
+  );
+});
+for (const text of [
+  "On a separate small study, test softening shadow edges in a small study; compare current and softer edges.",
+  "Test softer background edges in a small study on scrap paper; compare the depth.",
+  "On scrap watercolor paper, compare background values in a separate study.",
+])
+  test(`study framing occurs once: ${text.slice(0, 25)}`, () => {
+    const safe = language.separateStudyText(text);
+    assert.equal(
+      (
+        safe.match(
+          /(?:on|in) (?:a )?(?:separate |small )*study|on scrap(?: watercolor)? paper/gi,
+        ) || []
+      ).length,
+      1,
+    );
+    assert.match(safe, /compare/i);
+    assert.equal(language.separateStudyText(safe), safe);
+  });
+for (const [raw, expected] of [
+  [
+    "The wash application is controlled with transparent layering.",
+    "Visible colour passages are controlled, with transparent-looking overlaps.",
+  ],
+  [
+    "Watercolor washes are applied loosely with some layering and soft blending.",
+    "Visible washes appear loose, with overlapping colour and soft blended transitions.",
+  ],
+])
+  test(`production process assertion becomes a supplied visible effect: ${raw.slice(0, 30)}`, () => {
+    assert.equal(evidence.observationText(raw), expected);
+    const r = result();
+    r.canonicalAnalysis.facts[3].observation = raw;
+    r.canonicalAnalysis.insights[3].lesson = raw;
+    r.canonicalAnalysis.insights[3].action = raw;
+    r.canonicalAnalysis.qualityAssessment.rationale = raw;
+    const v = clean(r);
+    assert(painting.validPaintingAnalysis(v));
+    assert.equal(v.canonicalAnalysis.facts[3].observation, expected);
+    assert.equal(v.canonicalAnalysis.insights[3].lesson, expected);
+    assert.equal(v.canonicalAnalysis.insights[3].action, expected);
+    assert.equal(v.canonicalAnalysis.qualityAssessment.rationale, expected);
+  });
+test("horizontal layering of colour bands is a valid observable structure", () => {
+  const text = "Horizontal layering of colour bands divides the spatial field.";
+  assert.equal(evidence.observationText(text), text);
+});
+test("suggested wet-on-wet method stays allowed after process sanitization", () => {
+  const text = "A wet-on-wet study could reproduce similar softness.";
+  assert.equal(evidence.observationText(text), text);
+});
+for (const pigment of ["white", "Titanium White", "Chinese white", "PW6"])
+  test(`transparent recreation does not prescribe ${pigment}`, () => {
+    const r = result();
+    r.canonicalAnalysis.colourAnalysis = colourFixture();
+    r.canonicalAnalysis.colourAnalysis.recreationMixes[0].pigments.push(
+      pigment,
+    );
+    const mixes = clean(r).canonicalAnalysis.colourAnalysis.recreationMixes;
+    assert.equal(mixes.length, 1);
+    assert.equal(mixes[0].startingRatio, "3:1");
+  });
+test("an explicitly labelled opaque gouache variation may use white", () => {
+  const r = result();
+  r.canonicalAnalysis.colourAnalysis = colourFixture();
+  const mix = r.canonicalAnalysis.colourAnalysis.recreationMixes[0];
+  mix.pigments.push("Titanium White");
+  mix.use = "For an opaque gouache variation, test the pale mix on scrap.";
+  assert.equal(
+    clean(r).canonicalAnalysis.colourAnalysis.recreationMixes.length,
+    2,
+  );
+});
 function result(level = "competent", items = []) {
   const r = fixture();
   r.canonicalAnalysis.qualityAssessment.level = level;

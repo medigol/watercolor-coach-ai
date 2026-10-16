@@ -27,6 +27,7 @@ import {
   colourRelationshipText,
   objectDesignSuggestion,
   qualityRationaleText,
+  unsupportedPlacementAdvice,
 } from "./coachingLanguage.ts";
 
 // A saved, versioned document; no I/O and no inferred geometry or extra analysis.
@@ -169,6 +170,7 @@ export type CanonicalValidationIssue =
   | "visual_roles"
   | "duplicate_role_ids"
   | "duplicate_role_areas"
+  | "conflicting_roles"
   | "multiple_focal_roles"
   | "missing_facts"
   | "fact_structure"
@@ -180,7 +182,8 @@ export type CanonicalValidationIssue =
   | "duplicate_insight_ids"
   | "missing_domain_insight"
   | "expert_views"
-  | "view_reference";
+  | "view_reference"
+  | "view_domain_mismatch";
 
 /** Diagnose the strict core gate AFTER structural repair. No prose, identifiers,
  * image data or credentials are included in a reason code. Optional aids never
@@ -239,8 +242,17 @@ export function canonicalValidationIssue(
     return "visual_roles";
   const roles = c.visualRoles as unknown as PaintingRole[];
   if (!distinct(roles.map((r) => r.id))) return "duplicate_role_ids";
-  if (!distinct(roles.map((r) => r.area.trim().toLowerCase())))
-    return "duplicate_role_areas";
+  if (!distinct(roles.map((r) => roleArea(r.area))))
+    return roles.some((r, index) =>
+      roles
+        .slice(0, index)
+        .some(
+          (other) =>
+            roleArea(other.area) === roleArea(r.area) && other.role !== r.role,
+        ),
+    )
+      ? "conflicting_roles"
+      : "duplicate_role_areas";
   if (roles.filter((r) => r.role === "focal").length > 1)
     return "multiple_focal_roles";
   const roleIds = new Set(roles.map((r) => r.id));
@@ -319,12 +331,14 @@ export function canonicalValidationIssue(
       !v.insightIds.includes(v.summaryId)
     )
       return "view_reference";
+    if (!v.insightIds.every((ref) => insights.some((i) => i.id === ref)))
+      return "view_reference";
     if (
       !v.insightIds.every((ref) =>
         insights.some((i) => i.id === ref && i.domain === domains[key]),
       )
     )
-      return "view_reference";
+      return "view_domain_mismatch";
   }
   // Repeated prose and missing strength classifications are presentation issues,
   // not grounds to discard a useful analysis or invent a positive judgment.
@@ -339,6 +353,8 @@ export function validPaintingAnalysis(
 /** Bounded repairs use only explicitly supplied IDs, domains and confidence.
  * Ambiguous identity, missing required material and malformed core text still
  * fail the strict gate. This never creates observations, prose or geometry. */
+const roleArea = (area: string) =>
+  area.trim().toLowerCase().replace(/\s+/g, " ");
 function repairCanonicalReferences(value: unknown): unknown {
   if (
     !record(value) ||
@@ -357,12 +373,79 @@ function repairCanonicalReferences(value: unknown): unknown {
     !c.visualRoles.every(record)
   )
     return value;
-  const facts = c.facts as Record<string, unknown>[],
+  let facts = c.facts as Record<string, unknown>[],
     insights = c.insights as Record<string, unknown>[],
     roles = c.visualRoles as Record<string, unknown>[];
   // Duplicate identities cannot be resolved by choosing an arbitrary first row.
   if (!distinct(facts.map((f) => f.id)) || !distinct(insights.map((i) => i.id)))
     return value;
+  // Same identity with distinct IDs is repairable only when semantics agree.
+  // Tied, different geometry is ambiguous: never pick an arbitrary first row.
+  if (!distinct(roles.map((r) => r.id))) return value;
+  const remap = new Map<unknown, unknown>();
+  const retained: Record<string, unknown>[] = [];
+  for (const role of roles) {
+    if (
+      !id(role.id) ||
+      !text(role.area, 80) ||
+      !visualRoles.includes(role.role as never) ||
+      !keys(role, ["id", "area", "role"], ["region", "confidence"])
+    )
+      return value;
+    const group = roles.filter(
+      (r) =>
+        typeof r.area === "string" &&
+        roleArea(r.area) === roleArea(role.area as string),
+    );
+    if (group.some((r) => r.role !== role.role)) return value;
+    if (remap.has(role.id)) continue;
+    const score = (r: Record<string, unknown>) => [
+      validRect(r.region) ? 1 : 0,
+      unit(r.confidence) ? r.confidence : -1,
+    ];
+    const sorted = [...group].sort(
+      (a, b) => score(b)[0] - score(a)[0] || score(b)[1] - score(a)[1],
+    );
+    const best = sorted[0];
+    const geometryKey = (r: Record<string, unknown>) =>
+      validRect(r.region)
+        ? [r.region.x, r.region.y, r.region.width, r.region.height].join(",")
+        : "none";
+    const tied = sorted.filter(
+      (r) => score(r)[0] === score(best)[0] && score(r)[1] === score(best)[1],
+    );
+    if (
+      tied.length > 1 &&
+      tied.some((r) => geometryKey(r) !== geometryKey(best))
+    )
+      return value;
+    // Equal metadata/geometry: lexical ID is a stable identity-only tiebreaker.
+    const winner = tied.sort((a, b) =>
+      String(a.id).localeCompare(String(b.id)),
+    )[0];
+    retained.push(winner);
+    for (const r of group) remap.set(r.id, winner.id);
+  }
+  roles = retained;
+  facts = facts.map((f) => ({ ...f, roleId: remap.get(f.roleId) ?? f.roleId }));
+  const suppliedFacts = new Map(facts.map((f) => [f.id, f]));
+  const membership = new Map<unknown, ExpertViewKey[]>();
+  for (const key of expertViewKeys) {
+    const view = value.expertViews[key];
+    if (!record(view) || !list(view.insightIds, 0, 12)) return value;
+    for (const ref of new Set([view.summaryId, ...view.insightIds]))
+      membership.set(ref, [...(membership.get(ref) ?? []), key]);
+  }
+  insights = insights.map((insight) => {
+    const owners = membership.get(insight.id);
+    if (owners?.length !== 1 || !list(insight.factIds, 1, 3)) return insight;
+    const target = domains[owners[0]];
+    return feedbackDomains.includes(insight.domain as never) &&
+      insight.domain !== target &&
+      insight.factIds.every((ref) => suppliedFacts.get(ref)?.domain === target)
+      ? { ...insight, domain: target }
+      : insight;
+  });
   const factIds = new Set(facts.map((f) => f.id));
   const byId = new Map(insights.map((i) => [i.id, i]));
   const views: Record<string, unknown> = { ...value.expertViews };
@@ -433,7 +516,31 @@ function repairCanonicalReferences(value: unknown): unknown {
     ...value,
     canonicalAnalysis: {
       ...c,
+      facts,
       insights: repairedInsights,
+      ...(Array.isArray(c.visualEvidence)
+        ? {
+            visualEvidence: c.visualEvidence.map((e) =>
+              record(e) ? { ...e, roleId: remap.get(e.roleId) ?? e.roleId } : e,
+            ),
+          }
+        : {}),
+      ...(record(c.colourAnalysis) &&
+      Array.isArray(c.colourAnalysis.visibleColours)
+        ? {
+            colourAnalysis: {
+              ...c.colourAnalysis,
+              visibleColours: c.colourAnalysis.visibleColours.map((colour) =>
+                record(colour)
+                  ? {
+                      ...colour,
+                      roleId: remap.get(colour.roleId) ?? colour.roleId,
+                    }
+                  : colour,
+              ),
+            },
+          }
+        : {}),
       visualRoles: roles.map((role) => ({
         ...role,
         region: role.region ?? null,
@@ -597,6 +704,15 @@ export function cleanPaintingAnalysis(
       guarded.whatToFix.length === 0 || guarded.mainAdvice !== lesson;
     if (roleConflict) classification = "study_experiment";
     if (objectDesignSuggestion(action)) classification = "study_experiment";
+    if (
+      unsupportedPlacementAdvice(
+        `${lesson} ${action}`,
+        i.factIds
+          .map((ref) => facts.find((f) => f.id === ref)!.observation)
+          .join(" "),
+      )
+    )
+      classification = "stylistic_alternative";
     const safeAction =
       contradiction || roleConflict
         ? "In a separate study, compare this alternative while preserving the original focal hierarchy."

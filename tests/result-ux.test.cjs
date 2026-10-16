@@ -6,6 +6,34 @@ const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "..");
+
+test("colour rows sharing one source region render their own labelled original evidence", () => {
+  const canonical = require("./helpers/canonical-fixture.cjs")();
+  canonical.canonicalAnalysis.colourAnalysis =
+    require("./helpers/colour-fixture.cjs")();
+  canonical.canonicalAnalysis.colourAnalysis.visibleColours = [
+    { label: "Muted green", approximateHex: "#889987", roleId: "tower" },
+    { label: "Muted orange", approximateHex: "#b88b6d", roleId: "tower" },
+    { label: "Off-white", approximateHex: "#efeadb", roleId: null },
+  ];
+  const html = render(
+    "improve_painting",
+    "openai",
+    "https://example.invalid/original.png",
+    undefined,
+    { canonicalResult: canonical, viewportWidth: 1440 },
+  );
+  const colour = html.slice(
+    html.indexOf('data-testid="colour-value-analysis"'),
+  );
+  assert(colour.includes("Original painting evidence: Muted green"));
+  assert(colour.includes("Original painting evidence: Muted orange"));
+  assert(!/See image evidence[^<]*(?:Muted green|Muted orange)/.test(colour));
+  assert(
+    colour.includes("No confidently located source detail for this colour."),
+  );
+  assert(!colour.includes("unavailable for this saved colour"));
+});
 function render(
   mode,
   provider,

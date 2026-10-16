@@ -7,6 +7,8 @@ import {
   cropView,
   noteRegions,
   validRect,
+  validSize,
+  projectRect,
   type NormalizedRect,
   type ImageSize,
 } from "../shared/imageGeometry";
@@ -55,12 +57,48 @@ export function evidenceCrop(
   source: ImageSize,
   viewport: ImageSize,
 ) {
-  // 12–25% subject-relative context; the shared cropper also guarantees a
-  // small absolute margin, clamps bounds and rejects unreadably tiny crops.
+  if (
+    !usefulLocalRegion(region) ||
+    !validSize(source) ||
+    region.width * source.width < 2 ||
+    region.height * source.height < 2
+  )
+    return null;
+  // Presentation context only: retain the canonical target, but give narrow
+  // towers/strips enough neighbouring image to read as a painting passage.
   const padding = 0.12 + 0.13 * (1 - Math.sqrt(region.width * region.height));
-  return usefulLocalRegion(region)
-    ? cropView(region, source, viewport, padding, 1)
-    : null;
+  const width = Math.min(
+    1,
+    Math.max(
+      region.width,
+      0.18,
+      Math.min(0.55, ((region.height * source.height) / source.width) * 0.65),
+    ),
+  );
+  const height = Math.min(
+    1,
+    Math.max(
+      region.height,
+      0.16,
+      Math.min(0.45, (region.width * source.width) / source.height / 2),
+    ),
+  );
+  const context = {
+    x: Math.max(
+      0,
+      Math.min(1 - width, region.x + region.width / 2 - width / 2),
+    ),
+    y: Math.max(
+      0,
+      Math.min(1 - height, region.y + region.height / 2 - height / 2),
+    ),
+    width,
+    height,
+  };
+  const crop = cropView(context, source, viewport, padding, 1);
+  if (!crop) return null;
+  const target = projectRect(region, crop.image);
+  return target.width >= 4 && target.height >= 4 ? { ...crop, target } : null;
 }
 function locatedRole(role: PaintingRole | undefined): EvidenceRegion[] {
   return role && reliable(role.confidence) && usefulLocalRegion(role.region)
@@ -197,7 +235,9 @@ export function colourEvidence(
   const regions = locatedRole(
     source.canonicalAnalysis.visualRoles.find((r) => r.id === roleId),
   );
-  return regions.length ? { label, kind: "local", regions } : null;
+  return regions.length
+    ? { label, kind: "local", regions: regions.map((r) => ({ ...r, label })) }
+    : null;
 }
 export function compositionEvidence(overlay: unknown): TeachingEvidence | null {
   const composition = drawableCompositionOverlay(overlay);

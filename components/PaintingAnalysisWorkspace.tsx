@@ -252,11 +252,6 @@ export default function PaintingAnalysisWorkspace({
         label: "Future study location",
         plan: insightEvidence(source, i),
       })),
-    ...(c.colourAnalysis?.visibleColours.slice(0, 3).map((colour, index) => ({
-      key: `colour-${index}`,
-      label: colour.label,
-      plan: colourEvidence(source, colour.roleId, colour.label),
-    })) ?? []),
     ...teaching.recommendations.slice(1).map(({ insight, label }) => ({
       key: `insight:${insight.id}`,
       label,
@@ -793,7 +788,19 @@ export default function PaintingAnalysisWorkspace({
             >
               <ColourValueAnalysis
                 source={source}
-                renderEvidence={(index) => evidence(`colour-${index}`)}
+                renderEvidence={(index) => {
+                  const colour = c.colourAnalysis?.visibleColours[index];
+                  const plan =
+                    colour &&
+                    colourEvidence(source, colour.roleId, colour.label);
+                  return plan && image ? (
+                    <EvidenceVisual
+                      uri={image}
+                      sourceSize={sourceSize}
+                      plan={plan}
+                    />
+                  ) : null;
+                }}
                 renderValueEvidence={() => evidence("value")}
               />
               {lessons("colour_value", [

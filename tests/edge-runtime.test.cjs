@@ -1341,6 +1341,24 @@ test("actual Edge SDK drops optional canonical geometry and teaching aids withou
 
 for (const [name, mutate] of [
   [
+    "unique view/domain metadata mismatch",
+    (r) => {
+      r.canonicalAnalysis.insights[2].domain = "overall";
+    },
+  ],
+  [
+    "same-area same-role aliases with linked references",
+    (r) => {
+      r.canonicalAnalysis.visualRoles.push({
+        ...r.canonicalAnalysis.visualRoles[0],
+        id: "tower-alias",
+        confidence: 0.8,
+      });
+      r.canonicalAnalysis.facts[0].roleId = "tower-alias";
+      r.canonicalAnalysis.visualEvidence[0].roleId = "tower-alias";
+    },
+  ],
+  [
     "duplicated domain lesson",
     (r) =>
       (r.canonicalAnalysis.insights[2].lesson =
@@ -1426,6 +1444,26 @@ for (const [name, mutate] of [
   });
 
 for (const [reason, mutate] of [
+  [
+    "view_domain_mismatch",
+    (r) => {
+      r.expertViews.technique.summaryId = "design";
+      r.expertViews.technique.insightIds = ["design"];
+    },
+  ],
+  [
+    "conflicting_roles",
+    (r) => {
+      r.canonicalAnalysis.visualRoles[1].area = "tower";
+    },
+  ],
+  [
+    "missing_domain_insight",
+    (r) => {
+      r.canonicalAnalysis.insights[2].domain = "overall";
+      r.expertViews.overall.insightIds.push("temperature");
+    },
+  ],
   [
     "duplicate_role_ids",
     (r) => (r.canonicalAnalysis.visualRoles[1].id = "tower"),

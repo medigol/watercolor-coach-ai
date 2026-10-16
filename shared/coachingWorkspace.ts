@@ -10,6 +10,8 @@ import {
   objectDesignSuggestion,
   separateStudyText,
   variableStudy,
+  exerciseTeaching,
+  unsupportedPlacementAdvice,
 } from "./coachingLanguage.ts";
 
 /** Presentation is derived once from the canonical classifications, not a lens. */
@@ -19,13 +21,24 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
     i.factIds.some((id) => c.facts.some((f) => f.id === id)),
   );
   const insights = supplied.map((i) =>
-    objectDesignSuggestion(i.action)
+    unsupportedPlacementAdvice(
+      `${i.lesson} ${i.action}`,
+      i.factIds
+        .map((id) => c.facts.find((f) => f.id === id)?.observation ?? "")
+        .join(" "),
+    )
       ? {
           ...i,
-          classification: "study_experiment" as const,
+          classification: "stylistic_alternative" as const,
           action: separateStudyText(i.action),
         }
-      : i,
+      : objectDesignSuggestion(i.action)
+        ? {
+            ...i,
+            classification: "study_experiment" as const,
+            action: separateStudyText(i.action),
+          }
+        : i,
   );
   const unique = (items: PaintingInsight[]) =>
     items.filter(
@@ -42,7 +55,9 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
       (i) =>
         i.classification === "optional_refinement" &&
         (changeRecommendation(i.action) ||
-          /\b(?:compare|test|try|consider)\b/i.test(i.action)),
+          /\b(?:compare|test|try|consider|compress|connect|group|merge|integrate|rebalance|vary)\b/i.test(
+            i.action,
+          )),
     ),
   );
   const level = c.qualityAssessment.level;
@@ -53,14 +68,36 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
     )
       ? 1
       : 0;
-  const ranked = unique([
-    ...clear,
-    ...optional.sort((a, b) => elevationPriority(b) - elevationPriority(a)),
-  ]);
+  const specificPriority = (i: PaintingInsight) => {
+    const action = i.action;
+    const located =
+      /\b(?:background|foreground|middle[- ]?ground|distant|upper|lower|left|right|behind|beside|between|surrounding)\b/i.test(
+        action,
+      ) ||
+      i.factIds.some((id) => {
+        const roleId = c.facts.find((f) => f.id === id)?.roleId;
+        const area = c.visualRoles.find((r) => r.id === roleId)?.area;
+        return !!area && action.toLowerCase().includes(area.toLowerCase());
+      });
+    return located &&
+      /\b(?:values?|contrast|edges?|chroma|contours?|detail|shadows?|masses|bands|spacing|temperature|shapes?|integration|soft\w*|quieter|compressed)\b/i.test(
+        action,
+      )
+      ? 1
+      : 0;
+  };
+  const ranked = unique([...clear, ...optional]).sort(
+    (a, b) =>
+      specificPriority(b) - specificPriority(a) ||
+      Number(b.classification === "clear_issue") -
+        Number(a.classification === "clear_issue") ||
+      elevationPriority(b) - elevationPriority(a),
+  );
   const recommendations = ranked
     .slice(0, level === "highly_resolved" ? 2 : 3)
     .map((insight, index) => {
       const significant =
+        (index === 0 && clear.length > 0) ||
         insight.classification === "clear_issue" ||
         level === "competent" ||
         level === "developing" ||
@@ -92,14 +129,38 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
         : opportunity
           ? "Main opportunity to explore"
           : "Review the observed structure and handling below.";
-  const strengths = insights.filter(
-    (i) =>
-      i.classification === "strength" &&
-      !correctiveTeaching(i.action) &&
-      !correctiveTeaching(i.lesson),
-  );
+  const strengths = insights
+    .map((i) =>
+      i.classification !== "strength"
+        ? i
+        : {
+            ...i,
+            lesson: exerciseTeaching(i.lesson)
+              ? i.factIds
+                  .map(
+                    (id) => c.facts.find((f) => f.id === id)?.observation ?? "",
+                  )
+                  .filter(Boolean)
+                  .join(" ")
+              : i.lesson,
+            action: exerciseTeaching(i.action) ? "" : i.action,
+          },
+    )
+    .filter(
+      (i) =>
+        i.classification === "strength" &&
+        !correctiveTeaching(i.action) &&
+        !correctiveTeaching(i.lesson),
+    );
   const practices = Object.values(value.expertViews)
     .map((v) => v.practice)
+    .concat(
+      supplied
+        .filter(
+          (i) => i.classification === "strength" && exerciseTeaching(i.action),
+        )
+        .map((i) => i.action),
+    )
     .filter((p) => p && variableStudy(p))
     .filter(
       (p, index, all) =>

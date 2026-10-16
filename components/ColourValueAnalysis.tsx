@@ -89,7 +89,7 @@ export default function ColourValueAnalysis({
                   {sourceEvidence}
                   {!sourceEvidence && (
                     <Text style={styles.caption}>
-                      Source detail is unavailable for this saved colour.
+                      No confidently located source detail for this colour.
                     </Text>
                   )}
                   {item.roleId && (
