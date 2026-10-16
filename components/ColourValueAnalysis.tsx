@@ -16,6 +16,10 @@ export default function ColourValueAnalysis({
 }) {
   const c = source.canonicalAnalysis,
     colour = c.colourAnalysis;
+  const evidence = colour?.visibleColours.map((_, index) =>
+    renderEvidence?.(index),
+  );
+  const hasLocatedColours = evidence?.some(Boolean) ?? false;
   const value =
     colour?.valueHierarchy ||
     c.facts
@@ -52,7 +56,7 @@ export default function ColourValueAnalysis({
           </Text>
           <View style={{ gap: 14 }}>
             {colour.visibleColours.map((item, index) => {
-              const sourceEvidence = renderEvidence?.(index);
+              const sourceEvidence = evidence?.[index];
               return (
                 <View
                   key={index}
@@ -87,7 +91,7 @@ export default function ColourValueAnalysis({
                     </Text>
                   </View>
                   {sourceEvidence}
-                  {!sourceEvidence && (
+                  {hasLocatedColours && !sourceEvidence && (
                     <Text style={styles.caption}>
                       No confidently located source detail for this colour.
                     </Text>
@@ -102,6 +106,11 @@ export default function ColourValueAnalysis({
               );
             })}
           </View>
+          {!hasLocatedColours && (
+            <Text style={styles.caption}>
+              Source regions were not located confidently for these colours.
+            </Text>
+          )}
         </View>
       )}
       {paragraphs

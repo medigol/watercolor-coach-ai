@@ -26,6 +26,7 @@ import {
   objectDesignSuggestion,
   qualityRationaleText,
   separateStudyText,
+  purposefulFigureAdvice,
 } from "../shared/coachingLanguage";
 import {
   drawableCompositionOverlay,
@@ -175,6 +176,7 @@ export default function PaintingAnalysisWorkspace({
   const overallObservation =
     !teaching.opportunity &&
     overall &&
+    purposefulFigureAdvice(`${overall.lesson} ${overall.action}`) &&
     !teaching.recommendations.some((r) => r.insight.id === overall.id) &&
     !teaching.strengths.some((i) => i.id === overall.id) &&
     !teaching.studies.some((i) => i.id === overall.id) &&
@@ -358,6 +360,7 @@ export default function PaintingAnalysisWorkspace({
     c.insights.filter(
       (i) =>
         i.domain === domain &&
+        purposefulFigureAdvice(`${i.lesson} ${i.action}`) &&
         !teaching.strengths.some((s) => s.id === i.id) &&
         !teaching.studies.some((s) => s.id === i.id) &&
         !teaching.recommendations.some((r) => r.insight.id === i.id) &&

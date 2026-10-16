@@ -160,7 +160,10 @@ let signalFeedbackHeld;
       if (edgeMode === "unavailable")
         return reply({ code: "unavailable" }, 503);
       if (edgeMode === "invalid_core")
-        return reply({ code: "unavailable" }, 422);
+        return reply(
+          { code: "unavailable", reason_code: "unrecoverable_reference" },
+          422,
+        );
       if (edgeMode === "busy") return reply({ code: "busy" }, 409);
       if (edgeMode === "auth") return reply({ code: "auth" }, 401);
       if (edgeMode === "stale_mock") {
@@ -823,6 +826,66 @@ let signalFeedbackHeld;
   }
   Object.assign(saved, structuredClone(beforeCalibration));
   imageFile = aspectFiles.landscape;
+  const providerMatrix = [];
+  const { loadShared } = require(root + "/tests/helpers/shared-loader.cjs");
+  const providerResult = loadShared(
+    "../shared/providerPaintingAnalysis.ts",
+    "lib/overlays.ts",
+  ).normalizeProviderPaintingAnalysis(
+    require(root + "/tests/helpers/provider-draft-fixture.cjs")(),
+  );
+  assert(providerResult.ok);
+  Object.assign(saved, structuredClone(providerResult.result));
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 950 });
+    await page.reload();
+    await page
+      .getByText("Complete Painting Analysis", { exact: true })
+      .waitFor();
+    await open("Composition");
+    await open("Colour & Value");
+    await open("Watercolor technique");
+    await page.getByTestId("teaching-evidence").first().waitFor();
+    const before = snapshot();
+    await button("Composition overlay").click();
+    await artwork.getByTestId("composition-structure").waitFor();
+    await button("Roles").click();
+    await page.getByTestId("visual-role-map").waitFor();
+    await page.getByRole("button", { name: /^Notes ·/ }).click();
+    await page.getByTestId("coaching-marker-0").click();
+    await page.getByTestId("coaching-note-0").waitFor();
+    await button("Clean view").click();
+    assert.deepEqual(snapshot(), before);
+    await noOverflow();
+    providerMatrix.push({ width, normalizedV1: true, readonly: true });
+    await shot(`provider-normalized-${width}`);
+  }
+  // All colours without location use one shared note, including freshly normalized v1.
+  saved.canonicalAnalysis.colourAnalysis.visibleColours.forEach(
+    (c) => (c.roleId = null),
+  );
+  await page.reload();
+  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  await open("Colour & Value");
+  const colourSection = page.getByTestId("colour-value-analysis");
+  assert.equal(
+    await colourSection
+      .getByText(
+        "Source regions were not located confidently for these colours.",
+        { exact: true },
+      )
+      .count(),
+    1,
+  );
+  assert.equal(
+    await colourSection
+      .getByText("No confidently located source detail for this colour.", {
+        exact: true,
+      })
+      .count(),
+    0,
+  );
+  Object.assign(saved, structuredClone(beforeCalibration));
   const originalPrimary = structuredClone(
     saved.canonicalAnalysis.composition.primary,
   );
@@ -1110,6 +1173,11 @@ let signalFeedbackHeld;
       .getByRole("button", { name: /^(Analyse painting|Retry analysis)$/ })
       .click();
     await page.getByRole("alert").filter({ hasText: text }).waitFor();
+    assert(
+      !/unrecoverable_reference|reason_code/.test(
+        await page.locator("body").innerText(),
+      ),
+    );
     assert.equal(edgeCalls, n + 1);
     assert.equal(used, before);
     retryId ??= requests.at(-1).request_id;
@@ -1182,6 +1250,7 @@ let signalFeedbackHeld;
         matrix,
         evidenceMatrix,
         calibrationMatrix,
+        providerMatrix,
         calls: snapshot(),
         errors,
         requests: requests.map((r) => ({
@@ -1196,7 +1265,7 @@ let signalFeedbackHeld;
     ),
   );
   console.log(
-    "PASS: professional workspace; 70 responsive/aspect cases + 4 production calibration cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; zero automatic mock fallback; no live paid calls.",
+    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
   );
   await browser.close();
 })().catch(async (error) => {

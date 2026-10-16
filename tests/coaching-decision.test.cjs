@@ -386,7 +386,7 @@ for (const focus of [
     const prompt = coachingPrompt("improve_painting", focus);
     assert.equal(prompt, coachingPrompt("improve_painting"));
     for (const phrase of [
-      "ALL FOUR compact expertViews",
+      "ALL FOUR domain blocks",
       "COMPOSITION LOCK",
       "INSIGHT OWNERSHIP",
       "OBSERVABLE EFFECT",
