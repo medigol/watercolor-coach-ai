@@ -3,7 +3,13 @@ import type {
   PaintingInsight,
 } from "./paintingAnalysis.ts";
 import type { ColourAnalysis } from "./colourAnalysis.ts";
-import { observationText, suggestedMethodText } from "./coachingEvidence.ts";
+import {
+  visibleTeachingText,
+  futureTeachingText,
+  strengthTeachingText,
+  paintingLevelText,
+  honestStylisticAlternative,
+} from "./coachingSemantics.ts";
 import { supportedExplanation } from "./coachingAssessment.ts";
 import { validRect } from "./imageGeometry.ts";
 
@@ -197,8 +203,8 @@ export function displayRecreationMixes(
       )
     )
       return [];
-    const target = cleanDisplayText(mix.target),
-      use = cleanDisplayText(mix.use);
+    const target = cleanDisplayText(paintingLevelText(mix.target)),
+      use = cleanDisplayText(paintingLevelText(mix.use));
     const pigments = mix.pigments.map(cleanDisplayText);
     return target && use && pigments.every(Boolean)
       ? [{ ...mix, target, use, pigments, startingRatio: ratio }]
@@ -215,7 +221,7 @@ export function prepareCoachingDisplay(
     colourTheoryText(
       focalIdentityText(
         cleanDisplayText(
-          observationText(text)
+          visibleTeachingText(text)
             .replace(/\bloose technique\b/gi, "loose visible marks")
             .replace(
               /\bloose visible marks suits\b/gi,
@@ -231,7 +237,7 @@ export function prepareCoachingDisplay(
       ),
     );
   const future = (text: string) =>
-    cleanDisplayText(focalIdentityText(suggestedMethodText(text), source));
+    cleanDisplayText(focalIdentityText(futureTeachingText(text), source));
   const structure = (s: typeof c.composition.primary) =>
     s
       ? {
@@ -268,12 +274,25 @@ export function prepareCoachingDisplay(
       })),
       insights: c.insights.map((i) => ({
         ...i,
-        lesson: observed(i.lesson),
+        lesson:
+          i.classification === "strength"
+            ? strengthTeachingText(observed(i.lesson))
+            : observed(i.lesson),
         action:
           i.classification === "strength"
-            ? observed(i.action)
+            ? strengthTeachingText(observed(i.action))
             : future(i.action),
       })),
+      brushPlan:
+        c.brushPlan?.map((step) => ({
+          ...step,
+          stage: future(step.stage),
+          brush: future(step.brush),
+          wash: future(step.wash),
+          timing: future(step.timing),
+          edges: future(step.edges),
+          stop: future(step.stop),
+        })) ?? c.brushPlan,
       composition: {
         ...c.composition,
         observation: observed(c.composition.observation),
@@ -304,7 +323,16 @@ export function prepareCoachingDisplay(
                 c.insights.find((i) => i.id === e.insightId)?.classification !==
                   "strength"
                 ? future(value)
-                : observed(value)
+                : c.insights.find((i) => i.id === e.insightId)
+                      ?.classification === "strength" &&
+                    [
+                      "action",
+                      "shortInstruction",
+                      "instruction",
+                      "successCheck",
+                    ].includes(key)
+                  ? strengthTeachingText(observed(value))
+                  : observed(value)
               : value,
           ]),
         ) as typeof e.note,
@@ -390,6 +418,13 @@ export function finalCoachingDisplay(
             technicalAssessment:
               colour.technicalAssessment &&
               text(colour.technicalAssessment.explanation) &&
+              (colour.technicalAssessment.kind !== "stylistic_alternative" ||
+                honestStylisticAlternative(
+                  colour.technicalAssessment.explanation,
+                  c.insights.find(
+                    (i) => i.id === colour.technicalAssessment?.insightId,
+                  )?.action ?? colour.technicalAssessment.explanation,
+                )) &&
               (!colour.technicalAssessment.insightId ||
                 recommendations.some(
                   (i) => i.id === colour.technicalAssessment!.insightId,

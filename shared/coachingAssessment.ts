@@ -9,18 +9,18 @@ import {
   insightAlignment,
   materialInsight,
 } from "./coachingAlignment.ts";
-import { observationText } from "./coachingEvidence.ts";
+import { visibleTeachingText, tidyTeachingText } from "./coachingSemantics.ts";
 
 // Display-only calibration over supplied text, not a new assessment of pixels.
 // A missing/suppressed recommendation never by itself establishes strong work.
 const positive =
-  /\b(?:clear|coherent|balanced|successful|effective|convincing|resolved|strong|well[- ]organised|well[- ]organized|stands? apart|readable)\b/i;
+  /\b(?:clear|coherent|balanced|successful|effective(?:ly)?|balances?|convincing|resolved|strong|well[- ]organised|well[- ]organized|stands? apart|readable)\b/i;
 const negatedPositive =
-  /\b(?:not|never|without)\s+(?:(?:yet|fully|entirely|consistently|particularly)\s+)?(?:clear|coherent|balanced|successful|effective|convincing|resolved|strong|readable)\b/i;
+  /\b(?:not|never|without)\s+(?:(?:have|has|show|shows|demonstrate|demonstrates|a|an|yet|fully|entirely|consistently|particularly)\s+){0,3}(?:clear|coherent|balanced|successful|effective(?:ly)?|balances?|convincing|resolved|strong|readable)\b/i;
 const successfulPositive = (text: string) =>
   positive.test(text) && !negatedPositive.test(text);
 const limitation =
-  /\b(?:need\w*|requires?|would benefit|could benefit|could improve|could be improved|could be refined|refinements?|corrections?|weak\w*|poor\w*|inaccurac\w*|errors?|inconsisten\w*|distort\w*|insufficient|lacks?|muddy|disconnect\w*|detach\w*|flatten\w*|unresolved|compressed|limiting|limits?|competes?|competition|competing|excess\w*|unclear (?:hierarchy|separation|depth)|(?:perspective|proportion|drawing) problems?|too (?:uniform|sharp|dark|light|saturated|strong|many)|overly)\b|\b(?:could|should|might|may|would)\b[^.!?]{0,50}\b(?:softer|sharper|quieter|stronger|warmer|cooler|refin\w*|improv\w*|adjust\w*|clarif\w*|correct\w*)\b/i;
+  /\b(?:room for improvement|need\w*|requires?|would benefit|could benefit|could improve|could be improved|could be refined|refinements?|corrections?|weak\w*|poor\w*|inaccurac\w*|errors?|inconsisten\w*|distort\w*|insufficient|lacks?|muddy|disconnect\w*|detach\w*|flatten\w*|unresolved|compressed|limiting|limits?|competes?|competition|competing|excess\w*|unclear (?:hierarchy|separation|depth)|(?:perspective|proportion|drawing) problems?|too (?:uniform|sharp|dark|light|saturated|strong|many)|overly)\b|\b(?:could|should|might|may|would)\b[^.!?]{0,50}\b(?:softer|sharper|quieter|stronger|warmer|cooler|refin\w*|improv\w*|adjust\w*|clarif\w*|correct\w*)\b/i;
 const uncertainty =
   /\b(?:uncertain|unclear|perhaps|possibly|seems?|appears? to|difficult to|hard to|cannot|can't|inconclusive|may|might|could)\b/i;
 const personJudgement =
@@ -38,6 +38,7 @@ const preciseProperties = [
 ];
 export function hasLimitation(text: string): boolean {
   const checked = text
+    .replace(/\bwithout (?:need(?:ing)?|requiring)\b/gi, "")
     // A supplied absence of competition is successful hierarchy, not critique.
     .replace(
       /\b(?:without|not)\s+(?:(?:becoming|creating|being)\s+)?(?:a\s+)?competing\b/gi,
@@ -99,25 +100,41 @@ function rationaleClauses(sentence: string): string[] {
   });
 }
 
-/** Preserve only supplied assessment language supported by displayed teaching. */
-export function assessCoaching(
+function assessmentProperties(text: string): string[] {
+  return [
+    ...new Set([
+      ...evidenceProperties(text),
+      ...(/\bcompos(?:ition|itional)\b/i.test(text) ? ["composition"] : []),
+    ]),
+  ];
+}
+
+/** A displayed limitation needs a linked problem at the same target/property.
+ * A study can support a limitation only if it passes the correction evidence
+ * test too; a stylistic alternative never establishes a defect. */
+export function supportsTeachingLimitation(
   source: PaintingAnalysisResult,
-  survivingRecommendations: readonly PaintingInsight[],
-  finalSafeIssues?: readonly PaintingInsight[],
-): PaintingAnalysisResult["canonicalAnalysis"]["qualityAssessment"] {
+  survivingGuidance: readonly PaintingInsight[],
+  claim: string,
+): boolean {
   const c = source.canonicalAnalysis;
-  const original = c.qualityAssessment;
-  const suppliedRationale = observationText(original.rationale).trim();
-  const actionable = survivingRecommendations.filter(
+  const actionable = survivingGuidance.filter(
     (i) =>
-      ["clear_issue", "optional_refinement"].includes(i.classification) &&
+      ["clear_issue", "optional_refinement", "study_experiment"].includes(
+        i.classification,
+      ) &&
       i.action.trim() &&
       c.insights.some((s) => s.id === i.id) &&
       i.factIds.some((id) => c.facts.some((f) => f.id === id)) &&
-      insightAlignment(i, c.facts) === "supported",
+      insightAlignment(
+        i.classification === "study_experiment"
+          ? { ...i, classification: "optional_refinement" }
+          : i,
+        c.facts,
+      ) === "supported",
   );
   const supportsLimitation = (clause: string) => {
-    const named = evidenceProperties(clause);
+    const named = assessmentProperties(clause);
     const targets = evidenceTargets(clause);
     const supportedBy = (match: (text: string) => boolean) =>
       actionable.some(
@@ -137,22 +154,39 @@ export function assessCoaching(
     return (
       named.length > 0 &&
       named.every((property) =>
-        supportedBy((text) => evidenceProperties(text).includes(property)),
+        supportedBy((text) => assessmentProperties(text).includes(property)),
       ) &&
       preciseProperties
         .filter((property) => property.test(clause))
         .every((property) => supportedBy((text) => property.test(text)))
     );
   };
+  return supportsLimitation(claim);
+}
+
+/** Preserve only supplied assessment language supported by displayed teaching. */
+export function assessCoaching(
+  source: PaintingAnalysisResult,
+  survivingRecommendations: readonly PaintingInsight[],
+  finalSafeIssues?: readonly PaintingInsight[],
+): PaintingAnalysisResult["canonicalAnalysis"]["qualityAssessment"] {
+  const c = source.canonicalAnalysis;
+  const original = c.qualityAssessment;
+  const suppliedRationale = visibleTeachingText(original.rationale).trim();
+  const supportsLimitation = (clause: string) =>
+    supportsTeachingLimitation(source, survivingRecommendations, clause);
   const sentences = suppliedRationale.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [];
   const rationale = sentences
     .flatMap(rationaleClauses)
-    .map((clause) => clause.trim().replace(/^[,;:.\s]+|[,;:\s]+$/g, ""))
+    .map((clause) =>
+      tidyTeachingText(clause).replace(/^[,;:.\s]+|[.,;:\s]+$/g, ""),
+    )
     .filter(
       (clause) =>
         clause &&
         !personJudgement.test(clause) &&
-        !/\b(?:and|or|a|an|the|with|of|for|to)\s*$/i.test(clause) &&
+        !/^(?:with|and|but|which)\b/i.test(clause) &&
+        !/\b(?:and|but|yet|or|a|an|the|with|of|for|to)\s*$/i.test(clause) &&
         (!hasLimitation(clause) || supportsLimitation(clause)),
     )
     .slice(0, 4)
@@ -162,6 +196,7 @@ export function assessCoaching(
   const suppliedSuccessfulFact = c.insights.some(
     (i) =>
       i.classification === "strength" &&
+      !!i.lesson.trim() &&
       !hasLimitation(i.lesson) &&
       !uncertainty.test(i.lesson) &&
       !negatedPositive.test(i.lesson) &&
@@ -197,9 +232,11 @@ export function assessCoaching(
   // Workspace callers explicitly supply the final safe state after filtering;
   // a suppressed raw label then cannot remain a hidden quality blocker.
   // A card budget alone must not erase a real, safely supported limitation.
-  const material = (finalSafeIssues ?? actionable).some(
+  const material = (finalSafeIssues ?? survivingRecommendations).some(
     (i) =>
-      ["clear_issue", "optional_refinement"].includes(i.classification) &&
+      (["clear_issue", "optional_refinement"].includes(i.classification) ||
+        (i.classification === "study_experiment" &&
+          supportsTeachingLimitation(source, [i], i.lesson))) &&
       materialInsight(i, c.facts),
   );
   // A label alone cannot establish a limitation. In final display mode only
@@ -214,7 +251,7 @@ export function assessCoaching(
     successfulPositive(rationale) &&
     !hasLimitation(finalSafeIssues ? rationale : original.rationale) &&
     !uncertainty.test(finalSafeIssues ? rationale : original.rationale) &&
-    !personJudgement.test(original.rationale) &&
+    !personJudgement.test(finalSafeIssues ? rationale : original.rationale) &&
     (!finalSafeIssues ||
       c.colourAnalysis?.technicalAssessment?.kind !== "uncertain") &&
     suppliedSuccessfulFact &&
