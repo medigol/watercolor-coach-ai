@@ -174,6 +174,7 @@ export default function PaintingAnalysisWorkspace({
 }) {
   const { width, height } = useWindowDimensions(),
     wide = Platform.OS === "web" && width >= 1024;
+  const teaching = workspaceTeaching(source);
   // This is a view projection, not a canonical result to revalidate or persist.
   // All role labels, overlays and linked visual aids use the same omissions.
   const displaySource = useMemo(() => {
@@ -186,11 +187,15 @@ export default function PaintingAnalysisWorkspace({
         ...source.canonicalAnalysis,
         visualRoles,
         visualEvidence,
+        insights: source.canonicalAnalysis.insights.map(
+          (insight) =>
+            teaching.preservationInsights.find((i) => i.id === insight.id) ??
+            insight,
+        ),
       },
     };
-  }, [source]);
-  const c = displaySource.canonicalAnalysis,
-    teaching = workspaceTeaching(source);
+  }, [source, teaching.preservationInsights]);
+  const c = displaySource.canonicalAnalysis;
   const projection = useMemo(
     () =>
       projectPaintingAnalysis(

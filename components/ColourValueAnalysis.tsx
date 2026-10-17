@@ -5,6 +5,22 @@ import { colors, styles } from "./ui";
 import { design } from "./theme";
 import { sameLearningInsight } from "../shared/coachingEvidence";
 
+// A shared opening sentence does not make the rest of a teaching paragraph
+// redundant. Omit it only when all of its supplied lessons are already covered.
+function teachingAlreadyCovered(text: string, previous: string[]): boolean {
+  const sentences = (value: string) =>
+    value
+      .split(/(?<=[.!?])\s+|\n+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  const parts = sentences(text);
+  return parts.length > 1
+    ? parts.every((part) =>
+        previous.flatMap(sentences).some((p) => sameLearningInsight(part, p)),
+      )
+    : previous.some((p) => sameLearningInsight(text, p));
+}
+
 export default function ColourValueAnalysis({
   source,
   renderEvidence,
@@ -42,12 +58,10 @@ export default function ColourValueAnalysis({
     .filter(
       ([label, text], index, all) =>
         label === "Value hierarchy" ||
-        (!sameLearningInsight(text || "", value) &&
-          !all
-            .slice(0, index)
-            .some(([, previous]) =>
-              sameLearningInsight(previous || "", text || ""),
-            )),
+        !teachingAlreadyCovered(text || "", [
+          value,
+          ...all.slice(0, index).map(([, previous]) => previous || ""),
+        ]),
     );
   const assessment = colour?.technicalAssessment;
   const showAssessment =

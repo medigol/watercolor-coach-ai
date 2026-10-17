@@ -6,6 +6,59 @@ const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "..");
+test("substantive saved teaching survives the existing workspace without truncation or unsafe preservation", () => {
+  const canonical = require("./helpers/analysis-depth-fixture.cjs")();
+  const html = render(
+    "improve_painting",
+    "openai",
+    "https://example.invalid/original.png",
+    undefined,
+    {
+      canonicalResult: canonical,
+      viewportWidth: 1440,
+    },
+  );
+  assert(html.includes("Strong painting"));
+  for (const text of [
+    "Selected crisp contours hold attention near the tower",
+    "Preserve the value separation",
+    "Preserve the road curve",
+    "Warm focal accents concentrate chroma",
+    "Connected middle tones keep internal contrast",
+    "The concentrated warm accent marks one place to pause",
+    "This unequal edge definition lets the background recede",
+    "varying only value contrast",
+    "Keep the shapes, warm–cool relationship and edge treatment consistent",
+    "choose the version where the reserved light remains readable",
+  ])
+    assert(html.includes(text), text);
+  assert(
+    !/emphasize road contrast|tower perspective is inconsistent|edges and washes/i.test(
+      html,
+    ),
+  );
+});
+
+test("multi-sentence colour teaching is deduplicated only when every lesson is already covered", () => {
+  const canonical = require("./helpers/analysis-depth-fixture.cjs")();
+  const colour = canonical.canonicalAnalysis.colourAnalysis;
+  colour.chromaHierarchy = colour.valueHierarchy;
+  const html = render(
+    "improve_painting",
+    "openai",
+    "https://example.invalid/original.png",
+    undefined,
+    {
+      canonicalResult: canonical,
+      viewportWidth: 1440,
+    },
+  );
+  assert(html.includes("Colour strategy"));
+  assert(html.includes("Warm focal accents concentrate chroma"));
+  assert(!html.includes("Chroma hierarchy"));
+  assert(html.includes("Value hierarchy"));
+});
+
 test("a generic figure study cannot leak back through overall assessment or domain prose", () => {
   const canonical = require("./helpers/canonical-fixture.cjs")();
   Object.assign(canonical.canonicalAnalysis.insights[0], {

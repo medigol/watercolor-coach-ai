@@ -48,8 +48,49 @@ export function unsupportedProcess(value: string): boolean {
     value,
   );
 }
+function finishObservableText(
+  observed: string,
+  suggestedMethod: boolean,
+): string {
+  // A named method in an original-image description is not evidence of its
+  // execution. Proposed wash/mix instructions remain methods, rather than
+  // observations; keep those words without bypassing the process-history gate.
+  const proposedWash =
+    /^(?:mix|dilute|paint|lay|try|test|practi[cs]e)\b|^use\s+(?!of\b)|^(?:start|begin)\b[^.!?]{0,80}\b(?:parts?|ratio|mix(?:ture)?|water)\b|\b(?:approximate|suggested|starting|recreation)\b[^.!?]{0,35}\b(?:mix(?:ture)?|ratios?|pigments?)\b/i.test(
+      observed,
+    );
+  const visible =
+    suggestedMethod || proposedWash || unsupportedProcess(observed)
+      ? observed
+      : observed.replace(/\b(wash|washes)\b/gi, (match) => {
+          const noun = /^washes$/i.test(match)
+            ? "colour passages"
+            : "colour passage";
+          return /^[A-Z]/.test(match)
+            ? noun[0].toUpperCase() + noun.slice(1)
+            : noun;
+        });
+  // Only obvious local repetition: do not paraphrase or shorten substantive
+  // teaching, change adjectives, or collapse intentional grammatical repetition.
+  return visible
+    .replace(
+      /\b(visible|soft|diffused|crisp|sharp|dark|light|muted|warm|cool|irregular|granular|broken|broad|defined|transparent-looking)(?:[\s,]+\1\b)+/gi,
+      "$1",
+    )
+    .replace(
+      /\bvisible (texture|marks?|colou?r passages?) (is|are|was|were) visible\b/gi,
+      "$1 $2 visible",
+    )
+    .replace(
+      /\bvisible (texture|marks?|colou?r passages?) visible\b/gi,
+      "visible $1",
+    );
+}
 /** Restate only supplied visible qualities, never reconstruct a method. */
-export function observableEffectText(value: string): string {
+export function observableEffectText(
+  value: string,
+  suggestedMethod = false,
+): string {
   value = value
     .replace(
       /\banatomical (inaccuracies|accuracy|errors?|structure|proportions?) (in|of|around) (the |a |this )?(van|car|vehicle|boat|building|object)\b/gi,
@@ -68,7 +109,7 @@ export function observableEffectText(value: string): string {
         `${/^[A-Z]/.test(match) ? "Structure" : "structure"} of ${article ?? ""}${object}`,
     );
   if (recommendedMethod(value)) return value;
-  return (
+  return finishObservableText(
     value
       // These labels name an inferred method. Retain only their supplied
       // visible effect; future-study methods returned above remain untouched.
@@ -197,15 +238,19 @@ export function observableEffectText(value: string): string {
             ? label[0].toUpperCase() + label.slice(1)
             : label;
         },
-      )
+      ),
+    suggestedMethod,
   );
 }
-export function observationText(value: unknown): string {
+function cleanObservationText(
+  value: unknown,
+  suggestedMethod: boolean,
+): string {
   if (typeof value !== "string") return "";
   return sentences(value)
     .flatMap((raw) => {
       if (/^\s*with more controlled (?:for|in)\b/i.test(raw)) return [];
-      const sentence = observableEffectText(raw);
+      const sentence = observableEffectText(raw, suggestedMethod);
       if (!unsupportedProcess(sentence)) return [sentence];
       // Keep an explicitly supplied visible quality; remove the inferred method.
       if (
@@ -214,6 +259,7 @@ export function observationText(value: unknown): string {
       ) {
         const visible = observableEffectText(
           sentence.replace(/\bwet[- ]on[- ](?:wet|dry)\s*/gi, ""),
+          suggestedMethod,
         );
         if (!unsupportedProcess(visible)) return [visible];
       }
@@ -221,6 +267,13 @@ export function observationText(value: unknown): string {
     })
     .join(" ")
     .trim();
+}
+export function observationText(value: unknown): string {
+  return cleanObservationText(value, false);
+}
+/** Known future-method fields retain wash terminology, never inferred history. */
+export function suggestedMethodText(value: unknown): string {
+  return cleanObservationText(value, true);
 }
 export function changeRecommendation(value: string): boolean {
   if (
@@ -504,7 +557,9 @@ export function evidenceFeedback<T>(value: T): T {
         (item) =>
           typeof item !== "string" || !conflictsWithStrength(item, strengths),
       )
-      .map((item) => (typeof item === "string" ? observationText(item) : item))
+      .map((item) =>
+        typeof item === "string" ? suggestedMethodText(item) : item,
+      )
       .filter((item) => item !== "");
   for (const field of [
     "mainAdvice",
@@ -521,7 +576,10 @@ export function evidenceFeedback<T>(value: T): T {
       result[field].length <=
         (["promising", "paletteStrategy"].includes(field) ? 350 : 700)
     ) {
-      const safe = observationText(result[field]);
+      const safe =
+        field === "practice"
+          ? suggestedMethodText(result[field])
+          : observationText(result[field]);
       result[field] = safe;
       if (["promising", "paletteStrategy"].includes(field) && !safe)
         delete result[field];
@@ -556,7 +614,9 @@ export function evidenceFeedback<T>(value: T): T {
       "nextStudyAction",
     ]) {
       if (typeof decision[field] !== "string") continue;
-      const safe = observationText(decision[field]);
+      const safe = ["currentPaintingAction", "nextStudyAction"].includes(field)
+        ? suggestedMethodText(decision[field])
+        : observationText(decision[field]);
       decision[field] =
         safe && !conflictsWithStrength(safe, strengths) ? safe : null;
     }
@@ -599,7 +659,11 @@ export function evidenceFeedback<T>(value: T): T {
           "action",
         ])
           if (typeof clean[field] === "string")
-            clean[field] = observationText(clean[field]);
+            clean[field] =
+              clean.classification !== "strength" &&
+              ["shortInstruction", "action"].includes(field)
+                ? suggestedMethodText(clean[field])
+                : observationText(clean[field]);
         if (
           clean.classification === "strength" &&
           [clean.shortInstruction, clean.action].some(

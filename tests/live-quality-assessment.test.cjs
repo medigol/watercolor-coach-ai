@@ -106,7 +106,7 @@ test("a capped or suppressed supported material issue still prevents upgrading b
   );
   assert.equal(assessCoaching(r, []).level, "competent");
 });
-test("an unaligned original clear issue remains uncertainty rather than proof of Strong", () => {
+test("an unsupported original clear-issue label does not block otherwise supported Strong normalization", () => {
   const r = result();
   r.canonicalAnalysis.insights.push({
     ...r.canonicalAnalysis.insights[0],
@@ -115,7 +115,7 @@ test("an unaligned original clear issue remains uncertainty rather than proof of
     lesson: "The church's perspective is inconsistent.",
     action: "Correct perspective in a separate study.",
   });
-  assert.equal(assessCoaching(r, []).level, "competent");
+  assert.equal(assessCoaching(r, []).level, "strong");
 });
 test("hidden perspective criticism is removed while positive supplied explanation stays intact", () => {
   const r = result(
@@ -289,14 +289,14 @@ test("person skill judgement does not replace visual rationale", () => {
   );
   assert.equal(assessCoaching(r, []).level, "competent");
 });
-test("retained source rationale is concise and limited to two supplied clauses", () => {
+test("retained source rationale can teach three supplied relationships", () => {
   const r = result(
     "strong",
     "Clear light establishes the subject. Coherent values hold the scene. Balanced temperature supports the atmosphere.",
   );
   assert.equal(
     assessCoaching(r, []).rationale,
-    "Clear light establishes the subject. Coherent values hold the scene.",
+    "Clear light establishes the subject. Coherent values hold the scene. Balanced temperature supports the atmosphere.",
   );
 });
 test("an explicit absence of required correction remains a valid supplied assessment", () => {

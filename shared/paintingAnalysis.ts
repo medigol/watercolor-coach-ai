@@ -15,6 +15,7 @@ import {
   conflictsWithStrength,
   observationText,
   sameLearningInsight,
+  suggestedMethodText,
 } from "./coachingEvidence.ts";
 import { coherentFeedback, type CoachingDecision } from "./coachingDecision.ts";
 import {
@@ -23,6 +24,10 @@ import {
   type ColourAnalysis,
 } from "./colourAnalysis.ts";
 import { correctiveTeaching } from "./coachingWorkspace.ts";
+import {
+  hierarchySafePreservation,
+  qualifiedRoadPreservation,
+} from "./coachingCalibration.ts";
 import {
   colourRelationshipText,
   objectDesignSuggestion,
@@ -223,7 +228,7 @@ export function canonicalValidationIssue(
     !keys(q, ["level", "confidence", "rationale"]) ||
     !qualityLevels.includes(q.level as never) ||
     !unit(q.confidence) ||
-    !text(q.rationale) ||
+    !text(q.rationale, 640) ||
     personAssessment(q.rationale)
   )
     return "quality_assessment";
@@ -322,7 +327,7 @@ export function canonicalValidationIssue(
       !record(v) ||
       !keys(v, ["summaryId", "insightIds", "practice"]) ||
       typeof v.practice !== "string" ||
-      v.practice.length > 240
+      v.practice.length > 640
     )
       return "expert_views";
     if (
@@ -669,11 +674,37 @@ export function cleanPaintingAnalysis(
   const decision = roleDecision(c);
   const insights = c.insights.map((i) => {
     const lesson = colourRelationshipText(observationText(i.lesson)),
-      action = colourRelationshipText(observationText(i.action));
+      suppliedAction = colourRelationshipText(observationText(i.action)),
+      preservationAction =
+        i.classification === "strength"
+          ? hierarchySafePreservation(
+              suppliedAction,
+              [
+                lesson,
+                ...i.factIds.map(
+                  (ref) => facts.find((f) => f.id === ref)!.observation,
+                ),
+              ].join(" "),
+            )
+          : suppliedAction;
+    // The core v1 action is required. When no safe supplied preservation
+    // remains, retain its original text for compatibility and omit it only in
+    // presentation; do not turn its factual strength into a corrective study.
+    const action = preservationAction || suppliedAction,
+      classifiedAction =
+        i.classification === "strength" ? preservationAction : action,
+      qualifiedPreservation =
+        i.classification === "strength" &&
+        qualifiedRoadPreservation(classifiedAction, lesson) &&
+        !c.visualRoles.some(
+          ({ role, area }) =>
+            role === "quiet" &&
+            /\b(?:road|street|path|lead[- ]in)\b/i.test(area),
+        );
     let classification = i.classification;
     if (
       classification === "strength" &&
-      (changeRecommendation(action) ||
+      ((!qualifiedPreservation && changeRecommendation(classifiedAction)) ||
         (changeRecommendation(lesson) &&
           /^(?:enhance|deepen|increase|reduce|sharpen|soften|strengthen|darken|lighten|simplify|mute|quiet|add)\b|\b(?:should|needs?|could)\b/i.test(
             lesson,
@@ -683,21 +714,26 @@ export function cleanPaintingAnalysis(
     // A recommendation conflicting with successful evidence is an alternative
     // study, never a newly invented defect or intervention on the original.
     const contradiction = conflictsWithStrength(
-      `${lesson}. ${action}`,
+      qualifiedPreservation ? lesson : `${lesson}. ${classifiedAction}`,
       strengths,
       i.factIds.map((ref) => facts.find((f) => f.id === ref)!.observation),
     );
     if (contradiction) classification = "study_experiment";
     if (
       classification === "strength" &&
-      (correctiveTeaching(lesson) || correctiveTeaching(action))
+      (correctiveTeaching(lesson) ||
+        (!qualifiedPreservation && correctiveTeaching(classifiedAction)))
     )
       classification = "study_experiment";
     const guarded = coherentFeedback(
       {
         mainAdvice: lesson,
         whatWorks: [],
-        whatToFix: [action],
+        whatToFix: [
+          qualifiedPreservation
+            ? classifiedAction.split(/[.!?;]|\s+and\s+/i, 1)[0]
+            : classifiedAction || lesson,
+        ],
         coachingDecision: decision,
       },
       "improve_painting",
@@ -862,7 +898,7 @@ export function cleanPaintingAnalysis(
             ? Object.fromEntries(
                 Object.entries(stage).map(([key, value]) => [
                   key,
-                  key === "technique" ? value : observationText(value),
+                  key === "technique" ? value : suggestedMethodText(value),
                 ]),
               )
             : stage,
@@ -884,7 +920,7 @@ export function cleanPaintingAnalysis(
       key,
       {
         ...value.expertViews[key],
-        practice: observationText(value.expertViews[key].practice),
+        practice: suggestedMethodText(value.expertViews[key].practice),
       },
     ]),
   );
@@ -1033,7 +1069,7 @@ export function paintingAnalysisSchema(aids: {
     object({
       summaryId: string(40),
       insightIds: array(string(40), max, 1),
-      practice: { type: "string", maxLength: 240 },
+      practice: { type: "string", maxLength: 640 },
     });
   return object({
     title: string(100),
@@ -1042,7 +1078,7 @@ export function paintingAnalysisSchema(aids: {
       qualityAssessment: object({
         level: { type: "string", enum: [...qualityLevels] },
         confidence: unit,
-        rationale: string(240),
+        rationale: string(640),
       }),
       visualRoles: array(
         object({

@@ -6,6 +6,7 @@ import {
   evidencedProblem,
   evidenceProperties,
   evidenceTargets,
+  insightAlignment,
   materialInsight,
 } from "./coachingAlignment.ts";
 import { observationText } from "./coachingEvidence.ts";
@@ -35,13 +36,38 @@ const preciseProperties = [
   /\b(?:temperature|warm\w*|cool\w*)\b/i,
   /\b(?:chroma|saturat\w*)\b/i,
 ];
-const hasLimitation = (text: string) =>
-  limitation.test(
-    text.replace(
+function hasLimitation(text: string): boolean {
+  const checked = text
+    .replace(
       /\bno (?:significant |major |material )?correction (?:is )?needed\b|\b(?:does|do) not need (?:significant |major |material )?(?:correction|refinement)\b/gi,
       "",
-    ),
-  );
+    )
+    .split(/[.!?;]/)
+    .map((clause) => {
+      // Compressed values can successfully create recession. Exempt only that
+      // supplied positive relationship; compressed space/shadows or any other
+      // named harm remain limitations. This changes no displayed source text.
+      const valueCompression = clause.replace(
+        /\bcompressed\s+(?:(?:background|distant|mountain|supporting)\s+)?(?:values?|value range|tonal range)\b/gi,
+        (match) => match.replace(/\bcompressed\b/i, ""),
+      );
+      const positiveEffect =
+        /\b(?:support\w*|creat\w*|establish\w*|preserv\w*|maintain\w*|strengthen\w*)\b[^;.!?]{0,65}\b(?:depth|recession|atmospher\w*|focal separation|hierarchy)\b/i.test(
+          clause,
+        );
+      return valueCompression !== clause &&
+        positiveEffect &&
+        !/\b(?:not|never|without|cannot|can't)\b/i.test(clause) &&
+        !uncertainty.test(clause) &&
+        !negatedPositive.test(clause) &&
+        !limitation.test(valueCompression) &&
+        !evidencedProblem(valueCompression)
+        ? valueCompression
+        : clause;
+    })
+    .join(".");
+  return limitation.test(checked);
+}
 
 function rationaleClauses(sentence: string): string[] {
   const contrast = sentence.split(
@@ -77,7 +103,8 @@ export function assessCoaching(
       ["clear_issue", "optional_refinement"].includes(i.classification) &&
       i.action.trim() &&
       c.insights.some((s) => s.id === i.id) &&
-      i.factIds.some((id) => c.facts.some((f) => f.id === id)),
+      i.factIds.some((id) => c.facts.some((f) => f.id === id)) &&
+      insightAlignment(i, c.facts) === "supported",
   );
   const supportsLimitation = (clause: string) => {
     const named = evidenceProperties(clause);
@@ -113,7 +140,7 @@ export function assessCoaching(
         !/\b(?:and|or|a|an|the|with|of|for|to)\s*$/i.test(clause) &&
         (!hasLimitation(clause) || supportsLimitation(clause)),
     )
-    .slice(0, 2)
+    .slice(0, 4)
     .map((clause) => (/[.!?]$/.test(clause) ? clause : `${clause}.`))
     .join(" ");
 
@@ -154,10 +181,10 @@ export function assessCoaching(
   // Original supported clear issues remain a blocker below. Optional advice
   // which is no longer shown cannot itself count as a surviving improvement.
   const material = actionable.some((i) => materialInsight(i, c.facts));
-  // An original clear_issue remains a reason for caution even if later omitted:
-  // dropping unsupported advice cannot prove that a painting deserves upgrading.
+  // A label alone cannot establish a limitation. Keep original supported
+  // material issues as blockers even if presentation later omits their advice.
   const unresolvedIssue = c.insights.some(
-    (i) => i.classification === "clear_issue",
+    (i) => i.classification === "clear_issue" && materialInsight(i, c.facts),
   );
   const normalizeStrong =
     ["competent", "developing"].includes(original.level) &&

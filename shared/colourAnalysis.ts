@@ -1,4 +1,8 @@
-import { observationText, unsupportedProcess } from "./coachingEvidence.ts";
+import {
+  observationText,
+  suggestedMethodText,
+  unsupportedProcess,
+} from "./coachingEvidence.ts";
 import {
   conflictsWithDecision,
   type CoachingDecision,
@@ -33,7 +37,12 @@ export interface ColourAnalysis {
 }
 const record = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === "object" && !Array.isArray(v);
-function safeText(v: unknown, max: number, decision: CoachingDecision): string {
+function safeText(
+  v: unknown,
+  max: number,
+  decision: CoachingDecision,
+  suggestedMethod = false,
+): string {
   if (
     typeof v !== "string" ||
     !v.trim() ||
@@ -48,7 +57,7 @@ function safeText(v: unknown, max: number, decision: CoachingDecision): string {
     conflictsWithDecision(v, decision)
   )
     return "";
-  return observationText(v);
+  return suggestedMethod ? suggestedMethodText(v) : observationText(v);
 }
 /** Optional teaching only: malformed colour data never invalidates core facts.
  * Role labels are derived from canonical IDs, never supplied a second time. */
@@ -68,6 +77,8 @@ export function cleanColourAnalysis(
     : [];
   const text = (v: unknown, max = 180) =>
     colourRelationshipText(safeText(v, max, decision), hues);
+  const mixText = (v: unknown, max: number) =>
+    colourRelationshipText(safeText(v, max, decision, true), hues);
   const valueHierarchy = text(value.valueHierarchy);
   if (!valueHierarchy) return null;
   const visibleColours = (
@@ -127,12 +138,12 @@ export function cleanColourAnalysis(
     .flatMap((item) => {
       if (
         !record(item) ||
-        !text(item.target, 50) ||
-        !text(item.use, 100) ||
+        !mixText(item.target, 50) ||
+        !mixText(item.use, 100) ||
         !Array.isArray(item.pigments) ||
         !item.pigments.length ||
         item.pigments.length > 3 ||
-        !item.pigments.every((p) => text(p, 40))
+        !item.pigments.every((p) => mixText(p, 40))
       )
         return [];
       const opaqueVariation =
@@ -148,10 +159,10 @@ export function cleanColourAnalysis(
         return [];
       return [
         {
-          target: text(item.target, 50),
-          pigments: item.pigments.map((p) => text(p, 40)),
+          target: mixText(item.target, 50),
+          pigments: item.pigments.map((p) => mixText(p, 40)),
           startingRatio: approximateMixRatio(item.startingRatio),
-          use: text(item.use, 100),
+          use: mixText(item.use, 100),
         },
       ];
     });
