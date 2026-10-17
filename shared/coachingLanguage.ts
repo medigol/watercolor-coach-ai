@@ -1,4 +1,4 @@
-import { observationText } from "./coachingEvidence.ts";
+import { observationText, suggestedMethodText } from "./coachingEvidence.ts";
 
 /** Display safeguards use supplied words, never new observations or geometry. */
 export function qualityRationaleText(value: string): string {
@@ -37,7 +37,7 @@ export function qualityRationaleText(value: string): string {
     cleaned.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((s) => s.trim()) ?? [];
   const complete = sentences.filter((s) => /[.!?]$/.test(s));
   // A supplied complete sentence is preferable to an unfinished extra clause.
-  if (complete.length) return complete.slice(0, 2).join(" ");
+  if (complete.length) return complete.slice(0, 4).join(" ");
   return /\b(?:and|or|a|an|the|with|of|for|to)\s*$/i.test(cleaned)
     ? ""
     : cleaned;
@@ -134,7 +134,7 @@ export function singleVariableStudyText(value: string): string {
 }
 
 export function separateStudyText(value: string): string {
-  const text = singleVariableStudyText(observationText(value)).trim();
+  const text = singleVariableStudyText(suggestedMethodText(value)).trim();
   if (!text) return "";
   let safe = text.replace(
     /\b(?:your|the) (?:current |finished |existing )?painting\b/gi,

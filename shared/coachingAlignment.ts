@@ -62,24 +62,12 @@ export function directionalChange(text: string): boolean {
     text,
   );
 }
-/** Each supporting fact must itself connect the target and relevant property.
- * A colour fact and an unrelated placement fact cannot manufacture perspective. */
-export function insightAlignment(
+/** Reuse the same supplied target/property clauses for alignment and impact. */
+function relevantInsightClauses(
   i: PaintingInsight,
   facts: readonly PaintingFact[],
-): "supported" | "study" | "omit" {
-  if (!["clear_issue", "optional_refinement"].includes(i.classification))
-    return "supported";
+): string[] {
   const linked = facts.filter((f) => i.factIds.includes(f.id));
-  const claim = `${i.lesson} ${i.action}`;
-  if (
-    objectDesignSuggestion(i.action) ||
-    unsupportedPlacementAdvice(
-      claim,
-      linked.map((f) => f.observation).join(" "),
-    )
-  )
-    return "supported";
   const target = evidenceTargets(i.lesson),
     actionTargets = primaryTargets(i);
   const named = target.length ? target : actionTargets;
@@ -92,7 +80,7 @@ export function insightAlignment(
     text
       .match(/\b(?:upper|lower|left|right|base|roof)\b/gi)
       ?.map((x) => x.toLowerCase()) ?? [];
-  const relevant = linked
+  return linked
     .flatMap((f) =>
       f.observation
         .split(/[.!?;]|\b(?:but|while|with)\b/i)
@@ -118,6 +106,26 @@ export function insightAlignment(
           : !props.length || intersects(props, fp))
       );
     });
+}
+/** Each supporting fact must itself connect the target and relevant property.
+ * A colour fact and an unrelated placement fact cannot manufacture perspective. */
+export function insightAlignment(
+  i: PaintingInsight,
+  facts: readonly PaintingFact[],
+): "supported" | "study" | "omit" {
+  if (!["clear_issue", "optional_refinement"].includes(i.classification))
+    return "supported";
+  const linked = facts.filter((f) => i.factIds.includes(f.id));
+  const claim = `${i.lesson} ${i.action}`;
+  if (
+    objectDesignSuggestion(i.action) ||
+    unsupportedPlacementAdvice(
+      claim,
+      linked.map((f) => f.observation).join(" "),
+    )
+  )
+    return "supported";
+  const relevant = relevantInsightClauses(i, facts);
   if (!relevant.length) return "omit";
   // Explicit unsupported defects are never relabelled as harmless experiments.
   const problem = relevant.some(evidencedProblem);
@@ -131,18 +139,29 @@ export function materialInsight(
   facts: readonly PaintingFact[],
 ): boolean {
   if (insightAlignment(i, facts) !== "supported") return false;
-  const problem = facts.some(
-    (f) => i.factIds.includes(f.id) && evidencedProblem(f.observation),
-  );
-  if (!problem) return false;
+  // A linked but unrelated problem must not turn an otherwise neutral matched
+  // observation into a material diagnosis. Reuse alignment's existing clauses.
+  const problems = relevantInsightClauses(i, facts).filter(evidencedProblem);
+  if (!problems.length) return false;
+  if (i.classification === "clear_issue") {
+    // A provider label does not make an explicitly subtle effect material.
+    // Both the lesson and every linked problem fact must describe that limited
+    // impact; a mild lesson cannot erase a materially harmful supplied fact.
+    const minor = /\b(?:minor|subtle|slight(?:ly)?)\b/i;
+    const major =
+      /\b(?:major|severe|foundational|dominates?|obscur\w*|unreadable)\b/i;
+    return !(
+      minor.test(i.lesson) &&
+      problems.every((clause) => minor.test(clause) && !major.test(clause))
+    );
+  }
   return (
-    i.classification === "clear_issue" ||
-    (!/\b(?:minor|tiny|small|subtle|slightly|selected|a few|some wires)\b/i.test(
+    !/\b(?:minor|tiny|small|subtle|slightly|selected|a few|some wires)\b/i.test(
       `${i.lesson} ${i.action}`,
     ) &&
-      /\b(?:values?|contrast|focal dominance|hierarchy|depth|spatial|integrat\w*|perspective|proportion|drawing|balance|dominates?|disconnect\w*)\b/i.test(
-        `${i.lesson} ${i.action}`,
-      ))
+    /\b(?:values?|contrast|focal dominance|hierarchy|depth|spatial|integrat\w*|perspective|proportion|drawing|balance|dominates?|disconnect\w*)\b/i.test(
+      `${i.lesson} ${i.action}`,
+    )
   );
 }
 

@@ -136,7 +136,7 @@ for (const [name, mutate] of [
   ["missing quality", (r) => delete r.canonicalAnalysis.qualityAssessment],
   [
     "overlong practice",
-    (r) => (r.expertViews.technique.practice = "x".repeat(241)),
+    (r) => (r.expertViews.technique.practice = "x".repeat(641)),
   ],
   ["truncated core", (r) => delete r.canonicalAnalysis.facts],
 ])

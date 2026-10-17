@@ -75,7 +75,8 @@ test("constructive feedback keeps specific strengths visible and limits distinct
   assert(html.includes("What to improve"));
   assert(html.indexOf("What works well") < html.indexOf("What to improve"));
   assert.equal(
-    (html.match(/The soft sky wash supports distance\./g) || []).length,
+    (html.match(/The soft sky colour passage supports distance\./g) || [])
+      .length,
     1,
   );
   assert(html.includes("Sharpen only the focal marks."));
@@ -92,7 +93,8 @@ test("duplicate summary advice is removed from secondary feedback but a supplied
   });
   assert(html.includes("What works well"));
   assert.equal(
-    (html.match(/The soft sky wash supports distance\./g) || []).length,
+    (html.match(/The soft sky colour passage supports distance\./g) || [])
+      .length,
     1,
   );
   assert(!html.includes("Why this is worth developing"));

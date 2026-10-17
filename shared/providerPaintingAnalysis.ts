@@ -15,7 +15,7 @@ import {
 } from "./visualMetadata.ts";
 import { validRect, type NormalizedRect } from "./imageGeometry.ts";
 import { colourAnalysisSchema } from "./colourAnalysis.ts";
-import { observationText } from "./coachingEvidence.ts";
+import { observationText, suggestedMethodText } from "./coachingEvidence.ts";
 import { qualityRationaleText } from "./coachingLanguage.ts";
 
 export const providerFailureReasons = [
@@ -171,7 +171,7 @@ export function normalizeProviderPaintingAnalysis(
     !record(q) ||
     !qualityLevels.includes(q.level as never) ||
     !unit(q.confidence) ||
-    !text(q.rationale, 240)
+    !text(q.rationale, 640)
   )
     return fail("provider_structure");
   const rationale = qualityRationaleText(q.rationale);
@@ -269,8 +269,8 @@ export function normalizeProviderPaintingAnalysis(
       summaryId: summary.id,
       insightIds: chosen.map((i) => i.id),
       practice:
-        typeof block.practice === "string" && block.practice.length <= 240
-          ? observationText(block.practice)
+        typeof block.practice === "string" && block.practice.length <= 640
+          ? suggestedMethodText(block.practice)
           : "",
     };
     if (!Array.isArray(block.visualAids)) continue;
@@ -473,7 +473,7 @@ export function providerPaintingAnalysisSchema(aids: {
   const block = (maxFacts: number, maxInsights: number) => ({
     facts: array({ $ref: "#/$defs/fact" }, maxFacts, 1),
     insights: array({ $ref: "#/$defs/insight" }, maxInsights, 1),
-    practice: { type: ["string", "null"], maxLength: 240 },
+    practice: { type: ["string", "null"], maxLength: 640 },
     visualAids: {
       ...array(
         object({
@@ -529,7 +529,7 @@ export function providerPaintingAnalysisSchema(aids: {
       qualityAssessment: object({
         level: { type: "string", enum: [...qualityLevels] },
         confidence: unit,
-        rationale: string(180),
+        rationale: string(640),
       }),
       visualRoles: {
         ...array(

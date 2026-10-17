@@ -1458,6 +1458,73 @@ let signalFeedbackHeld;
     }
   }
   Object.assign(saved, structuredClone(beforeFinalCalibration));
+  const analysisDepthMatrix = [];
+  for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
+    Object.assign(
+      saved,
+      require(root + "/tests/helpers/analysis-depth-fixture.cjs")(),
+    );
+    imageFile = aspectFiles.portrait;
+    await page.setViewportSize({ width, height: 950 });
+    await page.reload();
+    await page
+      .getByText("Complete Painting Analysis", { exact: true })
+      .waitFor();
+    await page.getByTestId("coaching-source-image").waitFor();
+    await open("Composition");
+    await open("Colour & Value");
+    await open("Watercolor technique");
+    const assessment = await page.getByTestId("overall-assessment").innerText();
+    assert(assessment.includes("Strong painting"));
+    assert(
+      assessment.includes(
+        "Selected crisp contours hold attention near the tower",
+      ),
+    );
+    assert.equal(
+      await page.locator('[data-testid^="recommendation-"]').count(),
+      0,
+    );
+    const body = await page.locator("body").innerText();
+    for (const text of [
+      "Preserve the road curve",
+      "Warm focal accents concentrate chroma",
+      "Connected middle tones keep internal contrast",
+      "The concentrated warm accent marks one place to pause",
+      "This unequal edge definition lets the background recede",
+      "varying only value contrast",
+      "Keep the shapes, warm–cool relationship and edge treatment consistent",
+      "choose the version where the reserved light remains readable",
+    ])
+      assert(body.includes(text), text);
+    assert(
+      !/emphasize road contrast|tower perspective is inconsistent|edges and washes/i.test(
+        body,
+      ),
+    );
+    const before = snapshot();
+    for (const control of ["Roles", "Composition overlay", "Clean view"])
+      await button(control).click();
+    await page.getByRole("button", { name: /^Notes(?: · \d+)?$/ }).click();
+    await page.getByTestId("coaching-marker-0").click();
+    await page.getByTestId("coaching-note-0").waitFor();
+    await button("Clean view").click();
+    await noOverflow();
+    assert.deepEqual(
+      snapshot(),
+      before,
+      "deeper saved teaching and its evidence remain local and read-only",
+    );
+    analysisDepthMatrix.push({
+      width,
+      completeTeaching: true,
+      safePreservation: true,
+      processFree: true,
+      readonly: true,
+    });
+    if (width === 390 || width === 1440) await shot(`analysis-depth-${width}`);
+  }
+  Object.assign(saved, structuredClone(beforeFinalCalibration));
   imageFile = aspectFiles.landscape;
   const originalPrimary = structuredClone(
     saved.canonicalAnalysis.composition.primary,
@@ -1842,6 +1909,7 @@ let signalFeedbackHeld;
         finalCalibrationMatrix,
         liveFreezeMatrix,
         finalFreezeFixMatrix,
+        analysisDepthMatrix,
         calls: snapshot(),
         errors,
         requests: requests.map((r) => ({
@@ -1856,7 +1924,7 @@ let signalFeedbackHeld;
     ),
   );
   console.log(
-    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration + 21 live-freeze + 21 final-freeze-fix cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
+    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration + 21 live-freeze + 21 final-freeze-fix + 7 analysis-depth cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
   );
   await browser.close();
 })().catch(async (error) => {

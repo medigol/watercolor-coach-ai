@@ -118,7 +118,8 @@ for (const mode of ["improve_painting", "create_reference"]) {
         ])
       assert(prompt.includes(phrase), phrase);
     if (mode === "improve_painting") {
-      assert(prompt.includes("Overall is shortest"));
+      assert.match(prompt, /Overall identifies the main priority or strongest success/);
+      assert.match(prompt, /2–4 concise COMPLETE supported sentences/);
       assert(prompt.includes("without visible harm"));
       assert(prompt.includes("separate sheet"));
     } else {

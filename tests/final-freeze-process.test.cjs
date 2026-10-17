@@ -17,7 +17,7 @@ for (const [raw, expected] of [
   ],
   [
     "Drybrush texture is visible near the boat.",
-    "Irregular visible texture is visible near the boat.",
+    "Irregular texture is visible near the boat.",
   ],
   [
     "Wet blending creates a misty mountain passage.",

@@ -5,6 +5,8 @@ import {
 } from "./coachingEvidence.ts";
 import {
   unsafeHierarchyAdvice,
+  hierarchySafePreservation,
+  qualifiedRoadPreservation,
   sameFocalRecommendation,
   relationalRecommendation,
 } from "./coachingCalibration.ts";
@@ -14,6 +16,7 @@ import {
   materialInsight,
   teachingRank,
   evidenceTargets,
+  evidenceProperties,
 } from "./coachingAlignment.ts";
 import { assessCoaching } from "./coachingAssessment.ts";
 import type {
@@ -70,7 +73,9 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
       : [
           alignment === "study"
             ? { ...i, classification: "study_experiment" as const }
-            : i,
+            : i.classification === "clear_issue" && !materialInsight(i, c.facts)
+              ? { ...i, classification: "optional_refinement" as const }
+              : i,
         ];
   });
   const insights = aligned.map((i) =>
@@ -96,13 +101,23 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
   const unique = (items: PaintingInsight[]) =>
     items.filter(
       (i, index) =>
-        !items
-          .slice(0, index)
-          .some(
-            (p) =>
-              sameLearningInsight(p.lesson, i.lesson) ||
-              sameTeaching(p, i, i.classification === "strength"),
-          ),
+        !items.slice(0, index).some((p) => {
+          // Shared background/depth vocabulary must not erase distinct
+          // supplied value, colour, or edge preservation relationships.
+          const a = evidenceProperties(p.action).filter((k) => k !== "depth"),
+            b = evidenceProperties(i.action).filter((k) => k !== "depth");
+          if (
+            i.classification === "strength" &&
+            a.length &&
+            b.length &&
+            !a.some((k) => b.includes(k))
+          )
+            return false;
+          return (
+            sameLearningInsight(p.lesson, i.lesson) ||
+            sameTeaching(p, i, i.classification === "strength")
+          );
+        }),
     );
   const clear = insights.filter((i) => i.classification === "clear_issue");
   const optional = insights.filter(
@@ -242,15 +257,46 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
               : i.lesson,
             action: exerciseTeaching(i.action)
               ? ""
-              : transferablePreservation(i.action),
+              : hierarchySafePreservation(
+                  transferablePreservation(i.action),
+                  [
+                    i.lesson,
+                    ...i.factIds.flatMap((id) =>
+                      c.facts
+                        .filter((f) => f.id === id)
+                        .map((f) => f.observation),
+                    ),
+                  ].join(" "),
+                ),
           },
     )
     .filter(
       (i) =>
         i.classification === "strength" &&
-        !correctiveTeaching(i.action) &&
+        (!correctiveTeaching(i.action) ||
+          qualifiedRoadPreservation(i.action, i.lesson)) &&
         !correctiveTeaching(i.lesson),
-    );
+    )
+    .map((i) => {
+      if (
+        !/^(?:preserve|keep|retain) (?:the )?(?:central|centred|centered) placement[.!]?$/i.test(
+          i.action.trim(),
+        )
+      )
+        return i;
+      const relationship = i.factIds
+        .map((id) => c.facts.find((f) => f.id === id)?.observation)
+        .find(
+          (text) =>
+            text &&
+            /\b(?:value|contrast|chroma|edge|balance|separat\w*|stands? apart|hierarchy)\b/i.test(
+              text,
+            ),
+        );
+      return relationship
+        ? { ...i, action: `Preserve this relationship: ${relationship}` }
+        : { ...i, action: "" };
+    });
   const practices = Object.values(value.expertViews)
     .map((v) => v.practice)
     .concat(
@@ -317,26 +363,8 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
     opportunity,
     recommendations,
     clear,
-    strengths: selectedStrengths.map((i) => {
-      if (
-        !/^(?:preserve|keep|retain) (?:the )?(?:central|centred|centered) placement[.!]?$/i.test(
-          i.action.trim(),
-        )
-      )
-        return i;
-      const relationship = i.factIds
-        .map((id) => c.facts.find((f) => f.id === id)?.observation)
-        .find(
-          (text) =>
-            text &&
-            /\b(?:value|contrast|chroma|edge|balance|separat\w*|stands? apart|hierarchy)\b/i.test(
-              text,
-            ),
-        );
-      return relationship
-        ? { ...i, action: `Preserve this relationship: ${relationship}` }
-        : { ...i, action: "" };
-    }),
+    preservationInsights: unique(strengths),
+    strengths: selectedStrengths,
     practice: practices[0] ? separateStudyText(practices[0]) : "",
     studies: selectedStudies,
   };
