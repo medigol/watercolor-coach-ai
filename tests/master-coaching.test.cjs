@@ -579,7 +579,6 @@ test("atmospheric elevation uses visible evidence without inventing a defect", (
 for (const claim of [
   "Effective use of wet-on-wet.",
   "Effective use of watercolor layering.",
-  "Some areas of wet blending.",
   "Controlled application of glazing.",
   "Controlled glazing gives this passage depth.",
   "The artist layered the colours.",
@@ -589,6 +588,13 @@ for (const claim of [
     assert(evidence.unsupportedProcess(claim));
     assert.equal(evidence.observationText(claim), "");
   });
+test("wet blending retains only its supplied visible transition", () => {
+  const claim = "Some areas of wet blending.";
+  assert(evidence.unsupportedProcess(claim));
+  const observed = evidence.observationText(claim);
+  assert.equal(observed, "Some soft blended colour transitions.");
+  assert.equal(evidence.unsupportedProcess(observed), false);
+});
 test("a suggested reproduction technique remains allowed", () => {
   const text =
     "A wet-on-wet exercise could reproduce a similar soft transition on separate paper.";

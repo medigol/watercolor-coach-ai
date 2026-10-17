@@ -39,7 +39,10 @@ import {
   archetypeLabel,
   compositionTeachingRows,
 } from "../lib/compositionArchetypes";
-import { planCanonicalVisualRoles } from "../lib/visualRoles";
+import {
+  displayRoleProjection,
+  planCanonicalVisualRoles,
+} from "../lib/visualRoles";
 import { curatedCoachingNotes, VisualCoachingNotes } from "./CoachingOverlay";
 import { SavedImage } from "./SavedResultState";
 import type { ImageSize } from "../shared/imageGeometry";
@@ -171,23 +174,38 @@ export default function PaintingAnalysisWorkspace({
 }) {
   const { width, height } = useWindowDimensions(),
     wide = Platform.OS === "web" && width >= 1024;
-  const c = source.canonicalAnalysis,
+  // This is a view projection, not a canonical result to revalidate or persist.
+  // All role labels, overlays and linked visual aids use the same omissions.
+  const displaySource = useMemo(() => {
+    const { visualRoles, visualEvidence } = displayRoleProjection(
+      source.canonicalAnalysis,
+    );
+    return {
+      ...source,
+      canonicalAnalysis: {
+        ...source.canonicalAnalysis,
+        visualRoles,
+        visualEvidence,
+      },
+    };
+  }, [source]);
+  const c = displaySource.canonicalAnalysis,
     teaching = workspaceTeaching(source);
   const projection = useMemo(
     () =>
       projectPaintingAnalysis(
         {
-          ...source,
+          ...displaySource,
           canonicalAnalysis: {
-            ...source.canonicalAnalysis,
-            visualEvidence: source.canonicalAnalysis.visualEvidence?.filter(
+            ...c,
+            visualEvidence: c.visualEvidence?.filter(
               (e) => !teaching.noteExcludedInsightIds.includes(e.insightId),
             ),
           },
         },
         "overall",
       ),
-    [source, teaching.noteExcludedInsightIds],
+    [displaySource, teaching.noteExcludedInsightIds],
   );
   const notes = useMemo(
     () => curatedCoachingNotes(projection.overlays),
@@ -227,7 +245,7 @@ export default function PaintingAnalysisWorkspace({
       ) as typeof note,
   );
   const evidenceSource = {
-    ...source,
+    ...displaySource,
     canonicalAnalysis: {
       ...c,
       visualEvidence: c.visualEvidence?.filter(
@@ -836,7 +854,7 @@ export default function PaintingAnalysisWorkspace({
               }
             >
               <ColourValueAnalysis
-                source={source}
+                source={displaySource}
                 omittedInsightIds={teaching.noteExcludedInsightIds}
                 displayText={text}
                 renderEvidence={(index) => {

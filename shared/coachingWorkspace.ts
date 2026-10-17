@@ -211,17 +211,21 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
   const opportunity = recommendations.find(
     (r) => r.label === "Main opportunity",
   )?.insight;
-  const status = clear.length
-    ? level === "developing"
-      ? "Main priority"
-      : "Main opportunity"
-    : level === "highly_resolved"
-      ? "No significant correction is needed."
-      : level === "strong"
-        ? "No major issue detected. Explore optional refinements or studies."
-        : opportunity
-          ? "Main opportunity to explore"
-          : "Review the observed structure and handling below.";
+  const hasMaterialRecommendation = recommendations.some((r) =>
+    materialInsight(r.insight, c.facts),
+  );
+  const status =
+    ["competent", "developing"].includes(level) && !hasMaterialRecommendation
+      ? "Review the observations and studies below."
+      : clear.length
+        ? level === "developing"
+          ? "Main priority"
+          : "Main opportunity"
+        : level === "highly_resolved"
+          ? "No significant correction is needed."
+          : level === "strong"
+            ? "No major issue detected. Explore optional refinements or studies."
+            : "Main opportunity to explore";
   const strengths = insights
     .map((i) =>
       i.classification !== "strength"

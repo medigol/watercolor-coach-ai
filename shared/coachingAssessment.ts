@@ -5,6 +5,7 @@ import type {
 import {
   evidencedProblem,
   evidenceProperties,
+  evidenceTargets,
   materialInsight,
 } from "./coachingAlignment.ts";
 import { observationText } from "./coachingEvidence.ts";
@@ -13,10 +14,14 @@ import { observationText } from "./coachingEvidence.ts";
 // A missing/suppressed recommendation never by itself establishes strong work.
 const positive =
   /\b(?:clear|coherent|balanced|successful|effective|convincing|resolved|strong|well[- ]organised|well[- ]organized|stands? apart|readable)\b/i;
+const negatedPositive =
+  /\b(?:not|never|without)\s+(?:(?:yet|fully|entirely|consistently|particularly)\s+)?(?:clear|coherent|balanced|successful|effective|convincing|resolved|strong|readable)\b/i;
+const successfulPositive = (text: string) =>
+  positive.test(text) && !negatedPositive.test(text);
 const limitation =
   /\b(?:need\w*|requires?|would benefit|could benefit|could improve|could be improved|could be refined|refinements?|corrections?|weak\w*|poor\w*|inaccurac\w*|errors?|inconsisten\w*|distort\w*|insufficient|lacks?|muddy|disconnect\w*|detach\w*|flatten\w*|unresolved|compressed|limiting|limits?|competes?|competition|too (?:uniform|sharp|dark|light|saturated|strong|many)|overly)\b|\b(?:could|should|might|may|would)\b[^.!?]{0,50}\b(?:softer|sharper|quieter|stronger|warmer|cooler|refin\w*|improv\w*|adjust\w*|clarif\w*|correct\w*)\b/i;
 const uncertainty =
-  /\b(?:uncertain|unclear|perhaps|possibly|seems?|appears? to|difficult to|hard to|cannot|can't|inconclusive)\b/i;
+  /\b(?:uncertain|unclear|perhaps|possibly|seems?|appears? to|difficult to|hard to|cannot|can't|inconclusive|may|might|could)\b/i;
 const personJudgement =
   /\b(?:artist|painter|you|they)\b[^.!?]{0,45}\b(?:skill\w*|experienced|expert|talented|professional)\b|\b(?:confident handling|technique control|skillful|skilful)\b/i;
 // The shared property families are deliberately broad. A rationale explicitly
@@ -116,16 +121,39 @@ export function assessCoaching(
     (i) =>
       i.classification === "strength" &&
       !hasLimitation(i.lesson) &&
+      !uncertainty.test(i.lesson) &&
+      !negatedPositive.test(i.lesson) &&
       i.factIds.some((id) =>
-        c.facts.some(
-          (f) =>
+        c.facts.some((f) => {
+          const lessonProperties = evidenceProperties(i.lesson);
+          const factProperties = evidenceProperties(f.observation);
+          const lessonTargets = evidenceTargets(i.lesson);
+          const factTargets = evidenceTargets(f.observation);
+          const sharedProperty = lessonProperties.some((property) =>
+            factProperties.includes(property),
+          );
+          return (
             f.id === id &&
             f.observation.trim() &&
-            !evidencedProblem(f.observation),
-        ),
+            !evidencedProblem(f.observation) &&
+            !hasLimitation(f.observation) &&
+            !uncertainty.test(f.observation) &&
+            !negatedPositive.test(f.observation) &&
+            (!lessonProperties.length ||
+              !factProperties.length ||
+              sharedProperty) &&
+            (!lessonTargets.length ||
+              !factTargets.length ||
+              lessonTargets.some((target) => factTargets.includes(target))) &&
+            (successfulPositive(f.observation) ||
+              (successfulPositive(i.lesson) && sharedProperty))
+          );
+        }),
       ),
   );
-  const material = c.insights.some((i) => materialInsight(i, c.facts));
+  // Original supported clear issues remain a blocker below. Optional advice
+  // which is no longer shown cannot itself count as a surviving improvement.
+  const material = actionable.some((i) => materialInsight(i, c.facts));
   // An original clear_issue remains a reason for caution even if later omitted:
   // dropping unsupported advice cannot prove that a painting deserves upgrading.
   const unresolvedIssue = c.insights.some(
@@ -135,7 +163,7 @@ export function assessCoaching(
     ["competent", "developing"].includes(original.level) &&
     original.confidence >= 0.8 &&
     !!suppliedRationale &&
-    positive.test(suppliedRationale) &&
+    successfulPositive(suppliedRationale) &&
     !hasLimitation(original.rationale) &&
     !uncertainty.test(original.rationale) &&
     !personJudgement.test(original.rationale) &&

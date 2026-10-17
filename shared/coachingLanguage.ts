@@ -65,8 +65,76 @@ export function purposefulFigureAdvice(value: string): boolean {
   );
 }
 
+/** Keep explicit single-variable exercises honest without supplying a new task. */
+export function singleVariableStudyText(value: string): string {
+  const families = [
+    /\b(?:values?|value contrast|contrast|lightness|darkness|tonal range)\b/i,
+    /\b(?:edges?|softness|sharpness|crispness|contours?)\b/i,
+    /\b(?:chroma|saturation|colou?r intensity)\b/i,
+    /\b(?:temperature|warmth|coolness|warmer|cooler)\b/i,
+  ];
+  const claim = value.match(
+    /\b(?:vary(?:ing)?|chang(?:e|ing)|adjust(?:ing)?|test(?:ing)?|control(?:ling)?)\s+(?:only|just)\s+|\b(?:only|just)\s+(?:vary|change|adjust|test|control)\s+|\b(?:one|a single|single)(?: controlled)? variable\s*(?::|is|—|–|-)?\s*|\bthe only (?:controlled )?variable\s*(?::|is|—|–|-)\s*/i,
+  );
+  if (!claim || claim.index === undefined) return value;
+  const start = claim.index + claim[0].length;
+  const named = value
+    .slice(start)
+    .split(/[;.!?]/, 1)[0]
+    .slice(0, 100);
+  const first = families
+    .map((family, index) => ({ index, match: family.exec(named) }))
+    .filter((entry) => entry.match)
+    .sort((a, b) => a.match!.index - b.match!.index)[0];
+  if (!first) return value;
+  const firstEnd = start + first.match!.index + first.match![0].length;
+  const pieces = value.split(
+    /(\s+(?:and|while(?: also)?|with|using|by|against|to)\s+|[,;]\s*|(?<=[.!?])\s+)/i,
+  );
+  const change =
+    /\b(?:soften\w*|sharpen\w*|darken\w*|lighten\w*|increas\w*|reduc\w*|rais\w*|lower\w*|vary\w*|chang\w*|adjust\w*|mute\w*|strengthen\w*|weaken\w*|desaturat\w*|softer|sharper|crisper|harder|darker|lighter|stronger|weaker|warmer|cooler|higher|lower|more|less)\b/i;
+  let offset = 0;
+  let safe = "";
+  for (let index = 0; index < pieces.length; index += 2) {
+    const separator = index ? pieces[index - 1] : "";
+    const text = pieces[index];
+    const textStart = offset + separator.length;
+    offset = textStart + text.length;
+    const secondary = families.some(
+      (family, familyIndex) => familyIndex !== first.index && family.test(text),
+    );
+    // A joined noun in the explicit claim is also a second variable, even
+    // without another verb: "vary only value contrast and edge softness".
+    const joinedClaim =
+      /^\s+and\s+$/i.test(separator) &&
+      !/[;.!?]/.test(value.slice(firstEnd, textStart)) &&
+      !/\b(?:compare|keep|hold|leave|retain|preserve)\b/i.test(text);
+    const heldConstant =
+      /\b(?:same|unchanged|constant|consistent|fixed)\b/i.test(text) &&
+      !/\b(?:soften\w*|sharpen\w*|darken\w*|lighten\w*|increas\w*|reduc\w*|vary\w*|chang\w*|adjust\w*)\b/i.test(
+        text,
+      );
+    const changedComparison =
+      /\b(?:versus|vs\.?|compared (?:with|to))\b/i.test(text) &&
+      /\b(?:soft|sharp|crisp|hard|dark|light|warm|cool|muted|saturated)\b/i.test(
+        text,
+      );
+    if (
+      textStart >= firstEnd &&
+      secondary &&
+      !heldConstant &&
+      (change.test(text) || changedComparison || joinedClaim)
+    )
+      continue;
+    safe += separator + text;
+  }
+  safe = safe.replace(/\s+([,;.!?])/g, "$1").trim();
+  if (/[.!?]$/.test(value) && !/[.!?]$/.test(safe)) safe += value.slice(-1);
+  return safe;
+}
+
 export function separateStudyText(value: string): string {
-  const text = observationText(value).trim();
+  const text = singleVariableStudyText(observationText(value)).trim();
   if (!text) return "";
   let safe = text.replace(
     /\b(?:your|the) (?:current |finished |existing )?painting\b/gi,

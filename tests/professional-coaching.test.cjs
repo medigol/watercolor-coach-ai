@@ -43,8 +43,8 @@ test("upload has one analysis CTA and no focus choice or sample painting", () =>
 for (const [level, expected] of [
   ["highly_resolved", "No significant correction"],
   ["strong", "No major issue detected"],
-  ["competent", "Review the observed"],
-  ["developing", "Review the observed"],
+  ["competent", "Review the observations and studies"],
+  ["developing", "Review the observations and studies"],
 ])
   test(`${level}: deterministic status without invented defects`, () => {
     const r = fixture();
