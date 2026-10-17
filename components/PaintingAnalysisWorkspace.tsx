@@ -179,22 +179,22 @@ export default function PaintingAnalysisWorkspace({
   // All role labels, overlays and linked visual aids use the same omissions.
   const displaySource = useMemo(() => {
     const { visualRoles, visualEvidence } = displayRoleProjection(
-      source.canonicalAnalysis,
+      teaching.displaySource.canonicalAnalysis,
     );
     return {
-      ...source,
+      ...teaching.displaySource,
       canonicalAnalysis: {
-        ...source.canonicalAnalysis,
+        ...teaching.displaySource.canonicalAnalysis,
         visualRoles,
         visualEvidence,
-        insights: source.canonicalAnalysis.insights.map(
+        insights: teaching.displaySource.canonicalAnalysis.insights.map(
           (insight) =>
             teaching.preservationInsights.find((i) => i.id === insight.id) ??
             insight,
         ),
       },
     };
-  }, [source, teaching.preservationInsights]);
+  }, [teaching.displaySource, teaching.preservationInsights]);
   const c = displaySource.canonicalAnalysis;
   const projection = useMemo(
     () =>
@@ -914,10 +914,6 @@ export default function PaintingAnalysisWorkspace({
                 <>
                   <Text style={[styles.heading, { fontSize: 17 }]}>
                     Suggested practice method
-                  </Text>
-                  <Text style={styles.caption}>
-                    A way to test a similar effect on separate paper, not a
-                    reconstruction of the original process.
                   </Text>
                   <BrushWashPlanCard plan={c.brushPlan} hideHeading study />
                 </>

@@ -18,7 +18,11 @@ import {
   evidenceTargets,
   evidenceProperties,
 } from "./coachingAlignment.ts";
-import { assessCoaching } from "./coachingAssessment.ts";
+import { assessCoaching, supportedExplanation } from "./coachingAssessment.ts";
+import {
+  prepareCoachingDisplay,
+  finalCoachingDisplay,
+} from "./coachingDisplay.ts";
 import type {
   PaintingAnalysisResult,
   PaintingInsight,
@@ -35,6 +39,7 @@ import {
 
 /** Presentation is derived once from the canonical classifications, not a lens. */
 export function workspaceTeaching(value: PaintingAnalysisResult) {
+  value = prepareCoachingDisplay(value);
   const c = value.canonicalAnalysis;
   const successful = c.insights
     .filter((i) => i.classification === "strength")
@@ -200,7 +205,7 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
             sameTeaching(p, i),
         ),
   );
-  level = assessCoaching(value, distinct).level;
+  level = assessCoaching(value, distinct, distinct).level;
   const recommendations = distinct
     .slice(0, ["highly_resolved", "strong"].includes(level) ? 2 : 3)
     .map((insight, index) => {
@@ -352,19 +357,24 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
         ),
     )
     .map((i) => i.id);
+  const surviving = recommendations.map((r) => r.insight);
+  const displaySource = finalCoachingDisplay(value, surviving);
+  const cleanStrength = (i: PaintingInsight) => ({
+    ...i,
+    lesson: supportedExplanation(value, surviving, i.lesson),
+    action: supportedExplanation(value, surviving, i.action),
+  });
   return {
-    assessment: assessCoaching(
-      value,
-      recommendations.map((r) => r.insight),
-    ),
+    displaySource,
+    assessment: assessCoaching(value, surviving, distinct),
     noteExcludedInsightIds,
     omittedInsightIds,
     status,
     opportunity,
     recommendations,
     clear,
-    preservationInsights: unique(strengths),
-    strengths: selectedStrengths,
+    preservationInsights: unique(strengths).map(cleanStrength),
+    strengths: selectedStrengths.map(cleanStrength),
     practice: practices[0] ? separateStudyText(practices[0]) : "",
     studies: selectedStudies,
   };

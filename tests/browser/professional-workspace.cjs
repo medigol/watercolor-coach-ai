@@ -1524,6 +1524,75 @@ let signalFeedbackHeld;
     });
     if (width === 390 || width === 1440) await shot(`analysis-depth-${width}`);
   }
+  const cleanupMatrix = [];
+  for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
+    Object.assign(
+      saved,
+      require(root + "/tests/helpers/final-live-freeze-fixture.cjs")(),
+    );
+    const c = saved.canonicalAnalysis;
+    c.qualityAssessment.rationale =
+      "The bright sky and pier form the clear focal area. Coherent light and balanced masses give the scene readable depth.";
+    c.composition.primary.shortExplanation =
+      "The bank leads toward the tower across open water,低";
+    c.facts.find((f) => f.id === "edges").observation =
+      "Visible marks is loose, with soft washes and varied edge variation.";
+    c.visualRoles.find((r) => r.id === "water").area =
+      "foreground and background wash areas";
+    imageFile = aspectFiles.portrait;
+    await page.setViewportSize({ width, height: 950 });
+    await page.reload();
+    await page.getByTestId("overall-assessment").waitFor();
+    await page.getByTestId("coaching-source-image").waitFor();
+    for (const section of [
+      "Composition",
+      "Colour & Value",
+      "Watercolor technique",
+    ])
+      await open(section);
+    const body = await page.locator("body").innerText();
+    assert(body.includes("Strong painting"));
+    assert(body.includes("Coherent light and balanced masses"));
+    assert(
+      !/pier form the clear focal area|limiting depth|analogous|低|marks is|varied edge variation|soft washes|wash areas|damp_on_dry|2:2:1|Complex neutral/.test(
+        body,
+      ),
+      body,
+    );
+    assert(body.includes("Visible marks are loose"));
+    assert(body.includes("Quiet neutral"));
+    assert(body.includes("Wet-on-dry"));
+    assert.equal(
+      (body.match(/not a reconstruction of the original process/g) || [])
+        .length,
+      1,
+    );
+    const before = snapshot();
+    for (const control of ["Roles", "Composition overlay", "Clean view"])
+      await button(control).click();
+    await page.getByRole("button", { name: /^Notes(?: · \d+)?$/ }).click();
+    await page.getByTestId("coaching-marker-0").click();
+    await page.getByTestId("coaching-note-0").waitFor();
+    await button("Clean view").click();
+    await noOverflow();
+    assert.deepEqual(
+      snapshot(),
+      before,
+      "cleanup is presentation only: zero provider calls/uploads/writes/reads",
+    );
+    cleanupMatrix.push({
+      width,
+      focalConsistent: true,
+      noHiddenCritique: true,
+      grammar: true,
+      safeMixes: true,
+      english: true,
+      readableBrush: true,
+      readonly: true,
+    });
+    if (width === 390 || width === 1440)
+      await shot(`final-live-cleanup-${width}`);
+  }
   Object.assign(saved, structuredClone(beforeFinalCalibration));
   imageFile = aspectFiles.landscape;
   const originalPrimary = structuredClone(
@@ -1910,6 +1979,7 @@ let signalFeedbackHeld;
         liveFreezeMatrix,
         finalFreezeFixMatrix,
         analysisDepthMatrix,
+        cleanupMatrix,
         calls: snapshot(),
         errors,
         requests: requests.map((r) => ({
@@ -1924,7 +1994,7 @@ let signalFeedbackHeld;
     ),
   );
   console.log(
-    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration + 21 live-freeze + 21 final-freeze-fix + 7 analysis-depth cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
+    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration + 21 live-freeze + 21 final-freeze-fix + 7 analysis-depth + 7 final-live-cleanup cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
   );
   await browser.close();
 })().catch(async (error) => {

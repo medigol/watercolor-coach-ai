@@ -1557,3 +1557,100 @@ test("confident positive competent assessment is derived as Strong without chang
   assert.deepEqual(r, before);
   assert.equal(r.canonicalAnalysis.version, 1);
 });
+
+function cleanupRender(canonical) {
+  return render(
+    "improve_painting",
+    "openai",
+    "https://example.invalid/original.png",
+    undefined,
+    { canonicalResult: canonical, viewportWidth: 1440 },
+  );
+}
+test("final cleanup renders Strong from the final safe state and hides unsupported colour critique", () => {
+  const r = require("./helpers/final-live-freeze-fixture.cjs")();
+  const html = cleanupRender(r);
+  assert(html.includes("Strong painting"));
+  assert(!html.includes("limiting depth"));
+  assert(!html.includes("analogous"));
+  assert(!html.includes("Complex neutral"));
+  assert(html.includes("Quiet neutral"));
+  assert(html.includes("2:1"));
+});
+for (const [method, label] of [
+  ["wet_on_wet", "Wet-on-wet"],
+  ["wet_on_dry", "Wet-on-dry"],
+  ["damp_on_damp", "Damp-on-damp"],
+])
+  test(`final cleanup brush technique ${method} is human-readable`, () => {
+    const r = require("./helpers/final-live-freeze-fixture.cjs")();
+    r.canonicalAnalysis.brushPlan[0].technique = method;
+    const html = cleanupRender(r);
+    assert(html.includes(label));
+    assert(!html.includes(method));
+  });
+for (const wash of [
+  "damp_on_dry",
+  "internal_wash_method",
+  "wet_on_dry",
+  "Try wet-on-dry",
+  "Try wet-on-wet",
+])
+  test(`final cleanup does not show duplicate, unknown or contradictory Wash row: ${wash}`, () => {
+    const r = require("./helpers/final-live-freeze-fixture.cjs")();
+    r.canonicalAnalysis.brushPlan[0].wash = wash;
+    const html = cleanupRender(r);
+    assert(!html.includes(">Wash<"));
+    assert(html.includes("Wet-on-dry"));
+    if (wash.includes("_")) assert(!html.includes(wash));
+  });
+test("final cleanup readable wash remains future practice with a single reconstruction disclaimer", () => {
+  const r = require("./helpers/final-live-freeze-fixture.cjs")();
+  r.canonicalAnalysis.brushPlan[0].wash = "Light neutral wash";
+  const html = cleanupRender(r);
+  assert(html.includes("Light neutral wash"));
+  assert(html.includes(">Wash<"));
+  assert.equal(
+    (html.match(/not a reconstruction of the original process/g) || []).length,
+    1,
+  );
+  assert(!html.includes("A way to test a similar effect on separate paper"));
+  assert(!html.includes("For a separate study: soft distant shapes"));
+});
+test("final cleanup removes foreign tails and observed process terms in a saved v1 result without modifying it", () => {
+  const r = require("./helpers/final-live-freeze-fixture.cjs")();
+  r.canonicalAnalysis.composition.primary.shortExplanation =
+    "The open water and sky remain quiet,低";
+  r.canonicalAnalysis.visualRoles[2].area =
+    "foreground and background wash areas";
+  r.canonicalAnalysis.facts[3].observation =
+    "Visible marks is loose, with soft washes and varied edge variation.";
+  const before = structuredClone(r),
+    html = cleanupRender(r);
+  assert(
+    !/低|marks is|varied edge variation|wash areas|soft washes/.test(html),
+  );
+  assert(html.includes("colour passages"));
+  assert.deepEqual(r, before);
+});
+test("final cleanup renders one focal interpretation through notes, rationale and composition", () => {
+  const r = require("./helpers/final-live-freeze-fixture.cjs")();
+  r.canonicalAnalysis.qualityAssessment.rationale =
+    "The bright sky and pier form the clear focal area. Coherent light supports the quiet mood.";
+  r.canonicalAnalysis.composition.observation =
+    "The pier is the focal subject.";
+  const html = cleanupRender(r);
+  assert(!html.includes("pier form the clear focal area"));
+  assert(!html.includes("pier is the focal subject"));
+  assert(html.includes("Coherent light supports"));
+  assert(html.includes("One reserved light holds this quiet scene together"));
+});
+
+test("final cleanup keeps the existing study-stage safety filter while removing preambles", () => {
+  const r = require("./helpers/final-live-freeze-fixture.cjs")();
+  r.canonicalAnalysis.brushPlan[0].stage = "Fix the poor background";
+  const html = cleanupRender(r);
+  assert(!html.includes("Fix the poor background"));
+  assert(html.includes("Handling study"));
+  assert(html.includes("Wet-on-dry"));
+});
