@@ -15,11 +15,17 @@ export function recommendedMethod(value: string): boolean {
 }
 export function unsupportedProcess(value: string): boolean {
   const history =
-    /\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:the|original|actual|exact) (?:brush|pigment|paper moisture|wash order|glazing sequence)\b[^.!?]{0,40}\b(?:was|is|were)\b/i;
+    /\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:the|original|actual|exact) (?:brush|pigment|paper moisture|wash order|glazing sequence)\b[^.!?]{0,40}\b(?:was|is|were)\b|\b(?:was|were|must have been)\s+(?:(?:originally|fully|still|evenly)\s+)?(?:painted|applied|wetted|damp|soaked|glazed|layered)\b/i;
   if (history.test(value)) return true;
   // A modal such as “could” does not by itself make an observation a proposed
   // method. Retain methods only when explicitly framed as future practice.
   if (recommendedMethod(value)) return false;
+  if (
+    /\bdry[- ]?brush\b|\bwet blending\b|\bopaque (?:colou?r )?application\b|\bedge control\b|\bedge variation technique\b/i.test(
+      value,
+    )
+  )
+    return true;
   if (
     /\bsolid control of watercolou?r techniques\b|\busing layered washes\b|\b(?:more )?controlled brush\s*strokes\b|\bbroad,? loose horizontal washes\b|\b(?:loose|controlled|confident|defined|sharp(?:er)?) brushwork\b|\b(?:confident|skilful|skillful|expert) handling\b|\btechnique control\b|\bcontrolled edges\b|\b(?:strong|good|solid) control of (?:brushwork|techniques?|washes|edges)\b|\bedges? (?:are|is|were|was) (?:\w+ )?controlled\b/i.test(
       value,
@@ -38,7 +44,7 @@ export function unsupportedProcess(value: string): boolean {
     )
   )
     return true;
-  return /\b(?:wet[- ]on[- ]wet|wet[- ]on[- ]dry|damp[- ]on[- ]damp)\b|\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:was|were|must have been)\s+(?:(?:originally|fully|still|evenly)\s+)?(?:painted|applied|wetted|damp|soaked|glazed|layered)\b|\b(?:original|exact|actual)\s+(?:brush|pigment|paper moisture|wash order|glazing sequence)\b/i.test(
+  return /\b(?:wet[- ]on[- ]wet|wet[- ]on[- ]dry|damp[- ]on[- ]damp)\b|\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:original|exact|actual)\s+(?:brush|pigment|paper moisture|wash order|glazing sequence)\b/i.test(
     value,
   );
 }
@@ -64,6 +70,42 @@ export function observableEffectText(value: string): string {
   if (recommendedMethod(value)) return value;
   return (
     value
+      // These labels name an inferred method. Retain only their supplied
+      // visible effect; future-study methods returned above remain untouched.
+      .replace(
+        /\bdry[- ]?brush texture\b/gi,
+        (m) =>
+          `${/^[A-Z]/.test(m) ? "Irregular" : "irregular"} visible texture`,
+      )
+      .replace(
+        /\b(?:areas? of )?wet blending\b/gi,
+        (m) =>
+          `${/^[A-Z]/.test(m) ? "Soft" : "soft"} blended colour transitions`,
+      )
+      .replace(
+        /\b(soft blended colour transitions) (is|was|creates|gives|supports|produces|forms|adds|provides)\b/gi,
+        (_, effect: string, verb: string) =>
+          `${effect} ${/^(?:is|was)$/i.test(verb) ? (verb.toLowerCase() === "is" ? "are" : "were") : verb.slice(0, -1)}`,
+      )
+      // “Opaque application” alone does not establish a safely describable
+      // appearance. Convert only an explicit appearance predicate. Other opaque
+      // application claims remain unsupported and are omitted sentence by sentence.
+      .replace(
+        /\b(?:the )?opaque colou?r application (?:is|seems|appears|looks) ((?:more )?(?:dense|denser|flat|flatter|solid[- ]looking))\b/gi,
+        (match, appearance: string) =>
+          `${/^[A-Z]/.test(match) ? "Colour" : "colour"} passages appear ${appearance}`,
+      )
+      .replace(
+        /\bmaintain this edge control\b/gi,
+        (m) =>
+          `${/^[A-Z]/.test(m) ? "Preserve" : "preserve"} this edge variation`,
+      )
+      .replace(/\bedge variation technique\b/gi, (m) =>
+        /^[A-Z]/.test(m) ? "Edge variation" : "edge variation",
+      )
+      .replace(/\bedge control\b/gi, (m) =>
+        /^[A-Z]/.test(m) ? "Edge variation" : "edge variation",
+      )
       .replace(
         /\bbroad,? loose horizontal washes\b/gi,
         (m) =>

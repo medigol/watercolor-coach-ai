@@ -10,7 +10,82 @@ import {
   type NormalizedPoint,
   type NormalizedRect,
 } from "./imageGeometry";
-import type { PaintingRole } from "../shared/paintingAnalysis";
+import type {
+  PaintingAnalysisResult,
+  PaintingRole,
+} from "../shared/paintingAnalysis";
+
+const structuralField =
+  /\b(?:roads?|streets?|paths?|foreground|lead[- ]ins?)\b/i;
+const structurallyActive =
+  /\b(?:directional\s+)?lead[- ]in\b|\b(?:leads?|leading|guides?|guiding|draws?|drawing|carry|carries|carrying|directs?|directing|pulls?|pulling)\b[^.!?]{0,80}\b(?:eye|gaze|toward|through|focal)\b|\b(?:strong|major|dominant|significant|structural)\b[^.!?]{0,40}\b(?:value|tonal|dark|foreground|perspective|direction|flow|mass|path)\b|\b(?:road|street|path|foreground)\b[^.!?]{0,40}\b(?:anchors?|structures?|direction|flow|perspective|connects?)\b|\b(?:receding|converging|perspective)\s+(?:lines|edges|path|road)\b/i;
+const explicitQuiet =
+  /\bquiet\b|\blow[- ](?:contrast|information|detail)\b|\b(?:minimal|little|few)\s+(?:detail|details|texture|contrast|marks)\b|\b(?:visually\s+)?subordinate\b|\b(?:unbroken|uncluttered|uneventful)\s+(?:space|passage|area|field)\b/i;
+
+/**
+ * A display-only omission, never a new role assignment. A non-focal road or
+ * foreground may carry structure, so its quiet label needs affirmative supplied
+ * evidence and must not contradict an explicitly active spatial relationship.
+ * Canonical roles, facts, IDs and geometry remain untouched in saved data.
+ */
+export function displayRoleProjection(
+  canonical: Pick<
+    PaintingAnalysisResult["canonicalAnalysis"],
+    "visualRoles" | "facts" | "insights" | "visualEvidence"
+  >,
+) {
+  const suppressedRoleIds = canonical.visualRoles
+    .filter((role) => {
+      if (role.role !== "quiet") return false;
+      const facts = canonical.facts
+        .filter((fact) => fact.roleId === role.id)
+        .map((fact) => fact.observation);
+      const supplied = [role.area, ...facts].join(". ");
+      if (!structuralField.test(supplied)) return false;
+      // The label "quiet foreground" alone cannot substantiate itself. An
+      // independent linked observation must explain its subdued visual effect.
+      return (
+        structurallyActive.test(supplied) ||
+        !facts.some((observation) => explicitQuiet.test(observation))
+      );
+    })
+    .map((role) => role.id);
+  const suppressed = new Set(suppressedRoleIds);
+  return {
+    suppressedRoleIds,
+    visualRoles: canonical.visualRoles.filter(
+      (role) => !suppressed.has(role.id),
+    ),
+    visualEvidence: canonical.visualEvidence?.filter((evidence) => {
+      if (evidence.roleId && suppressed.has(evidence.roleId)) return false;
+      // Legacy optional notes can have a null role reference. Remove an
+      // explicitly quiet annotation only when its actual fact links identify
+      // the omitted role; unrelated advice and original geometry are retained.
+      if (
+        evidence.roleId == null &&
+        (evidence.note.visualRole === "quiet" ||
+          (typeof evidence.note.label === "string" &&
+            /\bquiet\b/i.test(evidence.note.label)))
+      ) {
+        const insight = canonical.insights.find(
+          (item) => item.id === evidence.insightId,
+        );
+        if (
+          insight?.factIds.some((id) =>
+            canonical.facts.some(
+              (fact) =>
+                fact.id === id &&
+                fact.roleId !== null &&
+                suppressed.has(fact.roleId),
+            ),
+          )
+        )
+          return false;
+      }
+      return true;
+    }),
+  };
+}
 
 export type VisualRoleRegion =
   | { kind: "rectangle"; role: VisualRole; region: NormalizedRect }

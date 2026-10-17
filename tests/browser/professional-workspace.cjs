@@ -14,6 +14,70 @@ const canonicalFixture = () => {
     "On scrap, paint three tower silhouettes against a soft wash. Keep one edge crisp. Compare which version holds the light most clearly at arm’s length.";
   return r;
 };
+function finalFreezeFixFixture(kind) {
+  const result = canonicalFixture(),
+    c = result.canonicalAnalysis;
+  c.qualityAssessment = {
+    level: "competent",
+    confidence: 0.88,
+    rationale:
+      kind === "uncertain"
+        ? "The hierarchy seems clear, with possibly balanced light."
+        : "Clear hierarchy and coherent values give the scene readable depth.",
+  };
+  const road = c.visualRoles.find((r) => r.id === "water");
+  road.area = "foreground road";
+  const active = kind === "active";
+  c.facts.push({
+    id: "road-role",
+    domain: "composition",
+    roleId: road.id,
+    observation: active
+      ? "The foreground road forms a strong directional lead-in and major foreground value mass."
+      : "The foreground road is a low-contrast, low-information subordinate passage.",
+  });
+  c.insights.push({
+    id: "road-role-strength",
+    domain: "composition",
+    classification: "strength",
+    factIds: ["road-role"],
+    lesson: active
+      ? "The road connects the foreground to the tower."
+      : "The sparse road marks create an uncluttered interval in the foreground.",
+    action: active
+      ? "Preserve the road's directional relationship."
+      : "Preserve the sparse road marks.",
+  });
+  c.visualEvidence.push({
+    insightId: "road-role-strength",
+    roleId: road.id,
+    note: {
+      ...structuredClone(c.visualEvidence[0].note),
+      id: "quiet-road-note",
+      label: "Quiet road passage",
+      shortInstruction: "Observe this Quiet road passage.",
+      type: "region_highlight",
+      visualRole: "quiet",
+      region: structuredClone(road.region),
+      x: road.region.x * 100,
+      y: road.region.y * 100,
+      width: road.region.width * 100,
+      height: road.region.height * 100,
+    },
+  });
+  c.facts.find((f) => f.id === "edges").observation =
+    "Dry-brush texture surrounds wet blending beside the tower; edge variation technique creates edge control.";
+  Object.assign(
+    c.insights.find((i) => i.id === "handling"),
+    {
+      lesson: "Dry brush texture and wet blending give the scene varied edges.",
+      action: "Maintain this edge control around the tower.",
+    },
+  );
+  result.expertViews.overall.practice =
+    "On a separate small study, paint horizontal colour bands varying only value contrast; compare spatial depth with softer edges.";
+  return result;
+}
 // Sanitized live-output text over original technical assets. These fixtures
 // exercise presentation consistency, not another assessment of image pixels.
 function liveFreezeFixture(kind) {
@@ -1305,6 +1369,95 @@ let signalFeedbackHeld;
     }
   }
   Object.assign(saved, structuredClone(beforeFinalCalibration));
+  const finalFreezeFixMatrix = [];
+  for (const kind of ["active", "quiet", "uncertain"]) {
+    Object.assign(saved, finalFreezeFixFixture(kind));
+    imageFile = aspectFiles.portrait;
+    for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
+      await page.setViewportSize({ width, height: 950 });
+      await page.reload();
+      await page
+        .getByText("Complete Painting Analysis", { exact: true })
+        .waitFor();
+      await page.getByTestId("coaching-source-image").waitFor();
+      const assessment = await page
+        .getByTestId("overall-assessment")
+        .innerText();
+      assert(
+        assessment.includes(
+          kind === "uncertain" ? "Competent painting" : "Strong painting",
+        ),
+      );
+      assert(
+        assessment.includes(
+          kind === "uncertain"
+            ? "Review the observations and studies below."
+            : "No major issue detected. Explore optional refinements or studies.",
+        ),
+      );
+      const before = snapshot();
+      await button("Roles").click();
+      const map = page.getByTestId("visual-role-map");
+      await map.waitFor();
+      const roleLabel = await map.getAttribute("aria-label");
+      assert.equal(roleLabel.includes("Quiet"), kind !== "active");
+      assert.equal(
+        await page
+          .getByText("Quiet · foreground road", { exact: true })
+          .count(),
+        kind === "active" ? 0 : 1,
+      );
+      await page.getByRole("button", { name: /^Notes(?: · \d+)?$/ }).click();
+      if (kind !== "active") {
+        // Notes initially shows the selected primary note. Open the retained
+        // road note before inspecting its teaching; marker existence is also
+        // the rendered orphan check, independent of collapsed list state.
+        await page.getByTestId("coaching-marker-1").click();
+        await page.getByTestId("coaching-note-1").waitFor();
+      }
+      assert.equal(
+        (await page.getByText("Quiet road passage", { exact: true }).count()) >
+          0,
+        kind !== "active",
+      );
+      if (kind === "active")
+        assert.equal(await page.getByTestId("coaching-marker-1").count(), 0);
+      await open("Watercolor technique");
+      const body = await page.locator("body").innerText();
+      assert(
+        !/dry[- ]brush texture|wet blending|edge variation technique|edge control|observed structure and handling/i.test(
+          body,
+        ),
+      );
+      assert(/irregular visible texture/i.test(body));
+      assert(/soft blended colour transitions/i.test(body));
+      assert(/preserve this edge variation/i.test(body));
+      const practice = page.getByText(
+        /paint horizontal colour bands varying only value contrast/i,
+      );
+      assert.equal(await practice.count(), 1);
+      assert(!/softer edges/i.test(await practice.innerText()));
+      await button("Clean view").click();
+      await noOverflow();
+      assert.deepEqual(
+        snapshot(),
+        before,
+        "final freeze safeguards remain local and read-only",
+      );
+      finalFreezeFixMatrix.push({
+        kind,
+        width,
+        roleConsistent: true,
+        processSafe: true,
+        singleVariable: true,
+        statusConsistent: true,
+        readonly: true,
+      });
+      if (width === 390 || width === 1440)
+        await shot(`final-freeze-fix-${kind}-${width}`);
+    }
+  }
+  Object.assign(saved, structuredClone(beforeFinalCalibration));
   imageFile = aspectFiles.landscape;
   const originalPrimary = structuredClone(
     saved.canonicalAnalysis.composition.primary,
@@ -1375,7 +1528,7 @@ let signalFeedbackHeld;
   });
   await page.reload();
   await page
-    .getByText("Main opportunity to explore", { exact: true })
+    .getByText("Review the observations and studies below.", { exact: true })
     .waitFor();
   assert.equal(await page.getByText(/No significant correction/).count(), 0);
   await page
@@ -1688,6 +1841,7 @@ let signalFeedbackHeld;
         providerMatrix,
         finalCalibrationMatrix,
         liveFreezeMatrix,
+        finalFreezeFixMatrix,
         calls: snapshot(),
         errors,
         requests: requests.map((r) => ({
@@ -1702,7 +1856,7 @@ let signalFeedbackHeld;
     ),
   );
   console.log(
-    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration + 21 live-freeze cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
+    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration + 21 live-freeze + 21 final-freeze-fix cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
   );
   await browser.close();
 })().catch(async (error) => {
