@@ -20,7 +20,7 @@ const negatedPositive =
 const successfulPositive = (text: string) =>
   positive.test(text) && !negatedPositive.test(text);
 const limitation =
-  /\b(?:need\w*|requires?|would benefit|could benefit|could improve|could be improved|could be refined|refinements?|corrections?|weak\w*|poor\w*|inaccurac\w*|errors?|inconsisten\w*|distort\w*|insufficient|lacks?|muddy|disconnect\w*|detach\w*|flatten\w*|unresolved|compressed|limiting|limits?|competes?|competition|too (?:uniform|sharp|dark|light|saturated|strong|many)|overly)\b|\b(?:could|should|might|may|would)\b[^.!?]{0,50}\b(?:softer|sharper|quieter|stronger|warmer|cooler|refin\w*|improv\w*|adjust\w*|clarif\w*|correct\w*)\b/i;
+  /\b(?:need\w*|requires?|would benefit|could benefit|could improve|could be improved|could be refined|refinements?|corrections?|weak\w*|poor\w*|inaccurac\w*|errors?|inconsisten\w*|distort\w*|insufficient|lacks?|muddy|disconnect\w*|detach\w*|flatten\w*|unresolved|compressed|limiting|limits?|competes?|competition|competing|excess\w*|unclear (?:hierarchy|separation|depth)|(?:perspective|proportion|drawing) problems?|too (?:uniform|sharp|dark|light|saturated|strong|many)|overly)\b|\b(?:could|should|might|may|would)\b[^.!?]{0,50}\b(?:softer|sharper|quieter|stronger|warmer|cooler|refin\w*|improv\w*|adjust\w*|clarif\w*|correct\w*)\b/i;
 const uncertainty =
   /\b(?:uncertain|unclear|perhaps|possibly|seems?|appears? to|difficult to|hard to|cannot|can't|inconclusive|may|might|could)\b/i;
 const personJudgement =
@@ -36,8 +36,13 @@ const preciseProperties = [
   /\b(?:temperature|warm\w*|cool\w*)\b/i,
   /\b(?:chroma|saturat\w*)\b/i,
 ];
-function hasLimitation(text: string): boolean {
+export function hasLimitation(text: string): boolean {
   const checked = text
+    // A supplied absence of competition is successful hierarchy, not critique.
+    .replace(
+      /\b(?:without|not)\s+(?:(?:becoming|creating|being)\s+)?(?:a\s+)?competing\b/gi,
+      "",
+    )
     .replace(
       /\bno (?:significant |major |material )?correction (?:is )?needed\b|\b(?:does|do) not need (?:significant |major |material )?(?:correction|refinement)\b/gi,
       "",
@@ -74,6 +79,10 @@ function rationaleClauses(sentence: string): string[] {
     /[,;]?\s+\b(?:though|although|but|however|yet)\b\s*/i,
   );
   return contrast.flatMap((clause) => {
+    const consequence = clause.split(
+      /,\s*(?=(?:limiting|weakening|flattening|obscuring|reducing depth)\b)/i,
+    );
+    if (consequence.length > 1) return consequence;
     // Keep a supplied positive explanation when an appended clause introduces
     // a different limitation. Never retain a bare property as a new sentence.
     for (const match of clause.matchAll(/[,;]\s*|\s+and\s+/gi)) {
@@ -94,6 +103,7 @@ function rationaleClauses(sentence: string): string[] {
 export function assessCoaching(
   source: PaintingAnalysisResult,
   survivingRecommendations: readonly PaintingInsight[],
+  finalSafeIssues?: readonly PaintingInsight[],
 ): PaintingAnalysisResult["canonicalAnalysis"]["qualityAssessment"] {
   const c = source.canonicalAnalysis;
   const original = c.qualityAssessment;
@@ -108,6 +118,7 @@ export function assessCoaching(
   );
   const supportsLimitation = (clause: string) => {
     const named = evidenceProperties(clause);
+    const targets = evidenceTargets(clause);
     const supportedBy = (match: (text: string) => boolean) =>
       actionable.some(
         (i) =>
@@ -116,6 +127,10 @@ export function assessCoaching(
             (f) =>
               i.factIds.includes(f.id) &&
               evidencedProblem(f.observation) &&
+              (!targets.length ||
+                targets.some((t) =>
+                  evidenceTargets(f.observation).includes(t),
+                )) &&
               match(f.observation),
           ),
       );
@@ -178,22 +193,30 @@ export function assessCoaching(
         }),
       ),
   );
-  // Original supported clear issues remain a blocker below. Optional advice
-  // which is no longer shown cannot itself count as a surviving improvement.
-  const material = actionable.some((i) => materialInsight(i, c.facts));
-  // A label alone cannot establish a limitation. Keep original supported
-  // material issues as blockers even if presentation later omits their advice.
-  const unresolvedIssue = c.insights.some(
+  // Direct audits remain conservative about unpresented supported issues.
+  // Workspace callers explicitly supply the final safe state after filtering;
+  // a suppressed raw label then cannot remain a hidden quality blocker.
+  // A card budget alone must not erase a real, safely supported limitation.
+  const material = (finalSafeIssues ?? actionable).some(
+    (i) =>
+      ["clear_issue", "optional_refinement"].includes(i.classification) &&
+      materialInsight(i, c.facts),
+  );
+  // A label alone cannot establish a limitation. In final display mode only
+  // surviving, evidence-aligned material issues can block normalization.
+  const unresolvedIssue = (finalSafeIssues ?? c.insights).some(
     (i) => i.classification === "clear_issue" && materialInsight(i, c.facts),
   );
   const normalizeStrong =
     ["competent", "developing"].includes(original.level) &&
     original.confidence >= 0.8 &&
-    !!suppliedRationale &&
-    successfulPositive(suppliedRationale) &&
-    !hasLimitation(original.rationale) &&
-    !uncertainty.test(original.rationale) &&
+    !!rationale &&
+    successfulPositive(rationale) &&
+    !hasLimitation(finalSafeIssues ? rationale : original.rationale) &&
+    !uncertainty.test(finalSafeIssues ? rationale : original.rationale) &&
     !personJudgement.test(original.rationale) &&
+    (!finalSafeIssues ||
+      c.colourAnalysis?.technicalAssessment?.kind !== "uncertain") &&
     suppliedSuccessfulFact &&
     !material &&
     !unresolvedIssue;
@@ -202,4 +225,27 @@ export function assessCoaching(
     confidence: original.confidence,
     rationale,
   };
+}
+
+/** Use the same supplied-fact test for explanatory sections as for rationale.
+ * This is a display projection, never a canonical validation/repair pass. */
+export function supportedExplanation(
+  source: PaintingAnalysisResult,
+  recommendations: readonly PaintingInsight[],
+  text: string,
+): string {
+  const c = source.canonicalAnalysis;
+  return assessCoaching(
+    {
+      ...source,
+      canonicalAnalysis: {
+        ...c,
+        qualityAssessment: { ...c.qualityAssessment, rationale: text },
+      },
+    },
+    recommendations,
+  ).rationale.replace(
+    /[.!?]\s+(preserving|supporting|maintaining)\b/gi,
+    ", $1",
+  );
 }

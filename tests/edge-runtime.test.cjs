@@ -47,6 +47,12 @@ const focusCases = [
 for (const [name, mutate] of [
   ["normal domain blocks", () => {}],
   [
+    "removable foreign tail in optional composition prose",
+    (r) =>
+      (r.compositionStructure.primary.shortExplanation =
+        "The open water and sky remain quiet,低"),
+  ],
+  [
     "optional conflicting role meanings",
     (r) => r.visualRoles.push({ ...r.visualRoles[0], role: "quiet" }),
   ],

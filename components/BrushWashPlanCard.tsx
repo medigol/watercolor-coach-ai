@@ -1,4 +1,5 @@
 import { suggestedMethodText } from "../shared/coachingEvidence";
+import { cleanDisplayText } from "../shared/coachingDisplay";
 import { StyleSheet, Text, View } from "react-native";
 import type { BrushWashStep } from "../types";
 import { colors, styles } from "./ui";
@@ -32,7 +33,7 @@ function suggestedMethod(value: string): string {
   const originalProcess =
     /\b(?:artist|painter|you|they)\s+(?:(?:clearly|definitely|originally)\s+)?(?:used|chose|painted|worked|applied|mixed|began|finished|soaked|glazed|layered)\b|\b(?:was|were|had been|has been|must have been)\s+(?:(?:clearly|definitely|originally|fully|still|evenly)\s+)?(?:painted|applied|used|mixed|laid|brushed|wet|wetted|damp|dry|soaked|glazed|layered|added)\b|\b(?:original|actual|exact)\s+(?:brush|pigment|paper moisture|wash sequence|process)\b.{0,40}\b(?:is|was|were|used|must be)\b/i;
   return conciseText(
-    suggestedMethodText(value)
+    cleanDisplayText(suggestedMethodText(value))
       .trim()
       .split(/(?<=[.!?])\s+|\r?\n+/)
       .filter((sentence) => !originalProcess.test(sentence))
@@ -100,6 +101,24 @@ export function isConciseBrushPlan(value: unknown): boolean {
   );
 }
 
+/** Free text is not a second technique enum. Omit rather than guess a method. */
+export function displayWash(wash: string): string {
+  if (/\b[a-z0-9]+(?:_[a-z0-9]+)+\b/i.test(wash)) return "";
+  // Any named application method duplicates or contradicts the Technique row.
+  if (/\b(?:wet|damp)[ -]on[ -](?:wet|dry|damp)\b/i.test(wash)) return "";
+  return suggestedMethod(wash);
+}
+
+function stageLabel(value: string): string {
+  return value
+    .replace(
+      /^(?:for a separate study[:;,]?\s*)?(?:a )?suggested practice method(?:,?\s*not a reconstruction(?: of the original process)?)?(?:[:;,.]\s*|$)/i,
+      "",
+    )
+    .replace(/^(?:for|in|on) (?:a )?separate (?:small )?study[:;,]\s*/i, "")
+    .trim();
+}
+
 function PlanNote({ label, text }: { label: string; text: string }) {
   return (
     <View style={planStyles.note}>
@@ -146,9 +165,10 @@ export default function BrushWashPlanCard({
       </Text>
       {steps.map((step, index) => {
         const stageText = suggestedMethod(step.stage);
-        const stage = study
-          ? studyText(stageText, "Handling study")
-          : stageText || "Handling practice";
+        const stage =
+          stageLabel(
+            study ? studyText(stageText, "Handling study") : stageText,
+          ) || "Handling study";
         const seen = [stage, ...omit];
         const notes = [
           ["Brush", step.brush],
@@ -157,7 +177,10 @@ export default function BrushWashPlanCard({
           ["Edges", step.edges],
           ["Stop", step.stop],
         ].flatMap(([label, supplied]) => {
-          const method = suggestedMethod(supplied);
+          const method =
+            label === "Wash"
+              ? displayWash(supplied)
+              : suggestedMethod(supplied);
           const text = study ? studyInstruction(method) : method;
           if (!uniqueGuidance([text], seen).length) return [];
           seen.push(text);

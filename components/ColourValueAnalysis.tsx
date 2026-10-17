@@ -4,6 +4,7 @@ import type { PaintingAnalysisResult } from "../shared/paintingAnalysis";
 import { colors, styles } from "./ui";
 import { design } from "./theme";
 import { sameLearningInsight } from "../shared/coachingEvidence";
+import { displayRecreationMixes } from "../shared/coachingDisplay";
 
 // A shared opening sentence does not make the rest of a teaching paragraph
 // redundant. Omit it only when all of its supplied lessons are already covered.
@@ -36,6 +37,7 @@ export default function ColourValueAnalysis({
 }) {
   const c = source.canonicalAnalysis,
     colour = c.colourAnalysis;
+  const mixes = displayRecreationMixes(colour?.recreationMixes ?? []);
   const evidence = colour?.visibleColours.map((_, index) =>
     renderEvidence?.(index),
   );
@@ -176,7 +178,7 @@ export default function ColourValueAnalysis({
           </Text>
         </View>
       )}
-      {!!colour?.recreationMixes.length && (
+      {!!mixes.length && (
         <View style={{ gap: 12 }}>
           <Text style={[styles.heading, { fontSize: 17 }]}>
             Recreate this look
@@ -185,7 +187,7 @@ export default function ColourValueAnalysis({
             Possible watercolor pigments for approximating the visible effect,
             not the original formula.
           </Text>
-          {colour.recreationMixes.map((mix, index) => (
+          {mixes.map((mix, index) => (
             <View
               key={index}
               style={{
