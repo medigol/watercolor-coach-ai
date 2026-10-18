@@ -1,0 +1,29 @@
+{
+  "prompt": "0343ad85ddf0286afd17b845d667fe8cfd2b7d75809daec267fe2ba9538ca1d1",
+  "user": "ccceff1c915cb6a2562c3c75169616be098e90c58135e0151de3ee9e58192869",
+  "schema": "df3c291786bb79cdc13762bf5b645a90ad1cf589ccacb70b23a9947adfc4d3f4",
+  "sources": {
+    "lib/prepareArtwork.ts": "2afef2354ba7f5df325a3b73bc0cc83269c3ed0156c37d2b478c956a445fb350",
+    "shared/artworkEligibility.ts": "1a2188d1e33afd5140b55fa84fddbb384cf72ad5a8d5fffab1f379388a08b901",
+    "shared/artworkPreparation.ts": "17a6b2fc5d64fe66f59914f6ef0eeeca248373a7567a6aa224a3bedc55328fd6",
+    "shared/coachingAlignment.ts": "929d6506fa313245366fb4d126b303246a84d73c9195262989eb67f30cda9573",
+    "shared/coachingAssessment.ts": "14aef33150729b53dfc1f18c69efcdcc93987829d178cdd22810f8a8dc73deb4",
+    "shared/coachingCalibration.ts": "5e34cc7cb63e49e5d6f3010b663c6b87c45960c3196fa853436e2f9767b89139",
+    "shared/coachingDecision.ts": "bc9a018683e7346642adf48cecd9b2f4aafa4e0e4d89f96848f6969e69e3763b",
+    "shared/coachingDisplay.ts": "a2286edf8299e3cb78862496278a3918f185455f356d8033bf27395eb517adfd",
+    "shared/coachingEvidence.ts": "280930075a0423af09da0e1122f423b304a2829a92ce6d8f3761f386e1fbf1e4",
+    "shared/coachingLanguage.ts": "a1e0a6c193944090600f2de4f71f1e3e86ed01dad3e890fcf764c96b808e8bc2",
+    "shared/coachingSemantics.ts": "a116be16241a937e98c097f0589460222188172f349aa7515660e12362263bfa",
+    "shared/coachingWorkspace.ts": "d19659ce5c326070e3a88f5819080a3b4278b052f3c869cc56154ae5b1a7e880",
+    "shared/colourAnalysis.ts": "25b9599645196b77c55fbbdfa6efb87bd1fbc7faee237ce597ae31a68a82c2b8",
+    "shared/imageGeometry.ts": "a359fd462682d0389bf07d9a81bbabf43a13b7d3eaf92d72232d07b5088e8a61",
+    "shared/paintingAnalysis.ts": "6a0041dfe36c27bce102d6a3192310c6acf75ba1929fcab21e0fb645a7195dea",
+    "shared/providerPaintingAnalysis.ts": "9521d23562b510d36b930fd923865a99257371d3987f5539fe87ff200baa950a",
+    "shared/visualMetadata.ts": "4d9805e7667d8d02d3b3fcd11373409efd4c1eae61c0b83fd279495024fc9deb",
+    "supabase/functions/_shared/coachingDecision.ts": "922398fe128381e83bdaf41210d05537d378c5794cea42451a9af3a7e4dc5d56",
+    "supabase/functions/_shared/contract.ts": "6e692e6860748feadbb1fc88021dfe485185fd884bec12a159ad6817a3063249",
+    "supabase/functions/_shared/overlays.ts": "00042b52c048d71bc1eb4c99cb898ce5161136f897099fb6b20ddf8b4298aad1",
+    "supabase/functions/_shared/prompts.ts": "51dca1d26c998718f6c905999f5aa3c35f7035c9d33c858a73f3bbf4777e33d5",
+    "supabase/functions/generate-feedback/index.ts": "466e14f3d5ee6aba56d26f42826e122ff3010b1b15b53f626e83686b6f5d0528"
+  }
+}
