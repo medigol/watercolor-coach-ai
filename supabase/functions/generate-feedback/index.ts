@@ -144,7 +144,7 @@ const handler = createHandler({
                 type: "text",
                 text:
                   input.mode === "improve_painting"
-                    ? "Analyse this painting once. Return the domain-grouped provider draft using the exact response schema; the server builds IDs and expert views."
+                    ? "Assess artwork eligibility and, only if accepted, analyse the isolated watercolor in this single response. Return the eligibility envelope; non-accepted analysis is null. The server builds canonical IDs and expert views."
                     : `Mode: ${input.mode}. Focus: ${input.focus_area ?? "Overall feedback"}. Use the exact response schema.`,
               },
               {
@@ -210,6 +210,11 @@ const handler = createHandler({
         p_result: result,
       }),
     );
+  },
+  async discardRejected(user, path) {
+    // User-scoped client/RLS; never delete through admin credentials.
+    const { error } = await userClient(user).storage.from("artworks").remove([path]);
+    if (error) throw new Error("Cleanup unavailable");
   },
   async release(user, input) {
     await adminRpc("release_feedback_request", user, input);

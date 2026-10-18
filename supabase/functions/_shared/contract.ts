@@ -4,6 +4,7 @@ import {
   paintingAnalysisSchema,
   validPaintingAnalysis,
 } from "../../../shared/paintingAnalysis.ts";
+import { artworkEligibilitySchema } from "../../../shared/artworkEligibility.ts";
 import { providerPaintingAnalysisSchema } from "../../../shared/providerPaintingAnalysis.ts";
 import {
   compositionArchetypes,
@@ -618,10 +619,12 @@ export function feedbackSchema(mode: Mode) {
 export function providerFeedbackSchema(mode: Mode) {
   if (mode === "create_reference") return feedbackSchema(mode);
   const legacy = legacyFeedbackSchema(mode);
-  return providerPaintingAnalysisSchema({
-    structure: legacy.properties.compositionOverlay,
-    brush: { ...legacy.properties.brushPlan, maxItems: 2 },
-  });
+  return artworkEligibilitySchema(
+    providerPaintingAnalysisSchema({
+      structure: legacy.properties.compositionOverlay,
+      brush: { ...legacy.properties.brushPlan, maxItems: 2 },
+    }),
+  );
 }
 export async function readLimited(
   body: ReadableStream<Uint8Array> | null,

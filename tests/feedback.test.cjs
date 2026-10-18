@@ -75,6 +75,13 @@ function fixture(overrides = {}) {
     },
     ...overrides,
   };
+  const rawGenerate = deps.generate;
+  deps.generate = async (input, bytes) => {
+    const analysis = await rawGenerate(input, bytes);
+    return input.mode === "improve_painting"
+      ? { eligibility: { status: "accepted", reason_code: null }, analysis }
+      : analysis;
+  };
   const handler = createHandler(deps);
   return {
     calls,
@@ -131,10 +138,7 @@ for (const [name, overrides] of [
   test(`${name}: reports failure without saving or counting a sample`, async () => {
     const f = fixture(overrides);
     const r = await f.run();
-    assert.equal(
-      r.status,
-      name === "invalid JSON" || name === "wrong response shape" ? 422 : 503,
-    );
+    assert.equal(r.status, name === "wrong response shape" ? 422 : 503);
     const body = await r.json();
     assert.equal(body.code, "unavailable");
     assert.equal(

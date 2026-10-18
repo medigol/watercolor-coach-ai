@@ -337,3 +337,23 @@ test("external URLs and traversal paths are never sent to private storage for si
   assert.deepEqual(state.signs, []);
   assert.equal(await api.imageUrl(`${userId}/painting.png`), "https://example.invalid/temporary-image");
 });
+
+for (const code of ["unsupported_artwork", "artwork_uncertain", "crop_needed"])
+  test(`definite semantic ${code} cleans upload and prevents resending same rejected preparation`, async () => {
+    const { api, state } = fixture({ edgeStatus: 400, edgeCode: code });
+    const attempt = api.createSaveAttempt();
+    await assert.rejects(
+      api.saveArtwork("improve_painting", null, image, attempt),
+      (e) => e.code === code && !e.message.includes("private"),
+    );
+    assert.equal(state.edges.length, 1);
+    assert.equal(state.removals.length, 1);
+    assert.equal(attempt.mayHaveSaved, false);
+    assert.equal(attempt.imagePath, undefined);
+    await assert.rejects(
+      api.saveArtwork("improve_painting", null, image, attempt),
+      (e) => e.code === code,
+    );
+    assert.equal(state.edges.length, 1);
+    assert.equal(state.uploads.length, 1);
+  });

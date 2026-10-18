@@ -1,4 +1,8 @@
 import {
+  artworkEligibility,
+  artworkGateMessages,
+} from "../../../shared/artworkEligibility.ts";
+import {
   validInput,
   validFeedback,
   cleanFeedback,
@@ -37,6 +41,7 @@ export interface Dependencies {
     result: Record<string, unknown>,
   ): Promise<Saved>;
   release(user: User, input: Input): Promise<void>;
+  discardRejected?(user: User, path: string): Promise<void>;
 }
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -141,7 +146,25 @@ export function createHandler(deps: Dependencies) {
       if (claim.status === "existing") return success(claim, input.request_id);
       claimed = true;
       const bytes = await deps.download(user, input.image_path);
-      const generated = await deps.generate(input, bytes);
+      let generated = await deps.generate(input, bytes);
+      if (input.mode === "improve_painting") {
+        const eligibility = artworkEligibility(generated);
+        if (eligibility.status === "invalid")
+          throw new Error("Invalid eligibility envelope");
+        if (eligibility.status !== "accepted") {
+          // No successful completion exists under this owned claim. Best effort
+          // server cleanup also covers clients that disconnect before the reply.
+          await deps.discardRejected?.(user, input.image_path).catch(() => {});
+          return reply(
+            {
+              code: eligibility.code,
+              message: artworkGateMessages[eligibility.code],
+            },
+            400,
+          );
+        }
+        generated = eligibility.analysis;
+      }
       // Canonical responses remain readable for existing server/test adapters;
       // the production provider schema now emits the simpler grouped draft.
       const normalized =

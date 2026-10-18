@@ -106,8 +106,8 @@ for (const [name, mutate] of [
       ),
     );
     assert(
-      models[0].body.response_format.json_schema.schema.properties.overall
-        .properties.facts,
+      models[0].body.response_format.json_schema.schema.properties.analysis
+        .properties.overall.properties.facts,
     );
     const completed = f.calls.filter((c) =>
       c.path.endsWith("/complete_openai_feedback"),
@@ -324,7 +324,18 @@ function fixture(options = {}) {
             message: {
               content: options.invalidJSON
                 ? "{invalid json"
-                : JSON.stringify(modelResult),
+                : JSON.stringify(
+                    options.envelope ??
+                      (options.mode === "create_reference"
+                        ? modelResult
+                        : {
+                            eligibility: {
+                              status: "accepted",
+                              reason_code: null,
+                            },
+                            analysis: modelResult,
+                          }),
+                  ),
               refusal: options.refusal ? "declined" : null,
             },
           },
@@ -352,6 +363,14 @@ function fixture(options = {}) {
         free_results_used: options.quota ? 3 : 0,
         free_results_limit: 3,
       });
+    }
+    if (
+      url.pathname === "/storage/v1/object/artworks" &&
+      init.method === "DELETE"
+    ) {
+      assert.equal(headers.get("authorization"), "Bearer user-session");
+      assert.deepEqual(body.prefixes, [`${uid}/painting.png`]);
+      return json([]);
     }
     if (url.pathname.startsWith("/storage/v1/object/artworks/")) {
       assert.equal(headers.get("authorization"), "Bearer user-session");
@@ -536,11 +555,10 @@ for (const [name, options] of [
   test(`actual Edge SDK runtime: ${name} returns live failure without any mock save`, async () => {
     const f = fixture(options);
     const r = await f.run();
-    assert.equal(r.status, options.invalidJSON ? 422 : 503);
+    assert.equal(r.status, 503);
     const value = await r.json();
     assert.deepEqual(value, {
       code: "unavailable",
-      ...(options.invalidJSON ? { reason_code: "provider_structure" } : {}),
       message: "Live AI feedback could not be prepared. Please try again.",
     });
     assert(!JSON.stringify(value).includes("private"));
@@ -1715,4 +1733,65 @@ for (const malformed of [false, true])
       canonical.canonicalAnalysis.visualRoles,
     );
     assert(!f.calls.some((c) => c.path.includes("save_mock")));
+  });
+
+for (const [status, code] of [
+  ["rejected", "unsupported_artwork"],
+  ["uncertain", "artwork_uncertain"],
+  ["uncertain", "crop_needed"],
+]) {
+  test(`actual Edge eligibility ${code}: one paid call, zero successful quota, release claim`, async () => {
+    const f = fixture({
+      envelope: { eligibility: { status, reason_code: code }, analysis: null },
+    });
+    const r = await f.run();
+    assert.equal(r.status, 400);
+    const v = await r.json();
+    assert.equal(v.code, code);
+    assert(!JSON.stringify(v).includes("PRIVATE"));
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert.equal(
+      f.calls.filter((c) => c.path.endsWith("/complete_openai_feedback"))
+        .length,
+      0,
+    );
+    assert.equal(
+      f.calls.filter((c) => c.path.endsWith("/release_feedback_request"))
+        .length,
+      1,
+    );
+    assert.equal(
+      f.calls.filter(
+        (c) => c.path === "/storage/v1/object/artworks" && c.body?.prefixes,
+      ).length,
+      1,
+    );
+    assert.deepEqual(f.diagnostics, []);
+  });
+}
+for (const envelope of [
+  {},
+  { eligibility: { status: "accepted", reason_code: null }, analysis: null },
+  {
+    eligibility: { status: "rejected", reason_code: "unsupported_artwork" },
+    analysis: providerDraftFixture(),
+  },
+  {
+    eligibility: { status: "uncertain", reason_code: "PRIVATE" },
+    analysis: null,
+  },
+])
+  test("actual Edge rejects malformed/contradictory eligibility as 503, never canonical 422 or success", async () => {
+    const f = fixture({ envelope });
+    const r = await f.run();
+    assert.equal(r.status, 503);
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert(!f.calls.some((c) => c.path.endsWith("/complete_openai_feedback")));
+    assert(f.calls.some((c) => c.path.endsWith("/release_feedback_request")));
   });

@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { ActivityIndicator, Text, View } from "react-native";
 import {
   saveArtwork,
+  ArtworkEligibilityError,
   createSaveAttempt,
   liveFeedbackErrorMessage,
   type SaveAttempt,
@@ -24,6 +25,7 @@ export default function SaveResultButton({
   title: string;
   onBusyChange?: (busy: boolean) => void;
 }) {
+  const [rejectedImage, setRejectedImage] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const saving = useRef(false);
@@ -39,7 +41,13 @@ export default function SaveResultButton({
     };
   }, []);
   async function save() {
-    if (saving.current) return;
+    if (
+      saving.current ||
+      (mode === "improve_painting" &&
+        image?.uri === rejectedImage &&
+        !!rejectedImage)
+    )
+      return;
     saving.current = true;
     const userId = account.current;
     setBusy(true);
@@ -73,6 +81,7 @@ export default function SaveResultButton({
         params: { id, ...(warning ? { warning } : {}) },
       });
     } catch (e) {
+      if (e instanceof ArtworkEligibilityError) setRejectedImage(image?.uri);
       if (active.current && account.current === userId)
         setError(e instanceof Error ? e.message : liveFeedbackErrorMessage);
     } finally {
@@ -94,7 +103,11 @@ export default function SaveResultButton({
               : title
         }
         onPress={save}
-        disabled={busy || (mode === "improve_painting" && !image)}
+        disabled={
+          busy ||
+          (mode === "improve_painting" &&
+            (!image || (!!rejectedImage && image.uri === rejectedImage)))
+        }
       />
       {busy && (
         <View
