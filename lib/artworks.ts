@@ -307,9 +307,15 @@ export async function saveArtwork(
         .json()
         .catch(() => null);
       if (context.status === 400 && isArtworkGateCode(problem?.code)) {
-        eligibilityCode = problem.code;
-        message = artworkGateMessages[problem.code as ArtworkGateCode];
-        attempt.rejectedCode = eligibilityCode;
+        if (attempt.mayHaveSaved) {
+          // Contradicts an earlier lost response. Preserve identity and bytes
+          // for existing-result recovery, never delete or mark it terminal.
+          message = serviceFeedbackErrorMessage;
+        } else {
+          eligibilityCode = problem.code;
+          message = artworkGateMessages[problem.code as ArtworkGateCode];
+          attempt.rejectedCode = eligibilityCode;
+        }
       } else if (problem?.code === "usage_limit") message = freeLimitMessage;
       else if (problem?.code === "auth" || context.status === 401)
         message = signInMessage;

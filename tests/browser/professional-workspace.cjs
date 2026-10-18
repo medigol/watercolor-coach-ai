@@ -420,6 +420,7 @@ let signalFeedbackHeld;
           releaseFeedback = resolve;
           signalFeedbackHeld?.();
         });
+      if (["unsupported_artwork","artwork_uncertain","crop_needed"].includes(edgeMode)) return reply({code:edgeMode,message:"PRIVATE provider prose must not be shown"},400);
       if (edgeMode === "missing")
         return reply({ message: "Function not found" }, 404);
       if (edgeMode === "unavailable")
@@ -696,6 +697,14 @@ let signalFeedbackHeld;
       req.method() === "POST"
     ) {
       uploads.push(path);
+      const prepared=req.postDataBuffer();
+      assert(prepared?.length);
+      if(uploads.length===1){
+        assert.equal(prepared.readUInt32BE(16),480);
+        assert.equal(prepared.readUInt32BE(20),320);
+        imageFile=artifactDir+"/submitted-artwork.png";
+        fs.writeFileSync(imageFile,prepared);
+      }
       return uploadFails
         ? reply({ statusCode: "500", message: "upload unavailable" }, 500)
         : reply({ Key: path.split("/object/")[1] });
@@ -783,6 +792,25 @@ let signalFeedbackHeld;
     await button("Choose another image").waitFor();
   };
   await choose();
+  const preparationMatrix = [];
+  // Original technical fixture only: no private user painting assets.
+  for (const width of [375,390,430,768,1024,1440,1800]) {
+    await page.setViewportSize({width,height:900});
+    const before=snapshot();
+    await button("Adjust crop").click();
+    await page.getByRole("textbox",{name:"Crop left percent",exact:true}).fill("12.5");
+    await page.getByRole("textbox",{name:"Crop top percent",exact:true}).fill("10");
+    await page.getByRole("textbox",{name:"Crop right percent",exact:true}).fill("87.5");
+    await page.getByRole("textbox",{name:"Crop bottom percent",exact:true}).fill("90");
+    await button("Preview crop").click();
+    await page.getByRole("img",{name:"Preview of artwork pixels to keep"}).waitFor();
+    await shot("crop-preview-"+width);
+    await button("Confirm crop").click();
+    await page.getByRole("img",{name:"Confirmed artwork preview"}).waitFor();
+    await button("Choose another image").waitFor();
+    assert.deepEqual(snapshot(),before,"crop/preview/confirm is entirely local");
+    await noOverflow();preparationMatrix.push({width,crop:"480x320",calls:0});
+  }
   await shot("upload-selected");
   edgeMode = "hold";
   const feedbackHeld = new Promise((resolve, reject) => {
@@ -2041,11 +2069,27 @@ let signalFeedbackHeld;
     },
     beforeGallery,
   );
+  const eligibilityMatrix=[];
+  for(const code of ["unsupported_artwork","artwork_uncertain","crop_needed"]){
+    await page.goto(base+"/upload/improve-painting");await choose();
+    edgeMode=code;const before=snapshot();
+    await button("Analyse painting").click();
+    await page.getByRole("alert").waitFor();
+    assert(!/PRIVATE|reason_code/.test(await page.locator('body').innerText()));
+    assert.equal(edgeCalls,before.edgeCalls+1);assert.equal(used,before.used);
+    assert.equal(removed.length,before.removed+1);
+    assert.equal(await button("Retry analysis").getAttribute("aria-disabled"),"true");
+    await button("Retry analysis").evaluate(el=>el.click());
+    assert.equal(edgeCalls,before.edgeCalls+1,"rejected preparation cannot auto/manual resubmit");
+    eligibilityMatrix.push({code,providerCalls:1,successfulQuota:0,cleaned:true});
+  }
   assert.deepEqual(errors, []);
   fs.writeFileSync(
     artifactDir + "/report.json",
     JSON.stringify(
       {
+        preparationMatrix,
+        eligibilityMatrix,
         matrix,
         evidenceMatrix,
         calibrationMatrix,

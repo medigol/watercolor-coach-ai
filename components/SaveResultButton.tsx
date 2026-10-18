@@ -40,6 +40,7 @@ export default function SaveResultButton({
       active.current = false;
     };
   }, []);
+  useEffect(() => { setError(""); }, [image?.uri]);
   async function save() {
     if (
       saving.current ||

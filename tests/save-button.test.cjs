@@ -30,7 +30,8 @@ function fixture() {
       const at = index++;
       if (values[at] === undefined) {
         values[at] = true;
-        cleanup = effect();
+        const result = effect();
+        if (typeof result === "function") cleanup = result;
       }
     },
   };

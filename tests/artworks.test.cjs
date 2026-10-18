@@ -357,3 +357,16 @@ for (const code of ["unsupported_artwork", "artwork_uncertain", "crop_needed"])
     assert.equal(state.edges.length, 1);
     assert.equal(state.uploads.length, 1);
   });
+
+test("semantic rejection after a lost completion preserves recovery ID and uploaded bytes", async()=>{
+ const {api,state}=fixture({edgeResponses:[{data:null,error:true},rejection(400,'crop_needed'),liveSuccess]});
+ const attempt=api.createSaveAttempt(),id=attempt.id;
+ await assert.rejects(api.saveArtwork('improve_painting',null,image,attempt),/Check My Artworks/);
+ const savedPath=attempt.imagePath;
+ await assert.rejects(api.saveArtwork('improve_painting',null,image,attempt),/Check My Artworks/);
+ assert.equal(attempt.id,id);assert.equal(attempt.imagePath,savedPath);assert.equal(attempt.rejectedCode,undefined);assert.equal(state.removals.length,0);
+ await api.saveArtwork('improve_painting',null,image,attempt);assert.equal(state.uploads.length,1);
+});
+test("prepared cropped bytes are uploaded unchanged without fetching or uploading their source",async()=>{
+ const {api,state}=fixture();await api.saveArtwork('improve_painting',null,{uri:'blob:crop-only',bytes:png,width:1,height:1});assert.equal(state.fetches,0);assert.equal(state.uploads.length,1);assert.deepEqual(new Uint8Array(state.uploads[0].bytes),png);
+});

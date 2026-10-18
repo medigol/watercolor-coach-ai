@@ -531,7 +531,7 @@ test("one successful canonical request uses one quota unit; retries/local views 
       if (fail) throw Error("upstream failure");
       const result = fixture();
       if (invalid) result.canonicalAnalysis.insights[0].factIds = ["missing"];
-      return result;
+      return {eligibility:{status:"accepted",reason_code:null},analysis:result};
     },
     finish: async (_u, i, result) => {
       assert(painting.validPaintingAnalysis(result));
@@ -603,7 +603,7 @@ test("a legacy provider response cannot satisfy a new canonical painting request
     usage: async () => ({ used: 0, limit: 3 }),
     claim: async () => ({ status: "claimed" }),
     download: async () => new Uint8Array(),
-    generate: async () => load("data/mockResults.ts").improveResult,
+    generate: async () => ({eligibility:{status:"accepted",reason_code:null},analysis:load("data/mockResults.ts").improveResult}),
     finish: async () => {
       completed++;
       throw Error("must not save");
