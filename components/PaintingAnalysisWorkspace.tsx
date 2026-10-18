@@ -919,12 +919,15 @@ export default function PaintingAnalysisWorkspace({
                 </>
               )}
             </Section>
-            {(!!teaching.practice || !!teaching.studies.length) && (
+            {(
               <Section
                 title="Practice & Studies"
                 icon="book-outline"
                 initiallyOpen
               >
+                {!teaching.practice && !teaching.studies.length && (
+                  <Text style={styles.caption}>No separate study is suggested for this analysis.</Text>
+                )}
                 {!!teaching.practice && (
                   <View
                     style={{

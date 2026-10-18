@@ -40,7 +40,9 @@ export default function SaveResultButton({
       active.current = false;
     };
   }, []);
-  useEffect(() => { setError(""); }, [image?.uri]);
+  useEffect(() => {
+    setError("");
+  }, [image?.uri]);
   async function save() {
     if (
       saving.current ||
@@ -82,7 +84,12 @@ export default function SaveResultButton({
         params: { id, ...(warning ? { warning } : {}) },
       });
     } catch (e) {
-      if (e instanceof ArtworkEligibilityError) setRejectedImage(image?.uri);
+      if (
+        active.current &&
+        account.current === userId &&
+        e instanceof ArtworkEligibilityError
+      )
+        setRejectedImage(image?.uri);
       if (active.current && account.current === userId)
         setError(e instanceof Error ? e.message : liveFeedbackErrorMessage);
     } finally {

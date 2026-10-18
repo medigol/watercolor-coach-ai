@@ -212,8 +212,15 @@ const handler = createHandler({
     );
   },
   async discardRejected(user, path) {
+    // A caller may reuse an owned path from ANOTHER saved result. Ownership
+    // alone is not permission to discard that result's source after rejection.
+    const client = userClient(user);
+    const referenced = await client.from("artworks").select("id")
+      .eq("user_id", user.id).eq("image_url", path).limit(1);
+    if (referenced.error || !Array.isArray(referenced.data)) throw new Error("Cleanup unavailable");
+    if (referenced.data.length) return;
     // User-scoped client/RLS; never delete through admin credentials.
-    const { error } = await userClient(user).storage.from("artworks").remove([path]);
+    const { error } = await client.storage.from("artworks").remove([path]);
     if (error) throw new Error("Cleanup unavailable");
   },
   async release(user, input) {

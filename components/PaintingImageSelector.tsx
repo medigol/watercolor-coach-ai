@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Platform, Pressable, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { prepareArtwork, type ArtworkPreparation } from "../lib/prepareArtwork";
+import {
+  prepareArtwork,
+  pickWebArtwork,
+  type ArtworkPreparation,
+} from "../lib/prepareArtwork";
 import type { ArtworkImage } from "../lib/artworks";
 import { fullArtwork } from "../shared/artworkPreparation";
 import type { NormalizedRect } from "../shared/imageGeometry";
@@ -56,22 +60,41 @@ export default function PaintingImageSelector({
     operation.current = true;
     setError("");
     try {
-      const picked = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        quality: 1,
-        exif: false,
-      });
-      if (picked.canceled || !picked.assets[0]) return;
+      let image: ArtworkImage | undefined;
+      let release = () => {};
+      if (Platform.OS === "web") {
+        const picked = await pickWebArtwork();
+        image = picked?.image;
+        release = picked?.dispose ?? release;
+      } else {
+        const picked = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ["images"],
+          quality: 1,
+          exif: false,
+        });
+        image = picked.canceled ? undefined : picked.assets[0];
+      }
+      if (!image || !active.current) {
+        release();
+        return;
+      }
       setBusy(true);
       setSelected(undefined);
       onSelect?.(undefined);
       setEditing(false);
-      const next = await prepareArtwork(picked.assets[0]);
+      current.current?.dispose();
+      current.current = undefined;
+      setSource(undefined);
+      let next: ArtworkPreparation;
+      try {
+        next = await prepareArtwork(image);
+      } finally {
+        release();
+      }
       if (!active.current) {
         next.dispose();
         return;
       }
-      current.current?.dispose();
       current.current = next;
       setSource(next);
       setRequired(false);

@@ -156,13 +156,22 @@ export function cropPixels(region: NormalizedRect, size: ImageSize) {
   return { originX: x, originY: y, width, height };
 }
 export function outputDimensions(size: ImageSize): ImageSize {
+  // Preserve legitimate panoramic/minimal artwork: resizing must not make a
+  // previously valid short side or pixel area fail our own output gate.
+  const minimumScale = Math.max(
+    preparationLimits.minSide / Math.min(size.width, size.height),
+    Math.sqrt(preparationLimits.minPixels / (size.width * size.height)),
+  );
   const scale = Math.min(
     1,
-    preparationLimits.outputSide / Math.max(size.width, size.height),
+    Math.max(
+      minimumScale,
+      preparationLimits.outputSide / Math.max(size.width, size.height),
+    ),
   );
   return {
-    width: Math.round(size.width * scale),
-    height: Math.round(size.height * scale),
+    width: Math.ceil(size.width * scale),
+    height: Math.ceil(size.height * scale),
   };
 }
 export function isFullArtwork(r: NormalizedRect) {

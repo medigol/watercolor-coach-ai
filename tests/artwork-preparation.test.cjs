@@ -250,3 +250,9 @@ test("crop/native adapter has no provider, storage or DB path", () => {
   assert(!/supabase|functions\.invoke|\.upload\(|\.rpc\(/.test(src));
   assert(!/api\.openai|images\/generations/.test(src));
 });
+
+for(const size of [{width:12000,height:64},{width:8000,height:128}])test('panoramic artwork is not made invalid by proportional output sizing',()=>{prep.validateDimensions(size);const out=prep.outputDimensions(size);assert.doesNotThrow(()=>prep.validateDimensions(out));assert(out.width<=size.width&&out.height<=size.height);assert(Math.abs(out.width/out.height-size.width/size.height)<.01);});
+
+test('Improve Painting web picker obtains bytes without decoding Expo metadata first',()=>{
+ const s=fs.readFileSync(path.join(__dirname,'../lib/prepareArtwork.ts'),'utf8');const start=s.indexOf('export function pickWebArtwork');const picker=s.slice(start);assert(picker.includes('URL.createObjectURL(file)'));assert(picker.includes('file.size'));assert(!/new (?:window\.)?Image|\.decode\(|launchImageLibrary/.test(picker));
+});

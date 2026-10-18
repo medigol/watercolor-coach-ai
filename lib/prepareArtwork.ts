@@ -142,10 +142,15 @@ async function webPreparation(
         );
         c.width = c.height = 1;
         if (b.size > preparationLimits.bytes) throw new Error(tooLarge);
-        const data = await blobBytes(b),
-          u = URL.createObjectURL(b);
+        const data = await blobBytes(b);
+        const output = checkedOutput(data, "", size.width, size.height);
+        const u = URL.createObjectURL(b);
+        // A confirmed replacement is a new preparation. Keep only its output;
+        // unconfirmed edits still retain the current URI for safe cancellation.
+        exports.forEach((previous) => URL.revokeObjectURL(previous));
+        exports.length = 0;
         exports.push(u);
-        return checkedOutput(data, u, size.width, size.height);
+        return { ...output, uri: u };
       },
     };
   } catch (e) {
@@ -215,4 +220,43 @@ export async function prepareArtwork(
   return Platform.OS === "web"
     ? webPreparation(bytes, header)
     : nativePreparation(image, header);
+}
+
+/** Web's general Expo picker decodes metadata before returning an asset. For
+ * this path use the file input directly so resource headers precede any decode. */
+export function pickWebArtwork(): Promise<
+  { image: ArtworkImage; dispose(): void } | undefined
+> {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/webp";
+    input.style.display = "none";
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener("focus", focused);
+      const file = input.files?.[0];
+      input.remove();
+      if (!file) {
+        resolve(undefined);
+        return;
+      }
+      const uri = URL.createObjectURL(file);
+      resolve({
+        image: { uri, fileSize: file.size, mimeType: file.type },
+        dispose: () => URL.revokeObjectURL(uri),
+      });
+    };
+    // `cancel` covers current browsers; focus is the older-picker fallback.
+    const focused = () => {
+      setTimeout(finish, 250);
+    };
+    input.addEventListener("change", finish, { once: true });
+    input.addEventListener("cancel", finish, { once: true });
+    window.addEventListener("focus", focused, { once: true });
+    document.body.appendChild(input);
+    input.click();
+  });
 }

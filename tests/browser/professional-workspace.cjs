@@ -812,6 +812,11 @@ let signalFeedbackHeld;
     await noOverflow();preparationMatrix.push({width,crop:"480x320",calls:0});
   }
   await shot("upload-selected");
+  const beforeUploadFailure=snapshot();uploadFails=true;
+  await button("Analyse painting").click();
+  await page.getByRole("alert").filter({hasText:"could not be uploaded"}).waitFor();
+  assert.equal(edgeCalls,beforeUploadFailure.edgeCalls);assert.equal(used,beforeUploadFailure.used);
+  assert.equal(uploads.length,beforeUploadFailure.uploads+1);uploadFails=false;
   edgeMode = "hold";
   const feedbackHeld = new Promise((resolve, reject) => {
     const deadline = setTimeout(
@@ -824,7 +829,7 @@ let signalFeedbackHeld;
       resolve();
     };
   });
-  await button("Analyse painting").click();
+  await button("Retry analysis").click();
   const pending = page.getByRole("button", {
     name: "Preparing your complete painting analysis…",
     exact: true,
@@ -2088,6 +2093,7 @@ let signalFeedbackHeld;
     artifactDir + "/report.json",
     JSON.stringify(
       {
+        uploadFailureCheck: true,
         preparationMatrix,
         eligibilityMatrix,
         matrix,

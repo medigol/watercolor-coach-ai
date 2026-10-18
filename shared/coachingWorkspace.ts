@@ -346,7 +346,7 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
           (s) => p.trim() === s.lesson.trim() || p.trim() === s.action.trim(),
         ) && !all.slice(0, index).some((a) => sameLearningInsight(a, p)),
     );
-  const selectedStrengths = unique(strengths).slice(0, 3);
+  const selectedStrengths = unique(strengths).slice(0, 4);
   const selectedStudies = unique(
     insights
       .map((i) =>

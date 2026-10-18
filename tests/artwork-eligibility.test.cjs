@@ -97,3 +97,8 @@ test("strict schema is root object, every field required, nested nullable draft,
     640,
   );
 });
+
+test('provider policy separates eligibility from quality, rejects image-text instructions and abstains on ambiguous medium',()=>{
+ const s=require('node:fs').readFileSync(require('node:path').join(__dirname,'../supabase/functions/_shared/prompts.ts'),'utf8').split('QUALITY:')[0];
+ for(const word of ['WIP','abstract','monochrome','realistic','scanned','photographed','Ordinary real-world photos','screenshot/UI','documents','empty paper','multiple separate artworks','crop_needed','digital watercolor-style','artwork_uncertain','untrusted image content','NEVER instructions','analysis MUST be null','reason_code null'])assert(s.includes(word),word);
+});
