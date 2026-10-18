@@ -380,6 +380,12 @@ function report({ prepared, output, ratings }) {
   const columns = [
     "caseID",
     "armID",
+    "sourceWidth",
+    "sourceHeight",
+    "cropWidth",
+    "cropHeight",
+    "imageHash",
+    "configHash",
     "outcome",
     "reasonCode",
     "strictSchema",
@@ -418,7 +424,7 @@ function report({ prepared, output, ratings }) {
       .relative(out, localFile(prepared, c.image))
       .split(path.sep)
       .join("/");
-    return `<article><h2>${html(b.blindID)} · ${b.reviewer}</h2><img alt="Original prepared source for blind review" src="${html(relative)}"><p>Outcome: ${html(outcome(r))}; schema: ${r.strictSchema === true ? "valid" : "not valid"}; canonical: ${r.canonicalValid === true ? "valid" : "not applicable/invalid"}</p><p>Sanitized excerpts only; missing context must not be scored as verified.</p><pre>${html(JSON.stringify(r.excerpts || [], null, 2))}</pre>${Object.entries(
+    return `<article><h2>${html(b.blindID)} · ${b.reviewer}</h2><img alt="Original prepared source for blind review" src="${html(relative)}"><p>Outcome: ${html(outcome(r))}; schema: ${r.strictSchema === true ? "valid" : "not valid"}; canonical: ${r.canonicalValid === true ? "valid" : "not applicable/invalid"}</p><p>Sanitized excerpts only; missing context must not be scored as verified.</p><pre>${html(JSON.stringify({ summary: r.teachingSummary, domainExcerpts: r.excerpts || [] }, null, 2))}</pre>${Object.entries(
       DOMAINS,
     )
       .map(

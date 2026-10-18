@@ -1,6 +1,10 @@
 const fs = require("node:fs"),
   path = require("node:path");
-const { lockedProduction, hash } = require("./production.cjs");
+const {
+  lockedProduction,
+  hash,
+  verifyProductionFiles,
+} = require("./production.cjs");
 const {
   external,
   privateDir,
@@ -61,6 +65,26 @@ function evaluate(payload, p) {
       ? p.contract.cleanFeedback(normalized.result, "improve_painting")
       : null;
     base.canonicalValid = p.contract.validFeedback(cleaned, "improve_painting");
+    const a = gate.analysis,
+      colour = a.colourValue?.colourAnalysis;
+    base.teachingSummary = {
+      rationale: excerpt(a.qualityAssessment?.rationale, 640),
+      composition: excerpt(a.compositionStructure?.observation, 240),
+      colour: colour
+        ? Object.fromEntries(
+            [
+              "colourStrategy",
+              "chromaHierarchy",
+              "temperatureRelationship",
+            ].map((k) => [k, excerpt(colour[k], 240)]),
+          )
+        : null,
+      valueHierarchy: excerpt(colour?.valueHierarchy, 240),
+      technicalAssessment: excerpt(
+        colour?.technicalAssessment?.explanation,
+        240,
+      ),
+    };
     // Review the raw draft, not just the cleaner: post-cleaning could hide a
     // hallucinated technique. Truncated excerpts remain explicitly incomplete.
     for (const domain of [
@@ -280,6 +304,7 @@ async function run(options, transport = fetch, env = process.env) {
         true,
       );
     events = ledgerRead(journal);
+    if (!fs.existsSync(journal)) writePrivate(journal, "", true);
     // Any unresolved request may have billed up to its reservation; it is NEVER
     // automatically replayed. Unknown accounting stops all further paid calls.
     if (
@@ -310,7 +335,7 @@ async function run(options, transport = fetch, env = process.env) {
           break benchmark;
         }
         // Recheck source locks and prices immediately before EACH paid request.
-        lockedProduction();
+        verifyProductionFiles(p.identity);
         attest(options.rates);
         const bytes = fs.readFileSync(localFile(options.prepared, c.image));
         if (hash(bytes) !== c.imageHash) throw Error("Prepared bytes changed");
@@ -423,6 +448,12 @@ async function run(options, transport = fetch, env = process.env) {
           armID: a.id,
           latencyMs: Math.round(performance.now() - start),
           ...row,
+          imageHash: c.imageHash,
+          configHash: reserve.configHash,
+          sourceWidth: c.sourceWidth,
+          sourceHeight: c.sourceHeight,
+          cropWidth: c.width,
+          cropHeight: c.height,
         };
         append(journal, row);
         events.push(row);

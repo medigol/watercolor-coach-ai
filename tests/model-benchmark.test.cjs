@@ -799,3 +799,35 @@ test("production boundaries unchanged; no SDK, DB, storage or hidden provider fa
   assert(entry.includes("max_completion_tokens: 3000"));
   assert(entry.includes('detail: "low"'));
 });
+
+test("review includes bounded original rationale and actual colour/value teaching", () => {
+  const v = payload(),
+    r = evaluate(v, p),
+    raw = accepted().analysis;
+  assert.equal(
+    r.teachingSummary.valueHierarchy,
+    raw.colourValue.colourAnalysis.valueHierarchy,
+  );
+  assert(r.teachingSummary.rationale.length > 0);
+  assert(r.teachingSummary.colour.colourStrategy.length > 0);
+});
+test("zero-affordable-call experiment still produces an honest empty report", async (t) => {
+  const f = fixture(t),
+    calls = [];
+  for (const a of ARMS) f.rates.arms[a.id].output = 2000;
+  await run({ ...f, live: true, confirmCost: true }, mockTransport(calls), env);
+  const r = report(f);
+  assert.equal(r.completed, 0);
+  assert(r.recommendation.includes("Pending"));
+  assert.equal(calls.length, 0);
+});
+
+test("every-call source verification detects drift without recompiling or changing production", () => {
+  const {
+    verifyProductionFiles,
+  } = require("../scripts/benchmark/production.cjs");
+  verifyProductionFiles(p.identity);
+  const changed = structuredClone(p.identity);
+  changed.sources["lib/prepareArtwork.ts"] = "not-the-locked-source";
+  assert.throws(() => verifyProductionFiles(changed));
+});

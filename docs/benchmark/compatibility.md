@@ -7,6 +7,8 @@ The public documentation hosts `developers.openai.com`, `platform.openai.com` an
 The official OpenAI API specification was accessible at:
 https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml
 
+Retrieved file SHA-256: `5ee00b466cb48a392c91773f62f1ca93392ec1bb26b52e0381af7fad0e4817a4`.
+
 It lists `gpt-4.1-mini`, `gpt-5.4-mini`, `gpt-5.4-mini-2026-03-17` and `gpt-6-luna` under `ModelIdsShared`. Its Chat Completions contract documents image input with `detail`, strict JSON-schema response format, reasoning effort, `max_completion_tokens`, standard `service_tier:default`, prompt/completion usage, cached input, cache-write and reasoning token fields. This confirms IDs and generic API fields; **it does not prove every model/account honors every combination**, nor a snapshot resolution, price or family-specific detail rule. Live responses record resolved model and system fingerprint when returned. Aliases may change over time; reproduce with recorded hashes/configuration and record this limitation rather than silently substitute snapshots.
 
 Exactly these adapters are implemented, pending local official documentation attestation and actual authorized response compatibility:

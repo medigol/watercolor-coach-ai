@@ -110,4 +110,18 @@ function lockedProduction() {
     );
   return p;
 }
-module.exports = { ROOT, hash, production, lockedProduction };
+function verifyProductionFiles(identity) {
+  for (const [file, digest] of Object.entries(identity.sources)) {
+    if (hash(fs.readFileSync(path.join(ROOT, file))) !== digest)
+      throw Error(
+        "Production source changed during benchmark; stop without another request",
+      );
+  }
+}
+module.exports = {
+  ROOT,
+  hash,
+  production,
+  lockedProduction,
+  verifyProductionFiles,
+};
