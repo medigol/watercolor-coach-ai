@@ -1593,6 +1593,81 @@ let signalFeedbackHeld;
     if (width === 390 || width === 1440)
       await shot(`final-live-cleanup-${width}`);
   }
+  const semanticMatrix = [];
+  for (const kind of ["church", "van", "boat"]) {
+    for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
+      Object.assign(
+        saved,
+        require(root + "/tests/helpers/semantic-cleanup-fixture.cjs")(kind),
+      );
+      imageFile =
+        kind === "van"
+          ? aspectFiles["portrait-vehicle"]
+          : kind === "church"
+            ? aspectFiles.portrait
+            : aspectFiles.landscape;
+      await page.setViewportSize({ width, height: 950 });
+      await page.reload();
+      await page.getByTestId("overall-assessment").waitFor();
+      await page.getByTestId("coaching-source-image").waitFor();
+      for (const section of [
+        "Composition",
+        "Colour & Value",
+        "Watercolor technique",
+      ])
+        await open(section);
+      const body = await page.locator("body").innerText();
+      assert(body.includes("Strong painting"), body);
+      assert(body.includes("No major issue detected"));
+      assert(body.includes("Preserve the sharp light-shadow contrast"));
+      assert(
+        !/room for improvement|solid foundational|technical mastery|refining edges|improving background|contrast contrast|pigment application|is painted with|gauge improvement|perspective accuracy/.test(
+          body,
+        ),
+        body,
+      );
+      assert(!body.includes("Stylistic alternative"));
+      if (kind === "church") {
+        assert(body.includes("strong value contrast"));
+        assert(body.includes("effectively balances"));
+      }
+      if (kind === "boat")
+        assert(
+          body.includes(
+            "The boat has more defined edges and darker visible passages",
+          ),
+        );
+      const before = snapshot();
+      for (const control of ["Roles", "Composition overlay", "Clean view"])
+        await button(control).click();
+      await page.getByRole("button", { name: /^Notes(?: · \d+)?$/ }).click();
+      await page.getByTestId("coaching-marker-0").click();
+      await page.getByTestId("coaching-note-0").waitFor();
+      assert(
+        !/refining edges|technical mastery|room for improvement/.test(
+          await page.locator("body").innerText(),
+        ),
+      );
+      await button("Clean view").click();
+      await noOverflow();
+      assert.deepEqual(
+        snapshot(),
+        before,
+        "semantic cleanup and saved interactions create zero provider calls/uploads/writes/reads",
+      );
+      semanticMatrix.push({
+        kind,
+        width,
+        coherentAssessment: true,
+        safeStrength: true,
+        noFalseAlternative: true,
+        neutralPractice: true,
+        readonly: true,
+      });
+      if (width === 390 || width === 1440)
+        await shot(`semantic-freeze-${kind}-${width}`);
+    }
+  }
   Object.assign(saved, structuredClone(beforeFinalCalibration));
   imageFile = aspectFiles.landscape;
   const originalPrimary = structuredClone(
@@ -1980,6 +2055,7 @@ let signalFeedbackHeld;
         finalFreezeFixMatrix,
         analysisDepthMatrix,
         cleanupMatrix,
+        semanticMatrix,
         calls: snapshot(),
         errors,
         requests: requests.map((r) => ({
@@ -1994,7 +2070,7 @@ let signalFeedbackHeld;
     ),
   );
   console.log(
-    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration + 21 live-freeze + 21 final-freeze-fix + 7 analysis-depth + 7 final-live-cleanup cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
+    "PASS: professional workspace; 70 responsive/aspect + 4 calibration + 2 provider-normalized + 7 final calibration + 21 live-freeze + 21 final-freeze-fix + 7 analysis-depth + 7 final-live-cleanup + 21 semantic-freeze cases; unchanged geometry; Notes/marker linking; all local controls readonly; upload/loading/errors/retry; legacy; safe reason codes; zero automatic mock fallback; no live paid calls.",
   );
   await browser.close();
 })().catch(async (error) => {

@@ -70,7 +70,7 @@ test("removing empty repeated study framing cannot crash presentation", () => {
   assert.equal(language.separateStudyText("; in a small study"), "");
 });
 for (const classification of ["clear_issue", "optional_refinement"])
-  test(`central placement alone is a study alternative even if labelled ${classification}`, () => {
+  test(`unsupported positional harm is omitted from displayed alternatives even if labelled ${classification}`, () => {
     const r = result("competent", [
       insight("position", {
         classification,
@@ -85,7 +85,7 @@ for (const classification of ["clear_issue", "optional_refinement"])
     );
     const t = workspace.workspaceTeaching(v);
     assert.equal(t.recommendations.length, 0);
-    assert(t.studies.some((i) => i.id === "position"));
+    assert(!t.studies.some((i) => i.id === "position"));
   });
 test("positive central-placement strength remains allowed", () => {
   const r = result();

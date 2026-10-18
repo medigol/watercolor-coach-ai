@@ -389,7 +389,7 @@ test("extra domain preservation projection also avoids central-placement dogma",
 });
 
 for (const verb of ["increase", "sharpen", "darken"])
-  test(`fully qualified road preservation survives the complete provider pipeline: ${verb}`, () => {
+  test(`qualified road guidance stays canonical while Strength displays preservation only: ${verb}`, () => {
     const action = `Preserve the road curve and ${verb} only the near foreground road contrast; taper its contrast toward the distance and keep it below focal contrast.`;
     const raw = draftFixture();
     raw.visualRoles[1].area = "road";
@@ -411,7 +411,7 @@ for (const verb of ["increase", "sharpen", "darken"])
     const teaching = workspaceTeaching(value);
     const strength = teaching.strengths.find((i) => i.id === insight.id);
     assert(strength);
-    assert.equal(strength.action, action);
+    assert.equal(strength.action, "Preserve the road curve.");
   });
 
 test("a false below-focal qualifier does not permit a competing road focal point", () => {

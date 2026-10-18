@@ -1654,3 +1654,74 @@ test("final cleanup keeps the existing study-stage safety filter while removing 
   assert(html.includes("Handling study"));
   assert(html.includes("Wet-on-dry"));
 });
+
+for (const kind of ["church", "van", "boat"])
+  test(`semantic freeze actual result screen: ${kind} has coherent Strong teaching without hidden critique`, () => {
+    const r = require("./helpers/semantic-cleanup-fixture.cjs")(kind),
+      before = structuredClone(r);
+    const html = cleanupRender(r);
+    assert(html.includes("Strong painting"));
+    assert(html.includes("Preserve the sharp light-shadow contrast"));
+    assert(
+      !/room for improvement|solid foundational|technical mastery|refining edges|improving background|contrast contrast|pigment application|is painted with|gauge improvement|perspective accuracy/.test(
+        html,
+      ),
+      html,
+    );
+    assert(!html.includes(">Stylistic alternative"));
+    assert(!html.includes("Increase edge sharpness"));
+    if (kind === "church") {
+      assert(html.includes("strong value contrast"));
+      assert(html.includes("effectively balances"));
+    }
+    if (kind === "boat")
+      assert(
+        html.includes(
+          "The boat has more defined edges and darker visible passages",
+        ),
+      );
+    assert.deepEqual(r, before);
+  });
+test("semantic freeze actual result screen retains supported perspective teaching and practice", () => {
+  const r = require("./helpers/semantic-cleanup-fixture.cjs")("van"),
+    c = r.canonicalAnalysis;
+  c.facts.push({
+    id: "drawing-problem",
+    domain: "overall",
+    roleId: null,
+    observation: "Inconsistent vehicle perspective flattens spatial depth.",
+  });
+  c.insights.push({
+    id: "drawing-guidance",
+    domain: "overall",
+    classification: "clear_issue",
+    factIds: ["drawing-problem"],
+    lesson: "Inconsistent vehicle perspective limits depth.",
+    action:
+      "On a separate study, align vehicle perspective and compare spatial depth.",
+  });
+  r.expertViews.overall.practice =
+    "On a separate study, paint two vehicle shapes varying only perspective accuracy. Keep values fixed. Compare vehicle perspective to gauge improvement.";
+  const html = cleanupRender(r);
+  assert(html.includes("perspective accuracy"));
+  assert(html.includes("gauge improvement"));
+  assert(html.includes("Inconsistent vehicle perspective limits depth"));
+});
+test("semantic freeze actual result screen keeps genuine artistic comparisons", () => {
+  const r = require("./helpers/semantic-cleanup-fixture.cjs")(),
+    c = r.canonicalAnalysis;
+  c.insights.push({
+    id: "valid-alternative",
+    domain: "technique",
+    classification: "stylistic_alternative",
+    factIds: ["edges"],
+    lesson:
+      "A quieter versus a more graphic focal treatment offers two valid choices.",
+    action:
+      "Compare the two edge treatments on a separate study, holding values constant and keeping supporting edges below the focal hierarchy.",
+  });
+  const html = cleanupRender(r);
+  assert(html.includes("Stylistic alternative"));
+  assert(html.includes("two valid choices"));
+  assert(!html.includes("could be enhanced"));
+});

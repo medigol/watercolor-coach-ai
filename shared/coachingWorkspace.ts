@@ -18,7 +18,17 @@ import {
   evidenceTargets,
   evidenceProperties,
 } from "./coachingAlignment.ts";
-import { assessCoaching, supportedExplanation } from "./coachingAssessment.ts";
+import {
+  assessCoaching,
+  hasLimitation,
+  supportedExplanation,
+  supportsTeachingLimitation,
+} from "./coachingAssessment.ts";
+import {
+  honestStylisticAlternative,
+  neutralStudyText,
+  strengthTeachingText,
+} from "./coachingSemantics.ts";
 import {
   prepareCoachingDisplay,
   finalCoachingDisplay,
@@ -83,26 +93,32 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
               : i,
         ];
   });
-  const insights = aligned.map((i) =>
-    unsupportedPlacementAdvice(
-      `${i.lesson} ${i.action}`,
-      i.factIds
-        .map((id) => c.facts.find((f) => f.id === id)?.observation ?? "")
-        .join(" "),
-    )
-      ? {
-          ...i,
-          classification: "stylistic_alternative" as const,
-          action: separateStudyText(i.action),
-        }
-      : objectDesignSuggestion(i.action)
+  const insights = aligned
+    .map((i) =>
+      unsupportedPlacementAdvice(
+        `${i.lesson} ${i.action}`,
+        i.factIds
+          .map((id) => c.facts.find((f) => f.id === id)?.observation ?? "")
+          .join(" "),
+      )
         ? {
             ...i,
-            classification: "study_experiment" as const,
+            classification: "stylistic_alternative" as const,
             action: separateStudyText(i.action),
           }
-        : i,
-  );
+        : objectDesignSuggestion(i.action)
+          ? {
+              ...i,
+              classification: "study_experiment" as const,
+              action: separateStudyText(i.action),
+            }
+          : i,
+    )
+    .filter(
+      (i) =>
+        i.classification !== "stylistic_alternative" ||
+        honestStylisticAlternative(i.lesson, i.action),
+    );
   const unique = (items: PaintingInsight[]) =>
     items.filter(
       (i, index) =>
@@ -205,7 +221,13 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
             sameTeaching(p, i),
         ),
   );
-  level = assessCoaching(value, distinct, distinct).level;
+  const supportedStudies = insights.filter(
+    (i) =>
+      i.classification === "study_experiment" &&
+      supportsTeachingLimitation(value, [i], i.lesson),
+  );
+  const safeIssues = [...distinct, ...supportedStudies];
+  level = assessCoaching(value, safeIssues, safeIssues).level;
   const recommendations = distinct
     .slice(0, ["highly_resolved", "strong"].includes(level) ? 2 : 3)
     .map((insight, index) => {
@@ -278,6 +300,8 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
     .filter(
       (i) =>
         i.classification === "strength" &&
+        i.lesson.trim() &&
+        !hasLimitation(i.lesson) &&
         (!correctiveTeaching(i.action) ||
           qualifiedRoadPreservation(i.action, i.lesson)) &&
         !correctiveTeaching(i.lesson),
@@ -302,6 +326,9 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
         ? { ...i, action: `Preserve this relationship: ${relationship}` }
         : { ...i, action: "" };
     });
+  const surviving = recommendations.map((r) => r.insight);
+  const supportsPractice = (claim: string) =>
+    supportsTeachingLimitation(value, surviving, claim);
   const practices = Object.values(value.expertViews)
     .map((v) => v.practice)
     .concat(
@@ -311,6 +338,7 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
         )
         .map((i) => i.action),
     )
+    .map((p) => neutralStudyText(p, supportsPractice))
     .filter((p) => p && variableStudy(p))
     .filter(
       (p, index, all) =>
@@ -320,16 +348,38 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
     );
   const selectedStrengths = unique(strengths).slice(0, 3);
   const selectedStudies = unique(
-    insights.filter(
-      (i) =>
-        ["study_experiment", "stylistic_alternative"].includes(
-          i.classification,
-        ) &&
-        (!objectDesignSuggestion(i.action) ||
-          ["overall", "composition"].includes(i.domain)) &&
-        (i.classification === "stylistic_alternative" ||
-          variableStudy(i.action)),
-    ),
+    insights
+      .map((i) =>
+        ["study_experiment", "stylistic_alternative"].includes(i.classification)
+          ? {
+              ...i,
+              lesson: neutralStudyText(
+                i.lesson,
+                (claim) =>
+                  supportsPractice(claim) ||
+                  supportsTeachingLimitation(value, [i], claim),
+              ),
+              action: neutralStudyText(
+                i.action,
+                (claim) =>
+                  supportsPractice(claim) ||
+                  supportsTeachingLimitation(value, [i], claim),
+              ),
+            }
+          : i,
+      )
+      .filter(
+        (i) =>
+          i.lesson.trim() &&
+          i.action.trim() &&
+          ["study_experiment", "stylistic_alternative"].includes(
+            i.classification,
+          ) &&
+          (!objectDesignSuggestion(i.action) ||
+            ["overall", "composition"].includes(i.domain)) &&
+          (i.classification === "stylistic_alternative" ||
+            variableStudy(i.action)),
+      ),
   )
     .filter(
       (i) =>
@@ -357,16 +407,51 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
         ),
     )
     .map((i) => i.id);
-  const surviving = recommendations.map((r) => r.insight);
-  const displaySource = finalCoachingDisplay(value, surviving);
+  const displayedGuidance = [...surviving, ...selectedStudies];
+  // Notes/evidence must use the same neutralized study copy as its card.
+  const displaySource = finalCoachingDisplay(
+    {
+      ...value,
+      canonicalAnalysis: {
+        ...c,
+        insights: c.insights.map(
+          (i) => selectedStudies.find((study) => study.id === i.id) ?? i,
+        ),
+        visualEvidence: c.visualEvidence?.map((e) => {
+          const study = selectedStudies.find((i) => i.id === e.insightId);
+          return study
+            ? {
+                ...e,
+                note: {
+                  ...e.note,
+                  shortInstruction: neutralStudyText(
+                    typeof e.note.shortInstruction === "string"
+                      ? e.note.shortInstruction
+                      : "",
+                    (claim) =>
+                      supportsPractice(claim) ||
+                      supportsTeachingLimitation(value, [study], claim),
+                  ),
+                },
+              }
+            : e;
+        }),
+      },
+    },
+    displayedGuidance,
+  );
   const cleanStrength = (i: PaintingInsight) => ({
     ...i,
-    lesson: supportedExplanation(value, surviving, i.lesson),
-    action: supportedExplanation(value, surviving, i.action),
+    lesson: strengthTeachingText(
+      supportedExplanation(value, displayedGuidance, i.lesson),
+    ),
+    action: strengthTeachingText(
+      supportedExplanation(value, displayedGuidance, i.action),
+    ),
   });
   return {
     displaySource,
-    assessment: assessCoaching(value, surviving, distinct),
+    assessment: assessCoaching(value, displayedGuidance, safeIssues),
     noteExcludedInsightIds,
     omittedInsightIds,
     status,
