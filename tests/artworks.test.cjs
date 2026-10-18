@@ -337,3 +337,36 @@ test("external URLs and traversal paths are never sent to private storage for si
   assert.deepEqual(state.signs, []);
   assert.equal(await api.imageUrl(`${userId}/painting.png`), "https://example.invalid/temporary-image");
 });
+
+for (const code of ["unsupported_artwork", "artwork_uncertain", "crop_needed"])
+  test(`definite semantic ${code} cleans upload and prevents resending same rejected preparation`, async () => {
+    const { api, state } = fixture({ edgeStatus: 400, edgeCode: code });
+    const attempt = api.createSaveAttempt();
+    await assert.rejects(
+      api.saveArtwork("improve_painting", null, image, attempt),
+      (e) => e.code === code && !e.message.includes("private"),
+    );
+    assert.equal(state.edges.length, 1);
+    assert.equal(state.removals.length, 1);
+    assert.equal(attempt.mayHaveSaved, false);
+    assert.equal(attempt.imagePath, undefined);
+    await assert.rejects(
+      api.saveArtwork("improve_painting", null, image, attempt),
+      (e) => e.code === code,
+    );
+    assert.equal(state.edges.length, 1);
+    assert.equal(state.uploads.length, 1);
+  });
+
+test("semantic rejection after a lost completion preserves recovery ID and uploaded bytes", async()=>{
+ const {api,state}=fixture({edgeResponses:[{data:null,error:true},rejection(400,'crop_needed'),liveSuccess]});
+ const attempt=api.createSaveAttempt(),id=attempt.id;
+ await assert.rejects(api.saveArtwork('improve_painting',null,image,attempt),/Check My Artworks/);
+ const savedPath=attempt.imagePath;
+ await assert.rejects(api.saveArtwork('improve_painting',null,image,attempt),/Check My Artworks/);
+ assert.equal(attempt.id,id);assert.equal(attempt.imagePath,savedPath);assert.equal(attempt.rejectedCode,undefined);assert.equal(state.removals.length,0);
+ await api.saveArtwork('improve_painting',null,image,attempt);assert.equal(state.uploads.length,1);
+});
+test("prepared cropped bytes are uploaded unchanged without fetching or uploading their source",async()=>{
+ const {api,state}=fixture();await api.saveArtwork('improve_painting',null,{uri:'blob:crop-only',bytes:png,width:1,height:1});assert.equal(state.fetches,0);assert.equal(state.uploads.length,1);assert.deepEqual(new Uint8Array(state.uploads[0].bytes),png);
+});

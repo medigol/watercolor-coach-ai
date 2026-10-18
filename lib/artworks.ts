@@ -1,4 +1,9 @@
 import {
+  isArtworkGateCode,
+  artworkGateMessages,
+  type ArtworkGateCode,
+} from "../shared/artworkEligibility";
+import {
   hasPaintingAnalysis,
   validPaintingAnalysis,
   type PaintingAnalysisResult,
@@ -24,6 +29,12 @@ export const validationFeedbackErrorMessage =
 const signInMessage = "Your session has expired. Please sign in again.";
 const busyMessage =
   "Your painting is already being analysed. Check My Artworks in a moment.";
+export class ArtworkEligibilityError extends Error {
+  constructor(public readonly code: ArtworkGateCode) {
+    super(artworkGateMessages[code]);
+    this.name = "ArtworkEligibilityError";
+  }
+}
 export function createSaveAttempt(): SaveAttempt {
   return { id: requestId() };
 }
@@ -32,6 +43,7 @@ export interface SaveAttempt {
   ownerId?: string;
   imagePath?: string | null;
   mayHaveSaved?: boolean;
+  rejectedCode?: ArtworkGateCode;
 }
 function requestId() {
   // This is an idempotency identifier, never a credential or an access token.
@@ -85,6 +97,10 @@ export interface ArtworkImage {
   uri: string;
   mimeType?: string | null;
   fileSize?: number;
+  width?: number;
+  height?: number;
+  /** Client-local prepared bytes, never saved in result JSON. */
+  bytes?: Uint8Array;
 }
 export interface SavedArtwork {
   id: string;
@@ -146,6 +162,8 @@ export async function saveArtwork(
   image?: ArtworkImage,
   attempt: SaveAttempt = createSaveAttempt(),
 ) {
+  if (attempt.rejectedCode)
+    throw new ArtworkEligibilityError(attempt.rejectedCode);
   const client = requireSupabase();
   let identity: Awaited<ReturnType<typeof client.auth.getUser>>;
   try {
@@ -188,7 +206,9 @@ export async function saveArtwork(
         uploadMessage = "Choose an image smaller than 10 MB, then try again.";
         throw new Error("Image too large");
       }
-      const response = await fetch(image.uri);
+      const response = image.bytes
+        ? new Response(image.bytes.slice().buffer)
+        : await fetch(image.uri);
       if (!response.ok) throw new Error("Image unavailable");
       const size = Number(response.headers.get("content-length"));
       if (Number.isFinite(size) && size > imageLimit) {
@@ -230,6 +250,7 @@ export async function saveArtwork(
   let edgeStarted = false;
   let edgeMayHaveSaved = attempt.mayHaveSaved ?? false;
   let message = liveFeedbackErrorMessage;
+  let eligibilityCode: ArtworkGateCode | undefined;
   try {
     await checkAccount();
     // Retries reuse this ID and upload so Edge can return an already-saved
@@ -285,7 +306,17 @@ export async function saveArtwork(
         .clone()
         .json()
         .catch(() => null);
-      if (problem?.code === "usage_limit") message = freeLimitMessage;
+      if (context.status === 400 && isArtworkGateCode(problem?.code)) {
+        if (attempt.mayHaveSaved) {
+          // Contradicts an earlier lost response. Preserve identity and bytes
+          // for existing-result recovery, never delete or mark it terminal.
+          message = serviceFeedbackErrorMessage;
+        } else {
+          eligibilityCode = problem.code;
+          message = artworkGateMessages[problem.code as ArtworkGateCode];
+          attempt.rejectedCode = eligibilityCode;
+        }
+      } else if (problem?.code === "usage_limit") message = freeLimitMessage;
       else if (problem?.code === "auth" || context.status === 401)
         message = signInMessage;
       else if (problem?.code === "busy") message = busyMessage;
@@ -310,6 +341,7 @@ export async function saveArtwork(
         .remove([path])
         .catch(() => {});
     }
+    if (eligibilityCode) throw new ArtworkEligibilityError(eligibilityCode);
     throw new Error(
       (message === liveFeedbackErrorMessage ||
         message === serviceFeedbackErrorMessage) &&

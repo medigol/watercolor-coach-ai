@@ -106,8 +106,8 @@ for (const [name, mutate] of [
       ),
     );
     assert(
-      models[0].body.response_format.json_schema.schema.properties.overall
-        .properties.facts,
+      models[0].body.response_format.json_schema.schema.properties.analysis
+        .properties.overall.properties.facts,
     );
     const completed = f.calls.filter((c) =>
       c.path.endsWith("/complete_openai_feedback"),
@@ -324,7 +324,18 @@ function fixture(options = {}) {
             message: {
               content: options.invalidJSON
                 ? "{invalid json"
-                : JSON.stringify(modelResult),
+                : JSON.stringify(
+                    options.envelope ??
+                      (options.mode === "create_reference"
+                        ? modelResult
+                        : {
+                            eligibility: {
+                              status: "accepted",
+                              reason_code: null,
+                            },
+                            analysis: modelResult,
+                          }),
+                  ),
               refusal: options.refusal ? "declined" : null,
             },
           },
@@ -346,12 +357,27 @@ function fixture(options = {}) {
       assert.equal(url.searchParams.get("artwork_id"), `eq.${id}`);
       return json(stored);
     }
+    if (url.pathname === "/rest/v1/artworks") {
+      assert.equal(headers.get("authorization"), "Bearer user-session");
+      assert.equal(url.searchParams.get("user_id"), `eq.${uid}`);
+      assert.equal(url.searchParams.get("image_url"), `eq.${uid}/painting.png`);
+      if(options.referenceCheckFails) return json({message:"private read failure"},503);
+      return json(options.savedImageReference ? [{id:"30000000-0000-4000-8000-000000000001"}] : []);
+    }
     if (url.pathname === "/rest/v1/usage_counters") {
       assert.equal(headers.get("authorization"), "Bearer user-session");
       return json({
         free_results_used: options.quota ? 3 : 0,
         free_results_limit: 3,
       });
+    }
+    if (
+      url.pathname === "/storage/v1/object/artworks" &&
+      init.method === "DELETE"
+    ) {
+      assert.equal(headers.get("authorization"), "Bearer user-session");
+      assert.deepEqual(body.prefixes, [`${uid}/painting.png`]);
+      return json([]);
     }
     if (url.pathname.startsWith("/storage/v1/object/artworks/")) {
       assert.equal(headers.get("authorization"), "Bearer user-session");
@@ -536,11 +562,10 @@ for (const [name, options] of [
   test(`actual Edge SDK runtime: ${name} returns live failure without any mock save`, async () => {
     const f = fixture(options);
     const r = await f.run();
-    assert.equal(r.status, options.invalidJSON ? 422 : 503);
+    assert.equal(r.status, 503);
     const value = await r.json();
     assert.deepEqual(value, {
       code: "unavailable",
-      ...(options.invalidJSON ? { reason_code: "provider_structure" } : {}),
       message: "Live AI feedback could not be prepared. Please try again.",
     });
     assert(!JSON.stringify(value).includes("private"));
@@ -1716,3 +1741,92 @@ for (const malformed of [false, true])
     );
     assert(!f.calls.some((c) => c.path.includes("save_mock")));
   });
+
+for (const [status, code] of [
+  ["rejected", "unsupported_artwork"],
+  ["uncertain", "artwork_uncertain"],
+  ["uncertain", "crop_needed"],
+]) {
+  test(`actual Edge eligibility ${code}: one paid call, zero successful quota, release claim`, async () => {
+    const f = fixture({
+      envelope: { eligibility: { status, reason_code: code }, analysis: null },
+    });
+    const r = await f.run();
+    assert.equal(r.status, 400);
+    const v = await r.json();
+    assert.equal(v.code, code);
+    assert(!JSON.stringify(v).includes("PRIVATE"));
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert.equal(
+      f.calls.filter((c) => c.path.endsWith("/complete_openai_feedback"))
+        .length,
+      0,
+    );
+    assert.equal(
+      f.calls.filter((c) => c.path.endsWith("/release_feedback_request"))
+        .length,
+      1,
+    );
+    assert.equal(
+      f.calls.filter(
+        (c) => c.path === "/storage/v1/object/artworks" && c.body?.prefixes,
+      ).length,
+      1,
+    );
+    assert.deepEqual(f.diagnostics, []);
+  });
+}
+for (const envelope of [
+  {},
+  { eligibility: { status: "accepted", reason_code: null }, analysis: null },
+  {
+    eligibility: { status: "rejected", reason_code: "unsupported_artwork" },
+    analysis: providerDraftFixture(),
+  },
+  {
+    eligibility: { status: "uncertain", reason_code: "PRIVATE" },
+    analysis: null,
+  },
+])
+  test("actual Edge rejects malformed/contradictory eligibility as 503, never canonical 422 or success", async () => {
+    const f = fixture({ envelope });
+    const r = await f.run();
+    assert.equal(r.status, 503);
+    assert.equal(
+      f.calls.filter((c) => c.path === "/v1/chat/completions").length,
+      1,
+    );
+    assert(!f.calls.some((c) => c.path.endsWith("/complete_openai_feedback")));
+    assert(f.calls.some((c) => c.path.endsWith("/release_feedback_request")));
+  });
+
+// These are mocked provider dispositions, NOT empirical medium recognition.
+for (const kind of ['scanned watercolor','cropped framed watercolor','desk artwork isolated from brush','integral white margin','watercolor work in progress','loose abstract watercolor','monochrome dark watercolor','photorealistic watercolor','sketchbook watercolor']) {
+ test(`mocked accepted ${kind} passes one-call gate and saves v1 once`,async()=>{
+  const draft=providerDraftFixture();draft.title=kind;
+  const f=fixture({draft,envelope:{eligibility:{status:'accepted',reason_code:null},analysis:draft}});
+  assert.equal((await f.run()).status,200);
+  assert.equal(f.calls.filter(c=>c.path==='/v1/chat/completions').length,1);
+  assert.equal(f.calls.filter(c=>c.path.endsWith('/complete_openai_feedback')).length,1);
+ });
+}
+for (const [kind,code] of [
+ ['selfie','unsupported_artwork'],['landscape photo','unsupported_artwork'],['animal photo','unsupported_artwork'],['house photo','unsupported_artwork'],['vehicle photo','unsupported_artwork'],['screenshot with tiny artwork','unsupported_artwork'],['document or image prompt injection','unsupported_artwork'],['empty paper','unsupported_artwork'],['palette and tools only','unsupported_artwork'],['multiple separate paintings','crop_needed'],['tiny art in room','crop_needed'],['ambiguous oil or acrylic','artwork_uncertain'],['digital watercolor style or printed reproduction','artwork_uncertain'],
+]) test(`mocked ${kind} outcome is safe, unpersisted and quota-free`,async()=>{
+ const f=fixture({envelope:{eligibility:{status:code==='unsupported_artwork'?'rejected':'uncertain',reason_code:code},analysis:null}});
+ const r=await f.run();assert.equal(r.status,400);assert.equal((await r.json()).code,code);assert.equal(f.calls.filter(c=>c.path==='/v1/chat/completions').length,1);assert(!f.calls.some(c=>c.path.endsWith('/complete_openai_feedback')));assert(f.calls.some(c=>c.path.endsWith('/release_feedback_request')));
+});
+for(const level of ['strong','developing'])test(`deeper ${level} teaching survives the real SDK canonical save in one call`,async()=>{
+ const draft=require('./helpers/deep-coaching-fixture.cjs')(level),f=fixture({draft});assert.equal((await f.run()).status,200);const saved=f.calls.find(c=>c.path.endsWith('/complete_openai_feedback')).body.p_result;assert.equal(saved.canonicalAnalysis.version,1);assert.equal(saved.canonicalAnalysis.qualityAssessment.level,level);assert(saved.expertViews.overall.practice.includes('two versions'));assert.equal(f.calls.filter(c=>c.path==='/v1/chat/completions').length,1);
+});
+
+for(const option of ['savedImageReference','referenceCheckFails'])test(`semantic rejection preserves source on ${option}`,async()=>{
+ const f=fixture({[option]:true,envelope:{eligibility:{status:'uncertain',reason_code:'crop_needed'},analysis:null}});assert.equal((await f.run()).status,400);
+ assert.equal(f.calls.filter(c=>c.path==='/storage/v1/object/artworks').length,0);
+ assert.equal(f.calls.filter(c=>c.path==='/v1/chat/completions').length,1);
+ assert(!f.calls.some(c=>c.path.endsWith('/complete_openai_feedback')));
+ assert(f.calls.some(c=>c.path.endsWith('/release_feedback_request')));
+});

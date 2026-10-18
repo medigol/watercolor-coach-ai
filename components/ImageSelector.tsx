@@ -1,3 +1,4 @@
+import PaintingImageSelector from "./PaintingImageSelector";
 import { useState } from "react";
 import { Image, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -13,10 +14,15 @@ export default function ImageSelector({
 }: {
   sample?: string;
   label: string;
-  onSelect?: (image: ArtworkImage) => void;
+  onSelect?: (image: ArtworkImage | undefined) => void;
   painting?: boolean;
   disabled?: boolean;
 }) {
+  if (painting) return <PaintingImageSelector onSelect={onSelect} disabled={disabled} />;
+  return <PhotoSelector sample={sample} label={label} onSelect={onSelect} disabled={disabled} />;
+}
+function PhotoSelector({sample,label,onSelect,disabled=false}:{sample?:string;label:string;onSelect?:(image:ArtworkImage|undefined)=>void;disabled?:boolean}){
+  const painting = false;
   const [uri, setUri] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();

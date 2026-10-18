@@ -30,7 +30,8 @@ function fixture() {
       const at = index++;
       if (values[at] === undefined) {
         values[at] = true;
-        cleanup = effect();
+        const result = effect();
+        if (typeof result === "function") cleanup = result;
       }
     },
   };
@@ -49,6 +50,7 @@ function fixture() {
       useAuth: () => ({ session: { user: { id: account } } }),
     },
     "../lib/artworks": {
+      ArtworkEligibilityError: class extends Error {},
       liveFeedbackErrorMessage: "Live AI feedback could not be prepared. Please try again.",
       createSaveAttempt: () => ({ id: `request-${++next}` }),
       saveArtwork: (...args) =>
