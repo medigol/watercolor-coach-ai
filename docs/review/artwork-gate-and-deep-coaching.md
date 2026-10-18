@@ -75,3 +75,43 @@ Repository: `medigol/watercolor-coach-ai`; branch: `codex/artwork-gate-and-deep-
 - Run full existing unit+integration, TypeScript frontend/strict Edge, configured/unconfigured export, browser responsive 375/390/430/768/1024/1440/1800, 401/403/409/422/503, quota/dedup/lost-response, plus mobile static/manual readiness. No skipped tests silently.
 - Before implementation, write a short engineering plan and explicit cost/schema/risk decisions; then implement, do not stop at planning.
 - Stay on branch; no PR, merge, deployment. Report exact files +/- counts, test count/new, validation, single-call gate, zero-cost crop flow, reject/quota cleanup, accepted output quality, token/cost estimate, caveats (including no guarantee free photo-vs-painting classifier), and live acceptance steps. Do NOT claim production success from mocks.
+
+
+## Mandatory final-review additions — 2026-10-18 (override ambiguity above)
+
+### Boundary detection versus image semantic detection
+- **Never conflate** deterministic crop geometry with watercolor/photo classification. A rectangular image with watercolor-like colours may be a normal photo. Free local processing is for safe geometry/quality only; the single model call is for semantic assessment.
+- A simple edge detector is NOT a reliable artwork detector; do not promise fully automatic border exclusion. Only propose auto crop for strongly distinguishable high-confidence boundaries and always preview/confirm when removing source pixels. Manual crop is the reliable fallback.
+- The crop editor must respect orientation and source pixel dimensions on web AND native; preserve true aspect ratio, check naturalWidth/naturalHeight versus rendered display, and never map overlay coordinates against the uncropped source image.
+
+### Idempotency and retention safeguards
+- Distinguish **local preflight rejection (0 provider calls)** from **semantic rejection (1 paid provider call, 0 successful quota)**. Do not claim zero provider cost on semantic rejection.
+- Semantic rejection should return a **machine-readable error code distinct from canonical 422**, ideally a bounded content-validation response (HTTP 400 with `code: unsupported_artwork|artwork_uncertain|crop_needed` after compatibility review). Ensure old client code does not present the error as quota failure or generic provider 503. Keep auth 401, quota 403, busy 409, canonical 422, provider 503 semantics.
+- Don't complete/save/reuse a rejected request as an accepted analysis. Don't automatically retry rejected or uncertain image. A new confirmed crop/photo is a new attempt. Avoid duplicate charges for button double tap, preserve lost-response same-ID recovery, and only delete source bytes when rejection is definite and no successful result exists. Reject stale or contradictory outcomes.
+- If there is no persisted rejection-cache (and adding one would require SQL), **do not promise server-level dedup of rejected attempts across sessions**; stop automatic resubmission in the UX instead and document the limitation.
+
+### Image classification policy precision
+- Watercolor WIP and poor-quality watercolors are valid artwork, not rejected for lack of realism/completion. Abstract/monochrome/photo-real watercolor should be accepted when reasonably identifiable. Photos OF art and scanned art count as art.
+- For photographs of paintings that may be oil/acrylic/digital/mixed medium, avoid asserting medium with certainty. Explicitly distinguish watercolor-dominant versus uncertain medium; conservative `uncertain` beats a false `rejected` if ambiguous.
+- Tiny artwork in a large room or multiple separate artworks must require isolation first. A clearly visible complete artwork occupying most of the submitted image may proceed without unnecessary manual crop.
+- Local quality gate must not reject original artwork for intentional white negative space, unusual paper colour, minimal/abstract styles, square, panoramic format, dark painting, or deliberate textured marks. Prevent prompt injection from image text.
+
+### Response schema and bounded output
+- Validate strict JSON Schema feasibility BEFORE implementing accepted/rejected/uncertain branching: all required fields, nullable optional payload, no forbidden root anyOf; model output acceptance must be normalized FIRST by eligibility before existing draft validation. Non-accepted outcomes are NOT 422 or fabricated full drafts.
+- The existing exact persisted v1 result schema must remain; internal response envelope can change, but avoid expanding persisted field set. No extra provider calls, retries or automatic token-cap changes.
+- Longer instructional output and 3000 completion tokens can conflict. Assess JSON overhead and live-length needs; aim for maximum **useful supported specificity**, not a mandatory word count. If the budget reliably truncates, report measured `finish_reason=length` and propose a separately approved ceiling/cost estimate; do not silently increase cap. Preserve 640-character rationale/practice limits unless expressly justified and backward compatible.
+- A Strong painting can still receive **one optional neutral, evidence-grounded controlled-variable study**. The coaching must not invent a flaw, fabricate an artist's process, or fill all sections with boilerplate. If no valid evidence exists, do not fabricate an exercise; present an honest concise no-study state.
+
+### Upload user experience and security
+- No cropping needed when the artwork already fills the image. For likely external frame/table/wall: crop selection and confirmation precede upload/provider spend. Clearly distinguish `Choose another`, `Adjust crop`, `Analyse painting`.
+- Only validated decoded cropped analysis bytes should be uploaded; avoid storing a redundant original full-room photo. Strip sensitive EXIF/GPS metadata where feasible without affecting orientation/appearance, document platform differences. Do not enable screenshots/photographs from Create Reference to be rejected.
+- Resource constraints: decoded pixel count (decompression bomb), maximum dimensions and exported byte size, mobile memory, alpha/white matte handling, no colour cast, no accidental blur, no crop that removes genuine painted content. Avoid new large CV/ML dependencies.
+- Web touch/click and native touch should both be tested realistically; simulated browser tests do not prove native Android/iOS crop, so list native manual checks as incomplete rather than claiming success.
+
+### Extended must-pass end-to-end tests
+- Provider outcomes accepted/rejected/uncertain, malformed eligibility enum, accepted missing draft, rejected non-null fake draft, contradictory status, provider refusal, timeout/length, bounded error mappings and sanitized logging.
+- Quota: accepted 1 success, rejected/uncertain 0 success, local invalid 0 calls, semantic rejected exactly 1 call, no auto retry. Check claim release on all exits, no leaked/orphaned storage after definite reject, no user data leakage.
+- Crop: preview/confirm/reset, rotation, high-DPI coordinates, pixel aspect, scroll/zoom, alpha, file size, phones, browser, no distortion, upload only cropped bytes, stored result overlay coordinates correspond to cropped bytes.
+- Native browser differences: web PNG/JPEG, Android/iOS file URI and image picker, Expo SDK 54; explicitly identify untested native paths.
+- Coaching: a strong result with meaningful optional practice, a developing result with clear evidence-supported guidance, correct technique observation vs suggested process, no duplicated praise, useful compositional/colour-value principles, no stale source-area references after crop.
+- Provide 2–3-stage implementation commits within the SAME branch to isolate eligibility/crop from coaching changes; run relevant tests after each and full suite before push. No feature rollout/deployment yet. Do not invent test success or assert live artistic quality.
