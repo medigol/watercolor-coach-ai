@@ -2,7 +2,7 @@ export const colors = {
   background: "#F5F3ED",
   paper: "#FFFEFB",
   ink: "#253C3C",
-  muted: "#617473",
+  muted: "#5C6F6D",
   accent: "#236963",
   pale: "#E8F3ED",
   border: "#DDE3DD",
