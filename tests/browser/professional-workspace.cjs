@@ -850,6 +850,7 @@ let signalFeedbackHeld;
   releaseFeedback();
   await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
   assert.equal(await page.getByRole("heading",{name:"Complete Painting Analysis",level:1,exact:true}).count(),1,"saved critique needs a navigable main heading");
+  assert.equal(await page.getByTestId("overall-assessment").getByRole("heading",{name:"Highly resolved painting",level:2,exact:true}).count(),1,"assessment needs a navigable section heading");
   assert.equal(await page.getByRole("heading",{name:"What works",level:2,exact:true}).count(),1,"strengths need a navigable section heading");
   assert.equal(edgeCalls, 1);
   assert.equal(used, 1);
@@ -1782,6 +1783,7 @@ let signalFeedbackHeld;
     .getByTestId("recommendation-0")
     .getByTestId("teaching-evidence")
     .waitFor();
+  assert.equal(await page.getByRole("heading",{name:"How to elevate this painting",level:2,exact:true}).count(),1,"recommendations need a navigable section heading");
   const beforeEvidence = snapshot();
   const recommendation = page.getByTestId("recommendation-0");
   const crops = recommendation.getByTestId("evidence-crop");
@@ -1807,6 +1809,12 @@ let signalFeedbackHeld;
     await page.getByTestId("recommendation-0").waitFor();
     for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
       await page.setViewportSize({ width, height: 1000 });
+      // The old stacked layout can still fit immediately after a resize,
+      // before useWindowDimensions commits the desktop column breakpoint.
+      // Wait for that breakpoint first, then the evidence's onLayout measure.
+      await page
+        .getByTestId(width >= 1024 ? "result-columns" : "result-stack")
+        .waitFor();
       await open("Colour & Value");
       const before = snapshot();
       const card = page.getByTestId("recommendation-0");
@@ -1819,13 +1827,19 @@ let signalFeedbackHeld;
       // setViewportSize fires before RN's useWindowDimensions + onLayout
       // updates have committed. Assert the same bounds after that layout settles,
       // with a bounded wait; a persistent crop overflow still fails this check.
-      await page.waitForFunction(({width})=>{
-        const crops=[...document.querySelectorAll('[data-testid="recommendation-0"] [data-testid="evidence-crop"]')];
-        return crops.length===2&&crops.every(el=>{
-          const r=el.getBoundingClientRect();
-          return r.left>=0&&r.right<=width+1&&r.width>=32&&r.height>=32;
-        });
-      },{width},{timeout:10000});
+      await page.waitForFunction(
+        ({ width }) => {
+          const crops = [...document.querySelectorAll(
+            '[data-testid="recommendation-0"] [data-testid="evidence-crop"]',
+          )];
+          return crops.length === 2 && crops.every((el) => {
+            const r = el.getBoundingClientRect();
+            return r.left >= 0 && r.right <= width + 1 && r.width >= 32 && r.height >= 32;
+          });
+        },
+        { width },
+        { timeout: 10000 },
+      );
       const boxes = await card.getByTestId("evidence-crop").evaluateAll((els) =>
         els.map((el) => {
           const r = el.getBoundingClientRect();
