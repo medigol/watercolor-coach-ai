@@ -3,7 +3,7 @@
   "user": "ccceff1c915cb6a2562c3c75169616be098e90c58135e0151de3ee9e58192869",
   "schema": "df3c291786bb79cdc13762bf5b645a90ad1cf589ccacb70b23a9947adfc4d3f4",
   "sources": {
-    "lib/prepareArtwork.ts": "2afef2354ba7f5df325a3b73bc0cc83269c3ed0156c37d2b478c956a445fb350",
+    "lib/prepareArtwork.ts": "59eaba1f7d7a762eeb2df4a195acee1598502c9cac79ffec00792c3e83a02801",
     "shared/artworkEligibility.ts": "1a2188d1e33afd5140b55fa84fddbb384cf72ad5a8d5fffab1f379388a08b901",
     "shared/artworkPreparation.ts": "17a6b2fc5d64fe66f59914f6ef0eeeca248373a7567a6aa224a3bedc55328fd6",
     "shared/coachingAlignment.ts": "929d6506fa313245366fb4d126b303246a84d73c9195262989eb67f30cda9573",

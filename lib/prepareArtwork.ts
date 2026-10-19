@@ -105,16 +105,20 @@ async function webPreparation(
     );
     sample.width = sample.height = 1;
     const exports: string[] = [];
+    let disposed = false;
     return {
       uri,
       width,
       height,
       proposal,
       dispose() {
+        disposed = true;
         URL.revokeObjectURL(uri);
         exports.forEach((u) => URL.revokeObjectURL(u));
       },
       async export(region) {
+        if (disposed)
+          throw new Error("This image is no longer selected. Choose it again.");
         const p = cropPixels(region, { width, height }),
           size = outputDimensions(p),
           c = canvas(size.width, size.height),
@@ -143,6 +147,10 @@ async function webPreparation(
         c.width = c.height = 1;
         if (b.size > preparationLimits.bytes) throw new Error(tooLarge);
         const data = await blobBytes(b);
+        // Encoding and byte reads can finish after navigating away or replacing
+        // the source. Do not resurrect a disposed private blob URL.
+        if (disposed)
+          throw new Error("This image is no longer selected. Choose it again.");
         const output = checkedOutput(data, "", size.width, size.height);
         const u = URL.createObjectURL(b);
         // A confirmed replacement is a new preparation. Keep only its output;

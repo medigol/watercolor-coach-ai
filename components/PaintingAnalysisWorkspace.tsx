@@ -493,7 +493,11 @@ export default function PaintingAnalysisWorkspace({
       >
         OVERALL ASSESSMENT
       </Text>
-      <Text style={styles.heading}>
+      <Text
+        accessibilityRole="header"
+        {...(Platform.OS === "web" ? { "aria-level": 2 } : {})}
+        style={styles.heading}
+      >
         {
           {
             highly_resolved: "Highly resolved",
@@ -532,6 +536,8 @@ export default function PaintingAnalysisWorkspace({
             WATERCOLOR COACH · {isSaved ? "SAVED ANALYSIS" : "PAINTING STUDY"}
           </Text>
           <Text
+            accessibilityRole="header"
+            {...(Platform.OS === "web" ? { "aria-level": 1 } : {})}
             style={[
               styles.title,
               width < 600 ? { fontSize: 23, lineHeight: 29 } : undefined,
@@ -705,7 +711,13 @@ export default function PaintingAnalysisWorkspace({
             {assessment}
             {!!teaching.strengths.length && (
               <View style={{ gap: 12 }}>
-                <Text style={styles.heading}>What works</Text>
+                <Text
+                  accessibilityRole="header"
+                  {...(Platform.OS === "web" ? { "aria-level": 2 } : {})}
+                  style={styles.heading}
+                >
+                  What works
+                </Text>
                 {teaching.strengths.map((i) => (
                   <View
                     key={i.id}
@@ -727,7 +739,13 @@ export default function PaintingAnalysisWorkspace({
             )}
             {!!teaching.recommendations.length && (
               <View testID="elevation-recommendations" style={{ gap: 18 }}>
-                <Text style={styles.heading}>How to elevate this painting</Text>
+                <Text
+                  accessibilityRole="header"
+                  {...(Platform.OS === "web" ? { "aria-level": 2 } : {})}
+                  style={styles.heading}
+                >
+                  How to elevate this painting
+                </Text>
                 {teaching.recommendations.map(({ insight, label }, index) => (
                   <View
                     key={insight.id}
