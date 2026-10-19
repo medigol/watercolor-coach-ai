@@ -831,3 +831,26 @@ test("every-call source verification detects drift without recompiling or changi
   changed.sources["lib/prepareArtwork.ts"] = "not-the-locked-source";
   assert.throws(() => verifyProductionFiles(changed));
 });
+
+test('lost cost journal cannot silently restart an existing paid experiment',async t=>{
+ const f=fixture(t),calls=[];await run({...f,live:true,confirmCost:true},mockTransport(calls),env);
+ fs.unlinkSync(path.join(f.output,'ledger.jsonl'));
+ await assert.rejects(run({...f,live:true,confirmCost:true},mockTransport(calls),env),/journal|ledger/i);
+ assert.equal(calls.length,12);
+});
+
+test('an unbound pre-existing journal cannot be adopted by another experiment',async t=>{
+ const f=fixture(t),calls=[];fs.mkdirSync(f.output);fs.writeFileSync(path.join(f.output,'ledger.jsonl'),'');
+ await assert.rejects(run({...f,live:true,confirmCost:true},mockTransport(calls),env),/unbound|journal/i);assert.equal(calls.length,0);
+});
+
+for(const corruption of ['empty','valid-prefix','changed-cost','missing-checkpoint'])test('corrupted request accounting fails closed: '+corruption,async t=>{
+ const f=fixture(t),calls=[];await run({...f,live:true,confirmCost:true},mockTransport(calls),env);
+ const file=path.join(f.output,'ledger.jsonl'),original=fs.readFileSync(file,'utf8');
+ if(corruption==='empty')fs.writeFileSync(file,'');
+ else if(corruption==='valid-prefix')fs.writeFileSync(file,original.trim().split('\n').slice(0,4).join('\n')+'\n');
+ else if(corruption==='changed-cost')fs.writeFileSync(file,original.replace('"usd":','"usd":0,"original_usd":'));
+ else fs.writeFileSync(path.join(f.prepared,'live-output.json'),JSON.stringify({output:f.output}));
+ await assert.rejects(run({...f,live:true,confirmCost:true},mockTransport(calls),env),/integrity|checkpoint|journal/i);
+ assert.throws(()=>report(f),/integrity|checkpoint|journal/i);assert.equal(calls.length,12);
+});

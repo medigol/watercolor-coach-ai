@@ -3,7 +3,12 @@ const fs = require("node:fs"),
   crypto = require("node:crypto");
 const { ARMS } = require("./models.cjs");
 const { lockedProduction } = require("./production.cjs");
-const { readPrepared, ledgerRead, charged } = require("./runner.cjs");
+const {
+  readPrepared,
+  ledgerRead,
+  charged,
+  verifyJournal,
+} = require("./runner.cjs");
 const {
   privateDir,
   writePrivate,
@@ -311,6 +316,7 @@ function report({ prepared, output, ratings }) {
     data = readPrepared(prepared, p),
     out = privateDir(output),
     events = ledgerRead(localFile(out, "ledger.jsonl"));
+  verifyJournal(prepared, out);
   const rows = events.filter((e) => e.kind === "result"),
     seed = fs.readFileSync(localFile(out, "blind-seed"), "utf8");
   const blind = (key) =>

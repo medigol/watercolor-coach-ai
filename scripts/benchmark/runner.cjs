@@ -214,6 +214,28 @@ function append(file, event) {
     fs.closeSync(fd);
   }
 }
+function checkpointJournal(journal, binding, output) {
+  writePrivate(binding, { output, ledgerHash: hash(fs.readFileSync(journal)) });
+  const fd = fs.openSync(binding, "r");
+  try {
+    fs.fsyncSync(fd);
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+function verifyJournal(prepared, output) {
+  const binding = JSON.parse(
+    fs.readFileSync(localFile(prepared, "live-output.json"), "utf8"),
+  );
+  const journal = localFile(output, "ledger.jsonl");
+  if (
+    binding.output !== external(output, true) ||
+    binding.ledgerHash !== hash(fs.readFileSync(journal))
+  )
+    throw Error(
+      "Cost journal integrity checkpoint mismatch; audit without issuing another request",
+    );
+}
 async function limitedJSON(response) {
   if (!response.body) throw Error("Invalid response");
   const reader = response.body.getReader();
@@ -267,7 +289,16 @@ async function run(options, transport = fetch, env = process.env) {
     external(options.prepared, true),
     "live-output.json",
   );
-  if (!fs.existsSync(binding)) writePrivate(binding, { output: out }, true);
+  if (fs.existsSync(binding) && !fs.existsSync(journal))
+    throw Error(
+      "The bound cost journal is missing; stop and audit prior billing without another request",
+    );
+  if (!fs.existsSync(binding) && fs.existsSync(journal))
+    throw Error(
+      "An unbound cost journal already exists; use its original experiment",
+    );
+  if (!fs.existsSync(binding))
+    writePrivate(binding, { output: out, ledgerHash: hash("") }, true);
   if (
     JSON.parse(
       fs.readFileSync(localFile(options.prepared, "live-output.json"), "utf8"),
@@ -305,6 +336,7 @@ async function run(options, transport = fetch, env = process.env) {
       );
     events = ledgerRead(journal);
     if (!fs.existsSync(journal)) writePrivate(journal, "", true);
+    verifyJournal(options.prepared, out);
     // Any unresolved request may have billed up to its reservation; it is NEVER
     // automatically replayed. Unknown accounting stops all further paid calls.
     if (
@@ -364,6 +396,7 @@ async function run(options, transport = fetch, env = process.env) {
           options.rates,
         );
         append(journal, reserve);
+        checkpointJournal(journal, binding, out);
         events.push(reserve); // Durable BEFORE request; network failure still burns this slot.
         const start = performance.now();
         let payload, row;
@@ -456,6 +489,7 @@ async function run(options, transport = fetch, env = process.env) {
           cropHeight: c.height,
         };
         append(journal, row);
+        checkpointJournal(journal, binding, out);
         events.push(row);
         if (row.accountingUnknown) {
           stopped = "unknown_or_exceeded_accounting";
@@ -482,6 +516,7 @@ module.exports = {
   readPrepared,
   plan,
   ledgerRead,
+  verifyJournal,
   charged,
   run,
   LIMIT,
