@@ -1,0 +1,83 @@
+{
+  "verified": false,
+  "checkedOn": "REPLACE-UTC-DATE",
+  "tier": "standard",
+  "currency": "USD",
+  "sources": [
+    "https://developers.openai.com/api/docs/models",
+    "https://developers.openai.com/api/docs/pricing",
+    "https://developers.openai.com/api/docs/guides/images-vision"
+  ],
+  "arms": {
+    "baseline_low": {
+      "model": "gpt-4.1-mini",
+      "detail": "low",
+      "input": 0.4,
+      "output": 1.6,
+      "cached": null,
+      "cacheWrite": null,
+      "cacheWriteAccounting": "additive",
+      "maxImageTokens": null,
+      "imageBoundSource": "REPLACE with official model-family bound source",
+      "support": {
+        "chatCompletions": false,
+        "imageInput": false,
+        "strictJsonSchema": false,
+        "requiredNullableEnvelope": false
+      }
+    },
+    "baseline_high": {
+      "model": "gpt-4.1-mini",
+      "detail": "high",
+      "input": 0.4,
+      "output": 1.6,
+      "cached": null,
+      "cacheWrite": null,
+      "cacheWriteAccounting": "additive",
+      "maxImageTokens": null,
+      "imageBoundSource": "REPLACE with official model-family bound source",
+      "support": {
+        "chatCompletions": false,
+        "imageInput": false,
+        "strictJsonSchema": false,
+        "requiredNullableEnvelope": false
+      }
+    },
+    "candidate_mini": {
+      "model": "gpt-5.4-mini",
+      "detail": "high",
+      "input": 0.75,
+      "output": 4.5,
+      "cached": null,
+      "cacheWrite": null,
+      "cacheWriteAccounting": "additive",
+      "maxImageTokens": null,
+      "imageBoundSource": "REPLACE with official model-family bound source",
+      "support": {
+        "chatCompletions": false,
+        "imageInput": false,
+        "strictJsonSchema": false,
+        "requiredNullableEnvelope": false,
+        "reasoningNone": false
+      }
+    },
+    "candidate_luna": {
+      "model": "gpt-6-luna",
+      "detail": "high",
+      "input": 0.1,
+      "output": 0.5,
+      "cached": null,
+      "cacheWrite": null,
+      "cacheWriteAccounting": "additive",
+      "maxImageTokens": null,
+      "imageBoundSource": "REPLACE with official model-family bound source",
+      "support": {
+        "chatCompletions": false,
+        "imageInput": false,
+        "strictJsonSchema": false,
+        "requiredNullableEnvelope": false,
+        "reasoningNone": false
+      }
+    }
+  }
+}

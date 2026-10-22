@@ -1,0 +1,198 @@
+{
+  "date": "2026-10-19",
+  "branch": "codex/artwork-critique-release-candidate",
+  "recoveredHead": "dc61aaef83bcb8f1e40465d050404a4563fd2b64",
+  "productionBase": "95549eb44bc93812328d560e4a61ff21abebc47a",
+  "compositionAncestor": "9552c2f62a2dbb9f1b1e6c6918488c3fafd4906d",
+  "priorTaskCompleted": false,
+  "originalRequirements": 256,
+  "recoveryRequirements": 10,
+  "requirementStatusCounts": {
+    "PARTIAL": 62,
+    "COMPLETE": 200,
+    "UNVERIFIED": 3,
+    "BLOCKED": 1
+  },
+  "unitIntegration": {
+    "command": "npm test",
+    "passed": 1677,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "baselinePassed": 1663,
+    "newRegressions": 14
+  },
+  "focused": {
+    "command": "node --test tests/artwork-preparation.test.cjs tests/model-benchmark.test.cjs",
+    "passed": 120,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "frontendTypescript": "PASS",
+  "strictEdgeTypescript": "PASS",
+  "edgeDenoVersion": "2.5.4",
+  "configuredExport": "PASS",
+  "unconfiguredExport": "PASS",
+  "workspaceBrowser": {
+    "passed": true,
+    "matrixCases": 170,
+    "uploadFailureRetry": true,
+    "accessibleHeadings": true,
+    "authAccountJourney": true,
+    "runtimeErrors": 0,
+    "widths": [
+      375,
+      390,
+      430,
+      768,
+      1024,
+      1440,
+      1800
+    ],
+    "headingAssertions": [
+      "main H1",
+      "assessment quality heading H2",
+      "What works H2",
+      "recommendations H2"
+    ],
+    "matrixCounts": {
+      "preparationMatrix": 7,
+      "eligibilityMatrix": 3,
+      "matrix": 35,
+      "evidenceMatrix": 35,
+      "calibrationMatrix": 4,
+      "providerMatrix": 2,
+      "finalCalibrationMatrix": 7,
+      "liveFreezeMatrix": 21,
+      "finalFreezeFixMatrix": 21,
+      "analysisDepthMatrix": 7,
+      "cleanupMatrix": 7,
+      "semanticMatrix": 21
+    },
+    "mockedHttpTotals": {
+      "edgeCalls": 12,
+      "used": 3,
+      "rpcCalls": 0,
+      "reads": 115,
+      "uploads": 8,
+      "removed": 4
+    }
+  },
+  "rasterBrowser": {
+    "technicalCases": 39,
+    "passed": true,
+    "runtimeErrors": 0,
+    "nativeDeviceVerified": false
+  },
+  "unconfiguredBrowser": {
+    "routes": 8,
+    "passed": true,
+    "runtimeErrors": 0,
+    "externalRequests": 0
+  },
+  "benchmarkBrowser": {
+    "technicalFixtures": 6,
+    "passed": true,
+    "runtimeErrors": 0,
+    "providerRequests": 0,
+    "networkRequests": 0
+  },
+  "benchmarkDryRun": {
+    "paidRequests": 0,
+    "plannedSlots": 24,
+    "pricingVerified": false,
+    "worstCaseUSD": null,
+    "readyForLive": false
+  },
+  "localDatabase": {
+    "passed": true,
+    "engine": "PostgreSQL 16 cached Docker image",
+    "network": "none",
+    "schemaRuns": 2,
+    "sqlSuites": [
+      "supabase/tests/rls.sql",
+      "supabase/tests/feedback.sql"
+    ],
+    "independentSimultaneousClaims": [
+      "busy",
+      "claimed"
+    ],
+    "liveSupabaseServicesTested": false
+  },
+  "browser": "Chromium",
+  "nodeVersion": "24.19.0",
+  "npmVersion": "11.9.0",
+  "remainingConfirmedDefects": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "scope": "tested repository/Chromium behavior"
+  },
+  "realArtisticAcceptance": "UNVERIFIED",
+  "nativeDevices": "UNVERIFIED",
+  "SafariFirefox": "UNVERIFIED",
+  "deployedSupabasePolicies": "UNVERIFIED",
+  "currentPricingAndAccountCompatibility": "UNVERIFIED",
+  "paidCalls": 0,
+  "privateArtworkTransmissions": 0,
+  "productionDataChanges": 0,
+  "merged": false,
+  "deployed": false,
+  "verdict": "CONDITIONALLY READY",
+  "repositoryEngineeringComplete": true,
+  "fullFeatureReleaseAcceptanceClosed": false,
+  "validationArtifacts": "External /tmp/rc-* logs and technical screenshots; not committed or published",
+  "intermediateFailures": [
+    {
+      "test": "crop lifecycle and missing-journal reproduction",
+      "result": "expected pre-fix failures"
+    },
+    {
+      "test": "main heading reproduction",
+      "result": "expected pre-fix failure"
+    },
+    {
+      "test": "two resize measurements during stacked-to-column breakpoint",
+      "result": "failed before RN breakpoint/onLayout settled; wait for expected layout mode then strict bounds; synchronized full rerun passed"
+    },
+    {
+      "test": "shared muted text contrast",
+      "result": "pre-fix failure reproduced; minimally darker token; all six pairs pass"
+    },
+    {
+      "test": "additional assessment heading assertion",
+      "result": "incorrect caption selector failed; corrected to existing quality-level H2 within assessment; final complete rerun passed all four heading checks"
+    }
+  ],
+  "accessibilityContrast": {
+    "command": "node --test tests/accessibility.test.cjs",
+    "passed": 6,
+    "failed": 0,
+    "minimumNormalTextRatio": 4.5,
+    "originalMutedOnBackground": 4.448904641952858,
+    "originalMutedOnAssessment": 4.342808022592409,
+    "originalMuted": "#617473",
+    "fixedMuted": "#5C6F6D",
+    "verifiedMutedRatios": {
+      "background": 4.791703852629451,
+      "paper": 5.271773648779275,
+      "pale": 4.677432223845502,
+      "blue": 4.7516038546317025
+    }
+  },
+  "branchReconciliation": {
+    "remoteHeadsExaminedBeforePush": 33,
+    "allHeadsAncestors": true,
+    "missingObjects": [],
+    "nonAncestorHeads": []
+  },
+  "keyPatternScan": {
+    "trackedAndPendingFiles": 257,
+    "matchingFiles": 0,
+    "limitation": "Pattern scan is not proof of absence; source-boundary tests also pass."
+  },
+  "validationCompleted": true,
+  "sourceImplementationHead": "e689003105eb5472efb5c1fd204eb3c3456e7404"
+}

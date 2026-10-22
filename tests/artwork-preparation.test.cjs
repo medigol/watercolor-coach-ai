@@ -256,3 +256,23 @@ for(const size of [{width:12000,height:64},{width:8000,height:128}])test('panora
 test('Improve Painting web picker obtains bytes without decoding Expo metadata first',()=>{
  const s=fs.readFileSync(path.join(__dirname,'../lib/prepareArtwork.ts'),'utf8');const start=s.indexOf('export function pickWebArtwork');const picker=s.slice(start);assert(picker.includes('URL.createObjectURL(file)'));assert(picker.includes('file.size'));assert(!/new (?:window\.)?Image|\.decode\(|launchImageLibrary/.test(picker));
 });
+
+// Real web adapter with deterministic DOM decode/export boundaries. A pending
+// encoder must never allocate another private blob URI after source disposal.
+function webFixture() {
+ const created=[],revoked=[],pending=[];
+ const output={};
+ const dom={createElement(){return {width:0,height:0,getContext(){return {fillRect(){},drawImage(){},getImageData(){return {data:new Uint8ClampedArray(96*96*4)}}}},toBlob(done){pending.push(()=>done(new Blob([png(800,600)],{type:'image/png'})))}}}};
+ const code=ts.transpileModule(fs.readFileSync(path.join(__dirname,'../lib/prepareArtwork.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+ new Function('exports','require','fetch','document','window','URL',code)(output,n=>n==='react-native'?{Platform:{OS:'web'}}:n==='expo-image-manipulator'?{}:loadShared(n,'lib/prepareArtwork.ts'),async()=>new Response(png()),dom,{Image:class{naturalWidth=800;naturalHeight=600;async decode(){}}},{createObjectURL(){const uri='blob:technical-'+created.length;created.push(uri);return uri},revokeObjectURL(uri){revoked.push(uri)}});
+ return {api:output,created,revoked,pending};
+}
+test('disposing an artwork while crop encoding is pending creates no orphan blob',async()=>{
+ const f=webFixture(),source=await f.api.prepareArtwork({uri:'blob:input'});
+ const pending=source.export({...prep.fullArtwork});source.dispose();f.pending.shift()();
+ await assert.rejects(pending,/no longer|disposed|choose/i);assert.equal(f.created.length,1);assert.deepEqual(f.revoked,[f.created[0]]);
+});
+test('a disposed artwork cannot begin another export',async()=>{
+ const f=webFixture(),source=await f.api.prepareArtwork({uri:'blob:input'});source.dispose();
+ await assert.rejects(source.export({...prep.fullArtwork}),/no longer|disposed|choose/i);assert.equal(f.pending.length,0);
+});

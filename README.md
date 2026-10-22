@@ -260,3 +260,12 @@ Local preparation uses **zero API calls**. It cannot reliably classify photos ve
 Definite semantic outcomes trigger owner-scoped server deletion and client cleanup. Uncertain network/save outcomes retain the image and request identity; check My Artworks before retrying. Cleanup is best effort: if both client and server storage deletion fail, a private orphan may remain. Never delete an image that could belong to an already-saved result.
 
 This update requires frontend and Edge Function releases together **when separately approved for deployment**. No SQL migration, new secret, quota change, model switch or Pages workflow change is needed. Old successful v1 results reopen without eligibility/model calls. An old unwrapped provider response cannot bypass the new gate.
+
+
+## Release-candidate validation
+
+The release-candidate audit and complete requirement traceability are in [docs/review/critique-release-candidate.md](docs/review/critique-release-candidate.md) and [docs/review/critique-requirements-matrix.md](docs/review/critique-requirements-matrix.md). Technical validation does not establish live artistic quality or configured-project correctness.
+
+With Docker and a **cached** `postgres:16` image, run `node scripts/test-local-database.cjs` to execute the existing SQL/RLS/quota tests in a disposable database with no network or published ports. It runs the schema twice and concurrent independent reservation checks, then removes its own container. It never pulls an image, reads production database credentials or touches a live project. The minimal compatibility bootstrap supplies Auth/Storage SQL objects only; it does not test Supabase's HTTP services, email delivery, JWT issuance or deployed policies.
+
+The separate offline benchmark commands and required private dataset are documented in [docs/benchmark/README.md](docs/benchmark/README.md). A real-image evaluation requires explicit permission and paid-run authorization; no such evaluation is part of automated validation.

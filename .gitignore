@@ -10,3 +10,9 @@ dist/
 # Supabase CLI local metadata
 supabase/.temp/
 supabase/.branches/
+
+# Defense in depth: private benchmark inputs/results belong OUTSIDE any checkout.
+.benchmark-private/
+benchmark-local/
+benchmark-results/
+*.benchmark-private.json

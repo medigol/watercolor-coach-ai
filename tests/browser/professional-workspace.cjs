@@ -405,6 +405,7 @@ let signalFeedbackHeld;
         token_type: "bearer",
         user,
       });
+    if (path.endsWith("/signup")) return reply({...user,identities:[],confirmation_sent_at:new Date().toISOString()});
     if (path.endsWith("/user")) return reply(user);
     if (path.endsWith("/logout")) return route.fulfill({ status: 204 });
     if (path.endsWith("/profiles")) return reply({ display_name: "Learner" });
@@ -848,6 +849,9 @@ let signalFeedbackHeld;
   edgeMode = "success";
   releaseFeedback();
   await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  assert.equal(await page.getByRole("heading",{name:"Complete Painting Analysis",level:1,exact:true}).count(),1,"saved critique needs a navigable main heading");
+  assert.equal(await page.getByTestId("overall-assessment").getByRole("heading",{name:"Highly resolved painting",level:2,exact:true}).count(),1,"assessment needs a navigable section heading");
+  assert.equal(await page.getByRole("heading",{name:"What works",level:2,exact:true}).count(),1,"strengths need a navigable section heading");
   assert.equal(edgeCalls, 1);
   assert.equal(used, 1);
   assert.equal(rows.length, 1);
@@ -1779,6 +1783,7 @@ let signalFeedbackHeld;
     .getByTestId("recommendation-0")
     .getByTestId("teaching-evidence")
     .waitFor();
+  assert.equal(await page.getByRole("heading",{name:"How to elevate this painting",level:2,exact:true}).count(),1,"recommendations need a navigable section heading");
   const beforeEvidence = snapshot();
   const recommendation = page.getByTestId("recommendation-0");
   const crops = recommendation.getByTestId("evidence-crop");
@@ -1804,6 +1809,12 @@ let signalFeedbackHeld;
     await page.getByTestId("recommendation-0").waitFor();
     for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
       await page.setViewportSize({ width, height: 1000 });
+      // The old stacked layout can still fit immediately after a resize,
+      // before useWindowDimensions commits the desktop column breakpoint.
+      // Wait for that breakpoint first, then the evidence's onLayout measure.
+      await page
+        .getByTestId(width >= 1024 ? "result-columns" : "result-stack")
+        .waitFor();
       await open("Colour & Value");
       const before = snapshot();
       const card = page.getByTestId("recommendation-0");
@@ -1813,6 +1824,22 @@ let signalFeedbackHeld;
         .getByTestId("evidence-source-frame")
         .evaluateAll((els) => els.map((el) => el.getAttribute("style")));
       assert.equal(transforms[0], transforms[1]);
+      // setViewportSize fires before RN's useWindowDimensions + onLayout
+      // updates have committed. Assert the same bounds after that layout settles,
+      // with a bounded wait; a persistent crop overflow still fails this check.
+      await page.waitForFunction(
+        ({ width }) => {
+          const crops = [...document.querySelectorAll(
+            '[data-testid="recommendation-0"] [data-testid="evidence-crop"]',
+          )];
+          return crops.length === 2 && crops.every((el) => {
+            const r = el.getBoundingClientRect();
+            return r.left >= 0 && r.right <= width + 1 && r.width >= 32 && r.height >= 32;
+          });
+        },
+        { width },
+        { timeout: 10000 },
+      );
       const boxes = await card.getByTestId("evidence-crop").evaluateAll((els) =>
         els.map((el) => {
           const r = el.getBoundingClientRect();
@@ -1832,6 +1859,7 @@ let signalFeedbackHeld;
             b.width >= 32 &&
             b.height >= 32,
         ),
+        JSON.stringify({aspect,width,boxes}),
       );
       const sources = await card
         .locator("img")
@@ -2088,12 +2116,30 @@ let signalFeedbackHeld;
     assert.equal(edgeCalls,before.edgeCalls+1,"rejected preparation cannot auto/manual resubmit");
     eligibilityMatrix.push({code,providerCalls:1,successfulQuota:0,cleaned:true});
   }
+  // Real rendered auth/account/protected-route journey with mocked Auth HTTP.
+  const beforeAccount={edgeCalls,used,rpcCalls,uploads:uploads.length};
+  await page.goto(base+"/account");await button("Sign out").click();await button("Sign in").waitFor();
+  await page.goto(base+"/result/improve-painting?id="+id);await button("Sign in").waitFor();
+  assert.equal(await page.getByText("Complete Painting Analysis",{exact:true}).count(),0);
+  await page.goto(base+"/auth/sign-up");
+  await page.getByRole("textbox",{name:"Email",exact:true}).fill("synthetic-signup@example.invalid");
+  await page.locator('input[aria-label="Password"]:visible').last().fill("test-password-only");
+  await button("Sign up").click();await page.getByRole("alert").filter({hasText:"Check your email"}).waitFor();
+  await page.getByRole("link",{name:"Already have an account? Sign in",exact:true}).click();
+  await page.getByRole("textbox",{name:"Email",exact:true}).fill(user.email);
+  await page.locator('input[aria-label="Password"]:visible').last().fill("test-password-only");
+  await button("Sign in").click();await button("Improve my painting").waitFor();
+  await page.goto(base+"/artworks");await page.getByRole("button",{name:/Tower study/}).first().click();
+  await page.getByRole("heading",{name:"Complete Painting Analysis",level:1,exact:true}).waitFor();
+  assert.deepEqual({edgeCalls,used,rpcCalls,uploads:uploads.length},beforeAccount);
   assert.deepEqual(errors, []);
   fs.writeFileSync(
     artifactDir + "/report.json",
     JSON.stringify(
       {
         uploadFailureCheck: true,
+        accessibleHeadings: true,
+        authAccountJourney: true,
         preparationMatrix,
         eligibilityMatrix,
         matrix,
