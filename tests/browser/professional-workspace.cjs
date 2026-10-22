@@ -832,7 +832,7 @@ let signalFeedbackHeld;
   });
   await button("Retry analysis").click();
   const pending = page.getByRole("button", {
-    name: "Preparing your complete painting analysis…",
+    name: "Analysing your artwork…",
     exact: true,
   });
   await pending.waitFor();
@@ -848,8 +848,8 @@ let signalFeedbackHeld;
   await shot("loading");
   edgeMode = "success";
   releaseFeedback();
-  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
-  assert.equal(await page.getByRole("heading",{name:"Complete Painting Analysis",level:1,exact:true}).count(),1,"saved critique needs a navigable main heading");
+  await page.getByText("Painting Assessment", { exact: true }).waitFor();
+  assert.equal(await page.getByRole("heading",{name:"Painting Assessment",level:1,exact:true}).count(),1,"saved critique needs a navigable main heading");
   assert.equal(await page.getByTestId("overall-assessment").getByRole("heading",{name:"Highly resolved painting",level:2,exact:true}).count(),1,"assessment needs a navigable section heading");
   assert.equal(await page.getByRole("heading",{name:"What works",level:2,exact:true}).count(),1,"strengths need a navigable section heading");
   assert.equal(edgeCalls, 1);
@@ -872,13 +872,13 @@ let signalFeedbackHeld;
   await page.keyboard.press("Enter");
   await page.getByTestId("coaching-note-0").waitFor();
   assert.deepEqual(snapshot(), beforeKeyboardEvidence);
-  await button("Clean view").click();
+  await button("Original").click();
   const matrix = [];
   for (const [aspect, file] of Object.entries(aspectFiles)) {
     imageFile = file;
     await page.reload();
     await page
-      .getByText("Complete Painting Analysis", { exact: true })
+      .getByText("Painting Assessment", { exact: true })
       .waitFor();
     await page.getByTestId("coaching-source-image").waitFor();
     for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
@@ -925,9 +925,9 @@ let signalFeedbackHeld;
         assert(Math.abs(boxes[0].width - boxes[1].width) < 1);
         assert.deepEqual(
           boxes.map((b) => b.text),
-          ["Clean", "Notes", "Composition", "Roles"],
+          ["Original", "Notes", "Composition", "Visual roles"],
         );
-        const title = page.getByText("Complete Painting Analysis", {
+        const title = page.getByText("Painting Assessment", {
           exact: true,
         });
         assert((await title.boundingBox()).height <= 60);
@@ -935,8 +935,8 @@ let signalFeedbackHeld;
       for (const section of [
         "Composition",
         "Colour & Value",
-        "Watercolor technique",
-        "Practice & Studies",
+        "Edges & Texture",
+        "Suggested practice",
       ])
         await open(section);
       assert.equal(
@@ -952,7 +952,7 @@ let signalFeedbackHeld;
         }),
       );
       assert(evidenceBoxes.every((b) => b.x >= 0 && b.right <= width + 1));
-      await button("Composition overlay").click();
+      await button("Composition guide").click();
       await artwork.getByTestId("composition-structure").waitFor();
       const image = await page
           .getByTestId("coaching-source-image")
@@ -984,14 +984,14 @@ let signalFeedbackHeld;
         await artwork.getByTestId("composition-structure").innerHTML(),
         firstGeometry,
       );
-      await button("Roles").click();
+      await button("Visual roles").click();
       await page.getByTestId("visual-role-map").waitFor();
       assert(
         (
           await page.getByTestId("visual-role-map").getAttribute("aria-label")
         ).includes("Supporting"),
       );
-      await page.getByRole("button", { name: /^Notes ·/ }).click();
+      await page.getByRole("button", { name: /^Coaching notes ·/ }).click();
       await page.getByTestId("coaching-marker-0").click();
       await page.getByTestId("coaching-note-0").waitFor();
       await page
@@ -1005,7 +1005,7 @@ let signalFeedbackHeld;
           .getAttribute("aria-selected"),
         "true",
       );
-      await button("Clean view").click();
+      await button("Original").click();
       assert.equal(
         await artwork.getByTestId("composition-structure").count(),
         0,
@@ -1019,18 +1019,18 @@ let signalFeedbackHeld;
   imageFile = aspectFiles.landscape;
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.reload();
-  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
-  await button("Composition overlay").click();
+  await page.getByText("Painting Assessment", { exact: true }).waitFor();
+  await button("Composition guide").click();
   await artwork.getByTestId("composition-structure").waitFor();
   await shot("composition-directional");
   await open("Colour & Value");
   await button("Colour & Value").scrollIntoViewIfNeeded();
   await shot("colour-value");
-  await page.getByRole("button", { name: /^Notes ·/ }).click();
+  await page.getByRole("button", { name: /^Coaching notes ·/ }).click();
   await page.getByTestId("coaching-marker-0").click();
   await page.getByTestId("coaching-note-0").waitFor();
   await shot("notes");
-  await button("Roles").click();
+  await button("Visual roles").click();
   await page.getByTestId("visual-role-map").waitFor();
   await shot("roles");
   // Reproduce live calibration failures with original technical assets only.
@@ -1069,30 +1069,23 @@ let signalFeedbackHeld;
     await page.setViewportSize({ width, height: 950 });
     await page.reload();
     await page
-      .getByText("Complete Painting Analysis", { exact: true })
+      .getByText("Painting Assessment", { exact: true })
       .waitFor();
     await open("Colour & Value");
-    await open("Watercolor technique");
+    await open("Edges & Texture");
     const colours = page.getByTestId("colour-value-analysis");
     const before = snapshot();
     for (const label of ["Muted green", "Muted orange"]) {
-      const crop = colours.locator(
-        `img[alt="Original painting evidence: ${label}"]`,
-      );
-      await crop.waitFor();
-      assert.equal(await crop.count(), 1);
-      const bounds = await crop.locator("..").locator("..").boundingBox();
-      assert(
-        bounds.width / bounds.height >= 0.6,
-        "narrow role needs recognisable display context",
-      );
-      assert.equal(
-        await colours
-          .getByRole("button", { name: `See image evidence: ${label}` })
-          .count(),
-        0,
-      );
+      await colours.getByText(label, { exact: true }).waitFor();
     }
+    assert.equal(await colours.getByTestId("evidence-crop").count(), 0,
+      "colour rows must not duplicate their shared source detail");
+    const sharedEvidence = colours.getByTestId("visible-colour-evidence").getByRole("button", { name: "See image evidence: What works", exact: true });
+    assert.equal(await sharedEvidence.count(), 2);
+    await sharedEvidence.first().click();
+    const detail = page.locator('img[alt^="Original painting evidence: The pale tower"]').locator("..").locator("..");
+    const bounds = await detail.boundingBox();
+    assert(bounds.width / bounds.height >= 0.6, "shared narrow evidence retains recognisable context");
     await colours
       .getByText("No confidently located source detail for this colour.", {
         exact: true,
@@ -1142,21 +1135,21 @@ let signalFeedbackHeld;
     await page.setViewportSize({ width, height: 950 });
     await page.reload();
     await page
-      .getByText("Complete Painting Analysis", { exact: true })
+      .getByText("Painting Assessment", { exact: true })
       .waitFor();
     await open("Composition");
     await open("Colour & Value");
-    await open("Watercolor technique");
+    await open("Edges & Texture");
     await page.getByTestId("teaching-evidence").first().waitFor();
     const before = snapshot();
-    await button("Composition overlay").click();
+    await button("Composition guide").click();
     await artwork.getByTestId("composition-structure").waitFor();
-    await button("Roles").click();
+    await button("Visual roles").click();
     await page.getByTestId("visual-role-map").waitFor();
-    await page.getByRole("button", { name: /^Notes ·/ }).click();
+    await page.getByRole("button", { name: /^Coaching notes ·/ }).click();
     await page.getByTestId("coaching-marker-0").click();
     await page.getByTestId("coaching-note-0").waitFor();
-    await button("Clean view").click();
+    await button("Original").click();
     assert.deepEqual(snapshot(), before);
     await noOverflow();
     providerMatrix.push({ width, normalizedV1: true, readonly: true });
@@ -1167,7 +1160,7 @@ let signalFeedbackHeld;
     (c) => (c.roleId = null),
   );
   await page.reload();
-  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  await page.getByText("Painting Assessment", { exact: true }).waitFor();
   await open("Colour & Value");
   const colourSection = page.getByTestId("colour-value-analysis");
   assert.equal(
@@ -1250,11 +1243,11 @@ let signalFeedbackHeld;
         })
         .waitFor();
     const before = snapshot();
-    await button("Composition overlay").click();
-    await button("Roles").click();
-    await page.getByRole("button", { name: /^Notes ·/ }).click();
+    await button("Composition guide").click();
+    await button("Visual roles").click();
+    await page.getByRole("button", { name: /^Coaching notes ·/ }).click();
     await page.getByTestId("coaching-marker-0").click();
-    await button("Clean view").click();
+    await button("Original").click();
     await noOverflow();
     assert.deepEqual(
       snapshot(),
@@ -1285,12 +1278,12 @@ let signalFeedbackHeld;
       await page.setViewportSize({ width, height: 950 });
       await page.reload();
       await page
-        .getByText("Complete Painting Analysis", { exact: true })
+        .getByText("Painting Assessment", { exact: true })
         .waitFor();
       await page.getByTestId("coaching-source-image").waitFor();
       await open("Composition");
       await open("Colour & Value");
-      await open("Watercolor technique");
+      await open("Edges & Texture");
       const assessment = await page
         .getByTestId("overall-assessment")
         .innerText();
@@ -1305,9 +1298,9 @@ let signalFeedbackHeld;
       const recommendations = page.locator('[data-testid^="recommendation-"]');
       assert.equal(await recommendations.count(), kind === "boat" ? 0 : 1);
       const colours = page.getByTestId("colour-value-analysis");
-      await colours
-        .locator('img[alt="Original painting evidence: Reserved warm light"]')
-        .waitFor();
+      await colours.getByTestId("visible-colour-evidence")
+        .locator('[data-testid="teaching-evidence"], [aria-label^="See image evidence:"]')
+        .first().waitFor();
       assert.equal(
         await colours
           .getByText(
@@ -1332,18 +1325,18 @@ let signalFeedbackHeld;
       ])
         assert(await colours.getByText(label, { exact: true }).count());
       const before = snapshot();
-      await button("Composition overlay").click();
+      await button("Composition guide").click();
       if (kind === "van") {
         assert(
           !/Off-centre focus/i.test(await page.locator("body").innerText()),
         );
         assert(await page.getByText(/Focal placement/).count());
       }
-      await button("Roles").click();
-      const notes = page.getByRole("button", { name: /^Notes(?: · \d+)?$/ });
+      await button("Visual roles").click();
+      const notes = page.getByRole("button", { name: /^Coaching notes(?: · \d+)?$/ });
       assert.equal(
         await notes.getAttribute("aria-label"),
-        kind === "boat" ? "Notes" : "Notes · 1",
+        kind === "boat" ? "Coaching notes" : "Coaching notes · 1",
       );
       if (kind !== "boat") {
         await notes.click();
@@ -1383,7 +1376,7 @@ let signalFeedbackHeld;
           ),
         );
       }
-      await button("Clean view").click();
+      await button("Original").click();
       await noOverflow();
       assert.deepEqual(
         snapshot(),
@@ -1414,7 +1407,7 @@ let signalFeedbackHeld;
       await page.setViewportSize({ width, height: 950 });
       await page.reload();
       await page
-        .getByText("Complete Painting Analysis", { exact: true })
+        .getByText("Painting Assessment", { exact: true })
         .waitFor();
       await page.getByTestId("coaching-source-image").waitFor();
       const assessment = await page
@@ -1429,11 +1422,11 @@ let signalFeedbackHeld;
         assessment.includes(
           kind === "uncertain"
             ? "Review the observations and studies below."
-            : "No major issue detected. Explore optional refinements or studies.",
+            : "No major issue detected.",
         ),
       );
       const before = snapshot();
-      await button("Roles").click();
+      await button("Visual roles").click();
       const map = page.getByTestId("visual-role-map");
       await map.waitFor();
       const roleLabel = await map.getAttribute("aria-label");
@@ -1444,7 +1437,7 @@ let signalFeedbackHeld;
           .count(),
         kind === "active" ? 0 : 1,
       );
-      await page.getByRole("button", { name: /^Notes(?: · \d+)?$/ }).click();
+      await page.getByRole("button", { name: /^Coaching notes(?: · \d+)?$/ }).click();
       if (kind !== "active") {
         // Notes initially shows the selected primary note. Open the retained
         // road note before inspecting its teaching; marker existence is also
@@ -1459,7 +1452,7 @@ let signalFeedbackHeld;
       );
       if (kind === "active")
         assert.equal(await page.getByTestId("coaching-marker-1").count(), 0);
-      await open("Watercolor technique");
+      await open("Edges & Texture");
       const body = await page.locator("body").innerText();
       assert(
         !/dry[- ]brush texture|wet blending|edge variation technique|edge control|observed structure and handling/i.test(
@@ -1474,7 +1467,7 @@ let signalFeedbackHeld;
       );
       assert.equal(await practice.count(), 1);
       assert(!/softer edges/i.test(await practice.innerText()));
-      await button("Clean view").click();
+      await button("Original").click();
       await noOverflow();
       assert.deepEqual(
         snapshot(),
@@ -1505,12 +1498,12 @@ let signalFeedbackHeld;
     await page.setViewportSize({ width, height: 950 });
     await page.reload();
     await page
-      .getByText("Complete Painting Analysis", { exact: true })
+      .getByText("Painting Assessment", { exact: true })
       .waitFor();
     await page.getByTestId("coaching-source-image").waitFor();
     await open("Composition");
     await open("Colour & Value");
-    await open("Watercolor technique");
+    await open("Edges & Texture");
     const assessment = await page.getByTestId("overall-assessment").innerText();
     assert(assessment.includes("Strong painting"));
     assert(
@@ -1540,12 +1533,12 @@ let signalFeedbackHeld;
       ),
     );
     const before = snapshot();
-    for (const control of ["Roles", "Composition overlay", "Clean view"])
+    for (const control of ["Visual roles", "Composition guide", "Original"])
       await button(control).click();
-    await page.getByRole("button", { name: /^Notes(?: · \d+)?$/ }).click();
+    await page.getByRole("button", { name: /^Coaching notes(?: · \d+)?$/ }).click();
     await page.getByTestId("coaching-marker-0").click();
     await page.getByTestId("coaching-note-0").waitFor();
-    await button("Clean view").click();
+    await button("Original").click();
     await noOverflow();
     assert.deepEqual(
       snapshot(),
@@ -1584,7 +1577,7 @@ let signalFeedbackHeld;
     for (const section of [
       "Composition",
       "Colour & Value",
-      "Watercolor technique",
+      "Edges & Texture",
     ])
       await open(section);
     const body = await page.locator("body").innerText();
@@ -1605,12 +1598,12 @@ let signalFeedbackHeld;
       1,
     );
     const before = snapshot();
-    for (const control of ["Roles", "Composition overlay", "Clean view"])
+    for (const control of ["Visual roles", "Composition guide", "Original"])
       await button(control).click();
-    await page.getByRole("button", { name: /^Notes(?: · \d+)?$/ }).click();
+    await page.getByRole("button", { name: /^Coaching notes(?: · \d+)?$/ }).click();
     await page.getByTestId("coaching-marker-0").click();
     await page.getByTestId("coaching-note-0").waitFor();
-    await button("Clean view").click();
+    await button("Original").click();
     await noOverflow();
     assert.deepEqual(
       snapshot(),
@@ -1650,7 +1643,7 @@ let signalFeedbackHeld;
       for (const section of [
         "Composition",
         "Colour & Value",
-        "Watercolor technique",
+        "Edges & Texture",
       ])
         await open(section);
       const body = await page.locator("body").innerText();
@@ -1675,9 +1668,9 @@ let signalFeedbackHeld;
           ),
         );
       const before = snapshot();
-      for (const control of ["Roles", "Composition overlay", "Clean view"])
+      for (const control of ["Visual roles", "Composition guide", "Original"])
         await button(control).click();
-      await page.getByRole("button", { name: /^Notes(?: · \d+)?$/ }).click();
+      await page.getByRole("button", { name: /^Coaching notes(?: · \d+)?$/ }).click();
       await page.getByTestId("coaching-marker-0").click();
       await page.getByTestId("coaching-note-0").waitFor();
       assert(
@@ -1685,7 +1678,7 @@ let signalFeedbackHeld;
           await page.locator("body").innerText(),
         ),
       );
-      await button("Clean view").click();
+      await button("Original").click();
       await noOverflow();
       assert.deepEqual(
         snapshot(),
@@ -1751,8 +1744,8 @@ let signalFeedbackHeld;
   saved.canonicalAnalysis.composition.observation =
     "Separate masses hold a quiet stretch of water between the tower light and the bank.";
   await page.reload();
-  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
-  await button("Composition overlay").click();
+  await page.getByText("Painting Assessment", { exact: true }).waitFor();
+  await button("Composition guide").click();
   await artwork.getByTestId("composition-structure").waitFor();
   assert.equal(
     await page.getByText(/This directional|This landing/).count(),
@@ -1881,7 +1874,7 @@ let signalFeedbackHeld;
       });
       if (width === 390 && ["portrait", "portrait-vehicle"].includes(aspect)) {
         await page
-          .getByText("Complete Painting Analysis", { exact: true })
+          .getByText("Painting Assessment", { exact: true })
           .scrollIntoViewIfNeeded();
         await shot(aspect + "-mobile-top");
         await card.scrollIntoViewIfNeeded();
@@ -1981,7 +1974,7 @@ let signalFeedbackHeld;
     },
   });
   await page.reload();
-  await open("Practice & Studies");
+  await open("Suggested practice");
   await page.getByTestId("future-study-location").waitFor();
   assert(
     await page
@@ -1994,7 +1987,7 @@ let signalFeedbackHeld;
   const beforeTextRoles = snapshot();
   saved.canonicalAnalysis.visualRoles.forEach((r) => (r.confidence = 0.2));
   await page.reload();
-  await button("Roles").click();
+  await button("Visual roles").click();
   await page
     .getByText(
       "Role locations are uncertain. These roles are text guidance only.",
@@ -2019,9 +2012,9 @@ let signalFeedbackHeld;
   await page.goto(base + "/upload/improve-painting");
   await choose();
   const errorCases = [
-    ["invalid_core", "reliable analysis"],
-    ["unavailable", "AI service could not complete"],
-    ["busy", "already being analysed"],
+    ["invalid_core", "reliable feedback"],
+    ["unavailable", "couldn't complete the analysis"],
+    ["busy", "already in progress"],
     ["auth", "session has expired"],
   ];
   let retryId;
@@ -2063,7 +2056,7 @@ let signalFeedbackHeld;
   const beforeRecovery = edgeCalls;
   edgeMode = "success";
   await button("Retry analysis").click();
-  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  await page.getByText("Painting Assessment", { exact: true }).waitFor();
   assert.equal(edgeCalls, beforeRecovery + 1);
   assert.equal(used, 2);
   assert.equal(rows.length, 2);
@@ -2091,7 +2084,7 @@ let signalFeedbackHeld;
     .getByRole("button", { name: /Tower study/ })
     .first()
     .click();
-  await page.getByText("Complete Painting Analysis", { exact: true }).waitFor();
+  await page.getByText("Painting Assessment", { exact: true }).waitFor();
   assert.deepEqual(
     {
       edgeCalls,
@@ -2120,7 +2113,7 @@ let signalFeedbackHeld;
   const beforeAccount={edgeCalls,used,rpcCalls,uploads:uploads.length};
   await page.goto(base+"/account");await button("Sign out").click();await button("Sign in").waitFor();
   await page.goto(base+"/result/improve-painting?id="+id);await button("Sign in").waitFor();
-  assert.equal(await page.getByText("Complete Painting Analysis",{exact:true}).count(),0);
+  assert.equal(await page.getByText("Painting Assessment",{exact:true}).count(),0);
   await page.goto(base+"/auth/sign-up");
   await page.getByRole("textbox",{name:"Email",exact:true}).fill("synthetic-signup@example.invalid");
   await page.locator('input[aria-label="Password"]:visible').last().fill("test-password-only");
@@ -2130,7 +2123,7 @@ let signalFeedbackHeld;
   await page.locator('input[aria-label="Password"]:visible').last().fill("test-password-only");
   await button("Sign in").click();await button("Improve my painting").waitFor();
   await page.goto(base+"/artworks");await page.getByRole("button",{name:/Tower study/}).first().click();
-  await page.getByRole("heading",{name:"Complete Painting Analysis",level:1,exact:true}).waitFor();
+  await page.getByRole("heading",{name:"Painting Assessment",level:1,exact:true}).waitFor();
   assert.deepEqual({edgeCalls,used,rpcCalls,uploads:uploads.length},beforeAccount);
   assert.deepEqual(errors, []);
   fs.writeFileSync(

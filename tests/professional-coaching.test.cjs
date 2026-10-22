@@ -204,7 +204,7 @@ test("colour UI distinguishes visible image colours, possible recreation pigment
     .replace(/\s+/g, " ");
   assert(ui.includes("Visible colour evidence"));
   assert(ui.includes("not original pigment identification"));
-  assert(ui.includes("Possible watercolor pigments"));
+  assert(ui.includes("Possible watercolour pigments"));
   assert(ui.includes("Approximate starting ratio"));
   assert(ui.includes("Brand, paper, pigment strength"));
   assert(!ui.includes("Suggested palette"));
@@ -232,11 +232,11 @@ test("unified workspace contains no model/service writes, view tabs or palette d
     ),
   );
   for (const title of [
-    "Complete Painting Analysis",
+    "Painting Assessment",
     "Composition",
     "Colour & Value",
-    "Watercolor technique",
-    "Practice & Studies",
+    "Edges & Texture",
+    "Suggested practice",
   ])
     assert(ui.includes(title));
 });

@@ -51,7 +51,7 @@ function fixture() {
     },
     "../lib/artworks": {
       ArtworkEligibilityError: class extends Error {},
-      liveFeedbackErrorMessage: "Live AI feedback could not be prepared. Please try again.",
+      liveFeedbackErrorMessage: "We couldn't complete the analysis. Please try again.",
       createSaveAttempt: () => ({ id: `request-${++next}` }),
       saveArtwork: (...args) =>
         new Promise((resolve, reject) => calls.push({ args, resolve, reject })),
@@ -148,7 +148,7 @@ test("a late response after leaving the upload screen cannot navigate", async ()
 });
 test("production feedback errors stay on the upload screen without navigation", async () => {
   for (const message of [
-    "Live AI feedback could not be prepared. Please try again.",
+    "We couldn't complete the analysis. Please try again.",
     "You have used your 3 free AI feedback results. More feedback will be available after subscriptions are added.",
     "Feedback is already being prepared. Check My Artworks in a moment.",
     "Please sign in again before requesting feedback.",
@@ -172,7 +172,7 @@ test("a stale or malformed provider response cannot navigate to a fake critique"
     await pending;
     assert.equal(f.routes.length, 0);
     assert.equal(f.render().disabled, false);
-    assert.equal(f.errorText(), "Live AI feedback could not be prepared. Please try again.");
+    assert.equal(f.errorText(), "We couldn't complete the analysis. Please try again.");
   }
 });
 

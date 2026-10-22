@@ -18,6 +18,7 @@ import {
 } from "../shared/visualMetadata";
 import { compositionIdentity } from "../shared/visualMetadata";
 import { objectDesignSuggestion } from "../shared/coachingLanguage";
+import { evidenceProperties } from "../shared/coachingAlignment";
 
 export interface EvidenceRegion {
   region: NormalizedRect;
@@ -135,9 +136,7 @@ export function insightEvidence(
     noteId: typeof note?.id === "string" ? note.id : undefined,
     value:
       insight.domain === "colour_value" &&
-      /\b(?:value|contrast|dark|light|shadow)\b/i.test(
-        `${facts.map((f) => f.observation).join(" ")} ${insight.lesson}`,
-      ),
+      evidenceProperties(facts.map((f) => f.observation).join(" ")).includes("value"),
   };
   if (objectDesignSuggestion(insight.action)) {
     if (

@@ -5,6 +5,7 @@ import { colors, styles } from "./ui";
 import { design } from "./theme";
 import { sameLearningInsight } from "../shared/coachingEvidence";
 import { displayRecreationMixes } from "../shared/coachingDisplay";
+import { evidenceProperties } from "../shared/coachingAlignment";
 
 // A shared opening sentence does not make the rest of a teaching paragraph
 // redundant. Omit it only when all of its supplied lessons are already covered.
@@ -44,10 +45,15 @@ export default function ColourValueAnalysis({
   const missingColourCount =
     colour?.visibleColours.filter((_, index) => !evidence?.[index]).length ?? 0;
   const hasLocatedColours = evidence?.some(Boolean) ?? false;
+  const suppliedValue = colour?.valueHierarchy ?? "";
+  const chromaticOnly = (text: string) => {
+    const properties = evidenceProperties(text);
+    return properties.includes("colour") && !properties.includes("value");
+  };
   const value =
-    colour?.valueHierarchy ||
+    (suppliedValue && !chromaticOnly(suppliedValue) ? suppliedValue : "") ||
     c.facts
-      .filter((f) => f.domain === "colour_value")
+      .filter((f) => f.domain === "colour_value" && evidenceProperties(f.observation).includes("value"))
       .map((f) => f.observation)
       .join(" ");
   const paragraphs = [
@@ -68,12 +74,14 @@ export default function ColourValueAnalysis({
   const assessment = colour?.technicalAssessment;
   const showAssessment =
     assessment &&
+    displayText(assessment.explanation).trim() &&
+    !teachingAlreadyCovered(assessment.explanation, paragraphs.map(([, text]) => text || "")) &&
     (!assessment.insightId ||
       !omittedInsightIds.includes(assessment.insightId));
   return (
     <View testID="colour-value-analysis" style={{ gap: design.space.lg }}>
       {!!colour?.visibleColours.length && (
-        <View style={{ gap: 10 }}>
+        <View testID="visible-colour-evidence" style={{ gap: 10 }}>
           <Text style={[styles.body, { color: colors.ink, fontWeight: "600" }]}>
             Visible colour evidence
           </Text>
@@ -124,7 +132,7 @@ export default function ColourValueAnalysis({
                       No confidently located source detail for this colour.
                     </Text>
                   )}
-                  {role && <Text style={styles.caption}>{role.role} area</Text>}
+                  {role && sourceEvidence && <Text style={styles.caption}>{role.role} area</Text>}
                 </View>
               );
             })}
@@ -172,19 +180,17 @@ export default function ColourValueAnalysis({
             }
           </Text>
           <Text style={styles.body}>
-            {!paragraphs.some(([, text]) =>
-              sameLearningInsight(text || "", assessment.explanation),
-            ) && displayText(assessment.explanation)}
+            {displayText(assessment.explanation)}
           </Text>
         </View>
       )}
       {!!mixes.length && (
         <View style={{ gap: 12 }}>
           <Text style={[styles.heading, { fontSize: 17 }]}>
-            Recreate this look
+            Colour-mixing starting points
           </Text>
           <Text style={styles.caption}>
-            Possible watercolor pigments for approximating the visible effect,
+            Possible watercolour pigments for approximating the visible effect,
             not the original formula.
           </Text>
           {mixes.map((mix, index) => (

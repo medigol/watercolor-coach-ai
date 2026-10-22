@@ -232,8 +232,8 @@ export default function PaintingImageSelector({
       )}
       <Text style={styles.caption}>
         Preparation stays on this device. Only the confirmed artwork is uploaded
-        privately when you choose Analyse painting. Watercolor eligibility is
-        checked in that analysis; an uncertain image may need a clearer photo.
+        privately when you choose Analyse painting. We check whether the image
+        is suitable for watercolour feedback; a clearer photo may be needed.
       </Text>
     </View>
   );

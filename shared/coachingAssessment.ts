@@ -8,6 +8,7 @@ import {
   evidenceTargets,
   insightAlignment,
   materialInsight,
+  descriptiveClaimSupported,
 } from "./coachingAlignment.ts";
 import { visibleTeachingText, tidyTeachingText } from "./coachingSemantics.ts";
 
@@ -196,6 +197,7 @@ export function assessCoaching(
   const suppliedSuccessfulFact = c.insights.some(
     (i) =>
       i.classification === "strength" &&
+      descriptiveClaimSupported(i.lesson, c.facts.filter((f) => i.factIds.includes(f.id))) &&
       !!i.lesson.trim() &&
       !hasLimitation(i.lesson) &&
       !uncertainty.test(i.lesson) &&

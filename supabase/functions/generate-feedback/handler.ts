@@ -119,7 +119,7 @@ export function createHandler(deps: Dependencies) {
           {
             code: "unavailable",
             message:
-              "Live AI feedback could not be prepared. Please try again.",
+              "We couldn't complete the analysis. Please try again.",
           },
           503,
         );
@@ -139,7 +139,7 @@ export function createHandler(deps: Dependencies) {
           {
             code: "busy",
             message:
-              "Feedback is already being prepared. Check My Artworks in a moment.",
+              "An analysis is already in progress. Check My Artworks before trying again.",
           },
           409,
         );
@@ -196,7 +196,7 @@ export function createHandler(deps: Dependencies) {
             code: "unavailable",
             reason_code: reasonCode,
             message:
-              "Live AI feedback could not be prepared. Please try again.",
+              "We couldn't complete the analysis. Please try again.",
           },
           422,
         );
@@ -211,7 +211,7 @@ export function createHandler(deps: Dependencies) {
       return reply(
         {
           code: "unavailable",
-          message: "Live AI feedback could not be prepared. Please try again.",
+          message: "We couldn't complete the analysis. Please try again.",
         },
         503,
       );

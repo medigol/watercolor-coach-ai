@@ -325,6 +325,11 @@ export default function PaintingAnalysisWorkspace({
         label: "Technique evidence",
         plan: insightEvidence(evidenceSource, i),
       })),
+    ...(c.colourAnalysis?.visibleColours ?? []).map((colour, index) => ({
+      key: `colour-${index}`,
+      label: text(colour.label),
+      plan: colourEvidence(evidenceSource, colour.roleId, text(colour.label)),
+    })),
   ];
   const placements = allocateEvidence(requests);
   const showEvidence = (key: string) => {
@@ -533,7 +538,7 @@ export default function PaintingAnalysisWorkspace({
       >
         <View style={{ gap: 6 }}>
           <Text style={styles.caption}>
-            WATERCOLOR COACH · {isSaved ? "SAVED ANALYSIS" : "PAINTING STUDY"}
+            WATERCOLOR COACH · {isSaved ? "SAVED ASSESSMENT" : "PAINTING STUDY"}
           </Text>
           <Text
             accessibilityRole="header"
@@ -543,7 +548,7 @@ export default function PaintingAnalysisWorkspace({
               width < 600 ? { fontSize: 23, lineHeight: 29 } : undefined,
             ]}
           >
-            Complete Painting Analysis
+            Painting Assessment
           </Text>
           <Text style={styles.body}>{source.title}</Text>
           {!!warning && <Text style={styles.caption}>{warning}</Text>}
@@ -615,8 +620,8 @@ export default function PaintingAnalysisWorkspace({
               style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
             >
               <Choice
-                title={width < 600 ? "Clean" : "Clean view"}
-                accessibilityLabel="Clean view"
+                title="Original"
+                accessibilityLabel="Original"
                 grid={width < 600}
                 active={mode === "clean"}
                 onPress={() => {
@@ -628,9 +633,9 @@ export default function PaintingAnalysisWorkspace({
                 title={
                   width < 600
                     ? "Notes"
-                    : `Notes${notes.length ? ` · ${notes.length}` : ""}`
+                    : `Coaching notes${notes.length ? ` · ${notes.length}` : ""}`
                 }
-                accessibilityLabel={`Notes${notes.length ? ` · ${notes.length}` : ""}`}
+                accessibilityLabel={`Coaching notes${notes.length ? ` · ${notes.length}` : ""}`}
                 grid={width < 600}
                 active={mode === "notes"}
                 disabled={!notes.length}
@@ -640,15 +645,15 @@ export default function PaintingAnalysisWorkspace({
                 }}
               />
               <Choice
-                title={width < 600 ? "Composition" : "Composition overlay"}
-                accessibilityLabel="Composition overlay"
+                title={width < 600 ? "Composition" : "Composition guide"}
+                accessibilityLabel="Composition guide"
                 grid={width < 600}
                 active={mode === "composition"}
                 disabled={!structure}
                 onPress={() => setMode("composition")}
               />
               <Choice
-                title="Roles"
+                title="Visual roles"
                 grid={width < 600}
                 active={mode === "roles"}
                 disabled={!c.visualRoles.length}
@@ -880,23 +885,7 @@ export default function PaintingAnalysisWorkspace({
                 source={displaySource}
                 omittedInsightIds={teaching.noteExcludedInsightIds}
                 displayText={text}
-                renderEvidence={(index) => {
-                  const colour = c.colourAnalysis?.visibleColours[index];
-                  const plan =
-                    colour &&
-                    colourEvidence(
-                      evidenceSource,
-                      colour.roleId,
-                      text(colour.label),
-                    );
-                  return plan && image ? (
-                    <EvidenceVisual
-                      uri={image}
-                      sourceSize={sourceSize}
-                      plan={plan}
-                    />
-                  ) : null;
-                }}
+                renderEvidence={(index) => evidence(`colour-${index}`)}
                 renderValueEvidence={() => evidence("value")}
               />
               {lessons("colour_value", [
@@ -905,7 +894,7 @@ export default function PaintingAnalysisWorkspace({
               ])}
             </Section>
             <Section
-              title="Watercolor technique"
+              title="Edges & Texture"
               icon="brush-outline"
               reveal={
                 revealed.key === "technique" ? revealed.revision : undefined
@@ -939,12 +928,12 @@ export default function PaintingAnalysisWorkspace({
             </Section>
             {(
               <Section
-                title="Practice & Studies"
+                title="Suggested practice"
                 icon="book-outline"
                 initiallyOpen
               >
                 {!teaching.practice && !teaching.studies.length && (
-                  <Text style={styles.caption}>No separate study is suggested for this analysis.</Text>
+                  <Text style={styles.caption}>No additional exercise is suggested for this assessment.</Text>
                 )}
                 {!!teaching.practice && (
                   <View
@@ -961,7 +950,7 @@ export default function PaintingAnalysisWorkspace({
                         { fontWeight: "600", color: colors.ink },
                       ]}
                     >
-                      Your next 15 minutes
+                      A focused study
                     </Text>
                     <Text style={styles.body}>{text(teaching.practice)}</Text>
                   </View>
@@ -980,8 +969,7 @@ export default function PaintingAnalysisWorkspace({
                       {i.classification === "stylistic_alternative"
                         ? "Stylistic alternative"
                         : "Study experiment"}{" "}
-                      · {i.domain.replace("colour_value", "Colour & Value")} · a
-                      future experiment
+                      · {{ overall: "Whole painting", composition: "Composition", colour_value: "Colour & Value", technique: "Edges & Texture" }[i.domain]}
                     </Text>
                     <Text style={styles.body}>{text(i.lesson)}</Text>
                     {evidence(`insight:${i.id}`)}

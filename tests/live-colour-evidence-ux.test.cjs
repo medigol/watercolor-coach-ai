@@ -40,11 +40,12 @@ function text(tree) {
     .join(" ")
     .replace(/\s+/g, " ");
 }
-function render(located, colours) {
+function render(located, colours, alter) {
   const source = require("./helpers/canonical-fixture.cjs")();
   source.canonicalAnalysis.colourAnalysis =
     require("./helpers/colour-fixture.cjs")();
   if (colours) source.canonicalAnalysis.colourAnalysis.visibleColours = colours;
+  alter?.(source);
   const before = structuredClone(source),
     calls = [];
   const tree = exportsForComponent.default({
@@ -72,6 +73,39 @@ function render(located, colours) {
   };
 }
 const localNotice = "No confidently located source detail for this colour.";
+test("hue-only prose is not presented as a value hierarchy", () => {
+  const result = render([], [], (r) => {
+    const c = r.canonicalAnalysis;
+    c.colourAnalysis.valueHierarchy = "Hue contrast separates red from blue.";
+    c.colourAnalysis.technicalAssessment = null;
+    c.facts.filter((f) => f.domain === "colour_value").forEach((f) => {
+      f.observation = "Hue contrast separates red from blue.";
+    });
+  });
+  assert(!result.text.includes("Value hierarchy"));
+  assert(result.text.includes("Colour strategy"));
+});
+test("duplicate technical explanation does not leave an empty assessment card", () => {
+  const result = render([], [], (r) => {
+    const colour = r.canonicalAnalysis.colourAnalysis;
+    colour.technicalAssessment.explanation = colour.colourStrategy;
+  });
+  assert(!result.text.includes("Coherent colour hierarchy"));
+});
+test("a shared opening does not erase distinct technical teaching", () => {
+  const result = render([], [], (r) => {
+    const colour = r.canonicalAnalysis.colourAnalysis;
+    colour.technicalAssessment.explanation = colour.colourStrategy + " The larger shadow mass connects the lower shapes.";
+  });
+  assert(result.text.includes("Coherent colour hierarchy"));
+  assert(result.text.includes("larger shadow mass connects the lower shapes"));
+});
+test("an unlocated colour does not borrow its canonical role as located evidence", () => {
+  const result = render([], [{ label: "Warm accent", approximateHex: "#be7450", roleId: "tower" }]);
+  assert(!result.text.includes("focal area"));
+  assert(result.text.includes("Warm accent"));
+  assert(result.text.includes(localNotice));
+});
 test("mixed colour evidence with two unlocated colours uses one shared notice and retains the located original", () => {
   const result = render([0]);
   assert.equal(

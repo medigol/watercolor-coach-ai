@@ -166,8 +166,19 @@ export default function ResultExperience(props: Props) {
 }
 function CanonicalExperience(props: Props) {
   const source = useMemo(
-    () => cleanPaintingAnalysis(props.result, usableOverlays),
-    [props.result],
+    () => {
+      const cleaned = cleanPaintingAnalysis(props.result, usableOverlays);
+      // New provider output still uses the strict server cleaner. A previously
+      // saved, structurally valid v1 result must remain readable when a newer
+      // wording guard omits an old method claim. Workspace display is immutable
+      // and applies the same observation/evidence safeguards to this source.
+      return validPaintingAnalysis(cleaned)
+        ? cleaned
+        : props.isSaved && validPaintingAnalysis(props.result)
+          ? props.result
+          : cleaned;
+    },
+    [props.result, props.isSaved],
   );
   if (!validPaintingAnalysis(source))
     return (
@@ -180,7 +191,9 @@ function CanonicalExperience(props: Props) {
       source={source}
       image={props.image}
       isSaved={props.isSaved}
-      warning={props.warning}
+      warning={props.warning || (source === props.result
+        ? "This older assessment is shown with current wording safeguards. Its saved content has not been changed."
+        : undefined)}
     />
   );
 }

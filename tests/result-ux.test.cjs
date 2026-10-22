@@ -6,6 +6,21 @@ const ts = require("typescript");
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "..");
+test("saved v1 with newly unsupported method wording remains readable without rewriting its source", () => {
+  const canonical = require("./helpers/canonical-fixture.cjs")();
+  canonical.canonicalAnalysis.facts[3].observation = "Lifting created the pale cloud shapes.";
+  canonical.canonicalAnalysis.insights[3].lesson = "Negative painting defined the tree canopy.";
+  canonical.canonicalAnalysis.insights[3].action = "Preserve the lifting used for the clouds.";
+  const before = structuredClone(canonical);
+  const html = render("improve_painting", "openai", "https://example.invalid/original.png", undefined,
+    { canonicalResult: canonical, viewportWidth: 1440 });
+  assert(html.includes("Painting Assessment"));
+  assert(html.includes("older assessment"));
+  assert(!/Lifting created|Negative painting defined|lifting used/.test(html));
+  assert(!html.includes("We could not open this saved analysis"));
+  assert(html.includes("example.invalid/original.png"));
+  assert.deepEqual(canonical, before);
+});
 test("substantive saved teaching survives the existing workspace without truncation or unsafe preservation", () => {
   const canonical = require("./helpers/analysis-depth-fixture.cjs")();
   const html = render(
@@ -75,7 +90,7 @@ test("a generic figure study cannot leak back through overall assessment or doma
   );
   assert(!html.includes("decorative interest"));
   assert(!html.includes("Add figures"));
-  assert(html.includes("Complete Painting Analysis"));
+  assert(html.includes("Painting Assessment"));
 });
 for (const focus of [
   "Overall feedback",
@@ -100,12 +115,12 @@ for (const focus of [
       { canonicalResult: normalized.result, viewportWidth: 1440, focus },
     );
     for (const text of [
-      "Complete Painting Analysis",
+      "Painting Assessment",
       "Highly resolved painting",
       "What works",
       "Composition",
       "Colour &amp; Value",
-      "Watercolor technique",
+      "Edges &amp; Texture",
     ])
       assert(html.includes(text), text);
     assert(!html.includes("saved analysis could not"));
@@ -163,10 +178,11 @@ test("mixed colour evidence retains its own labels and a single individual confi
       "Source regions were not located confidently for these colours.",
     ),
   );
-  assert(html.includes("Original painting evidence: Reserved warm light"));
+  assert(html.includes("Reserved warm light"));
+  assert(html.includes("See image evidence · What works"));
 });
 
-test("colour rows sharing one source region render their own labelled original evidence", () => {
+test("colour rows sharing one source region retain labels and reference one existing original detail", () => {
   const canonical = require("./helpers/canonical-fixture.cjs")();
   canonical.canonicalAnalysis.colourAnalysis =
     require("./helpers/colour-fixture.cjs")();
@@ -185,9 +201,11 @@ test("colour rows sharing one source region render their own labelled original e
   const colour = html.slice(
     html.indexOf('data-testid="colour-value-analysis"'),
   );
-  assert(colour.includes("Original painting evidence: Muted green"));
-  assert(colour.includes("Original painting evidence: Muted orange"));
-  assert(!/See image evidence[^<]*(?:Muted green|Muted orange)/.test(colour));
+  assert(colour.includes("Muted green"));
+  assert(colour.includes("Muted orange"));
+  const rows = colour.slice(0, colour.indexOf(">Colour strategy<"));
+  assert.equal((rows.match(/See image evidence · What works/g) || []).length, 2);
+  assert.equal((colour.match(/data-testid="evidence-crop"/g) || []).length, 0);
   assert(
     colour.includes("No confidently located source detail for this colour."),
   );
@@ -1222,7 +1240,7 @@ for (const focus of [
       viewportWidth: 1440,
       expandedAids: false,
     });
-    assert(html.includes("Complete Painting Analysis"));
+    assert(html.includes("Painting Assessment"));
     assert(!html.includes('data-testid="expert-view-controls"'));
     assert(html.includes("Highly resolved painting"));
     assert(html.includes("No significant correction is needed"));
@@ -1252,7 +1270,7 @@ test("canonical optional alternatives are explicitly labelled, not presented as 
     expandedAids: false,
   });
   assert(html.includes("Stylistic alternative"));
-  assert(html.includes("a future experiment"));
+  assert(html.includes("On a separate small study"));
   assert(!html.includes("What to improve"));
 });
 test("canonical invalid required data renders an explicit saved-analysis error", () => {
@@ -1277,7 +1295,7 @@ test("canonical developing analysis stays readable without leaking an unselected
     canonicalResult: fixture,
     expandedAids: false,
   });
-  assert(html.includes("Complete Painting Analysis"));
+  assert(html.includes("Painting Assessment"));
   assert(!html.includes('data-testid="expert-view-controls"'));
   assert(!html.includes(fixture.canonicalAnalysis.insights[0].lesson));
   assert(!html.includes("What works well"));
@@ -1298,9 +1316,9 @@ test("unified Colour & Value renders visible relationships and possible mixes wi
     "Visible colour evidence",
     "Value hierarchy",
     "Chroma hierarchy",
-    "Recreate this look",
+    "Colour-mixing starting points",
     "Approximate starting ratio",
-    "Possible watercolor pigments",
+    "Possible watercolour pigments",
   ])
     assert(html.includes(text));
   assert(!html.includes("Suggested palette"));
@@ -1512,7 +1530,7 @@ for (const [position, region, point] of [
         ),
       );
     if (position !== "off_centre") assert(!html.includes("Off-centre focus"));
-    assert(html.includes("Complete Painting Analysis"));
+    assert(html.includes("Painting Assessment"));
     assert.deepEqual(
       r,
       before,

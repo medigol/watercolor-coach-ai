@@ -10,7 +10,7 @@ const userId = "10000000-0000-4000-8000-000000000001";
 const artworkId = "20000000-0000-4000-8000-000000000001";
 const otherUserId = "10000000-0000-4000-8000-000000000002";
 const image = { uri: "blob:painting" };
-const liveError = "Live AI feedback could not be prepared. Please try again.";
+const liveError = "We couldn't complete the analysis. Please try again.";
 const authMessage = "Your session has expired. Please sign in again.";
 const png = Uint8Array.from(Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWQAAAABJRU5ErkJggg==",
@@ -158,7 +158,7 @@ for (const [status, code] of [[503, "unavailable"], [422, "unavailable"], [400, 
   test(`production HTTP ${status}/${code} fails clearly without mock RPC`, async () => {
     const { api, state } = fixture({ edgeCode: code, edgeStatus: status });
     await assert.rejects(api.saveArtwork("improve_painting", null, image), (error) => {
-      assert(error.message.startsWith(status === 422 ? "We couldn't prepare a reliable analysis" : status === 503 ? "The AI service could not complete this analysis" : liveError));
+      assert(error.message.startsWith(status === 422 ? "We couldn't prepare reliable feedback" : status === 503 ? "We couldn't complete the analysis" : liveError));
       assert(!/private|sample|mock/.test(error.message));
       return true;
     });
@@ -168,7 +168,7 @@ for (const [status, code] of [[503, "unavailable"], [422, "unavailable"], [400, 
 test("quota and busy messages remain exact and never create mock rows", async () => {
   for (const [status, code, message] of [
     [403, "usage_limit", "You've reached the current analysis limit."],
-    [409, "busy", "Your painting is already being analysed. Check My Artworks in a moment."],
+    [409, "busy", "An analysis is already in progress. Check My Artworks before trying again."],
     [401, "auth", authMessage],
   ]) {
     const { api, state } = fixture({ edgeCode: code, edgeStatus: status });
@@ -242,7 +242,7 @@ test("busy responses keep the same in-flight ID/image until the next manual retr
   const attempt = api.createSaveAttempt();
   const originalId = attempt.id;
   await assert.rejects(api.saveArtwork("improve_painting", null, image, attempt), {
-    message: "Your painting is already being analysed. Check My Artworks in a moment.",
+    message: "An analysis is already in progress. Check My Artworks before trying again.",
   });
   assert.equal(attempt.id, originalId);
   assert.equal(state.edges.length, 1);

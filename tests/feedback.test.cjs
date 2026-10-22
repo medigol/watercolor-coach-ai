@@ -143,7 +143,7 @@ for (const [name, overrides] of [
     assert.equal(body.code, "unavailable");
     assert.equal(
       body.message,
-      "Live AI feedback could not be prepared. Please try again.",
+      "We couldn't complete the analysis. Please try again.",
     );
     assert(!JSON.stringify(body).includes("private upstream error"));
     assert(!f.calls.includes("finish"));

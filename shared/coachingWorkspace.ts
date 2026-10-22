@@ -17,6 +17,7 @@ import {
   teachingRank,
   evidenceTargets,
   evidenceProperties,
+  descriptiveClaimSupported,
 } from "./coachingAlignment.ts";
 import {
   assessCoaching,
@@ -62,6 +63,9 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
   const supplied = c.insights.filter(
     (i) =>
       i.factIds.some((id) => c.facts.some((f) => f.id === id)) &&
+      (i.classification !== "strength" || descriptiveClaimSupported(
+        i.lesson, c.facts.filter((f) => i.factIds.includes(f.id)),
+      )) &&
       purposefulFigureAdvice(`${i.lesson} ${i.action}`) &&
       (i.classification === "strength" ||
         (!unsafeHierarchyAdvice(
@@ -257,7 +261,9 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
     materialInsight(r.insight, c.facts),
   );
   const status =
-    ["competent", "developing"].includes(level) && !hasMaterialRecommendation
+    c.qualityAssessment.confidence < 0.65
+      ? "This assessment is tentative. Review the observations below."
+      : ["competent", "developing"].includes(level) && !hasMaterialRecommendation
       ? "Review the observations and studies below."
       : clear.length
         ? level === "developing"
@@ -266,7 +272,7 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
         : level === "highly_resolved"
           ? "No significant correction is needed."
           : level === "strong"
-            ? "No major issue detected. Explore optional refinements or studies."
+            ? "No major issue detected."
             : "Main opportunity to explore";
   const strengths = insights
     .map((i) =>

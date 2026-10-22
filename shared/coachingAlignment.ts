@@ -28,7 +28,7 @@ const properties: Record<string, RegExp> = {
     /\b(?:values?|tonal|contrast|dark\w*|light\w*|shadows?|mid[- ]?tones?)\b/i,
   edge: /\b(?:edges?|contours?|sharp\w*|soft\w*|crisp\w*|diffus\w*|silhouette)\b/i,
   colour:
-    /\b(?:colou?r|chroma|saturat\w*|temperature|warm\w*|cool\w*|palette)\b/i,
+    /\b(?:colou?r|hue|chroma|saturat\w*|temperature|warm\w*|cool\w*|palette)\b/i,
   drawing:
     /\b(?:perspective|drawing|proportion|alignment|misalign\w*|structural|angles?|distort\w*|deck angle)\b/i,
   composition:
@@ -41,8 +41,53 @@ const properties: Record<string, RegExp> = {
 };
 const matching = (dictionary: Record<string, RegExp>, text: string) =>
   Object.keys(dictionary).filter((k) => dictionary[k].test(text));
-export const evidenceProperties = (text: string) => matching(properties, text);
+export function evidenceProperties(text: string): string[] {
+  const chromatic = text.replace(
+    // Contrast has several meanings. Explicit chromatic contrast is not proof
+    // of a tonal difference; keep any independently supplied value vocabulary.
+    /\b(?:hue|colou?r|chroma|saturation|temperature|warm(?:\s+and\s+|\s*[–—/-]\s*)cool)\s+contrast\b/gi,
+    "colour relationship",
+  );
+  const hues = new Set(
+    text.toLowerCase().match(/\b(?:red|orange|yellow|green|blue|violet|purple)\b/g) ?? [],
+  );
+  const tonal =
+    /\b(?:values?|tonal|luminance|gr[ae]yscale|dark\w*|light\w*|pale|white|black|shadows?|mid[- ]?tones?)\b/i.test(text);
+  return matching(
+    properties,
+    hues.size >= 2 && !tonal
+      ? chromatic.replace(/\bcontrast\b/gi, "colour relationship")
+      : chromatic,
+  );
+}
 export const evidenceTargets = (text: string) => matching(targets, text);
+
+/** Narrow evidence test for explicit tonal and structural-accuracy claims.
+ * It checks supplied relationships, never pixels, RGB swatches or correctness
+ * of the model's observation. Other descriptive teaching is left untouched. */
+export function descriptiveClaimSupported(
+  claim: string,
+  facts: readonly PaintingFact[],
+): boolean {
+  const named = evidenceTargets(claim);
+  const linked = facts.filter((f) => {
+    const target = evidenceTargets(f.observation);
+    return !named.length || named.some((t) => target.includes(t));
+  });
+  if (
+    /\b(?:value|tonal|luminance|gr[ae]yscale)\s+(?:contrast|separation|difference|hierarchy|grouping)\b/i.test(claim) &&
+    !linked.some((f) => evidenceProperties(f.observation).includes("value"))
+  )
+    return false;
+  const accuracy =
+    /\b(?:perspective|proportions?|drawing|structural alignment)\b[^.!?]{0,45}\b(?:accurate|correct|consistent|convincing)\b|\b(?:accurate|correct|consistent|convincing)\s+(?:perspective|proportions?|drawing|structural alignment)\b/i;
+  if (!accuracy.test(claim)) return true;
+  return linked.some(
+    (f) =>
+      /\b(?:lines?|angles?|ellipses|planes?|verticals?|horizontals?|width|height|axes)\b/i.test(f.observation) &&
+      /\b(?:converg\w*|parallel|align\w*|relative|recession|consistent direction|shared direction|proportional)\b/i.test(f.observation),
+  );
+}
 const intersects = (a: string[], b: string[]) => a.some((x) => b.includes(x));
 export function evidencedProblem(text: string): boolean {
   return text

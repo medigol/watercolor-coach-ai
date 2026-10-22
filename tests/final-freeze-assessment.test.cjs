@@ -15,7 +15,7 @@ const positive =
   "Clear focal separation and coherent value relationships support the atmosphere.";
 const neutralStatus = "Review the observations and studies below.";
 const strongStatus =
-  "No major issue detected. Explore optional refinements or studies.";
+  "No major issue detected.";
 
 function result(level = "competent", rationale = positive) {
   const r = fixture();

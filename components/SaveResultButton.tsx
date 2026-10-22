@@ -104,7 +104,7 @@ export default function SaveResultButton({
         title={
           busy
             ? mode === "improve_painting"
-              ? "Preparing your complete painting analysis…"
+              ? "Analysing your artwork…"
               : "Preparing…"
             : error && mode === "improve_painting"
               ? "Retry analysis"
@@ -124,8 +124,7 @@ export default function SaveResultButton({
         >
           <ActivityIndicator />
           <Text style={styles.caption}>
-            Reviewing structure, colour and value, and preparing coaching notes
-            in one analysis.
+            Reviewing your artwork and preparing feedback. This may take a moment.
           </Text>
         </View>
       )}
