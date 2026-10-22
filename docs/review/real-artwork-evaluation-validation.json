@@ -1,0 +1,201 @@
+{
+  "checkedOn": "2026-10-23 Australia/Sydney (2026-10-22 UTC)",
+  "branch": "codex/grounded-artwork-assessment",
+  "baseline": "1aa087f0f1f3f5f27378bf28c8319ead86601f53",
+  "codeCommit": "6f8510b",
+  "verdict": "CONDITIONALLY READY engineering; artistic acceptance BLOCKED",
+  "commands": [
+    {
+      "command": "node --test tests/*.test.cjs",
+      "runtime": "Node 22.23.4",
+      "result": "PASS",
+      "tests": 1767,
+      "newTests": 7,
+      "failures": 0,
+      "skips": 0,
+      "cancellations": 0,
+      "todo": 0,
+      "log": "/tmp/real-artwork-full-tests.log"
+    },
+    {
+      "command": "node --test tests/benchmark-outcomes.test.cjs tests/model-benchmark.test.cjs",
+      "result": "PASS",
+      "tests": 86,
+      "log": "/tmp/real-artwork-benchmark-tests.log",
+      "preFixRegression": {
+        "tests": 7,
+        "failed": 2,
+        "passed": 5
+      }
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "result": "PASS",
+      "log": "/tmp/real-artwork-frontend-ts.log"
+    },
+    {
+      "command": "DENO_DIR=/tmp/watercolor-integration-deno DENO_TLS_CA_STORE=system npm exec --yes --cache /tmp/watercolor-integration-npm --package=deno@2.5.6 -- deno check --config supabase/functions/generate-feedback/deno.json supabase/functions/generate-feedback/index.ts",
+      "result": "PASS",
+      "log": "/tmp/real-artwork-edge-ts.log"
+    },
+    {
+      "command": "EXPO_PUBLIC_SUPABASE_URL=https://watercolor-test.supabase.co EXPO_PUBLIC_SUPABASE_ANON_KEY=public-test-anon-key EXPO_WEB_BASE_PATH=/watercolor-coach-ai npm run build:web",
+      "result": "PASS",
+      "log": "/tmp/real-artwork-configured-export.log"
+    },
+    {
+      "command": "EXPO_PUBLIC_SUPABASE_URL= EXPO_PUBLIC_SUPABASE_ANON_KEY= EXPO_WEB_BASE_PATH=/watercolor-coach-ai EXPO_OFFLINE=1 NODE_ENV=production node node_modules/expo/bin/cli export --platform web --output-dir /tmp/real-artwork-unconfigured --clear --max-workers 2",
+      "result": "PASS",
+      "log": "/tmp/real-artwork-unconfigured-export.log"
+    },
+    {
+      "command": "NODE_PATH=/opt/codex/cua_node/lib/node_modules node tests/browser/professional-workspace.cjs http://127.0.0.1:8091/watercolor-coach-ai /tmp/real-artwork-professional-browser",
+      "result": "PASS",
+      "cases": 177,
+      "widths": [
+        375,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1800
+      ],
+      "runtimeErrors": 0,
+      "provider": "mocked, never live",
+      "log": "/tmp/real-artwork-professional-browser.log",
+      "artifact": "/tmp/real-artwork-professional-browser/report.json"
+    },
+    {
+      "command": "NODE_PATH=/opt/codex/cua_node/lib/node_modules node tests/browser/artwork-preparation.cjs http://127.0.0.1:8091/watercolor-coach-ai /tmp/real-artwork-technical-raster",
+      "result": "PASS",
+      "checks": 40,
+      "fixtureKind": "original technical raster fixtures, not artistic acceptance",
+      "log": "/tmp/real-artwork-technical-raster.log"
+    },
+    {
+      "command": "NODE_PATH=/opt/codex/cua_node/lib/node_modules node tests/browser/model-benchmark.cjs",
+      "result": "PASS",
+      "technicalFixtures": 6,
+      "providerCalls": 0,
+      "log": "/tmp/real-artwork-technical-benchmark.log"
+    },
+    {
+      "command": "NODE_PATH=/opt/codex/cua_node/lib/node_modules node tests/browser/unconfigured-pages.cjs http://127.0.0.1:8099/watercolor-coach-ai",
+      "result": "PASS",
+      "routes": 8,
+      "runtimeErrors": 0,
+      "externalRequests": 0,
+      "log": "/tmp/real-artwork-unconfigured-browser.log"
+    },
+    {
+      "command": "node scripts/test-local-database.cjs",
+      "result": "PASS",
+      "scope": "isolated cached PostgreSQL 16; no live service; schema twice, RLS/storage/RPC/quota/idempotency/rollback/concurrent claims",
+      "log": "/tmp/real-artwork-database.log"
+    },
+    {
+      "command": "NODE_PATH=/opt/codex/cua_node/lib/node_modules node scripts/benchmark/cli.cjs prepare --manifest /tmp/watercolor-private-evaluation/manifest.json --output /tmp/watercolor-private-evaluation/prepared --cases C02,C03,C08 --chromium /usr/bin/chromium",
+      "result": "PASS",
+      "prepared": 3,
+      "networkRequests": 0,
+      "log": "/tmp/real-artwork-prepare-1.log"
+    },
+    {
+      "command": "Existing prepare() with C04,C16,C22, same private manifest/output and Chromium",
+      "result": "EXPECTED QUALITY GATE",
+      "additionalPrepared": 2,
+      "blocked": "C22 small isolated thumbnail; no padding or upscaling",
+      "log": "/tmp/real-artwork-prepare-2.log"
+    },
+    {
+      "command": "NODE_PATH=/opt/codex/cua_node/lib/node_modules node /tmp/watercolor-private-evaluation/inspect-prepared.cjs",
+      "result": "PASS",
+      "realImages": 5,
+      "referenceProjectionChecks": 35,
+      "providerCalls": 0,
+      "networkRequests": 0,
+      "runtimeErrors": 0,
+      "scope": "AI-assisted reference geometry, not model annotations",
+      "log": "/tmp/real-artwork-raster-inspection.log"
+    },
+    {
+      "command": "NODE_PATH=/opt/codex/cua_node/lib/node_modules node /tmp/watercolor-private-evaluation/check-upload-ui.cjs",
+      "result": "PASS",
+      "realImageChecks": 10,
+      "widths": [
+        375,
+        1440
+      ],
+      "smallCropBlocked": true,
+      "providerCalls": 0,
+      "uploads": 0,
+      "writes": 0,
+      "runtimeErrors": 0,
+      "log": "/tmp/real-artwork-upload-ui.log"
+    },
+    {
+      "command": "node scripts/benchmark/cli.cjs run --dry-run --prepared /tmp/watercolor-private-evaluation/prepared --cases C02,C03,C16",
+      "result": {
+        "mode": "dry-run",
+        "paidRequests": 0,
+        "plannedRequests": 12,
+        "maximumRequests": 96,
+        "budgetUSD": 3,
+        "worstCaseUSD": null,
+        "pricingVerified": false,
+        "readyForLive": false,
+        "note": "No provider request. Estimates are not an account billing cap."
+      }
+    },
+    {
+      "command": "node scripts/benchmark/cli.cjs run --dry-run --prepared /tmp/watercolor-private-evaluation/prepared",
+      "result": {
+        "mode": "dry-run",
+        "paidRequests": 0,
+        "plannedRequests": 20,
+        "maximumRequests": 96,
+        "budgetUSD": 3,
+        "worstCaseUSD": null,
+        "pricingVerified": false,
+        "readyForLive": false,
+        "note": "No provider request. Estimates are not an account billing cap."
+      }
+    }
+  ],
+  "privacy": {
+    "artifactsOutsideGit": true,
+    "privateFileMode": "0600",
+    "privateDirectoryMode": "0700",
+    "allApprovedForAPI": false,
+    "liveJournalExists": false,
+    "realArtUploads": 0,
+    "paidRequests": 0
+  },
+  "unchangedProtectedFiles": true,
+  "productionSourceLockUnchanged": true,
+  "liveAcceptance": {
+    "providerOutputs": 0,
+    "independentHumanReviews": 0,
+    "exactVanModelReview": "NOT RUN",
+    "exactChurchModelReview": "NOT RUN",
+    "CareBearsScreenshot": "ORIGINAL INPUT UNAVAILABLE",
+    "CareBearsIsolated": "ORIGINAL INPUT UNAVAILABLE",
+    "rawNestedScreenshotModelEligibility": "NOT RUN",
+    "currentPricingAndFamilyDetailBounds": "BLOCKED: documentation proxy 403; elevated retry cancelled",
+    "winner": null
+  },
+  "environmentLimits": [
+    "No physical device/real screen reader tests",
+    "No real deployed Supabase/storage CORS/expiry test",
+    "No actual provider output or blind human review",
+    "No current verified rate card",
+    "Temporary private corpus must be retained privately outside ephemeral workspace if needed later"
+  ],
+  "securityScan": {
+    "trackedFilesScanned": 271,
+    "credentialShapedMatches": 0,
+    "newTrackedImages": 0,
+    "limitations": "Pattern scan is not a formal security audit; existing SQL/ownership tests separately executed."
+  }
+}

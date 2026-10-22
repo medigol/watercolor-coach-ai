@@ -1,5 +1,7 @@
 # Independent artistic and visual-grounding acceptance
 
+Follow-up: the [real-artwork offline evaluation](real-artwork-evaluation.md) now records local inspection and preparation of five supplied files, including the van and church originals. Care Bears inputs, real provider outputs and independent human review remain pending. The statements below describe the original implementation's evidence state; no historical experiment or result was rewritten.
+
 Status: **PENDING real-image review**. No original image bytes or controlled real model outputs for the three reported paintings are available. Technical fixtures do not substitute for them. No expert participation, ratings, quality improvement percentages or before/after artistic win is claimed.
 
 Use the existing private [benchmark workflow](../benchmark/README.md) and blind worksheets. Author expectations **before** reviewing outputs. Keep permitted originals, crop ground truth, outputs and reviewer records outside Git. A paid run needs separate explicit approval, image rights, a current compatible rate card and the existing cost journal; never reset a journal to rerun a failed arm. Current prompt lock starts a new experiment, not a relabelled historical result. No paid run is part of this implementation.

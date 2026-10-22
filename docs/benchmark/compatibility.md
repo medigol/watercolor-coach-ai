@@ -1,5 +1,15 @@
 # Model/API and price verification record — 2026-10-18 UTC
 
+## Follow-up verification — 2026-10-23 Australia/Sydney (2026-10-22 UTC)
+
+Public requests to all three exact model pages, pricing, vision and structured-output documentation again failed with `Tunnel connection failed: 403 Forbidden`. The elevated retry was cancelled; no permission bypass or provider probe was attempted. Thus **all four arms remain unavailable for live evaluation in this environment**, pending verified compatibility, pricing and family/detail-specific bounds. This is an evidence/access limitation, not a claim that the models do not exist. No example price was promoted to a current verified price; the rate template and adapters are unchanged.
+
+The official repository's [OpenAPI specification](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) was retrieved again. SHA-256: `11ce7fc4b6ad9127e05dade75b0b1cf1cd8a6ed4441da10890d8b9a72e316d91`. Its `ModelIdsShared` includes all three configured IDs. Generic Chat Completions image/structured-output/usage fields still do not attest model-specific parameter combinations, account access, prices or image accounting. The retrieved enum metadata also announces a **2027-01-14** shutdown for `gpt-4.1-mini`; independently confirm the official deprecation notice before a future release decision. No production model change is made here.
+
+See the [real-artwork offline evaluation](../review/real-artwork-evaluation.md) for the available corpus, zero-cost pilot plan and outstanding artistic gates. The earlier record below is retained as historical evidence.
+
+## Original verification record
+
 No API request, model-availability probe or image upload was made. These are documentation findings, not account compatibility results.
 
 The public documentation hosts `developers.openai.com`, `platform.openai.com` and `openai.com/api/pricing/` returned proxy **403 Forbidden** in this environment, including an escalated attempt. Current rates, cached/write rates and family-specific image bounds could not be independently verified. The committed rate-card template is deliberately **unverified and cannot enable live mode**.
