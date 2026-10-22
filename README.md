@@ -269,3 +269,8 @@ The release-candidate audit and complete requirement traceability are in [docs/r
 With Docker and a **cached** `postgres:16` image, run `node scripts/test-local-database.cjs` to execute the existing SQL/RLS/quota tests in a disposable database with no network or published ports. It runs the schema twice and concurrent independent reservation checks, then removes its own container. It never pulls an image, reads production database credentials or touches a live project. The minimal compatibility bootstrap supplies Auth/Storage SQL objects only; it does not test Supabase's HTTP services, email delivery, JWT issuance or deployed policies.
 
 The separate offline benchmark commands and required private dataset are documented in [docs/benchmark/README.md](docs/benchmark/README.md). A real-image evaluation requires explicit permission and paid-run authorization; no such evaluation is part of automated validation.
+
+
+## Artistic-quality and copy review
+
+The focused post-PR-35 review is documented in [docs/review/artistic-intelligence-quality.md](docs/review/artistic-intelligence-quality.md), including the four reported scenarios, a 17-case acceptance matrix, editorial examples and the human review rubric. Engineering regressions do not prove medium recognition or artistic accuracy on unavailable originals. Existing saved v1 assessments remain readable and are not rewritten; new prompt guidance applies only to future analyses after a separately authorised Edge Function release. This change needs no SQL migration or new secret.
