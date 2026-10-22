@@ -12,6 +12,7 @@ import {
 } from "./coachingSemantics.ts";
 import { supportedExplanation } from "./coachingAssessment.ts";
 import { validRect } from "./imageGeometry.ts";
+import { descriptiveClaimSupported } from "./coachingAlignment.ts";
 
 /** English prose only: remove an isolated foreign-script tail after English.
  * Mixed/embedded CJK is not safely repairable, so omit that optional text.
@@ -235,7 +236,9 @@ export function prepareCoachingDisplay(
         ),
         source,
       ),
-    );
+    ).split(/(?<=[.!?])\s+/)
+      .filter((sentence) => descriptiveClaimSupported(sentence, c.facts))
+      .join(" ");
   const future = (text: string) =>
     cleanDisplayText(focalIdentityText(futureTeachingText(text), source));
   const structure = (s: typeof c.composition.primary) =>

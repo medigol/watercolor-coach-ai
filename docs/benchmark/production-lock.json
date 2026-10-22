@@ -1,20 +1,20 @@
 {
-  "prompt": "0343ad85ddf0286afd17b845d667fe8cfd2b7d75809daec267fe2ba9538ca1d1",
+  "prompt": "0ab8e8114fb9c6f19b19c95be3724881e1f60389f4d5c7f8d7eb0ab940f5f369",
   "user": "ccceff1c915cb6a2562c3c75169616be098e90c58135e0151de3ee9e58192869",
   "schema": "df3c291786bb79cdc13762bf5b645a90ad1cf589ccacb70b23a9947adfc4d3f4",
   "sources": {
     "lib/prepareArtwork.ts": "59eaba1f7d7a762eeb2df4a195acee1598502c9cac79ffec00792c3e83a02801",
-    "shared/artworkEligibility.ts": "1a2188d1e33afd5140b55fa84fddbb384cf72ad5a8d5fffab1f379388a08b901",
+    "shared/artworkEligibility.ts": "e0063c99115ae45182e0a79e8daca986da2dfb58f7d4dfddd49c212a7aa0c84d",
     "shared/artworkPreparation.ts": "17a6b2fc5d64fe66f59914f6ef0eeeca248373a7567a6aa224a3bedc55328fd6",
-    "shared/coachingAlignment.ts": "929d6506fa313245366fb4d126b303246a84d73c9195262989eb67f30cda9573",
-    "shared/coachingAssessment.ts": "14aef33150729b53dfc1f18c69efcdcc93987829d178cdd22810f8a8dc73deb4",
+    "shared/coachingAlignment.ts": "eeb91c3397ba81c1ba3ff9135224a848fe92a63b387326dd9bf35cd79a7bc65c",
+    "shared/coachingAssessment.ts": "97fa549047d0dd770b8e0d5711e826ec0a52e37fdfde5f923140e964ae932d84",
     "shared/coachingCalibration.ts": "5e34cc7cb63e49e5d6f3010b663c6b87c45960c3196fa853436e2f9767b89139",
     "shared/coachingDecision.ts": "bc9a018683e7346642adf48cecd9b2f4aafa4e0e4d89f96848f6969e69e3763b",
-    "shared/coachingDisplay.ts": "a2286edf8299e3cb78862496278a3918f185455f356d8033bf27395eb517adfd",
-    "shared/coachingEvidence.ts": "280930075a0423af09da0e1122f423b304a2829a92ce6d8f3761f386e1fbf1e4",
+    "shared/coachingDisplay.ts": "28e03971897feb44a7c6fff2c0c78c13f2441bb968c41fe42e0051c2a2c942ce",
+    "shared/coachingEvidence.ts": "f7caefe660acea7b1c996b33ba6fef3148f80dcf61e8fd83696e81b5be0c35dc",
     "shared/coachingLanguage.ts": "a1e0a6c193944090600f2de4f71f1e3e86ed01dad3e890fcf764c96b808e8bc2",
     "shared/coachingSemantics.ts": "a116be16241a937e98c097f0589460222188172f349aa7515660e12362263bfa",
-    "shared/coachingWorkspace.ts": "d19659ce5c326070e3a88f5819080a3b4278b052f3c869cc56154ae5b1a7e880",
+    "shared/coachingWorkspace.ts": "fe06d94c0a1afbd5cfe43f9aee5e19252022811ef43455a25098cd48d474ca25",
     "shared/colourAnalysis.ts": "25b9599645196b77c55fbbdfa6efb87bd1fbc7faee237ce597ae31a68a82c2b8",
     "shared/imageGeometry.ts": "a359fd462682d0389bf07d9a81bbabf43a13b7d3eaf92d72232d07b5088e8a61",
     "shared/paintingAnalysis.ts": "6a0041dfe36c27bce102d6a3192310c6acf75ba1929fcab21e0fb645a7195dea",
@@ -23,7 +23,7 @@
     "supabase/functions/_shared/coachingDecision.ts": "922398fe128381e83bdaf41210d05537d378c5794cea42451a9af3a7e4dc5d56",
     "supabase/functions/_shared/contract.ts": "6e692e6860748feadbb1fc88021dfe485185fd884bec12a159ad6817a3063249",
     "supabase/functions/_shared/overlays.ts": "00042b52c048d71bc1eb4c99cb898ce5161136f897099fb6b20ddf8b4298aad1",
-    "supabase/functions/_shared/prompts.ts": "51dca1d26c998718f6c905999f5aa3c35f7035c9d33c858a73f3bbf4777e33d5",
+    "supabase/functions/_shared/prompts.ts": "6839befea26e70a0977bb0992c63112d5ebdbf6df326da63d1b571909de37387",
     "supabase/functions/generate-feedback/index.ts": "466e14f3d5ee6aba56d26f42826e122ff3010b1b15b53f626e83686b6f5d0528"
   }
 }

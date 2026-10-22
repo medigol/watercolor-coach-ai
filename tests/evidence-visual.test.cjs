@@ -119,6 +119,15 @@ const render = (plan, props = {}) =>
     }),
   );
 
+test("hue-only evidence does not imply a grayscale value comparison", () => {
+  const r = fixture(), i = r.canonicalAnalysis.insights[2];
+  r.canonicalAnalysis.facts[2].observation = "Hue contrast separates the red vehicle from the blue background.";
+  i.lesson = "Hue contrast establishes separation.";
+  const plan = helper.insightEvidence(r, i);
+  assert.equal(plan.value, false);
+  assert(!render(plan).includes("grayscale(1)"));
+});
+
 test("two colours sharing a role keep their own semantic evidence labels", () => {
   const r = fixture();
   for (const label of ["Muted green", "Muted orange", "Off-white", "Red"]) {

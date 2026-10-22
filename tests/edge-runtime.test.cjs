@@ -144,7 +144,7 @@ for (const [reason, mutate] of [
     assert.deepEqual(await response.json(), {
       code: "unavailable",
       reason_code: reason,
-      message: "Live AI feedback could not be prepared. Please try again.",
+      message: "We couldn't complete the analysis. Please try again.",
     });
     assert.deepEqual(f.diagnostics, [[`canonical_invalid:${reason}`]]);
     assert.deepEqual(f.providerDiagnostics, [["provider_finish:stop"]]);
@@ -566,7 +566,7 @@ for (const [name, options] of [
     const value = await r.json();
     assert.deepEqual(value, {
       code: "unavailable",
-      message: "Live AI feedback could not be prepared. Please try again.",
+      message: "We couldn't complete the analysis. Please try again.",
     });
     assert(!JSON.stringify(value).includes("private"));
     assert(!f.calls.some((c) => c.path.endsWith("/save_mock_feedback")));
@@ -697,7 +697,7 @@ for (const status of ["busy", "limit", "existing"])
           : {
               code: "busy",
               message:
-                "Feedback is already being prepared. Check My Artworks in a moment.",
+                "An analysis is already in progress. Check My Artworks before trying again.",
             },
     );
     assert(
@@ -1693,7 +1693,7 @@ for (const [reason, mutate] of [
           : reason === "core_text_cleaning"
             ? "core_text"
             : "unrecoverable_reference",
-      message: "Live AI feedback could not be prepared. Please try again.",
+      message: "We couldn't complete the analysis. Please try again.",
     });
     assert.deepEqual(f.diagnostics, [[`canonical_invalid:${reason}`]]);
     assert.equal(

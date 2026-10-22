@@ -21,14 +21,14 @@ import type {
 export type ResultProvider = "mock" | "openai";
 export const freeLimitMessage = "You've reached the current analysis limit.";
 export const liveFeedbackErrorMessage =
-  "Live AI feedback could not be prepared. Please try again.";
+  "We couldn't complete the analysis. Please try again.";
 export const serviceFeedbackErrorMessage =
-  "The AI service could not complete this analysis. Please retry in a moment.";
+  "We couldn't complete the analysis. Please try again in a moment.";
 export const validationFeedbackErrorMessage =
-  "We couldn't prepare a reliable analysis from that response. Please retry. Failed attempts do not use a successful-analysis quota unit.";
+  "We couldn't prepare reliable feedback. Please try again.";
 const signInMessage = "Your session has expired. Please sign in again.";
 const busyMessage =
-  "Your painting is already being analysed. Check My Artworks in a moment.";
+  "An analysis is already in progress. Check My Artworks before trying again.";
 export class ArtworkEligibilityError extends Error {
   constructor(public readonly code: ArtworkGateCode) {
     super(artworkGateMessages[code]);

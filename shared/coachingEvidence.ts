@@ -3,7 +3,7 @@
 const sentences = (value: string) =>
   value.split(/(?<=[.!?])\s+|\n+/).filter(Boolean);
 const explicitPractice =
-  /^(?:on|in|for)\b[^.!?]{0,50}\bstudy\b|^on scrap\b|^(?:a|an|the)\b[^.!?]{0,45}\b(?:study|exercise) (?:could|can|might)\b|^(?:a |the )?(?:suggested|recommended)\b|^(?:try|test|practi[cs]e)\b|^to (?:reproduce|recreate)\b/i;
+  /^(?:on|in|for)\b[^.!?]{0,50}\bstudy\b|^on scrap\b|^(?:a|an|the)\b[^.!?]{0,45}\b(?:study|exercise) (?:could|can|might)\b|^(?:a |the )?(?:suggested|recommended)\b|^(?:try|test|practi[cs]e)\b|^to (?:reproduce|recreate)\b|^(?:a|one) practical way to (?:reproduce|recreate|practi[cs]e)\b|^this effect (?:could|can|might) be (?:practised|practiced|reproduced|recreated)\b/i;
 export function recommendedMethod(value: string): boolean {
   return (
     explicitPractice.test(value) ||
@@ -15,11 +15,14 @@ export function recommendedMethod(value: string): boolean {
 }
 export function unsupportedProcess(value: string): boolean {
   const history =
-    /\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:the|original|actual|exact) (?:brush|pigment|paper moisture|wash order|glazing sequence)\b[^.!?]{0,40}\b(?:was|is|were)\b|\b(?:was|were|must have been)\s+(?:(?:originally|fully|still|evenly)\s+)?(?:painted|applied|wetted|damp|soaked|glazed|layered)\b/i;
+    /\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked|lifted)\b|\b(?:the|original|actual|exact) (?:brush|pigment|paper moisture|wash order|glazing sequence)\b[^.!?]{0,40}\b(?:was|is|were)\b|\b(?:was|were|has been|have been|must have been)\s+(?:(?:originally|fully|still|evenly)\s+)?(?:painted|applied|wetted|damp|soaked|glazed|layered|lifted)\b/i;
   if (history.test(value)) return true;
   // A modal such as “could” does not by itself make an observation a proposed
   // method. Retain methods only when explicitly framed as future practice.
   if (recommendedMethod(value)) return false;
+  // These name execution methods, not visible shapes. "Negative shapes" is
+  // observational; negative painting/lifting belong only to proposed practice.
+  if (/\bnegative painting\b|^lifting\b|\b(?:using|through|by|via|with|preserve)\s+(?:the\s+)?lifting\b|\blifting\s+(?:paint|pigment|colou?r)\b/i.test(value)) return true;
   if (
     /\bdry[- ]?brush\b|\bwet blending\b|\bopaque (?:colou?r )?application\b|\bedge control\b|\bedge variation technique\b/i.test(
       value,
@@ -44,7 +47,7 @@ export function unsupportedProcess(value: string): boolean {
     )
   )
     return true;
-  return /\b(?:wet[- ]on[- ]wet|wet[- ]on[- ]dry|damp[- ]on[- ]damp)\b|\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked)\b|\b(?:original|exact|actual)\s+(?:brush|pigment|paper moisture|wash order|glazing sequence)\b/i.test(
+  return /\b(?:wet[- ]on[- ]wet|wet[- ]on[- ]dry|damp[- ]on[- ]damp)\b|\b(?:artist|painter|you|they)\s+(?:(?:clearly|originally|effectively)\s+)?(?:used|chose|painted|mixed|glazed|layered|soaked|lifted)\b|\b(?:original|exact|actual)\s+(?:brush|pigment|paper moisture|wash order|glazing sequence)\b/i.test(
     value,
   );
 }

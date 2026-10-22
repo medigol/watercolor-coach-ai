@@ -7,11 +7,11 @@ export const artworkGateCodes = [
 export type ArtworkGateCode = (typeof artworkGateCodes)[number];
 export const artworkGateMessages: Record<ArtworkGateCode, string> = {
   unsupported_artwork:
-    "This doesn't appear to be a watercolor painting. Choose a watercolor artwork or a clear photo of one.",
+    "We couldn't assess this as a watercolour artwork. Upload a clear photo or scan. If this is an app screenshot, use the original artwork file or crop out the interface.",
   artwork_uncertain:
-    "We couldn't confidently identify the painting or its medium. Choose a clearer photo or scan of your watercolor.",
+    "We couldn't reliably identify the medium. Upload a clearer photo or scan of the artwork. Watercolour-specific advice may not apply to other media.",
   crop_needed:
-    "Please isolate one painting. Adjust the crop to exclude the frame, room or tools, then confirm it.",
+    "Crop the image to show one complete artwork, with as little surrounding background as possible.",
 };
 const record = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === "object" && !Array.isArray(v);

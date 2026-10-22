@@ -63,7 +63,7 @@ function fixture(mode, provider, options = {}) {
         select(columns) { query.columns = columns; return chain; },
         eq(field, value) { query.filters[field] = value; return chain; },
         abortSignal(signal) { query.signal = signal; return chain; },
-        async single() { return { data: row, error: null }; },
+        async single() { return options.readRow ? options.readRow(query) : { data: row, error: null }; },
       };
       return chain;
     },
@@ -71,7 +71,7 @@ function fixture(mode, provider, options = {}) {
       assert.equal(bucket, "artworks");
       return { async createSignedUrl(name) {
         calls.signs.push(name);
-        return { data: { signedUrl: "https://example.invalid/signed-painting" }, error: null };
+        return { data: { signedUrl: options.distinctImages ? "https://example.invalid/" + encodeURIComponent(name) : "https://example.invalid/signed-painting" }, error: null };
       } };
     } },
     rpc() { calls.saves++; throw new Error("A gallery/result read must never save or charge quota"); },
@@ -100,6 +100,27 @@ function fixture(mode, provider, options = {}) {
     },
   };
 }
+
+test("late saved-result reads cannot replace the current artwork or image mapping", async () => {
+  const pending = [];
+  const f = fixture("improve_painting", "openai", { distinctImages: true,
+    readRow: () => new Promise((resolve) => pending.push(resolve)) });
+  const row = (title, image) => ({ provider: "openai", result_json: { ...samples.improveResult, title },
+    artworks: { image_url: `${userId}/${image}`, focus_area: "Composition" } });
+  f.render(); await f.settle();
+  f.setParams({ id: "20000000-0000-4000-8000-000000000002" });
+  assert(f.render().loading);
+  await f.settle();
+  pending[1]({ data: row("Current artwork", "current.png"), error: null });
+  await f.settle();
+  assert.equal(f.render().result.title, "Current artwork");
+  assert(f.render().image.endsWith("current.png"));
+  pending[0]({ data: row("Old artwork", "old.png"), error: null });
+  await f.settle();
+  assert.equal(f.render().result.title, "Current artwork");
+  assert(f.render().image.endsWith("current.png"));
+  assert.equal(f.calls.model, 0); assert.equal(f.calls.saves, 0);
+});
 
 for (const mode of ["improve_painting", "create_reference"])
   for (const provider of ["openai", "mock"])
