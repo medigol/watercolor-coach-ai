@@ -691,6 +691,7 @@ let signalFeedbackHeld;
         : route.fulfill({
             status: 200,
             contentType: "image/png",
+            headers: { "access-control-allow-origin": "*" },
             body: fs.readFileSync(imageFile),
           });
     if (
@@ -791,6 +792,12 @@ let signalFeedbackHeld;
     await button("Choose painting").click();
     await (await event).setFiles(artifactDir + "/technical-scene.png");
     await button("Choose another image").waitFor();
+    await button("Use full image").waitFor();
+    assert.equal(await button("Analyse painting").getAttribute("aria-disabled"), "true", "unconfirmed image cannot be uploaded or assessed");
+    const beforeConfirm = snapshot();
+    await button("Use full image").click();
+    await page.getByRole("img", {name: "Confirmed artwork preview"}).waitFor();
+    assert.deepEqual(snapshot(), beforeConfirm, "explicit artwork confirmation is entirely local");
   };
   await choose();
   const preparationMatrix = [];
@@ -852,6 +859,9 @@ let signalFeedbackHeld;
   assert.equal(await page.getByRole("heading",{name:"Painting Assessment",level:1,exact:true}).count(),1,"saved critique needs a navigable main heading");
   assert.equal(await page.getByTestId("overall-assessment").getByRole("heading",{name:"Highly resolved painting",level:2,exact:true}).count(),1,"assessment needs a navigable section heading");
   assert.equal(await page.getByRole("heading",{name:"What works",level:2,exact:true}).count(),1,"strengths need a navigable section heading");
+  for(const name of ["Composition", "Colour & Value", "Edges & Texture", "Suggested practice"]) {
+    assert.equal(await page.getByRole("heading",{name,level:2,exact:true}).count(),1,`${name} needs a navigable section heading`);
+  }
   assert.equal(edgeCalls, 1);
   assert.equal(used, 1);
   assert.equal(rows.length, 1);
@@ -1298,13 +1308,22 @@ let signalFeedbackHeld;
       const recommendations = page.locator('[data-testid^="recommendation-"]');
       assert.equal(await recommendations.count(), kind === "boat" ? 0 : 1);
       const colours = page.getByTestId("colour-value-analysis");
-      await colours.getByTestId("visible-colour-evidence")
-        .locator('[data-testid="teaching-evidence"], [aria-label^="See image evidence:"]')
-        .first().waitFor();
+      if(kind === "boat") {
+        // This sanitized text fixture deliberately points its warm-colour role
+        // at the GREEN technical source. The independent pixel contradiction
+        // screen must remove that source link, not invent matching evidence.
+        await colours.getByText("Source regions were not located confidently for these colours.",{exact:true}).waitFor();
+        assert.equal(await colours.getByTestId("visible-colour-evidence")
+          .locator('[data-testid="teaching-evidence"], [aria-label^="See image evidence:"]').count(),0);
+      } else {
+        await colours.getByTestId("visible-colour-evidence")
+          .locator('[data-testid="teaching-evidence"], [aria-label^="See image evidence:"]')
+          .first().waitFor();
+      }
       assert.equal(
         await colours
           .getByText(
-            "Some listed colours are visible in the painting, but their exact source regions were not located confidently.",
+            kind === "boat" ? "Source regions were not located confidently for these colours." : "Some listed colours are visible in the painting, but their exact source regions were not located confidently.",
             { exact: true },
           )
           .count(),
@@ -1943,6 +1962,48 @@ let signalFeedbackHeld;
   );
   await page.getByTestId("recommendation-0").scrollIntoViewIfNeeded();
   await shot("mobile-edge-comparison");
+  // Two ORIGINAL regions, independent raster sampling and a reversible local
+  // grayscale display. This does not assert artistic truth of the mock prose.
+  Object.assign(saved, structuredClone(beforeVisualExamples));
+  const tonalInsight = saved.canonicalAnalysis.insights[2];
+  Object.assign(tonalInsight, {
+    classification: "optional_refinement", factIds: ["colour", "edges"],
+    lesson: "The bank's internal value contrast competes with the focal tower light.",
+    action: "On a separate small study, compress the bank values; compare focal separation while keeping the tower unchanged.",
+  });
+  Object.assign(saved.canonicalAnalysis.facts[2], {
+    roleId: "bank", observation: "The bank's internal value contrast competes with the tower light and weakens separation.",
+  });
+  saved.canonicalAnalysis.visualEvidence.push({
+    insightId: tonalInsight.id, roleId: null,
+    note: { ...saved.canonicalAnalysis.visualEvidence[0].note, id:"tonal-comparison", scope:"multi_region", region:null,
+      regions:[{x:.56,y:.24,width:.2,height:.3},{x:.08,y:.59,width:.27,height:.22}],
+      regionConfidence:.9, label:"Focal and supporting values", priority:"high" },
+  });
+  const tonalMatrix=[];
+  await page.reload();
+  for(const width of [375,390,430,768,1024,1440,1800]) {
+    await page.setViewportSize({width,height:950});
+    await page.getByTestId(width>=1024?"result-columns":"result-stack").waitFor();
+    const card=page.getByTestId("recommendation-0");
+    await card.getByRole("button",{name:"Show grayscale evidence",exact:true}).waitFor();
+    await card.getByTestId("measured-tonal-evidence").waitFor();
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    // Baseline AFTER the awaited saved read/raster readiness, not immediately
+    // after reload while that existing read is still in flight.
+    const before=snapshot();
+    await card.getByRole("button",{name:"Show grayscale evidence",exact:true}).click();
+    assert.equal(await card.locator('img[style*="grayscale(1)"]').count(),2);
+    const styles=await card.getByTestId("evidence-source-frame").evaluateAll(es=>es.map(e=>e.getAttribute("style")));
+    const sources=await card.locator("img").evaluateAll(es=>es.map(e=>e.src));
+    assert.equal(new Set(sources).size,1);
+    await card.getByRole("button",{name:"Show colour evidence",exact:true}).click();
+    assert.equal(await card.locator('img[style*="grayscale(1)"]').count(),0);
+    assert.deepEqual(await card.getByTestId("evidence-source-frame").evaluateAll(es=>es.map(e=>e.getAttribute("style"))),styles);
+    assert.deepEqual(snapshot(),before);await noOverflow();
+    tonalMatrix.push({width,originalRegions:true,linearLuminance:true,grayscaleOnly:true,readonly:true});
+    if(width===390||width===1440){await card.scrollIntoViewIfNeeded();await shot("measured-tonal-comparison-"+width);}
+  }
   Object.assign(saved, structuredClone(beforeVisualExamples));
   saved.canonicalAnalysis.insights.push({
     id: "figure-study",
@@ -2137,6 +2198,7 @@ let signalFeedbackHeld;
         eligibilityMatrix,
         matrix,
         evidenceMatrix,
+        tonalMatrix,
         calibrationMatrix,
         providerMatrix,
         finalCalibrationMatrix,
