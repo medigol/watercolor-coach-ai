@@ -51,6 +51,18 @@ function outcome(r) {
     ? "crop-needed"
     : r?.outcome || "not_run";
 }
+function matchesExpected(r, c) {
+  // Manifest labels are imperative (accept/reject); provider outcomes are past
+  // tense (accepted/rejected). Keep the recorded confusion labels unchanged.
+  const expected =
+    { accept: "accepted", reject: "rejected" }[c.ground_truth] ||
+    c.ground_truth;
+  const actual = outcome(r);
+  return (
+    actual === expected ||
+    (c.abstention_acceptable && ["uncertain", "crop-needed"].includes(actual))
+  );
+}
 function reviewRows(value, known) {
   if (!value || !Array.isArray(value.reviews))
     throw Error("Invalid review file");
@@ -174,23 +186,9 @@ function statistics(rows, cases, reviews, mapping) {
             ["reject", "crop-needed"].includes(c.ground_truth) &&
             r.outcome === "accepted",
         ).length,
-        errors: ps.filter(
-          ({ r, c }) =>
-            outcome(r) !== c.ground_truth &&
-            !(
-              c.abstention_acceptable &&
-              ["uncertain", "crop-needed"].includes(outcome(r))
-            ),
-        ).length,
+        errors: ps.filter(({ r, c }) => !matchesExpected(r, c)).length,
         errorRate:
-          ps.filter(
-            ({ r, c }) =>
-              outcome(r) !== c.ground_truth &&
-              !(
-                c.abstention_acceptable &&
-                ["uncertain", "crop-needed"].includes(outcome(r))
-              ),
-          ).length / total,
+          ps.filter(({ r, c }) => !matchesExpected(r, c)).length / total,
         invalid: ps.filter(({ r }) => r.outcome === "invalid").length,
       };
     });
