@@ -287,7 +287,15 @@ export function usableCompositionTeaching(
         ? observationText(value[field]) || null
         : null;
   return (result.elements as string[]).length &&
-    [result.entry, result.path, result.landing].some(Boolean)
+    [
+      result.entry,
+      result.path,
+      result.landing,
+      result.supportingMass,
+      result.quietMass,
+      result.counterbalance,
+      result.risk,
+    ].some(Boolean)
     ? (result as unknown as CompositionTeaching)
     : null;
 }
@@ -443,6 +451,21 @@ export function drawableCompositionOverlay(
   ]);
   const paths = overlay.paths ?? [];
   const masses = overlay.masses ?? [];
+  // A directional journey with a declared landing cannot end far from that
+  // landing. 0.12 is a coarse artwork-relative tolerance, not a snapped point.
+  // Keep the supplied explanation; omit this optional diagram, never move it.
+  if (
+    ["diagonal", "s_curve"].includes(overlay.type) &&
+    overlay.focalPoint &&
+    paths[0]
+  ) {
+    const end = paths[0][paths[0].length - 1];
+    if (
+      Math.hypot(end.x - overlay.focalPoint.x, end.y - overlay.focalPoint.y) >
+      0.12
+    )
+      return null;
+  }
   if (overlay.type === "mixed")
     return paths.length || masses.length || anchors.length ? overlay : null;
   if (overlay.type === "rule_of_thirds" || overlay.type === "off_centre")

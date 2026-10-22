@@ -762,6 +762,23 @@ test("screenshot/photo false acceptance separate from watercolor recall", () => 
   assert.equal(s.watercolorRecall, 1);
   assert.equal(s.eligibilityPrecision, 0.5);
 });
+
+test("required-crop screenshots remain raw controls and cannot be marked accepted", (t) => {
+  const m=structuredClone(require('../docs/benchmark/manifest.example.json'));
+  const root=temp(t), file=path.join(root,'manifest.json');
+  for(const c of m.cases.filter(c=>c.category==='screenshot')) c.ground_truth='crop-needed';
+  fs.writeFileSync(file,JSON.stringify(m));assert.equal(readManifest(file).cases.length,24);
+  m.cases.find(c=>c.category==='screenshot').ground_truth='accept';
+  fs.writeFileSync(file,JSON.stringify(m));assert.throws(()=>readManifest(file),/screenshot controls/);
+});
+test("accepting an interface that needed cropping counts as false acceptance, not benchmark success",()=>{
+  const c={case_id:'C13',category:'screenshot',ground_truth:'crop-needed',watercolor_status:'ambiguous'};
+  const row={caseID:'C13',armID:'baseline_low',outcome:'accepted',canonicalValid:true};
+  const result=statistics([row],[c],[],[])[0];
+  assert.equal(result.falseAcceptanceCount,1);assert.equal(result.acceptedWithoutRequiredCrop,1);
+  assert.equal(result.categoryMetrics.find(c=>c.category==='screenshot').falseAccepts,1);
+  assert.equal(result.eligibilityPrecision,0);
+});
 test("metrics do not turn missing data into zero latency or a price winner", () => {
   assert.equal(percentile([], 0.95), null);
   assert(

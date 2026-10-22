@@ -261,7 +261,7 @@ test("workspace applies one read-only role projection to labels, overlays, notes
   assert(source.includes("planCanonicalVisualRoles(c.visualRoles)"));
   assert(source.includes("{c.visualRoles.map((r) => ("));
   assert(source.includes("source={displaySource}"));
-  assert(source.includes("const evidenceSource = {\n    ...displaySource,"));
+  assert.match(source, /const evidenceSource = useMemo\([\s\S]*?\.\.\.displaySource,[\s\S]*?visualEvidence: c\.visualEvidence\?\.filter/);
   for (const file of ["lib/visualRoles.ts"]) {
     const code = fs.readFileSync(path.join(root, file), "utf8");
     assert(

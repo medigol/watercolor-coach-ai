@@ -195,14 +195,12 @@ test("distinct secondary structure is kept without changing canonical role map",
       c.canonicalAnalysis.composition.secondary,
     );
 });
-test("diagonal rendering reduces ordered canonical anchors to entry and landing", () => {
+test("diagonal rendering preserves every supplied ordered anchor, not a fabricated straight shortcut", () => {
   const result = clean(fixture());
-  assert.deepEqual(result.canonicalAnalysis.composition.primary.paths, [
-    [
-      { x: 0.12, y: 0.85 },
-      { x: 0.67, y: 0.36 },
-    ],
-  ]);
+  assert.deepEqual(
+    result.canonicalAnalysis.composition.primary.paths,
+    fixture().canonicalAnalysis.composition.primary.paths,
+  );
 });
 test("highly resolved painting needs no clear issues, forced correction or filler", () => {
   const c = clean(fixture());
@@ -531,7 +529,10 @@ test("one successful canonical request uses one quota unit; retries/local views 
       if (fail) throw Error("upstream failure");
       const result = fixture();
       if (invalid) result.canonicalAnalysis.insights[0].factIds = ["missing"];
-      return {eligibility:{status:"accepted",reason_code:null},analysis:result};
+      return {
+        eligibility: { status: "accepted", reason_code: null },
+        analysis: result,
+      };
     },
     finish: async (_u, i, result) => {
       assert(painting.validPaintingAnalysis(result));
@@ -603,7 +604,10 @@ test("a legacy provider response cannot satisfy a new canonical painting request
     usage: async () => ({ used: 0, limit: 3 }),
     claim: async () => ({ status: "claimed" }),
     download: async () => new Uint8Array(),
-    generate: async () => ({eligibility:{status:"accepted",reason_code:null},analysis:load("data/mockResults.ts").improveResult}),
+    generate: async () => ({
+      eligibility: { status: "accepted", reason_code: null },
+      analysis: load("data/mockResults.ts").improveResult,
+    }),
     finish: async () => {
       completed++;
       throw Error("must not save");

@@ -111,7 +111,9 @@ function statistics(rows, cases, reviews, mapping) {
       rate = (num) => (n ? num / n : null);
     const accept = count(({ r }) => r.outcome === "accepted");
     const falseAccept = count(
-      ({ r, c }) => r.outcome === "accepted" && c.ground_truth === "reject",
+      ({ r, c }) =>
+        r.outcome === "accepted" &&
+        ["reject", "crop-needed"].includes(c.ground_truth),
     );
     const watercolor = pairs.filter(
       ({ c }) =>
@@ -168,7 +170,9 @@ function statistics(rows, cases, reviews, mapping) {
         category,
         total,
         falseAccepts: ps.filter(
-          ({ r, c }) => c.ground_truth === "reject" && r.outcome === "accepted",
+          ({ r, c }) =>
+            ["reject", "crop-needed"].includes(c.ground_truth) &&
+            r.outcome === "accepted",
         ).length,
         errors: ps.filter(
           ({ r, c }) =>
@@ -201,6 +205,10 @@ function statistics(rows, cases, reviews, mapping) {
       rejectionRate: rate(count(({ r }) => r.outcome === "rejected")),
       uncertainRate: rate(count(({ r }) => r.outcome === "uncertain")),
       falseAcceptanceCount: falseAccept,
+      acceptedWithoutRequiredCrop: count(
+        ({ r, c }) =>
+          r.outcome === "accepted" && c.ground_truth === "crop-needed",
+      ),
       acceptedAndCritiquedNonPainting: count(
         ({ r, c }) =>
           r.outcome === "accepted" &&

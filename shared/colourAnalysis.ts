@@ -12,6 +12,7 @@ import {
   approximateMixRatio,
   colourRelationshipText,
 } from "./coachingLanguage.ts";
+import { plausiblePigmentMix } from "./pigmentMixes.ts";
 
 export interface ColourAnalysis {
   visibleColours: {
@@ -143,7 +144,8 @@ export function cleanColourAnalysis(
         !Array.isArray(item.pigments) ||
         !item.pigments.length ||
         item.pigments.length > 3 ||
-        !item.pigments.every((p) => mixText(p, 40))
+        !item.pigments.every((p) => mixText(p, 40)) ||
+        !plausiblePigmentMix(item.target as string, item.pigments as string[])
       )
         return [];
       const opaqueVariation =

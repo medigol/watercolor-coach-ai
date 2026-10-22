@@ -171,7 +171,7 @@ export default function CompositionStructure({
                 stroke={ink}
                 strokeWidth={1.6}
                 strokeOpacity={0.9}
-                strokeDasharray={plan.type === "mixed" ? "7 4" : undefined}
+                strokeDasharray="7 4"
               />
             </G>
           );

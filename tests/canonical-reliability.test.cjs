@@ -239,12 +239,8 @@ test("multiple focal roles use the unique highest explicit confidence, independe
           : "quiet",
     );
   }
-  assert.deepEqual(value.canonicalAnalysis.composition.primary.paths, [
-    [
-      raw.canonicalAnalysis.composition.primary.paths[0][0],
-      raw.canonicalAnalysis.composition.primary.paths[0].at(-1),
-    ],
-  ]);
+  assert.deepEqual(value.canonicalAnalysis.composition.primary.paths,
+    raw.canonicalAnalysis.composition.primary.paths);
 });
 for (const [name, confidence] of [
   ["tie", 0.92],

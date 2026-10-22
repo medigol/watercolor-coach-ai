@@ -52,6 +52,7 @@ import {
   allocateEvidence,
   insightEvidence,
   colourEvidence,
+  tonalEvidence,
   compositionEvidence,
   evidenceIdentity,
   type EvidencePlacement,
@@ -59,6 +60,8 @@ import {
 import BrushWashPlanCard from "./BrushWashPlanCard";
 import { colors, styles } from "./ui";
 import { design } from "./theme";
+import { useImageTone } from "../lib/useImageTone";
+import { regionColourSupport } from "../shared/imageTone";
 
 function Section({
   title,
@@ -103,6 +106,8 @@ function Section({
       >
         <Ionicons name={icon} size={21} color={colors.accent} />
         <Text
+          accessibilityRole="header"
+          {...(Platform.OS === "web" ? { "aria-level": 2 } : {})}
           style={[styles.heading, { flex: 1, fontSize: design.type.section }]}
         >
           {title}
@@ -174,7 +179,7 @@ export default function PaintingAnalysisWorkspace({
 }) {
   const { width, height } = useWindowDimensions(),
     wide = Platform.OS === "web" && width >= 1024;
-  const teaching = workspaceTeaching(source);
+  const teaching = useMemo(() => workspaceTeaching(source), [source]);
   // This is a view projection, not a canonical result to revalidate or persist.
   // All role labels, overlays and linked visual aids use the same omissions.
   const displaySource = useMemo(() => {
@@ -222,11 +227,18 @@ export default function PaintingAnalysisWorkspace({
   const [selected, setSelected] = useState<number | null>(0);
   const [showNotes, setShowNotes] = useState(false);
   const [secondary, setSecondary] = useState(false);
-  const [sourceSize, setSourceSize] = useState<ImageSize | null>(null);
+  const [sourceMetrics, setSourceMetrics] = useState<{
+    uri: string;
+    size: ImageSize;
+  } | null>(null);
   const onSize = useCallback(
-    (size: ImageSize | null) => setSourceSize(size),
-    [],
+    (size: ImageSize | null) =>
+      setSourceMetrics(size && image ? { uri: image, size } : null),
+    [image],
   );
+  const sourceSize =
+    sourceMetrics?.uri === image ? (sourceMetrics?.size ?? null) : null;
+  const tone = useImageTone(image, sourceSize);
   const primary = drawableCompositionOverlay(c.composition.primary);
   const other = drawableCompositionOverlay(c.composition.secondary);
   const distinctSecondary =
@@ -249,15 +261,18 @@ export default function PaintingAnalysisWorkspace({
         ]),
       ) as typeof note,
   );
-  const evidenceSource = {
-    ...displaySource,
-    canonicalAnalysis: {
-      ...c,
-      visualEvidence: c.visualEvidence?.filter(
-        (e) => !teaching.noteExcludedInsightIds.includes(e.insightId),
-      ),
-    },
-  };
+  const evidenceSource = useMemo(
+    () => ({
+      ...displaySource,
+      canonicalAnalysis: {
+        ...c,
+        visualEvidence: c.visualEvidence?.filter(
+          (e) => !teaching.noteExcludedInsightIds.includes(e.insightId),
+        ),
+      },
+    }),
+    [displaySource, teaching.noteExcludedInsightIds],
+  );
   const visualStructure =
     structure?.type === "off_centre" && focalPosition !== "off_centre"
       ? null
@@ -267,15 +282,43 @@ export default function PaintingAnalysisWorkspace({
   const scrollRef = useRef<ScrollView>(null);
   const evidenceRefs = useRef<Record<string, View | null>>({});
   const [revealed, setRevealed] = useState({ key: "", revision: 0 });
+  useEffect(() => {
+    // A new saved record/source cannot inherit another painting's selected note,
+    // secondary guide or intrinsic dimensions. No persisted data is changed.
+    setMode("clean");
+    setSelected(null);
+    setShowNotes(false);
+    setSecondary(false);
+    setRevealed({ key: "", revision: 0 });
+  }, [source, image]);
   const firstRecommendation = teaching.recommendations[0];
-  const colourInsight = c.insights.find(
-    (i) =>
-      i.domain === "colour_value" &&
-      !teaching.noteExcludedInsightIds.includes(i.id),
+  const valueEvidence = tonalEvidence(
+    evidenceSource,
+    teaching.noteExcludedInsightIds,
   );
-  const valueEvidence = colourInsight
-    ? insightEvidence(evidenceSource, colourInsight)
-    : null;
+  const colourRequests = useMemo(
+    () =>
+      (c.colourAnalysis?.visibleColours ?? []).map((colour, index) => {
+        const plan = colourEvidence(
+          evidenceSource,
+          colour.roleId,
+          neutralizeFocalPositionText(colour.label, focalPosition),
+        );
+        const mismatch =
+          tone &&
+          plan?.regions.some(
+            (r) =>
+              regionColourSupport(tone, r.region, colour.approximateHex) ===
+              false,
+          );
+        return {
+          key: `colour-${index}`,
+          label: neutralizeFocalPositionText(colour.label, focalPosition),
+          plan: mismatch ? null : plan,
+        };
+      }),
+    [evidenceSource, tone, focalPosition],
+  );
   const requests = [
     {
       key: "composition",
@@ -299,7 +342,7 @@ export default function PaintingAnalysisWorkspace({
     {
       key: "value",
       label: "Value hierarchy",
-      plan: valueEvidence ? { ...valueEvidence, value: true } : null,
+      plan: valueEvidence?.value ? valueEvidence : null,
     },
     ...teaching.studies
       .filter((i) => objectDesignSuggestion(i.action))
@@ -325,11 +368,7 @@ export default function PaintingAnalysisWorkspace({
         label: "Technique evidence",
         plan: insightEvidence(evidenceSource, i),
       })),
-    ...(c.colourAnalysis?.visibleColours ?? []).map((colour, index) => ({
-      key: `colour-${index}`,
-      label: text(colour.label),
-      plan: colourEvidence(evidenceSource, colour.roleId, text(colour.label)),
-    })),
+    ...colourRequests,
   ];
   const placements = allocateEvidence(requests);
   const showEvidence = (key: string) => {
@@ -392,6 +431,7 @@ export default function PaintingAnalysisWorkspace({
       >
         <EvidenceVisual
           uri={image}
+          tone={tone}
           sourceSize={sourceSize}
           plan={{
             ...placement.plan,
@@ -407,6 +447,7 @@ export default function PaintingAnalysisWorkspace({
                   setSelected(noteIndex);
                   setMode("notes");
                   setShowNotes(true);
+                  showEvidence("artwork");
                 }
               : undefined
           }
@@ -519,6 +560,10 @@ export default function PaintingAnalysisWorkspace({
       </Text>
       <Text style={[styles.body, { color: colors.accent, fontWeight: "600" }]}>
         {teaching.status}
+      </Text>
+      <Text style={styles.caption}>
+        An image-based interpretation, without a reference comparison. Located
+        areas are guides to check against your painting.
       </Text>
     </View>
   );
@@ -662,6 +707,7 @@ export default function PaintingAnalysisWorkspace({
             </View>
             {mode === "composition" && structure && (
               <Text style={styles.caption}>
+                Interpretive composition guide · not a traced object boundary.{" "}
                 {archetypeLabel(structure.type, focalPosition)} ·{" "}
                 {text(structure.shortExplanation)}
               </Text>
@@ -926,14 +972,16 @@ export default function PaintingAnalysisWorkspace({
                 </>
               )}
             </Section>
-            {(
+            {
               <Section
                 title="Suggested practice"
                 icon="book-outline"
                 initiallyOpen
               >
                 {!teaching.practice && !teaching.studies.length && (
-                  <Text style={styles.caption}>No additional exercise is suggested for this assessment.</Text>
+                  <Text style={styles.caption}>
+                    No additional exercise is suggested for this assessment.
+                  </Text>
                 )}
                 {!!teaching.practice && (
                   <View
@@ -969,7 +1017,15 @@ export default function PaintingAnalysisWorkspace({
                       {i.classification === "stylistic_alternative"
                         ? "Stylistic alternative"
                         : "Study experiment"}{" "}
-                      · {{ overall: "Whole painting", composition: "Composition", colour_value: "Colour & Value", technique: "Edges & Texture" }[i.domain]}
+                      ·{" "}
+                      {
+                        {
+                          overall: "Whole painting",
+                          composition: "Composition",
+                          colour_value: "Colour & Value",
+                          technique: "Edges & Texture",
+                        }[i.domain]
+                      }
                     </Text>
                     <Text style={styles.body}>{text(i.lesson)}</Text>
                     {evidence(`insight:${i.id}`)}
@@ -977,7 +1033,7 @@ export default function PaintingAnalysisWorkspace({
                   </View>
                 ))}
               </Section>
-            )}
+            }
           </View>
         </View>
       </View>
