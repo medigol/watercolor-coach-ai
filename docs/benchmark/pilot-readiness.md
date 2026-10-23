@@ -1,6 +1,6 @@
 # Controlled artistic-quality pilot: NO-GO
 
-2026-10-23 UTC. Follow-up to clean, synchronized `codex/grounded-artwork-assessment` at `8f189dc194dbcaf88b953a4ea8187fa257d96db1`. The completed offline engineering suite was **not rerun**. No provider request, API key use, artwork transmission, merge or deployment occurred. Production settings, schema, prompt and source lock remain unchanged.
+2026-10-23 UTC. Engineering follow-up began at `8f189dc194dbcaf88b953a4ea8187fa257d96db1`; final unblocking follow-up at clean, synchronized `397d572d6350484741ed2ba476f8c1d6f2125de4`, on `codex/grounded-artwork-assessment`. The completed offline engineering suite was **not rerun**. No provider request, API key use, artwork transmission, merge or deployment occurred. Production settings, schema, prompt and source lock remain unchanged.
 
 ## Fixed scope and verified cost status
 
@@ -15,14 +15,14 @@ The smallest proposed pilot remains **C02 church, C03 van, C16 full raw nested s
 
 All retain exact production strict JSON schema, required-null eligibility envelope and 3,000 completion tokens. Prior official OpenAPI retrieval lists the model IDs and generic API fields; it does not verify individual combinations, current availability/prices or model-specific image accounting.
 
-Fresh requests to all four requested official pages failed with **`Tunnel connection failed: 403 Forbidden`**:
+The most recent environment requests to the following official pages failed with **`Tunnel connection failed: 403 Forbidden`**; the final unblocking follow-up did not repeatedly retry the proxy:
 
 - https://developers.openai.com/api/docs/models
 - https://developers.openai.com/api/docs/pricing
 - https://developers.openai.com/api/docs/guides/images-vision
 - https://developers.openai.com/api/docs/guides/image-cost-calculator
 
-**Verified worst-case pilot cost: unavailable (`null`).** No current price, cache-write assumption, image multiplier/patch limit or shared low/high formula was fabricated. The existing **$3 prospective experiment guard** is an application control, not a verified quote or invoice guarantee. No arm is live-eligible until same-day official compatibility/rates/family-detail bounds can be attested and the 12-request projection fits the remaining budget. A fresh free dry-run confirms 12 planned requests, zero paid requests, `pricingVerified:false`, `readyForLive:false`. No provider probe was used to resolve documentation gaps.
+**Verified worst-case pilot cost: unavailable (`null`).** The user's independently supplied official input/output prices and generic image/Chat Completions/Structured Outputs support are now [recorded](compatibility.md#independently-supplied-official-findings--2026-10-23). Missing exact parameters/schema acceptance, cached/write accounting and family/detail-specific image bounds still prevent complete attestation. The existing **$3 prospective experiment guard** is an application control, not a verified quote or invoice guarantee. Actual serialized non-image requests are 33,823/33,824/33,832/33,830 UTF-8 bytes across the fixed arms; the existing 2× byte allowance plus 4,096 gives text-token bounds 71,742/71,744/71,760/71,756. Reserving 3,000 output tokens per call at the supplied uncached/output prices yields a **$0.42897 non-image component for 12 calls**, excluding all image charges and unresolved cache writes. It must not be represented as the pilot quote or total bound. The recorded free dry-run remains 12 planned requests, zero paid, `pricingVerified:false`, `readyForLive:false`. No provider probe was used.
 
 ## Inputs and ground truth
 
@@ -47,6 +47,10 @@ Only affected checks were executed: **91 benchmark tests pass**, zero failures/s
 ## Private preservation and authorization prerequisites
 
 The corpus remains at `/tmp/watercolor-private-evaluation/`, now eight prepared files. Private `pilot-readiness/` contains documentation-access evidence, compatibility/cost unknowns, unapproved permission records, proposed reviewer requirements and the dry-run. Every approval remains false; no live cost journal exists. A checked local archive and hash receipt are at **`/workspace/watercolor-private-preservation/`**, outside Git, with directory/file modes 0700/0600. Both `/tmp` and `/workspace` can disappear when this execution environment is deleted. Copy the archive to private user-controlled durable storage before that happens; no external backup/upload was performed.
+
+Final follow-up verified the original archive's gzip/tar integrity, receipt SHA-256, all 75 internal hash-manifest entries, and all 76 archived files against the corpus. Inventory: nine source files (eight unique inputs plus the linked small-crop source copy), eight prepared images, eight reference drafts, 26 visual artifacts, the 24-slot manifest and private permission/review records. Credential pattern/filename scans found zero matches; no unsafe archive paths or links. The original archive is unchanged. A second local download bundle includes it and the final unapproved rate/cost/reviewer records, with separate checksum receipts. No callable outbound file-export connector exists: use a host-provided private filesystem download or existing authenticated file copy, then verify the checksum. Neither local bundle is a durable external backup.
+
+R1 and R2 assignments now explicitly require independent review of every actual masked output (up to 12 each), all sixteen dimensions and every app-visible annotation, with source region, exact claim, reasoning, severity and uncertainty. Identities and independence are unconfirmed, ratings absent and retention/transmission/payment false. If C02/C03 both abstain on all arms, no substantive artistic comparison is possible. Recommend a **separately approved** three-case positive-control selection (matching the current CLI), containing at least two provenance-confirmed watercolours with different structures; at most 12 additional proposed calls, never silently added to this pilot. None of those controls is presently available as confirmed medium.
 
 Before GO:
 
