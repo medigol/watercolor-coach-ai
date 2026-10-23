@@ -2,6 +2,8 @@
 
 This is developer-only tooling. It does not run in Expo, Pages, CI, Supabase or the production Edge Function. It never accesses user storage, database, quota or production credentials. Production remains one `gpt-4.1-mini` low-detail call, temperature 0.3, 3,000 completion tokens and canonical version 1. No model has won; real visual evaluation is pending.
 
+**Current execution status: deferred by user instruction.** The approved pilot made zero provider requests because no credential was available; do not request/configure credentials or execute it automatically. Use the [manual production saved-result review](../review/production-manual-artistic-review.md) now. Historical pilot authorizations/preparations remain preserved; a later user instruction is needed to resume the independent benchmark.
+
 See [pilot-readiness.md](pilot-readiness.md) for the restricted three-arm proposal, exact cost assumptions, private preservation record and remaining approval requirements.
 
 Read [compatibility.md](compatibility.md) for verified findings and unavailable official documentation. Exactly four arms are fixed in code: 4.1-mini low, 4.1-mini high, 5.4-mini high, 6-luna high. Candidates use `reasoning_effort:none`, omit temperature, and never silently change API/schema/model. All arms use Chat Completions standard tier, identical production instructions/schema and prepared bytes. No retries, repair, separate classifier, fallback, warm-up or availability probe.

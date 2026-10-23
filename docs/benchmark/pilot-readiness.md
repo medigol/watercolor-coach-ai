@@ -1,5 +1,7 @@
 # Controlled artistic-quality pilot
 
+**Current status: DEFERRED BY USER.** The authorized clean-pair snapshot passed the nine-request/hash/source-lock preflight, but no provider request or artwork transmission occurred. The latest instruction suspends the independent benchmark and all credential setup. Continue with [legitimate production saved-result review](../review/production-manual-artistic-review.md). The readiness/authorization discussion below is a historical preparation record, not an instruction to execute.
+
 ## Final cost reconciliation — READY FOR EXPLICIT USER AUTHORIZATION
 
 The user's latest independent check of the official [prompt-caching guide](https://developers.openai.com/api/docs/guides/prompt-caching) resolves the remaining write-tariff question: **models before GPT-5.6 incur no additional cache-write charge**. This applies to both restricted model families. Reconciliation against the exact `bodyFor`, `projected` and `usageCost` requests needs **no code change**: use additional `cacheWrite:0`, retain full uncached pricing for every input token, and reserve all 3,000 output tokens per request. Do not confuse provider prompt caching with permission to retain complete responses locally. The earlier $0.7497656 included an extra precautionary allowance, not a required cache-write charge.
