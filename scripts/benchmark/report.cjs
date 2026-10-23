@@ -1,8 +1,9 @@
 const fs = require("node:fs"),
   path = require("node:path"),
   crypto = require("node:crypto");
-const { ARMS } = require("./models.cjs");
-const { lockedProduction } = require("./production.cjs");
+const { ARMS, selectArms } = require("./models.cjs");
+const { lockedProduction, hash } = require("./production.cjs");
+const { RULES } = require("./vision.cjs");
 const { fullReview } = require("./review.cjs");
 const {
   readPrepared,
@@ -343,6 +344,30 @@ function report({ prepared, output, ratings }) {
   const blind = (key) =>
     "V" +
     crypto.createHmac("sha256", seed).update(key).digest("hex").slice(0, 14);
+  const experiment = JSON.parse(
+    fs.readFileSync(localFile(out, "experiment.json"), "utf8"),
+  );
+  const includedArmIDs = experiment.arms ?? ARMS.map((a) => a.id);
+  const reservations = events.filter((e) => e.kind === "reserved");
+  if (experiment.scopeHash) {
+    const expected = hash(
+      JSON.stringify({
+        arms: selectArms(includedArmIDs.join(",")),
+        visionRules: RULES,
+      }),
+    );
+    if (
+      expected !== experiment.scopeHash ||
+      reservations.some(
+        (e) => e.scopeHash !== expected || !includedArmIDs.includes(e.armID),
+      )
+    )
+      throw Error("Report arm/rule scope does not match durable journal");
+  } else if (reservations.some((e) => e.scopeHash !== undefined)) {
+    throw Error(
+      "Report scope metadata missing; audit without resetting the journal",
+    );
+  }
   const mapping = rows.map((r) => ({
     blindID: blind(r.key),
     key: r.key,
@@ -383,6 +408,10 @@ function report({ prepared, output, ratings }) {
   const stats = statistics(rows, data.cases, rated, mapping);
   const summary = {
     status: "screening-only",
+    includedArmIDs,
+    excludedArmIDs: ARMS.filter((a) => !includedArmIDs.includes(a.id)).map(
+      (a) => a.id,
+    ),
     attempted: events.filter((e) => e.kind === "reserved").length,
     completed: rows.length,
     chargedOrReservedUSD: charged(events),

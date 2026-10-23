@@ -17,6 +17,7 @@ const { selectCases, CATEGORIES } = require("./manifest.cjs");
 const { assertSchema, validate } = require("./schema.cjs");
 const {
   ARMS,
+  selectArms,
   ENDPOINT,
   bodyFor,
   attest,
@@ -24,6 +25,7 @@ const {
   usageCost,
   fingerprint,
 } = require("./models.cjs");
+const { RULES } = require("./vision.cjs");
 const LIMIT = 96,
   BUDGET = 3;
 function evaluate(payload, p) {
@@ -161,23 +163,28 @@ function readPrepared(dir, p) {
   }
   return data;
 }
-function plan({ prepared, rates, cases }, p = lockedProduction()) {
+function plan(
+  { prepared, rates, cases, arms: armSelection },
+  p = lockedProduction(),
+) {
   assertSchema(p.schema);
   const data = readPrepared(prepared, p),
-    selected = selectCases(data.cases, cases);
-  if (rates) attest(rates);
+    selected = selectCases(data.cases, cases),
+    arms = selectArms(armSelection);
+  if (rates) attest(rates, undefined, arms);
   const calls = selected.flatMap((c) =>
-    ARMS.map((a) => ({
+    arms.map((a) => ({
       caseID: c.case_id,
       armID: a.id,
       ...(rates
-        ? projected(p, a, Buffer.alloc(0), c.mime, rates)
+        ? projected(p, a, Buffer.alloc(0), c.mime, rates, c)
         : { usd: null }),
     })),
   );
   return {
     data,
     selected,
+    arms,
     calls,
     worstCaseUSD: rates ? calls.reduce((n, c) => n + c.usd, 0) : null,
   };
@@ -262,12 +269,18 @@ async function run(options, transport = fetch, env = process.env) {
       mode: "dry-run",
       paidRequests: 0,
       plannedRequests: planned.calls.length,
+      selectedArmIDs: planned.arms.map((a) => a.id),
+      excludedArmIDs: ARMS.filter((a) => !planned.arms.includes(a)).map(
+        (a) => a.id,
+      ),
       maximumRequests: LIMIT,
       budgetUSD: BUDGET,
       worstCaseUSD: planned.worstCaseUSD,
       pricingVerified: !!options.rates,
       readyForLive:
-        !!options.rates && planned.selected.every((c) => c.approved_for_api),
+        !!options.rates &&
+        planned.worstCaseUSD <= BUDGET &&
+        planned.selected.every((c) => c.approved_for_api),
       note: "No provider request. Estimates are not an account billing cap.",
     };
   if (options.confirmCost !== true || !env.OPENAI_API_KEY)
@@ -313,9 +326,14 @@ async function run(options, transport = fetch, env = process.env) {
   );
   let events;
   try {
+    const scopeHash = hash(
+      JSON.stringify({ arms: planned.arms, visionRules: RULES }),
+    );
     const identity = {
       experimentID: planned.data.experimentID,
       production: p.identity,
+      arms: planned.arms.map((a) => a.id),
+      scopeHash,
     };
     const identityFile = path.join(out, "experiment.json");
     if (fs.existsSync(identityFile)) {
@@ -326,7 +344,9 @@ async function run(options, transport = fetch, env = process.env) {
           ),
         ) !== JSON.stringify(identity)
       )
-        throw Error("Output belongs to another experiment");
+        throw Error(
+          "Output belongs to another experiment or immutable arm/rule scope; audit without resetting the journal",
+        );
     } else writePrivate(identityFile, identity, true);
     if (!fs.existsSync(path.join(out, "blind-seed")))
       writePrivate(
@@ -351,6 +371,18 @@ async function run(options, transport = fetch, env = process.env) {
         "Uncertain prior billing; audit journal before any new paid experiment",
       );
     const reservations = events.filter((e) => e.kind === "reserved");
+    if (reservations.some((e) => e.scopeHash !== scopeHash))
+      throw Error("Journal arm/rule scope mismatch; no new paid request");
+    if (
+      events.some(
+        (e) =>
+          e.kind === "result" &&
+          e.errorCode === "compatibility_contract_failure",
+      )
+    )
+      throw Error(
+        "Prior metered compatibility failure; audit before another paid attempt",
+      );
     if (
       reservations.length > LIMIT ||
       new Set(reservations.map((e) => e.key)).size !== reservations.length
@@ -358,7 +390,7 @@ async function run(options, transport = fetch, env = process.env) {
       throw Error("Invalid call journal");
     let stopped = null;
     benchmark: for (const c of planned.selected)
-      for (const a of ARMS) {
+      for (const a of planned.arms) {
         const key = c.case_id + ":" + a.id;
         if (events.some((e) => e.kind === "reserved" && e.key === key))
           continue;
@@ -368,10 +400,10 @@ async function run(options, transport = fetch, env = process.env) {
         }
         // Recheck source locks and prices immediately before EACH paid request.
         verifyProductionFiles(p.identity);
-        attest(options.rates);
+        attest(options.rates, undefined, planned.arms);
         const bytes = fs.readFileSync(localFile(options.prepared, c.image));
         if (hash(bytes) !== c.imageHash) throw Error("Prepared bytes changed");
-        const bound = projected(p, a, bytes, c.mime, options.rates);
+        const bound = projected(p, a, bytes, c.mime, options.rates, c);
         if (charged(events) + bound.usd > BUDGET) {
           stopped = "prospective_budget";
           break benchmark;
@@ -379,6 +411,7 @@ async function run(options, transport = fetch, env = process.env) {
         const body = bodyFor(p, a, bytes, c.mime);
         const reserve = {
           kind: "reserved",
+          scopeHash,
           key,
           caseID: c.case_id,
           armID: a.id,
@@ -488,11 +521,23 @@ async function run(options, transport = fetch, env = process.env) {
           cropWidth: c.width,
           cropHeight: c.height,
         };
+        if (
+          options.rates.meteredCompatibilityTrial?.approved === true &&
+          options.rates.meteredCompatibilityTrial.armIDs?.includes(a.id) &&
+          !row.accountingUnknown &&
+          (!row.strictSchema ||
+            (row.outcome === "accepted" && !row.canonicalValid))
+        )
+          row.errorCode = "compatibility_contract_failure";
         append(journal, row);
         checkpointJournal(journal, binding, out);
         events.push(row);
         if (row.accountingUnknown) {
           stopped = "unknown_or_exceeded_accounting";
+          break benchmark;
+        }
+        if (row.errorCode === "compatibility_contract_failure") {
+          stopped = "incompatible_contract";
           break benchmark;
         }
         if (row.outcome === "not_comparable") {

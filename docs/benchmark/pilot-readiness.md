@@ -1,4 +1,24 @@
-# Controlled artistic-quality pilot: NO-GO
+# Controlled artistic-quality pilot
+
+## Restricted pilot update — 2026-10-23
+
+Explicit `--arms baseline_low,baseline_high,candidate_mini` now supports the unchanged C02/C03/C16 selection as **nine** guarded requests. Default remains four arms; Luna is configured but excluded, not substituted. Scope is immutable after paid start and checked against durable reservation hashes; the original 96-slot/$3 journal remains. No paid invocation or approval occurred. Production source lock and prepared bytes remain unchanged.
+
+The supplied official vision rules establish these upward-rounded image-token bounds, without resizing any of these prepared inputs:
+
+| Case / exact dimensions | 4.1-mini low | 4.1-mini high | 5.4-mini high |
+|---|---:|---:|---:|
+| C02 / 915 × 1280 | 1880 | 1880 | 1392 |
+| C03 / 857 × 1280 | 1750 | 1750 | 1296 |
+| C16 / 591 × 1280 | 1232 | 1232 | 912 |
+
+At the supplied published prices, the existing conservative text bound + these image bounds + 3,000 output tokens contributes **$0.4095328** for all nine calls before any separate cache-write charge. Full uncached pricing also for cache hits, plus an ADDITIONAL full-input-rate write allowance, yields **$0.7497656**. That latter reservation is conditional on the write tariff not exceeding the allowance; it is not an independently verified write-fee cap or invoice guarantee. An official default-retention cache-write rate/zero-fee statement is still needed before attesting the full bound. The private rate card stays `verified:false` with every transmission/payment/retention/runtime-trial approval false. No cache-discount assumption is needed. Luna's image accounting is still unknown and excluded. Exact account/parameter acceptance can instead be explicitly authorized as ordinary metered slots within the nine, never an extra probe.
+
+For reliable substantive critique evidence, the smallest **three-arm** combined design is a **separate proposed** three-case pilot: two independent permissioned provenance-confirmed watercolours with different structures, plus the raw screenshot control. That is nine calls, not nine automatically added to the original proposal. Confirmed sources are not supplied yet; no provenance/cases/approvals were fabricated. C02/C03 remain unknown medium, and their original restricted pilot can be inconclusive if all arms abstain. C04/C08 remain reserved. Two actual independent reviewers remain unassigned; existing complete blind text/geometry materials and local app replay are required before artistic conclusions.
+
+The local original/download archives were reverified by SHA-256 and full gzip/tar reads. They are unchanged and remain ephemeral until privately downloaded. Restricted proposal, per-case hashes, calculation and unapproved records are stored outside Git under `/workspace/watercolor-private-preservation/restricted-2026-10-23/`. The sections below preserve the earlier four-arm proposal and evidence record.
+
+Focused verification: `node --test tests/model-benchmark.test.cjs tests/benchmark-outcomes.test.cjs tests/benchmark-vision.test.cjs` on Node 22 passed **107 tests**, including **16 new tests**, with zero failures/skips/cancellations. Coverage includes exact image bounds, explicit subsets, durable scope tampering, the original 96-slot limit, restricted 72-slot maximum, prospective budget stops, unknown billing, no replay and authorized in-slot compatibility failure. Syntax checks and `git diff --check` passed; the real restricted dry-run planned nine requests and made zero. Production-source verification and all eight prepared-image hashes passed. Previously completed broad frontend/Edge/build/browser checks were not repeated for these isolated developer-tool changes.
 
 2026-10-23 UTC. Engineering follow-up began at `8f189dc194dbcaf88b953a4ea8187fa257d96db1`; final unblocking follow-up at clean, synchronized `397d572d6350484741ed2ba476f8c1d6f2125de4`, on `codex/grounded-artwork-assessment`. The completed offline engineering suite was **not rerun**. No provider request, API key use, artwork transmission, merge or deployment occurred. Production settings, schema, prompt and source lock remain unchanged.
 

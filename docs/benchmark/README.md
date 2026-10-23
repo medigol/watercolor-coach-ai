@@ -2,9 +2,23 @@
 
 This is developer-only tooling. It does not run in Expo, Pages, CI, Supabase or the production Edge Function. It never accesses user storage, database, quota or production credentials. Production remains one `gpt-4.1-mini` low-detail call, temperature 0.3, 3,000 completion tokens and canonical version 1. No model has won; real visual evaluation is pending.
 
-See [pilot-readiness.md](pilot-readiness.md) for the current **NO-GO**, newly available Care Bears inputs, private preservation record and the unchanged three-case pilot scope.
+See [pilot-readiness.md](pilot-readiness.md) for the restricted three-arm proposal, exact cost assumptions, private preservation record and remaining approval requirements.
 
 Read [compatibility.md](compatibility.md) for verified findings and unavailable official documentation. Exactly four arms are fixed in code: 4.1-mini low, 4.1-mini high, 5.4-mini high, 6-luna high. Candidates use `reasoning_effort:none`, omit temperature, and never silently change API/schema/model. All arms use Chat Completions standard tier, identical production instructions/schema and prepared bytes. No retries, repair, separate classifier, fallback, warm-up or availability probe.
+
+An explicitly restricted run is now supported, without changing the four-arm default:
+
+```bash
+node scripts/benchmark/cli.cjs run --dry-run \
+  --prepared /tmp/watercolor-private-evaluation/prepared --cases C02,C03,C16 \
+  --arms baseline_low,baseline_high,candidate_mini
+```
+
+Only fixed IDs are accepted; order is canonical and duplicates/unknown IDs fail. Pricing/support attestation applies to **every included arm**, so unverified Luna can remain configured and excluded. The first live invocation binds the arm/rule scope to `experiment.json` and every integrity-protected reservation. Resumption with another arm set or changed vision rules fails; rewriting scope metadata cannot override the journal. Case-arm keys, original 96-slot/$3 experiment cap, before-call reservation, immutable image/source checks, and no-retry rules remain. A three-arm scope permits at most 72 distinct slots across 24 images, not a new allowance of 96 plus the original slots. Existing paid experiments without the new scope record require manual audit rather than silent paid resumption; historical reports remain readable. Do not start a new experiment to reset uncertain billing. Reports identify included/excluded arms; exclusion is not a candidate failure or a model win.
+
+For the first three configurations, `vision.cjs` records the official patch rules supplied on 2026-10-23. Prepared images within dimension/patch limits use `ceil(width/32) × ceil(height/32)` then round the documented multiplier upward. Larger inputs use a documented global cap, not an invented resizing algorithm. The rate card must cover the derived bound; understated bounds fail. Luna still requires its own independently verified bound. Non-image byte/framing and 3,000-token output reservations and additive cache-write accounting are unchanged. An estimate does not attest an unknown write tariff.
+
+Account access and exact request acceptance can be tested **only inside existing paid case-arm slots**, after explicit authorization. A rate card may record `meteredCompatibilityTrial: {approved:true, usesExistingSlots:true, armIDs:[...]}` for empirical required-null/reasoning-parameter acceptance. This never overrides endpoint/image/strict-schema support, prices or image bounds; it does not alter the strict request, add a probe or repair/retry failure. An invalid strict/canonical trial response halts and its journal blocks silent resumption pending audit. Leave that authorization false until granted. All other existing live/image/cost/retention gates still apply.
 
 ## Requirements and private workspace
 

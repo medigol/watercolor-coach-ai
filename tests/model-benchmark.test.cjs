@@ -13,6 +13,7 @@ const {
 } = require("../scripts/benchmark/production.cjs");
 const {
   ARMS,
+  selectArms,
   ENDPOINT,
   bodyFor,
   attest,
@@ -48,6 +49,7 @@ const {
 } = require("../scripts/benchmark/report.cjs");
 const { args } = require("../scripts/benchmark/cli.cjs");
 const p = lockedProduction();
+const restrictedArms = "baseline_low,baseline_high,candidate_mini";
 const draft = () => require("./helpers/deep-coaching-fixture.cjs")("strong");
 const accepted = () => ({
   eligibility: { status: "accepted", reason_code: null },
@@ -937,4 +939,225 @@ for(const corruption of ['empty','valid-prefix','changed-cost','missing-checkpoi
  else fs.writeFileSync(path.join(f.prepared,'live-output.json'),JSON.stringify({output:f.output}));
  await assert.rejects(run({...f,live:true,confirmCost:true},mockTransport(calls),env),/integrity|checkpoint|journal/i);
  assert.throws(()=>report(f),/integrity|checkpoint|journal/i);assert.equal(calls.length,12);
+});
+
+test("restricted attestation excludes unknown Luna but default cannot silently exclude it", (t) => {
+  const f = fixture(t);
+  delete f.rates.arms.candidate_luna;
+  assert.doesNotThrow(() =>
+    attest(f.rates, undefined, selectArms(restrictedArms)),
+  );
+  assert.throws(() => attest(f.rates), /candidate_luna/);
+  assert.equal(plan({ ...f, arms: restrictedArms }).calls.length, 9);
+  assert.equal(
+    args(["run", "--prepared", f.prepared, "--arms", restrictedArms]).options
+      .arms,
+    restrictedArms,
+  );
+  assert.throws(
+    () =>
+      args([
+        "prepare",
+        "--manifest",
+        "x",
+        "--output",
+        "y",
+        "--arms",
+        restrictedArms,
+      ]),
+    /only to run/,
+  );
+});
+test("three-arm live scope makes nine mocked calls, retains exact bytes and never replays on reordered resume", async (t) => {
+  const f = fixture(t),
+    calls = [];
+  delete f.rates.arms.candidate_luna;
+  const options = { ...f, arms: restrictedArms, live: true, confirmCost: true };
+  await run(options, mockTransport(calls), env);
+  assert.equal(calls.length, 9);
+  assert(calls.every((c) => c.body.model !== "gpt-6-luna"));
+  for (let i = 0; i < 9; i += 3)
+    assert.equal(
+      new Set(
+        calls
+          .slice(i, i + 3)
+          .map((c) => c.body.messages[1].content[1].image_url.url),
+      ).size,
+      1,
+    );
+  const identity = JSON.parse(
+    fs.readFileSync(path.join(f.output, "experiment.json")),
+  );
+  assert.deepEqual(identity.arms, [
+    "baseline_low",
+    "baseline_high",
+    "candidate_mini",
+  ]);
+  const events = ledgerRead(path.join(f.output, "ledger.jsonl"));
+  assert(
+    events
+      .filter((e) => e.kind === "reserved")
+      .every((e) => e.scopeHash === identity.scopeHash),
+  );
+  await run(
+    { ...options, arms: "candidate_mini,baseline_high,baseline_low" },
+    mockTransport(calls),
+    env,
+  );
+  assert.equal(calls.length, 9);
+  report(f);
+  const summary = JSON.parse(
+    fs.readFileSync(path.join(f.output, "summary.json")),
+  );
+  assert.deepEqual(summary.excludedArmIDs, ["candidate_luna"]);
+});
+test("arm widening or changing scope cannot spend more or reset the bound output journal", async (t) => {
+  const f = fixture(t),
+    calls = [];
+  const options = { ...f, arms: restrictedArms, live: true, confirmCost: true };
+  await run(options, mockTransport(calls), env);
+  await assert.rejects(
+    run({ ...options, arms: undefined }, mockTransport(calls), env),
+    /immutable arm/,
+  );
+  await assert.rejects(
+    run({ ...options, arms: "baseline_low" }, mockTransport(calls), env),
+    /immutable arm/,
+  );
+  await assert.rejects(
+    run(
+      { ...options, output: path.join(f.root, "other") },
+      mockTransport(calls),
+      env,
+    ),
+    /bound.*journal|bound to/,
+  );
+  assert.equal(calls.length, 9);
+});
+test("rewriting scope metadata cannot bypass the durable reservation scope hash", async (t) => {
+  const f = fixture(t),
+    calls = [];
+  const options = { ...f, arms: restrictedArms, live: true, confirmCost: true };
+  await run(options, mockTransport(calls), env);
+  const identityFile = path.join(f.output, "experiment.json"),
+    identity = JSON.parse(fs.readFileSync(identityFile));
+  identity.arms = ARMS.map((a) => a.id);
+  identity.scopeHash = hash(
+    JSON.stringify({
+      arms: ARMS,
+      visionRules: require("../scripts/benchmark/vision.cjs").RULES,
+    }),
+  );
+  fs.writeFileSync(identityFile, JSON.stringify(identity));
+  await assert.rejects(
+    run({ ...options, arms: undefined }, mockTransport(calls), env),
+    /Journal arm/,
+  );
+  assert.throws(() => report(f), /scope/);
+  assert.equal(calls.length, 9);
+});
+test("restricted pilot then full images is at most 72 unique slots; original global cap remains 96", async (t) => {
+  const f = fixture(t, 24),
+    calls = [];
+  const options = { ...f, arms: restrictedArms, live: true, confirmCost: true };
+  await run({ ...options, cases: "C01,C02,C03" }, mockTransport(calls), env);
+  assert.equal(calls.length, 9);
+  await run(options, mockTransport(calls), env);
+  assert.equal(calls.length, 72);
+  await run(options, mockTransport(calls), env);
+  assert.equal(calls.length, 72);
+  assert.equal(require("../scripts/benchmark/runner.cjs").LIMIT, 96);
+});
+test("restricted scope preserves per-call prospective budget and stops before unaffordable calls", async (t) => {
+  const f = fixture(t),
+    calls = [];
+  for (const a of ARMS) f.rates.arms[a.id].output = 625;
+  const result = await run(
+    { ...f, arms: restrictedArms, live: true, confirmCost: true },
+    mockTransport(calls),
+    env,
+  );
+  assert.equal(calls.length, 3);
+  assert.equal(result.stopped, "prospective_budget");
+  assert(result.chargedOrReservedUSD <= 3);
+});
+test("unknown billing in restricted scope burns the first slot and prevents any retry", async (t) => {
+  const f = fixture(t),
+    calls = [];
+  const options = { ...f, arms: restrictedArms, live: true, confirmCost: true };
+  const transport = async () => {
+    calls.push(1);
+    throw Error("mock ambiguous transport");
+  };
+  await run(options, transport, env);
+  assert.equal(calls.length, 1);
+  await assert.rejects(run(options, transport, env), /Uncertain prior billing/);
+  assert.equal(calls.length, 1);
+});
+test("subset dry-run is zero-call even with key and cannot declare an over-budget plan ready", async (t) => {
+  const f = fixture(t),
+    calls = [];
+  for (const a of ARMS) f.rates.arms[a.id].output = 2000;
+  const r = await run(
+    { ...f, arms: restrictedArms },
+    mockTransport(calls),
+    env,
+  );
+  assert.equal(r.plannedRequests, 9);
+  assert.equal(r.readyForLive, false);
+  assert.equal(calls.length, 0);
+  assert.deepEqual(r.excludedArmIDs, ["candidate_luna"]);
+});
+
+test("runtime parameter uncertainty needs explicit metered-slot authorization; generic support and prices stay mandatory", () => {
+  const rates = card(),
+    arms = selectArms(restrictedArms);
+  rates.arms.candidate_mini.support.reasoningNone = false;
+  rates.arms.candidate_mini.support.requiredNullableEnvelope = false;
+  assert.throws(() => attest(rates, undefined, arms), /compatibility/);
+  rates.meteredCompatibilityTrial = {
+    approved: true,
+    usesExistingSlots: true,
+    armIDs: ["candidate_mini"],
+  };
+  assert.doesNotThrow(() => attest(rates, undefined, arms));
+  rates.arms.candidate_mini.support.strictJsonSchema = false;
+  assert.throws(() => attest(rates, undefined, arms), /compatibility/);
+  rates.arms.candidate_mini.support.strictJsonSchema = true;
+  rates.arms.candidate_mini.maxImageTokens = null;
+  assert.throws(() => attest(rates, undefined, arms), /image bound/);
+});
+
+test("authorized in-slot compatibility failure halts and cannot be silently resumed", async (t) => {
+  const f = fixture(t),
+    calls = [];
+  f.rates.meteredCompatibilityTrial = {
+    approved: true,
+    usesExistingSlots: true,
+    armIDs: ["baseline_low"],
+  };
+  const options = { ...f, arms: restrictedArms, live: true, confirmCost: true };
+  const r = await run(
+    options,
+    mockTransport(
+      calls,
+      (b) =>
+        new Response(
+          JSON.stringify(
+            payload(accepted(), {
+              model: b.model,
+              choices: [{ finish_reason: "length", message: { content: "{" } }],
+            }),
+          ),
+        ),
+    ),
+    env,
+  );
+  assert.equal(calls.length, 1);
+  assert.equal(r.stopped, "incompatible_contract");
+  await assert.rejects(
+    run(options, mockTransport(calls), env),
+    /Prior metered compatibility/,
+  );
+  assert.equal(calls.length, 1);
 });
