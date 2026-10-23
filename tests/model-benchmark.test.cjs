@@ -666,6 +666,8 @@ test("report emits reproducible blind worksheets, CSV, category errors and no in
   );
   for (const a of ARMS) assert(!html.includes(a.id) && !html.includes(a.model));
   assert(html.includes("R1") && html.includes("R2"));
+  assert(html.includes("response retention was not authorized"));
+  assert(!fs.existsSync(path.join(f.output, "blind-details")));
   assert.equal(
     JSON.parse(fs.readFileSync(path.join(f.output, "ratings.template.json")))
       .reviews.length,
@@ -680,6 +682,71 @@ test("report emits reproducible blind worksheets, CSV, category errors and no in
   assert.equal(
     fs.readFileSync(path.join(f.output, "blind-review.html"), "utf8"),
     before,
+  );
+});
+test("explicitly retained responses enable complete masked critique and geometry review", async (t) => {
+  const f = fixture(t);
+  await run(
+    { ...f, live: true, confirmCost: true, retainResponses: true },
+    mockTransport([]),
+    env,
+  );
+  report(f);
+  const details = path.join(f.output, "blind-details");
+  assert.equal(fs.readdirSync(details).length, 12);
+  const page = fs.readFileSync(
+    path.join(details, fs.readdirSync(details)[0]),
+    "utf8",
+  );
+  for (const a of ARMS) assert(!page.includes(a.id) && !page.includes(a.model));
+  assert(page.includes("Complete model analysis before cleaning"));
+  assert(page.includes("Complete production-cleaned canonical analysis"));
+  assert(page.includes("Role: focal"));
+  assert(page.includes("Note:"));
+  assert(page.includes("Composition: primary"));
+  assert(page.includes("Colour source:"));
+  assert(
+    page.includes("<svg") &&
+      page.includes("<polyline") &&
+      page.includes("<rect"),
+  );
+  assert(page.includes("not a reproduction of app styling"));
+  assert.equal(
+    fs.statSync(path.join(details, fs.readdirSync(details)[0])).mode & 0o777,
+    0o600,
+  );
+});
+test("complete review keeps long teaching, escapes depicted instructions, and omits provider metadata", () => {
+  const { fullReview } = require("../scripts/benchmark/review.cjs");
+  const response = payload();
+  const v = JSON.parse(response.choices[0].message.content);
+  v.analysis.overall.practice =
+    "On a separate study, " +
+    "compare the supplied relationship. ".repeat(20) +
+    "<script>private-instruction</script> END-OF-PRACTICE";
+  v.analysis.candidate_luna = "gpt-6-luna"; // Malformed extras cannot unblind review.
+  response.choices[0].message.content = JSON.stringify(v);
+  const page = fullReview(response, p, "../prepared/local.png", {
+    width: 800,
+    height: 600,
+  });
+  assert(page.includes("END-OF-PRACTICE"));
+  assert(page.includes("&lt;script&gt;private-instruction&lt;/script&gt;"));
+  assert(!page.includes("<script>"));
+  assert(!page.includes("fp_mock") && !page.includes("prompt_tokens"));
+  assert(!page.includes("candidate_luna") && !page.includes("gpt-6-luna"));
+});
+test("unavailable/oversized complete response cannot pretend annotation acceptance", () => {
+  const { fullReview } = require("../scripts/benchmark/review.cjs");
+  assert.throws(
+    () => fullReview({}, p, "local.png", { width: 800, height: 600 }),
+    /unavailable/,
+  );
+  const response = payload();
+  response.choices[0].message.content = "x".repeat(250001);
+  assert.throws(
+    () => fullReview(response, p, "local.png", { width: 800, height: 600 }),
+    /bound/,
   );
 });
 test("rating requires two independent individual reviews, domain scores and evidence", () => {

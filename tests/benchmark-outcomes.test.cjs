@@ -48,3 +48,53 @@ test("abstention is tolerated only when annotated before evaluation", () => {
     0,
   );
 });
+test("unknown-medium uncertain ground truth cannot falsely score accepted art as an eligibility error", () => {
+  const m = metric(
+    "uncertain",
+    { outcome: "accepted" },
+    {
+      ambiguous_ground_truth: true,
+      abstention_acceptable: true,
+    },
+  );
+  assert.equal(m.categoryMetrics[0].unscoredAmbiguous, 1);
+  assert.equal(m.categoryMetrics[0].eligibilityScored, 0);
+  assert.equal(m.categoryMetrics[0].errorRate, null);
+  assert.equal(m.falseAcceptanceCount, 0);
+  assert.equal(m.acceptanceRate, 1);
+});
+test("accepted critique with unknown medium remains eligible for independent artistic review", () => {
+  const c = {
+    case_id: "C01",
+    category: "watercolor",
+    ground_truth: "uncertain",
+    watercolor_status: "ambiguous",
+    ambiguous_ground_truth: true,
+  };
+  const row = {
+    caseID: "C01",
+    key: "test",
+    armID: "baseline_low",
+    outcome: "accepted",
+    strictSchema: true,
+    canonicalValid: true,
+    finishReason: "stop",
+    usage: { usd: 0.01 },
+  };
+  // Mock review rows verify routing only; no actual expert ratings are claimed.
+  const reviews = ["R1", "R2"].map((reviewer) => ({
+    blindID: "V1",
+    reviewer,
+    visuallyGrounded: true,
+    uiUsable: true,
+    hallucination: false,
+    originalProcessClaim: false,
+    scores: { A: 4, B: 4, C: 4, D: 4, E: 4, F: 4, G: 4 },
+  }));
+  const m = statistics([row], [c], reviews, [
+    { blindID: "V1", armID: "baseline_low", key: "test" },
+  ])[0];
+  assert.equal(m.costUSD.reviewedUsableOutputs, 1);
+  assert.equal(m.categoryMetrics[0].errorRate, null);
+  assert.equal(m.watercolorRecall, null); // No invented confirmed-positive truth.
+});

@@ -3,6 +3,7 @@ const fs = require("node:fs"),
   crypto = require("node:crypto");
 const { ARMS } = require("./models.cjs");
 const { lockedProduction } = require("./production.cjs");
+const { fullReview } = require("./review.cjs");
 const {
   readPrepared,
   ledgerRead,
@@ -177,18 +178,32 @@ function statistics(rows, cases, reviews, mapping) {
       lat = rr.map((r) => r.latencyMs).filter(Number.isFinite);
     const categoryMetrics = Object.keys(confusion).map((category) => {
       const ps = pairs.filter(({ c }) => c.category === category),
-        total = ps.length;
+        total = ps.length,
+        // Unknown physical medium is not proof that the model must abstain.
+        // Keep its outcomes and artistic reviews, but do not fabricate an
+        // eligibility accuracy label from explicitly ambiguous ground truth.
+        scored = ps.filter(
+          ({ c }) =>
+            !(
+              c.ground_truth === "uncertain" &&
+              c.ambiguous_ground_truth === true
+            ),
+        );
       return {
         category,
         total,
+        eligibilityScored: scored.length,
+        unscoredAmbiguous: total - scored.length,
         falseAccepts: ps.filter(
           ({ r, c }) =>
             ["reject", "crop-needed"].includes(c.ground_truth) &&
             r.outcome === "accepted",
         ).length,
-        errors: ps.filter(({ r, c }) => !matchesExpected(r, c)).length,
-        errorRate:
-          ps.filter(({ r, c }) => !matchesExpected(r, c)).length / total,
+        errors: scored.filter(({ r, c }) => !matchesExpected(r, c)).length,
+        errorRate: scored.length
+          ? scored.filter(({ r, c }) => !matchesExpected(r, c)).length /
+            scored.length
+          : null,
         invalid: ps.filter(({ r }) => r.outcome === "invalid").length,
       };
     });
@@ -436,7 +451,42 @@ function report({ prepared, output, ratings }) {
       .relative(out, localFile(prepared, c.image))
       .split(path.sep)
       .join("/");
-    return `<article><h2>${html(b.blindID)} · ${b.reviewer}</h2><img alt="Original prepared source for blind review" src="${html(relative)}"><p>Outcome: ${html(outcome(r))}; schema: ${r.strictSchema === true ? "valid" : "not valid"}; canonical: ${r.canonicalValid === true ? "valid" : "not applicable/invalid"}</p><p>Sanitized excerpts only; missing context must not be scored as verified.</p><pre>${html(JSON.stringify({ summary: r.teachingSummary, domainExcerpts: r.excerpts || [] }, null, 2))}</pre>${Object.entries(
+    let complete =
+      "Complete critique/annotation review unavailable: response retention was not authorized. Excerpts cannot pass annotation or full-context acceptance.";
+    const rawFile = path.join(
+      out,
+      "private-responses",
+      `${c.case_id}-${r.armID}.json`,
+    );
+    if (fs.existsSync(rawFile)) {
+      const directory = privateDir(path.join(out, "blind-details"));
+      const source = path
+        .relative(directory, localFile(prepared, c.image))
+        .split(path.sep)
+        .join("/");
+      const retained = localFile(
+        out,
+        `private-responses/${c.case_id}-${r.armID}.json`,
+      );
+      try {
+        if (fs.statSync(retained).size > 4 * 1024 * 1024)
+          throw Error("Oversized retained response");
+        writePrivate(
+          path.join(directory, `${b.blindID}.html`),
+          fullReview(
+            JSON.parse(fs.readFileSync(retained, "utf8")),
+            p,
+            source,
+            c,
+          ),
+        );
+        complete = `<a href="blind-details/${b.blindID}.html">Complete blind critique and supplied-geometry audit</a>`;
+      } catch {
+        complete =
+          "Complete review unavailable: retained response is invalid. Annotation/full-context acceptance remains unverified.";
+      }
+    }
+    return `<article><h2>${html(b.blindID)} · ${b.reviewer}</h2><img alt="Original prepared source for blind review" src="${html(relative)}"><p>Outcome: ${html(outcome(r))}; schema: ${r.strictSchema === true ? "valid" : "not valid"}; canonical: ${r.canonicalValid === true ? "valid" : "not applicable/invalid"}</p><p>${complete}</p><p>Sanitized excerpts only; missing context must not be scored as verified.</p><pre>${html(JSON.stringify({ summary: r.teachingSummary, domainExcerpts: r.excerpts || [] }, null, 2))}</pre>${Object.entries(
       DOMAINS,
     )
       .map(
