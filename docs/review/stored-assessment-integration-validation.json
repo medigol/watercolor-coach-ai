@@ -162,5 +162,76 @@
     "node tests/browser/model-benchmark.cjs (synthetic offline fixtures only)",
     "node scripts/test-local-database.cjs (isolated no-network PostgreSQL16)"
   ],
-  "integrationClassification": "CONDITIONALLY READY for review; no automatic merge/deployment; full record/artistic gates unverified"
+  "integrationClassification": "CONDITIONALLY READY for review; no automatic merge/deployment; full record/artistic gates unverified",
+  "annotationScreenshotReview": {
+    "date": "2026-10-27 Australia/Sydney",
+    "baseHead": "2b6e2406994d9aee1f37b30920b9bf2c9eeca54a",
+    "actualProductionScreenshotsInspected": 5,
+    "completeSavedRecordsRetrieved": 0,
+    "church": "Supplied persisted region projects to visible screenshot border within approximately 2px. Unsuitable supplied extents, not a reproduced current transform defect; original raw-model/canonicalization provenance unverified.",
+    "boat": "Historical local focal box undercovers hull/reflection. Stored coordinates and clean analysed raster unavailable; no current transform defect reproduced. Separate from reported whole-image colour/value evidence.",
+    "van": "Independent reviewer accepts focal box; useful target retained. Other role/box semantics not established by this acceptance.",
+    "runtimeSourceChanges": [],
+    "testsAdded": 4,
+    "testEvidence": "tests/image-geometry.test.cjs: saved-v1 projection through selected SVG at all seven widths, no mutation, and valid detail/crop-padding counterexample",
+    "focusedTests": {
+      "pass": 181,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "fullUnitIntegration": {
+      "pass": 1799,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "frontendTypeScript": "PASS",
+    "sourceLock": "PASS, unchanged",
+    "previousValidationRetained": "Prior Edge TypeScript, configured/unconfigured exports, raster/browser/security validation remains applicable: no production code/configuration changed in this follow-up.",
+    "prNumber": 37,
+    "prURL": "https://github.com/medigol/watercolor-coach-ai/pull/37",
+    "prHeadVerifiedBeforeReview": "2b6e2406994d9aee1f37b30920b9bf2c9eeca54a via Git refs/pull/37/head",
+    "apiAccess": "GET Forbidden; elevated access request cancelled. No PR metadata/CI success claim.",
+    "limitations": [
+      "Complete historical JSON/source replay unverified",
+      "Pixel bounds and role overlap do not prove semantic object coverage",
+      "No current real-model or physical-device acceptance"
+    ],
+    "paidRequests": 0,
+    "savedResultWrites": 0,
+    "merged": false,
+    "deployed": false,
+    "logs": {
+      "unit": "/tmp/stored-assessment-review-2026-10-27/annotation-review/unit-integration.log",
+      "focused": "/tmp/stored-assessment-review-2026-10-27/annotation-focused.log",
+      "typescript": "/tmp/stored-assessment-review-2026-10-27/annotation-review/frontend-typescript.log",
+      "screenshots": "Private screenshot-findings.json (not committed)",
+      "browser": "/tmp/stored-assessment-review-2026-10-27/annotation-review/browser/report.json"
+    },
+    "browser": {
+      "status": "PASS",
+      "workspaceCases": 177,
+      "runtimeErrors": 0,
+      "savedInteractionAssertions": "Existing no additional provider/upload/artwork-write assertions passed; actual HTTP mocked",
+      "physicalDevice": false,
+      "scope": "Earlier configured export reused; application source unchanged",
+      "counts": {
+        "preparationMatrix": 7,
+        "eligibilityMatrix": 3,
+        "matrix": 35,
+        "evidenceMatrix": 35,
+        "tonalMatrix": 7,
+        "calibrationMatrix": 4,
+        "providerMatrix": 2,
+        "finalCalibrationMatrix": 7,
+        "liveFreezeMatrix": 21,
+        "finalFreezeFixMatrix": 21,
+        "analysisDepthMatrix": 7,
+        "cleanupMatrix": 7,
+        "semanticMatrix": 21
+      }
+    }
+  }
 }
