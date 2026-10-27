@@ -2,16 +2,16 @@
   "date": "2026-10-27",
   "branch": "codex/grounded-artwork-assessment",
   "base": "8ce3c80823b259495ff19c39189de36d32d4a5bc",
-  "codeCommit": "97b79ddd1125ab6c45e847ffa0b19d6f889b7e0b",
+  "codeCommit": "11eaf07e10d09962f2d31e80d6df87703669425d",
   "unitIntegration": {
-    "tests": 1791,
-    "pass": 1791,
+    "tests": 1795,
+    "pass": 1795,
     "fail": 0,
     "cancelled": 0,
     "skipped": 0,
     "todo": 0
   },
-  "newTestsThisPass": 3,
+  "newTestsThisPass": 4,
   "focalAliasReproduction": {
     "before": {
       "passed": 21,
@@ -88,7 +88,17 @@
     "retrievedRecords": 0,
     "recordsExist": "User independently verified 87 genuine OpenAI improve_painting rows and full records for four cases",
     "requiredInput": "Private sanitized four-case result_json export",
-    "status": "BLOCKED_PENDING_EXPORT"
+    "status": "Excerpt-level findings examined; complete saved-v1 replay UNVERIFIED",
+    "excerptsExamined": true,
+    "source": "Verified inline persisted excerpts supplied by user; named attachment not exposed as local file",
+    "completeEvidenceFileReceived": false,
+    "completeResultJSONReceived": false,
+    "receivedScope": [
+      "Church observation description, exact lesson, fact reference and example note region",
+      "Van active fact/role link, separate Quiet role/region, composition entry",
+      "Care Bears target/pigments/ratio, rationale fragment and incomplete note region"
+    ],
+    "boatExactExcerptReceived": false
   },
   "productionFacts": {
     "evidence": "User independent authenticated inspection; not a Codex database read",
@@ -101,10 +111,11 @@
     "maxCompletionTokens": 3000
   },
   "limitations": [
-    "No actual persisted four-case JSON inspected in this session",
-    "No direct persisted-result replay or independent artistic acceptance yet",
-    "No physical-device or live storage/auth smoke test",
-    "GitHub API standard access returned Forbidden; PR creation pending network escalation"
+    "Complete four-record replay remains unverified",
+    "Supplied inline evidence ends in Care Bears region; no exact boat excerpt received",
+    "Actual focal/source geometry association and independent artistic review remain pending",
+    "No physical-device or live authenticated deployment smoke test",
+    "GitHub API returned Forbidden; elevated access check was cancelled; PR creation still unverified"
   ],
   "initialCommandIssues": [
     "Deno check does not accept --cached-only; correct strict check passed",
@@ -113,5 +124,43 @@
   "paidRequests": 0,
   "productionWrites": 0,
   "merged": false,
-  "deployed": false
+  "deployed": false,
+  "newTestsAcrossStoredReview": 7,
+  "previousFullRunPassed": 1791,
+  "possessiveReproduction": {
+    "before": {
+      "pass": 24,
+      "fail": 2
+    },
+    "focusedAfter": {
+      "pass": 137,
+      "fail": 0
+    },
+    "directPrivateExcerptProbe": "Unsupported central-placement qualifier removed for inconsistent/uncertain placement; compatible supplied wording preserved; no full result reconstructed"
+  },
+  "logs": {
+    "unit": "/tmp/stored-assessment-review-2026-10-27/final-unit-integration.log",
+    "frontendTypeScript": "/tmp/stored-assessment-review-2026-10-27/final-frontend-typescript.log",
+    "edgeTypeScript": "/tmp/stored-assessment-review-2026-10-27/final-edge-typescript.log",
+    "configuredExport": "/tmp/stored-assessment-review-2026-10-27/final-export-configured.log",
+    "unconfiguredExport": "/tmp/stored-assessment-review-2026-10-27/final-export-unconfigured.log",
+    "workspace": "/tmp/stored-assessment-review-2026-10-27/final-workspace-browser.log",
+    "raster": "/tmp/stored-assessment-review-2026-10-27/final-preparation-browser.log",
+    "unconfiguredBrowser": "/tmp/stored-assessment-review-2026-10-27/final-unconfigured-browser.log",
+    "benchmarkTechnical": "/tmp/stored-assessment-review-2026-10-27/final-benchmark-browser.log",
+    "localSecurity": "/tmp/stored-assessment-review-2026-10-27/final-local-security.log"
+  },
+  "commands": [
+    "node --test tests/*.test.cjs",
+    "node node_modules/typescript/bin/tsc --noEmit",
+    "deno check --config supabase/functions/generate-feedback/deno.json supabase/functions/generate-feedback/index.ts",
+    "node scripts/expo-web.cjs build (fake public test configuration)",
+    "node node_modules/expo/bin/cli export --platform web --output-dir <private unconfigured export> --clear --max-workers 2",
+    "node tests/browser/professional-workspace.cjs <loopback configured export> <private artifacts>",
+    "node tests/browser/artwork-preparation.cjs <loopback configured export> <private artifacts>",
+    "node tests/browser/unconfigured-pages.cjs <loopback unconfigured export>",
+    "node tests/browser/model-benchmark.cjs (synthetic offline fixtures only)",
+    "node scripts/test-local-database.cjs (isolated no-network PostgreSQL16)"
+  ],
+  "integrationClassification": "CONDITIONALLY READY for review; no automatic merge/deployment; full record/artistic gates unverified"
 }
