@@ -1,0 +1,117 @@
+{
+  "date": "2026-10-27",
+  "branch": "codex/grounded-artwork-assessment",
+  "base": "8ce3c80823b259495ff19c39189de36d32d4a5bc",
+  "codeCommit": "97b79ddd1125ab6c45e847ffa0b19d6f889b7e0b",
+  "unitIntegration": {
+    "tests": 1791,
+    "pass": 1791,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "newTestsThisPass": 3,
+  "focalAliasReproduction": {
+    "before": {
+      "passed": 21,
+      "failed": 2
+    },
+    "after": {
+      "passed": 23,
+      "failed": 0
+    }
+  },
+  "frontendTypeScript": "PASS",
+  "edgeTypeScript": "PASS",
+  "configuredExport": {
+    "status": "PASS",
+    "configuration": "fake public test settings; watercolor-test.supabase.co; no production credentials"
+  },
+  "unconfiguredExport": "PASS",
+  "browser": {
+    "workspaceCases": 177,
+    "counts": {
+      "preparationMatrix": 7,
+      "eligibilityMatrix": 3,
+      "matrix": 35,
+      "evidenceMatrix": 35,
+      "tonalMatrix": 7,
+      "calibrationMatrix": 4,
+      "providerMatrix": 2,
+      "finalCalibrationMatrix": 7,
+      "liveFreezeMatrix": 21,
+      "finalFreezeFixMatrix": 21,
+      "analysisDepthMatrix": 7,
+      "cleanupMatrix": 7,
+      "semanticMatrix": 21
+    },
+    "widths": [
+      375,
+      390,
+      430,
+      768,
+      1024,
+      1440,
+      1800
+    ],
+    "runtimeErrors": 0,
+    "accessibleHeadings": true,
+    "authAccountJourney": true,
+    "savedInteractionAssertions": {
+      "additionalProviderCalls": 0,
+      "additionalUploads": 0,
+      "additionalArtworkWrites": 0,
+      "reopenAdditionalProviderCalls": 0
+    },
+    "scope": "Mocked HTTP in actual exported app; no live authenticated production replay",
+    "rasterCases": 40,
+    "unconfiguredRoutes": 8,
+    "technicalBenchmarkFixtures": 6,
+    "realProviderCalls": 0,
+    "physicalDeviceVerified": false
+  },
+  "security": {
+    "status": "PASS",
+    "scope": "Isolated cached PostgreSQL16; no live Supabase",
+    "suites": [
+      "supabase/tests/rls.sql",
+      "supabase/tests/feedback.sql"
+    ],
+    "schemaExecutions": 2,
+    "concurrentClaims": "one claimed / one busy"
+  },
+  "sourceLock": "unchanged and verified",
+  "protectedPathsChangedThisPass": [],
+  "storedProductionReview": {
+    "connectionExposedInCodex": false,
+    "retrievedRecords": 0,
+    "recordsExist": "User independently verified 87 genuine OpenAI improve_painting rows and full records for four cases",
+    "requiredInput": "Private sanitized four-case result_json export",
+    "status": "BLOCKED_PENDING_EXPORT"
+  },
+  "productionFacts": {
+    "evidence": "User independent authenticated inspection; not a Codex database read",
+    "projectRef": "tnclxscyryfnxnildnjn",
+    "function": "generate-feedback",
+    "activeVersion": 26,
+    "model": "gpt-4.1-mini",
+    "detail": "low",
+    "temperature": 0.3,
+    "maxCompletionTokens": 3000
+  },
+  "limitations": [
+    "No actual persisted four-case JSON inspected in this session",
+    "No direct persisted-result replay or independent artistic acceptance yet",
+    "No physical-device or live storage/auth smoke test",
+    "GitHub API standard access returned Forbidden; PR creation pending network escalation"
+  ],
+  "initialCommandIssues": [
+    "Deno check does not accept --cached-only; correct strict check passed",
+    "Configured browser export initially used generic example hostname; rebuilt with harness test host before browser validation"
+  ],
+  "paidRequests": 0,
+  "productionWrites": 0,
+  "merged": false,
+  "deployed": false
+}

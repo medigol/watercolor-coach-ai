@@ -1,5 +1,7 @@
 # Manual review of legitimate production assessments
 
+**Superseded evidence state, 2026-10-27:** the user independently inspected authenticated Supabase project `tnclxscyryfnxnildnjn`: `generate-feedback` is ACTIVE v26 with `gpt-4.1-mini`/low/0.3/3000, and 87 genuine OpenAI `improve_painting` rows include complete records for the four reported cases. Full results **exist**. The limitation is this Codex session's lack of an exposed authenticated database connection/export, not the absence of saved records. Continue the [stored-assessment integration review](stored-assessment-integration.md); screenshot capture below is supplementary, not the primary investigation. Earlier access observations remain historical.
+
 2026-10-23 UTC. Active approach: review owner-generated, existing production assessments. The independent paid benchmark is **deferred by user instruction**. No API key or new credentials are requested, no production assessment is submitted automatically, and no benchmark approval is exercised. Existing evidence and experimental records remain unchanged.
 
 ## Deployment evidence
