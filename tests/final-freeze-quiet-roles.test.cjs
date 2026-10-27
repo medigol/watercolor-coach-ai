@@ -153,6 +153,25 @@ test("a quiet adjective does not override supplied active road structure", () =>
     !projected.canonicalAnalysis.visualRoles.some((r) => r.id === "field"),
   );
 });
+
+test("an active path linked to another role does not alone invalidate a supplied quiet segment", () => {
+  const source = fixture(
+    "lower foreground road",
+    "The lower foreground road remains low-contrast with few marks.",
+  );
+  source.canonicalAnalysis.facts.push({
+    id: "separate_active_path",
+    domain: "composition",
+    roleId: source.canonicalAnalysis.visualRoles[1].id,
+    observation: "The upper path guides the eye toward the focal group.",
+  });
+  const projected = display(source);
+  assert(projected.canonicalAnalysis.visualRoles.some((r) => r.id === "field"));
+  assert.deepEqual(
+    projected.canonicalAnalysis.visualEvidence,
+    source.canonicalAnalysis.visualEvidence,
+  );
+});
 test("quiet omission never fabricates Supporting or moves canonical geometry", () => {
   const source = fixture(
     "foreground",

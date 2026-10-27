@@ -254,6 +254,36 @@ test("architectural aliases preserve compatible placement and unrelated central 
     assert.equal(neutralizeFocalPositionText(text, position), text);
 });
 
+for (const apostrophe of ["'", "’"])
+  test(`possessive focal placement with ${apostrophe} obeys supplied geometry`, () => {
+    // Sanitized word form from a verified saved-result excerpt; not a complete
+    // production record, subject diagnosis or replacement geometry.
+    const text = `The steeple${apostrophe}s central placement balances the shapes.`;
+    for (const position of ["off_centre", "uncertain"])
+      assert.equal(
+        neutralizeFocalPositionText(text, position),
+        `The steeple${apostrophe}s placement balances the shapes.`,
+      );
+    assert.equal(neutralizeFocalPositionText(text, "central"), text);
+    assert.equal(
+      neutralizeFocalPositionText(
+        `The spire${apostrophe}s off-centre position balances the shapes.`,
+        "central",
+      ),
+      `The spire${apostrophe}s position balances the shapes.`,
+    );
+  });
+
+test("possessive placement cleanup preserves other properties and compatible alternatives", () => {
+  for (const [text, position] of [
+    ["The steeple's central shadow is dark.", "off_centre"],
+    ["The tower’s central colour region is broad.", "uncertain"],
+    ["The spire’s off-centre position balances the shapes.", "off_centre"],
+    ["Compare central placement with off-centre placement in a separate study.", "uncertain"],
+  ])
+    assert.equal(neutralizeFocalPositionText(text, position), text);
+});
+
 test("structure plan neutralizes an off-centre label without inferring another archetype", () => {
   const input = composition();
   const before = structuredClone(input);

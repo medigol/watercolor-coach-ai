@@ -107,6 +107,13 @@ export function neutralizeFocalPositionText(
           "gi",
         ),
         "$1within the image",
+      )
+      .replace(
+        new RegExp(
+          `\\b(${subject}['’]s\\s+)(?:central|centred|centered)\\s+(?=(?:placement|position|location)\\b)`,
+          "gi",
+        ),
+        "$1",
       );
   }
   if (position !== "off_centre") {
@@ -124,6 +131,13 @@ export function neutralizeFocalPositionText(
           "gi",
         ),
         "$1within the image",
+      )
+      .replace(
+        new RegExp(
+          `\\b(${subject}['’]s\\s+)off[- ]cent(?:re|er)(?:d|ed)?\\s+(?=(?:placement|position|location)\\b)`,
+          "gi",
+        ),
+        "$1",
       );
   }
   result = result.replace(/ {2,}/g, " ").trim();
