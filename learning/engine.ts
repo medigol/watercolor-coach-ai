@@ -5,9 +5,21 @@ import type { LearnerProgress, LearningPath, LearningProfile } from "./types";
 export function sessionPlan(id: string, minutes: number): string {
   const item = itemById(id)!;
   const total = item.instructionMinutes + item.practiceMinutes;
+  const longest = Math.max(...item.steps.map((s) => s.minutes));
+  if (longest > minutes)
+    return `${total} active minutes total, including a ${longest}-minute activity. Use the authored short comparison or allow a longer session; do not rush a drying passage.`;
+  let sessions = 1,
+    used = 0;
+  for (const step of item.steps) {
+    if (used + step.minutes > minutes) {
+      sessions++;
+      used = 0;
+    }
+    used += step.minutes;
+  }
   return total <= minutes
     ? `${total} active minutes, plus any drying time.`
-    : `${Math.ceil(total / minutes)} short sessions of up to ${minutes} active minutes. Pause at step boundaries; drying time is additional.`;
+    : `${sessions} short sessions of up to ${minutes} active minutes (${total} active minutes total). Pause at step boundaries; drying time is additional.`;
 }
 export function application(profile: LearningProfile, id: string): string {
   const subject = subjectLabels[profile.subject].toLowerCase();

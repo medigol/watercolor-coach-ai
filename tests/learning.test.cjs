@@ -170,7 +170,7 @@ test("beginner with 15 minutes receives feasible multiple sessions, not a fictit
   assert.equal(p.recommendations[0].itemId, "water-brush");
   assert.match(
     p.recommendations.find((r) => r.itemId === project.id).sessionPlan,
-    /4 short sessions.*15/,
+    /6 short sessions.*15/,
   );
   assert.match(
     p.recommendations.find((r) => r.itemId === project.id).sessionPlan,
@@ -235,6 +235,23 @@ test("changing available time changes the actual session plan without erasing wo
 test("all 10,15,30,45,60 minute settings produce bounded useful session descriptions", () => {
   for (const n of [10, 15, 30, 45, 60])
     for (const i of items) assert.match(sessionPlan(i.id, n), /active minutes/);
+});
+test("project session estimates keep whole ordered activities rather than dividing total time", () => {
+  // Independently packed durations: 4,7,6,8,8,10,10,7. At 15 minutes:
+  // [4+7], [6+8], [8], [10], [10], [7]; at 30: [4+7+6+8], [8+10+10], [7].
+  for (const [minutes, count] of [
+    [10, 8],
+    [15, 6],
+    [30, 3],
+    [45, 2],
+  ]) {
+    assert.match(
+      sessionPlan(project.id, minutes),
+      new RegExp(`^${count} short sessions`),
+    );
+    assert.match(sessionPlan(project.id, minutes), /60 active minutes total/);
+  }
+  assert.match(sessionPlan(project.id, 60), /^60 active minutes, plus/);
 });
 test("a completed study remains available for revisiting after changing preferences", () => {
   const s = finish(lessons[0], personal());
