@@ -220,12 +220,13 @@ test("switching accounts resets the protected stack without resetting token refr
       AuthProvider: "AuthProvider",
       useAuth: () => ({ session, loading: false }),
     },
+    "../providers/LearningProvider": { LearningProvider: "LearningProvider" },
     "../lib/supabase": { supabase: {} },
     "../components/ui": { Screen: "Screen", styles: {}, colors: {} },
   });
-  const routes = RootLayout().props.children.find(
-    (child) => child.type.name === "AppRoutes",
-  ).type;
+  const learning = RootLayout().props.children.find(child => child.type === "LearningProvider");
+  assert(learning, "local learning must use its account-scoped provider");
+  const routes = learning.props.children.type;
   const original = routes();
   assert.equal(original.type, Stack);
   assert.equal(original.key, "account-a");

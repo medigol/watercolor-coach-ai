@@ -7,6 +7,11 @@ export default function Home() {
     <Screen>
       <WatercolorWashHeader />
       <ActionCard
+        title="Learn watercolour"
+        description="Build painting decisions through small studies and a personal learning path."
+        onPress={() => router.push("/learn")}
+      />
+      <ActionCard
         title="Improve my painting"
         description="Upload your artwork and get clear feedback."
         onPress={() => router.push("/upload/improve-painting")}

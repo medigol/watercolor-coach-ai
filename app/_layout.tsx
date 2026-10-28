@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "../providers/AuthProvider";
+import { LearningProvider } from "../providers/LearningProvider";
 import { supabase } from "../lib/supabase";
 import { Screen, styles, colors } from "../components/ui";
 export const unstable_settings = { initialRouteName: "(tabs)" };
@@ -81,7 +82,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <StatusBar style="dark" />
-      <AppRoutes />
+      <LearningProvider><AppRoutes /></LearningProvider>
     </AuthProvider>
   );
 }

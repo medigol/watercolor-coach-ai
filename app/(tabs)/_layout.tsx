@@ -63,6 +63,29 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="learn"
+        options={{
+          title: "Learn",
+          headerShown: false,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View
+              style={{
+                backgroundColor: focused ? colors.pale : "transparent",
+                paddingHorizontal: 14,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <Ionicons
+                name={focused ? "brush" : "brush-outline"}
+                color={color}
+                size={size}
+              />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="artworks"
         options={{
           title: "My Artworks",
@@ -84,28 +107,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="practice"
-        options={{
-          title: "Practice",
-          tabBarIcon: ({ color, size, focused }) => (
-            <View
-              style={{
-                backgroundColor: focused ? colors.pale : "transparent",
-                paddingHorizontal: 14,
-                paddingVertical: 4,
-                borderRadius: 12,
-              }}
-            >
-              <Ionicons
-                name={focused ? "brush" : "brush-outline"}
-                color={color}
-                size={size}
-              />
-            </View>
-          ),
-        }}
-      />
+      <Tabs.Screen name="practice" options={{ href: null }} />
     </Tabs>
   );
 }
