@@ -85,9 +85,9 @@ const token = [
   });
   const button = (name) => page.getByRole("button", { name, exact: true });
   const heading = (name) => page.getByRole("heading", { name, exact: true });
-  const shot = async (name) => {
+  const shot = async (name, reset = true) => {
     const main = page.getByRole("main");
-    if (await main.count())
+    if (reset && (await main.count()))
       await main.evaluate((el) => {
         let p = el.parentElement;
         while (p) {
@@ -189,7 +189,9 @@ const token = [
     await saved();
     await heading("Notice the three water decisions").waitFor();
     await shot("06-mobile-lesson");
+    await button("Optional demonstration").click();
     assert(await page.getByText(/No verified video is assigned/).count());
+    await button("Optional demonstration").click();
     assert.equal(await page.locator("iframe").count(), 0);
     const firstCheck = page.getByRole("checkbox").first();
     await firstCheck.focus();
@@ -201,13 +203,13 @@ const token = [
     );
     await firstCheck.press("Space");
     assert.equal(await firstCheck.isChecked(), false);
+    await button("Notes for this step").click();
     await page
       .getByRole("textbox", { name: "Optional note for this step" })
       .fill("Two water conditions to compare.");
     async function finishCurrent(final = false, kind = "lesson") {
       for (const check of await page.getByRole("checkbox").all())
-        if (!(await check.isChecked()))
-          await check.click();
+        if (!(await check.isChecked())) await check.click();
       if (final) {
         await page
           .getByRole("textbox", { name: "My exercise reflection" })
@@ -236,8 +238,8 @@ const token = [
     for (let n = 1; n < 5; n++) await finishCurrent(n === 4);
     await heading("Lesson completed").waitFor();
     await page.goto(base + "/learn");
-    await heading("A little practice. A clear next step.").waitFor();
-    await page.getByRole("img", { name: /soft pale distant hills/ }).waitFor();
+    await heading("Continue your practice").waitFor();
+    await page.getByRole("img", { name: /translucent river-valley/ }).waitFor();
     await shot("02-learn-returning");
     await page.setViewportSize({ width: 390, height: 900 });
     await page.goto(base + "/learn/lesson?id=quiet-landscape");
@@ -245,18 +247,25 @@ const token = [
     await finishCurrent();
     await heading("Plan three major values").waitFor();
     await page.getByRole("checkbox").first().check();
+    await button("Notes for this step").click();
     await page
       .getByRole("textbox", { name: "Optional note for this step" })
       .fill("Keep a broad quiet sky.");
     await saved();
     await page.reload();
     await heading("Plan three major values").waitFor();
-    assert(await page.getByRole("checkbox").first().isChecked(),"partially completed project checklist must survive reload");
+    assert(
+      await page.getByRole("checkbox").first().isChecked(),
+      "partially completed project checklist must survive reload",
+    );
     assert.equal(
       (await read()).entries["quiet-landscape"].notes.values,
       "Keep a broad quiet sky.",
     );
     await shot("08-guided-project");
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await shot("08-guided-project-desktop");
+    await page.setViewportSize({ width: 390, height: 900 });
     for (let n = 1; n < 8; n++) await finishCurrent(n === 7, "project");
     await heading("Project completed").waitFor();
     await page.reload();
@@ -264,6 +273,10 @@ const token = [
     await page.goto(base + "/learn/progress");
     await heading("Your practice, kept in view").waitFor();
     await shot("09-progress");
+    await page.goto(base + "/learn/curriculum");
+    await page.getByRole("main").getByRole("heading", { level: 1 }).waitFor();
+    await shot("15-curriculum");
+    await page.goto(base + "/learn/progress");
     await button("Revisit Water & brush control").click();
     await button("Review this completed study").click();
     await button("1. Notice the three water decisions · recorded").click();
@@ -311,22 +324,52 @@ const token = [
           assert(reference && practice && media);
           if (width < 1000)
             assert(
-              reference.y + reference.height <= practice.y + 1,
-              "stacked teaching panels must not overlap",
+              practice.y + practice.height <= reference.y + 1,
+              "action-first panels must not overlap below the practice",
             );
           else
             assert(
-              reference.x + reference.width <= practice.x + 1,
-              "desktop teaching columns must not overlap",
+              practice.x + practice.width <= reference.x + 1,
+              "desktop action and visual columns must not overlap",
             );
-          assert(
-            practice.y + practice.height <= media.y + 1,
+          const intersection =
+            Math.max(
+              0,
+              Math.min(practice.x + practice.width, media.x + media.width) -
+                Math.max(practice.x, media.x),
+            ) *
+            Math.max(
+              0,
+              Math.min(practice.y + practice.height, media.y + media.height) -
+                Math.max(practice.y, media.y),
+            );
+          assert.equal(
+            intersection,
+            0,
             "media must not cover reflection controls",
           );
         }
         await noOverflow();
-        if (width === 1440 && route === "/learn/styles")
+        if (width === 1440 && route === "/learn/styles") {
           await shot("03-style-explorer-desktop");
+          await page
+            .getByTestId("style-example-botanical")
+            .getByRole("img")
+            .scrollIntoViewIfNeeded();
+          await shot("21-botanical-expressive", false);
+          await button("Compare Botanical observation").click();
+          await button("Compare Expressive and gestural").click();
+          const comparison = page.getByTestId("style-comparison");
+          assert.equal(await comparison.getByRole("img").count(), 2);
+          await comparison
+            .getByRole("img", { name: /flowering branch/ })
+            .waitFor();
+          await comparison
+            .getByRole("img", { name: /broad directional marks/ })
+            .waitFor();
+          await comparison.scrollIntoViewIfNeeded();
+          await shot("22-style-comparison", false);
+        }
         const tiny = await page
           .getByRole("main")
           .getByRole("button")
@@ -375,6 +418,240 @@ const token = [
     await page.goto(base + "/learn/lesson?id=missing-study");
     await heading("That study is not available").waitFor();
     await shot("11-unavailable-study");
+    // New quality gates use independent viewport geometry, not DOM existence.
+    const preserved = await read();
+    const loadLearning = require("../helpers/learning-loader.cjs");
+    const water = loadLearning("learning/content.ts").itemById("water-brush");
+    const { newEntry, checklistId } = loadLearning("learning/progress.ts");
+    const older = require("../helpers/learning-progress-v1.json");
+    await page.evaluate(
+      ({ key, value }) => localStorage.setItem(key, JSON.stringify(value)),
+      { key, value: older },
+    );
+    await page.goto(base + "/learn/progress");
+    await heading("Your practice, kept in view").waitFor();
+    assert.deepEqual(
+      await read(),
+      older,
+      "reading e0c560d progress must not rewrite it",
+    );
+    const seeded = structuredClone(preserved);
+    seeded.entries[water.id] = newEntry(water);
+    seeded.entries[water.id].stepId = "set-up";
+    seeded.entries[water.id].completedSteps = ["look"];
+    seeded.entries[water.id].checked.look = [checklistId("look", 0)];
+    seeded.currentItemId = water.id;
+    await page.evaluate(
+      ({ key, value }) => localStorage.setItem(key, JSON.stringify(value)),
+      { key, value: seeded },
+    );
+    const fold = [];
+    for (const [w, h] of [
+      [320, 800],
+      [375, 900],
+      [390, 900],
+      [430, 900],
+      [375, 600],
+      [768, 480],
+      [1024, 768],
+      [1440, 1000],
+    ]) {
+      await page.setViewportSize({ width: w, height: h });
+      await page.goto(base + "/learn/lesson?id=water-brush");
+      await heading("Prepare a repeatable brush load").waitFor();
+      const action = await page
+        .getByText(water.steps[1].actions[0], { exact: true })
+        .boundingBox();
+      assert(
+        action &&
+          action.y >= 0 &&
+          action.y + action.height < h - (w >= 1000 ? 0 : 80),
+        "current practical instruction must be visible in the first viewport",
+      );
+      const nav = await page.getByTestId("learn-section-nav").boundingBox();
+      assert(nav && nav.height <= 56, "secondary navigation stays one row");
+      assert(
+        await page
+          .getByRole("main")
+          .evaluate((n) => n.scrollWidth <= n.clientWidth + 1),
+        `content must not be clipped horizontally at ${w} × ${h}`,
+      );
+      if (w >= 1000) {
+        const primary = await page
+          .getByTestId("desktop-learn-nav")
+          .boundingBox();
+        assert(
+          primary.y < 1 && primary.width === w,
+          "desktop navigation belongs at the top across the available width",
+        );
+      }
+      if ((w === 375 && h === 900) || w === 390) {
+        const check = await page.getByRole("checkbox").first().boundingBox();
+        assert(
+          check.y + check.height < h - 80,
+          "beginning the practical checklist must be visible without scrolling",
+        );
+      }
+      if (w === 375 && h === 600) await shot("16-short-height-studio");
+      if (w === 390 && h === 900) await shot("17-action-first-390");
+      if (w === 1440) await shot("20-desktop-navigation");
+      fold.push({
+        width: w,
+        height: h,
+        actionBottom: Math.round(action.y + action.height),
+        navigationHeight: nav.height,
+      });
+    }
+    const textContrast = [];
+    for (const target of [
+      page.getByText(water.steps[1].actions[0], { exact: true }),
+      page.getByText(water.steps[1].observe, { exact: true }),
+      button("Learn home").locator("div").first(),
+    ]) {
+      const ratio = await target.evaluate((el) => {
+        const rgb = (s) =>
+          s
+            .match(/[\d.]+/g)
+            .slice(0, 3)
+            .map(Number);
+        let p = el,
+          bg = "rgb(245, 243, 237)";
+        while (p) {
+          const c = getComputedStyle(p).backgroundColor;
+          if (c !== "rgba(0, 0, 0, 0)" && c !== "transparent") {
+            bg = c;
+            break;
+          }
+          p = p.parentElement;
+        }
+        const lum = (color) =>
+          rgb(color)
+            .map((v) => {
+              v /= 255;
+              return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+            })
+            .reduce((a, n, i) => a + n * [0.2126, 0.7152, 0.0722][i], 0);
+        const a = lum(getComputedStyle(el).color),
+          b = lum(bg);
+        return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      });
+      assert(ratio >= 4.5, "instruction and navigation text meet AA contrast");
+      textContrast.push(Number(ratio.toFixed(2)));
+    }
+    // A user stylesheet doubles text independently of layout. This exercises
+    // text-only enlargement; it does not claim physical browser/OS zoom testing.
+    await page.setViewportSize({ width: 375, height: 900 });
+    await page.reload();
+    await heading("Prepare a repeatable brush load").waitFor();
+    await page.evaluate(() => {
+      const nodes = [...document.querySelectorAll('[role="main"] *')].filter(
+        (el) =>
+          [...el.childNodes].some(
+            (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
+          ),
+      );
+      const sizes = nodes.map((el) => [
+        el,
+        parseFloat(getComputedStyle(el).fontSize),
+      ]);
+      for (const [el, size] of sizes) {
+        el.style.fontSize = `${size * 2}px`;
+        el.style.lineHeight = "1.5";
+      }
+    });
+    assert(
+      await page
+        .getByRole("main")
+        .evaluate((n) => n.scrollWidth <= n.clientWidth + 1),
+      "200% text must reflow without clipping: " +
+        JSON.stringify(
+          await page.getByRole("main").evaluate((n) =>
+            [...n.querySelectorAll("*")]
+              .filter(
+                (e) =>
+                  e.getBoundingClientRect().right >
+                  n.getBoundingClientRect().right + 1,
+              )
+              .map((e) => ({
+                tag: e.tagName,
+                text: e.textContent.slice(0, 70),
+                width: e.getBoundingClientRect().width,
+              }))
+              .slice(0, 8),
+          ),
+        ),
+    );
+    await button("Complete step and continue").scrollIntoViewIfNeeded();
+    const enlargedControl = await button(
+      "Complete step and continue",
+    ).boundingBox();
+    assert(
+      enlargedControl.y >= 0 &&
+        enlargedControl.y + enlargedControl.height <= 820,
+      "enlarged step controls remain reachable above navigation",
+    );
+    await shot("19-text-enlargement", false);
+    await page.reload();
+    await heading("Prepare a repeatable brush load").waitFor();
+    // Keyboard reflow emulation is explicitly not a physical OS-keyboard test.
+    await page.setViewportSize({ width: 390, height: 480 });
+    await button("Notes for this step").click();
+    const noteField = page.getByRole("textbox", {
+      name: "Optional note for this step",
+    });
+    await noteField.fill(
+      "A long observation about moisture and edge behaviour. ".repeat(32),
+    );
+    await saved();
+    await noteField.focus();
+    await noteField.scrollIntoViewIfNeeded();
+    const noteBox = await noteField.boundingBox();
+    assert(
+      noteBox.y >= 0 && noteBox.y + noteBox.height <= 400,
+      "notes remain above the navigation in a reduced keyboard viewport",
+    );
+    await shot("18-note-keyboard-viewport", false);
+    await page.setViewportSize({ width: 390, height: 900 });
+    await page.goto(base + "/learn");
+    await button("Open learning menu").click();
+    await button("Resume current study").click();
+    await heading("Prepare a repeatable brush load").waitFor();
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.getByRole("tab", { name: "Home", exact: true }).click();
+    await button("Learn watercolour").click();
+    await heading("Continue your practice").waitFor();
+    assert(
+      (await read()).entries[water.id].notes["set-up"].length > 1500,
+      "long notes are retained",
+    );
+    for (const [id, filename] of [
+      ["three-values", "24-value-planning-visual"],
+      ["edge-families", "25-edge-visual"],
+      ["observed-structure", "26-perspective-visual"],
+    ]) {
+      const item = loadLearning("learning/content.ts").itemById(id);
+      const visualState = structuredClone(preserved);
+      visualState.entries[id] = newEntry(item);
+      visualState.currentItemId = id;
+      await page.evaluate(
+        ({ key, value }) => localStorage.setItem(key, JSON.stringify(value)),
+        { key, value: visualState },
+      );
+      await page.goto(base + "/learn/lesson?id=" + id);
+      await heading(item.steps[0].title).waitFor();
+      const guide = page.getByTestId("studio-reference");
+      assert.equal(
+        await guide.getByRole("img").count(),
+        1,
+        "one named teaching visual, without a duplicate SVG image",
+      );
+      await shot(filename);
+    }
+    await page.evaluate(
+      ({ key, value }) => localStorage.setItem(key, JSON.stringify(value)),
+      { key, value: preserved },
+    );
+    await page.goto(base + "/learn/lesson?id=three-values");
     // Simulated storage failure must not become a fake successful save.
     await page.goto(base + "/learn/lesson?id=three-values");
     await button("Begin lesson").waitFor();
@@ -393,10 +670,31 @@ const token = [
     await button("Retry local save").waitFor();
     assert.deepEqual(await read(), before);
     await shot("12-save-failure");
+    await page.setViewportSize({ width: 390, height: 480 });
+    await button("Notes for this step").click();
+    const failedNote = page.getByRole("textbox", {
+      name: "Optional note for this step",
+    });
+    await failedNote.fill(
+      "This note must show a failure until an actual retry succeeds.",
+    );
+    await button("Retry note save").scrollIntoViewIfNeeded();
+    const retryBox = await button("Retry note save").boundingBox();
+    assert(
+      retryBox.y >= 0 && retryBox.y + retryBox.height <= 400,
+      "note-save error recovery stays reachable with the keyboard viewport reduced",
+    );
+    await shot("23-note-save-error", false);
+    assert.deepEqual(await read(), before);
     await page.evaluate(() => window.restoreLearningStorage());
     await button("Retry local save").click();
     await saved();
     assert((await read()).entries["three-values"]);
+    assert.equal(
+      (await read()).entries["three-values"].notes.look,
+      "This note must show a failure until an actual retry succeeds.",
+    );
+    await page.setViewportSize({ width: 390, height: 900 });
     // Corrupt data is preserved until an explicit backup/recovery action.
     await page.evaluate(
       (k) => localStorage.setItem(k, "synthetic broken data"),
@@ -448,6 +746,16 @@ const token = [
         {
           status: "PASS",
           responsiveCases: matrix.length,
+          firstViewportCases: fold,
+          baselineProgressReplay: true,
+          textContrastRatios: textContrast,
+          textEnlargement:
+            "200% user stylesheet; no clipping; controls reachable",
+          keyboardViewportEmulation: {
+            width: 390,
+            height: 480,
+            physicalKeyboard: false,
+          },
           matrix,
           runtimeErrors: errors,
           unexpectedNetwork: unexpected,

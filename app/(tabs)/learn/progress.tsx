@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { items, itemById } from "../../../learning/content";
 import { skills, confidenceLabels } from "../../../learning/catalogue";
 import {
@@ -13,15 +13,20 @@ import {
   Action,
   Card,
   Copy,
+  Disclosure,
   Heading,
   LearnScreen,
+  TextLink,
   learnStyles,
 } from "../../../components/learning/LearningUI";
 export default function Progress() {
   const { state } = useLearning(),
-    path = makePath(state);
-  const entries = Object.values(state.entries);
-  const done = items.filter((i) => completed(i, state.entries[i.id]));
+    path = makePath(state),
+    entries = Object.values(state.entries);
+  const done = items.filter((i) => completed(i, state.entries[i.id])),
+    next = path.recommendations.find(
+      (r) => !completed(itemById(r.itemId)!, state.entries[r.itemId]),
+    );
   const practised = [
     ...new Set(
       items
@@ -35,64 +40,76 @@ export default function Progress() {
   ];
   return (
     <LearnScreen>
+      <Text style={learnStyles.label}>{path.title}</Text>
       <Heading level={1}>Your practice, kept in view</Heading>
       <Copy>
-        {done.length} completed {done.length === 1 ? "study" : "studies"}.
-        Completion and confidence are self-reported; no independent competence
-        has been measured.
+        {done.length} completed {done.length === 1 ? "study" : "studies"} ·{" "}
+        {practised.length} skills practised
       </Copy>
       <Copy muted>
-        Learning notes stay in this browser or app, are not encrypted or synced,
-        and can be lost if local storage is cleared. Use a trusted personal
-        device.
+        A record of your activities and reflections, not an independent
+        proficiency score.
       </Copy>
-      {!entries.length && (
+      {!entries.length ? (
         <Card>
           <Heading>A clean sheet</Heading>
           <Copy>
-            Begin a lesson, try its exercise and record what you notice. Opening
-            a page alone does not complete it.
+            Begin with one small study. Record what you tried and what you
+            noticed.
           </Copy>
           <Action
             title="Choose my first study"
             onPress={() => router.push("/learn/path")}
           />
         </Card>
+      ) : (
+        next && (
+          <View style={learnStyles.section}>
+            <Text style={learnStyles.label}>Next recommendation</Text>
+            <Heading>{itemById(next.itemId)!.title}</Heading>
+            <Copy>{next.reason}</Copy>
+            <TextLink
+              title="See my next recommendation"
+              onPress={() => router.push("/learn/path")}
+            />
+          </View>
+        )
       )}
-      {entries.map((entry) => {
-        const i = itemById(entry.itemId);
+      {entries.map((e) => {
+        const i = itemById(e.itemId);
         if (!i)
           return (
-            <Card key={entry.itemId}>
+            <View key={e.itemId} style={learnStyles.section}>
               <Heading>Earlier content retained</Heading>
               <Copy muted>
-                Saved work for {entry.itemId} is preserved locally. This version
+                Saved work for {e.itemId} is preserved locally. This version
                 does not offer its lesson route.
               </Copy>
-            </Card>
+            </View>
           );
         return (
-          <Card key={i.id}>
-            <Text style={learnStyles.label}>{i.kind}</Text>
+          <View key={i.id} style={learnStyles.section}>
+            <Text style={learnStyles.label}>
+              {i.kind} · {completed(i, e) ? "✓ Completed" : "In progress"}
+            </Text>
             <Heading>{i.title}</Heading>
-            <Copy>
-              {learningStatus(i, entry)} ·{" "}
+            <Copy muted>
+              {learningStatus(i, e)} ·{" "}
               {
-                entry.completedSteps.filter((id) =>
+                e.completedSteps.filter((id) =>
                   i.steps.some((s) => s.id === id),
                 ).length
               }{" "}
               of {i.steps.length} steps recorded
             </Copy>
-            {entry.contentVersion !== i.version ? (
+            {e.contentVersion !== i.version ? (
               <Copy muted>
-                Earlier version {entry.contentVersion} retained. It is not
-                automatically marked complete for the current content.
+                Earlier version {e.contentVersion} retained; it is not
+                automatically completed for current content.
               </Copy>
             ) : (
-              <Action
-                title={`${completed(i, entry) ? "Revisit" : "Resume"} ${i.title}`}
-                secondary
+              <TextLink
+                title={`${completed(i, e) ? "Revisit" : "Resume"} ${i.title}`}
                 onPress={() =>
                   router.push({
                     pathname: "/learn/lesson",
@@ -100,38 +117,34 @@ export default function Progress() {
                   })
                 }
               />
+            )}{" "}
+            {!completed(i, e) && e.contentVersion === i.version && (
+              <Copy muted>Resume at: {i.steps[resumeStep(i, e)].title}</Copy>
             )}
-            {!completed(i, entry) && entry.contentVersion === i.version && (
-              <Copy muted>
-                Resume at: {i.steps[resumeStep(i, entry)].title}
-              </Copy>
-            )}
-            {entry.reflection && (
-              <>
-                <Copy>Reflection: {entry.reflection.text}</Copy>
+            {e.reflection && (
+              <Disclosure title={`Reflection: ${i.title}`}>
+                <Copy>{e.reflection.text}</Copy>
                 <Copy muted>
-                  {entry.reflection.difficulty} · confidence:{" "}
-                  {confidenceLabels[entry.reflection.confidence]}
+                  {e.reflection.difficulty} · confidence:{" "}
+                  {confidenceLabels[e.reflection.confidence]}
                 </Copy>
-              </>
+              </Disclosure>
             )}
-          </Card>
+          </View>
         );
       })}
-      <Card>
+      <View style={learnStyles.section}>
         <Heading>Skills you have practised</Heading>
         <Copy>
           {practised.length
             ? practised
                 .map((id) => skills.find((s) => s.id === id)?.title ?? id)
                 .join(" · ")
-            : "Your practical activity will appear here after a study step is completed."}
+            : "Recorded practical activity will appear here."}
         </Copy>
-        <Copy muted>These are practice records, not a mastery percentage.</Copy>
-      </Card>
+      </View>
       {state.profile && (
-        <Card>
-          <Heading>Self-reported starting confidence</Heading>
+        <Disclosure title="Self-reported starting confidence">
           {Object.entries(state.profile.diagnostic).length ? (
             Object.entries(state.profile.diagnostic).map(([id, level]) => (
               <Copy key={id}>
@@ -142,34 +155,38 @@ export default function Progress() {
           ) : (
             <Copy muted>No optional confidence answers recorded.</Copy>
           )}
-          <Action
+          <TextLink
             title="Revise my self-report"
-            secondary
             onPress={() => router.push("/learn/onboarding")}
           />
-        </Card>
+        </Disclosure>
       )}
-      <Card>
-        <Heading>Worth revisiting</Heading>
+      <Disclosure title="Worth revisiting">
         {path.revisionIds.length ? (
           path.revisionIds.map((id) => (
             <Copy key={id}>
-              {itemById(id)!.title}: you reported difficulty; compare one
+              {itemById(id)!.title}: you reported difficulty. Compare one
               controlled variable again.
             </Copy>
           ))
         ) : (
           <Copy>
-            No difficulty-based refresher is recorded. You can revisit any
-            available study.
+            Revisit any available study when it helps your next painting.
           </Copy>
         )}
-        <Action
-          title="See my next recommendation"
-          secondary
+        <TextLink
+          title="My learning path"
           onPress={() => router.push("/learn/path")}
         />
-      </Card>
+      </Disclosure>
+      <Disclosure title="How your progress is stored">
+        <Copy muted>
+          Notes and progress stay in this browser or app on this device. They
+          are not encrypted or synced. Clearing local storage can remove them;
+          use a trusted personal device. A completed activity is self-reported
+          practice, not independently verified mastery.
+        </Copy>
+      </Disclosure>
     </LearnScreen>
   );
 }

@@ -4,6 +4,7 @@ export default function LearnLayout() {
   return (
     <Stack
       screenOptions={{
+        headerShown: false,
         headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.ink,
         headerShadowVisible: false,

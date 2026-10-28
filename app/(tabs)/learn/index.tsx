@@ -3,20 +3,20 @@ import { router } from "expo-router";
 import { useLearning } from "../../../providers/LearningProvider";
 import { makePath } from "../../../learning/engine";
 import { itemById, project } from "../../../learning/content";
-import { completed, learningStatus } from "../../../learning/progress";
+import { completed, resumeStep } from "../../../learning/progress";
 import {
   Action,
-  Card,
   Copy,
   Heading,
   LearnScreen,
+  TextLink,
   learnStyles,
 } from "../../../components/learning/LearningUI";
 import { StyleVisual } from "../../../components/learning/StudyVisual";
 export default function Learn() {
-  const { state, update } = useLearning();
-  const { width } = useWindowDimensions();
-  const path = makePath(state);
+  const { state, update } = useLearning(),
+    { width } = useWindowDimensions(),
+    path = makePath(state);
   const current = state.currentItemId
     ? itemById(state.currentItemId)
     : undefined;
@@ -31,47 +31,55 @@ export default function Learn() {
     const i = itemById(e.itemId);
     return i && completed(i, e);
   }).length;
+  const step = next?.steps[resumeStep(next, state.entries[next.id])],
+    reason = path.recommendations.find((r) => r.itemId === next?.id)?.reason;
   return (
     <LearnScreen nav={false}>
-      <Text style={learnStyles.label}>Learn watercolour · your studio</Text>
+      <Text style={learnStyles.label}>Learn watercolour</Text>
       <Heading level={1}>
-        {returning
-          ? "A little practice. A clear next step."
-          : "Learn to see. Learn to paint."}
+        {returning ? "Continue your practice" : "Learn to see. Learn to paint."}
       </Heading>
-      <Copy>
-        {returning
-          ? "Return to a decision you were exploring, or follow your next study. Your pace belongs to you."
-          : "Build water, value and edge decisions through small physical studies. Start now, or shape a path around what you want to paint."}
-      </Copy>
+      {!returning && (
+        <Copy>
+          Small, purposeful studies. A few better decisions each time you pick
+          up a brush.
+        </Copy>
+      )}
       <View
         style={{
-          flexDirection: width >= 850 ? "row" : "column",
-          gap: 24,
-          alignItems: "stretch",
+          flexDirection: width >= 900 ? "row" : "column",
+          gap: 36,
+          alignItems: "flex-start",
         }}
       >
         <View
           style={{
-            flex: width >= 850 ? 1 : undefined,
-            width: width >= 850 ? undefined : "100%",
+            flex: width >= 900 ? 1 : undefined,
+            width: width >= 900 ? undefined : "100%",
+            gap: 20,
             minWidth: 0,
-            gap: 18,
           }}
         >
           {returning ? (
-            <Card>
-              <Text style={learnStyles.label}>
-                {state.mode === "personal"
-                  ? "Your personal path"
-                  : "Structured learning"}
-              </Text>
+            <View
+              style={{
+                gap: 14,
+                padding: 20,
+                backgroundColor: "#FFFEFB",
+                borderRadius: 14,
+              }}
+            >
+              <Text style={learnStyles.label}>{path.title}</Text>
               <Heading>{next?.title ?? "Choose your next experiment"}</Heading>
-              <Copy>
-                {next
-                  ? learningStatus(next, state.entries[next.id])
-                  : "Your available path is complete. Revisit a study or try its advanced extension."}
-              </Copy>
+              {step && (
+                <>
+                  <Copy muted>
+                    Step {resumeStep(next!, state.entries[next!.id]) + 1} ·{" "}
+                    {step.minutes} active minutes
+                  </Copy>
+                  <Copy>{step.actions[0]}</Copy>
+                </>
+              )}
               {next && (
                 <Action
                   title="Continue learning"
@@ -84,22 +92,22 @@ export default function Learn() {
                 />
               )}
               <Copy muted>
-                {done} completed {done === 1 ? "study" : "studies"} ·
-                self-reported practice, not a mastery score.
+                {current?.id === next?.id
+                  ? "Pick up the step you left open."
+                  : (reason ??
+                    "Revisit a study or explore its next-level experiment.")}
               </Copy>
-              <Action
+              <TextLink
                 title="View my learning path"
-                secondary
                 onPress={() => router.push("/learn/path")}
               />
-            </Card>
-          ) : (
-            <Card>
-              <Heading>The foundation pathway</Heading>
-              <Copy>
-                Water and brush control → three-value planning → purposeful
-                edges → a small landscape. No questionnaire required.
+              <Copy muted>
+                {done} completed {done === 1 ? "study" : "studies"} · recorded
+                practice
               </Copy>
+            </View>
+          ) : (
+            <View style={{ gap: 14 }}>
               <Action
                 title="Start structured learning"
                 onPress={() => {
@@ -107,53 +115,57 @@ export default function Learn() {
                   router.push("/learn/path");
                 }}
               />
+              <Copy muted>
+                Begin with water, values and edges. No questionnaire.
+              </Copy>
               <Action
                 title="Create my personal path"
                 secondary
                 onPress={() => router.push("/learn/onboarding")}
               />
-            </Card>
+              <Copy muted>
+                A few preferences, then a path that fits what you want to paint.
+              </Copy>
+            </View>
           )}
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-            <Action
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 20 }}>
+            <TextLink
               title="Explore styles"
-              secondary
               onPress={() => router.push("/learn/styles")}
             />
-            <Action
+            <TextLink
               title="Browse curriculum"
-              secondary
               onPress={() => router.push("/learn/curriculum")}
             />
-            <Action
+            <TextLink
               title="Learning progress"
-              secondary
               onPress={() => router.push("/learn/progress")}
             />
           </View>
+          {returning && (
+            <TextLink
+              title="Edit learning preferences"
+              onPress={() => router.push("/learn/onboarding")}
+            />
+          )}
         </View>
         <View
           style={{
-            flex: width >= 850 ? 1 : undefined,
-            width: width >= 850 ? undefined : "100%",
+            flex: width >= 900 ? 1.15 : undefined,
+            width: width >= 900 ? undefined : "100%",
             minWidth: 0,
-            gap: 16,
+            gap: 12,
           }}
         >
           <StyleVisual styleId="atmospheric" />
-          <Text style={learnStyles.muted}>
-            Original vector study · choosing masses and edges, not copying a
-            finished painting.
-          </Text>
+          <Text style={learnStyles.label}>Bring the studies together</Text>
           <Heading>{project.title}</Heading>
           <Copy>
-            A postcard-sized painting in short, resumable sessions. Make a value
-            plan, choose wash conditions, then decide which edges deserve
-            attention.
+            A small landscape, painted in unhurried steps. Plan the masses, find
+            your wash conditions, choose where an edge should speak.
           </Copy>
-          <Action
+          <TextLink
             title="Explore the guided landscape"
-            secondary
             onPress={() =>
               router.push({
                 pathname: "/learn/lesson",
@@ -161,15 +173,12 @@ export default function Learn() {
               })
             }
           />
+          <Copy muted>
+            Original teaching illustration · not a finished physical
+            watercolour.
+          </Copy>
         </View>
       </View>
-      {returning && (
-        <Action
-          title="Edit learning preferences"
-          secondary
-          onPress={() => router.push("/learn/onboarding")}
-        />
-      )}
     </LearnScreen>
   );
 }

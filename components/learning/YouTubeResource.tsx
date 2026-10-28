@@ -15,14 +15,10 @@ export default function YouTubeResource({
   const { width } = useWindowDimensions();
   if (!resource || !validMedia(resource))
     return (
-      <Card>
-        <Heading level={3}>Optional demonstration</Heading>
-        <Copy>
-          No verified video is assigned to this lesson yet. Use the original
-          diagram, observation prompts and physical exercise; nothing is locked
-          behind a video.
-        </Copy>
-      </Card>
+      <Copy muted>
+        No verified video is assigned yet. The visual guide and physical
+        exercise are available here.
+      </Copy>
     );
   const urls = videoUrls(resource, start);
   const canEmbed =

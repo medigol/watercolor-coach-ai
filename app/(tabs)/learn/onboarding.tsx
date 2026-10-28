@@ -30,6 +30,7 @@ import {
   Heading,
   LearnScreen,
   learnStyles,
+  TextLink,
 } from "../../../components/learning/LearningUI";
 import StylePicker from "../../../components/learning/StylePicker";
 const headings = [
@@ -56,16 +57,27 @@ export default function Onboarding() {
         Preferences · step {index + 1} of 6
       </Text>
       <Heading level={1}>{headings[index]}</Heading>
-      <Copy>
-        Only learning preferences stay on this device. Defaults are suggestions:
-        review them before confirming. There is no painting test and no AI
-        request.
-      </Copy>
+      <View
+        accessibilityRole="progressbar"
+        accessibilityLabel="Learning preferences"
+        accessibilityValue={{ min: 1, max: 6, now: index + 1 }}
+        style={{ flexDirection: "row", gap: 5 }}
+      >
+        {headings.map((_, n) => (
+          <View
+            key={n}
+            style={{
+              height: 3,
+              flex: 1,
+              backgroundColor: n <= index ? "#236963" : "#CCD8D0",
+            }}
+          />
+        ))}
+      </View>
       {index === 0 && (
         <Card>
           <Copy>
-            Your experience guides the starting suggestion. It is not an
-            objective assessment of skill.
+            Choose the closest fit. This is your own starting-point description.
           </Copy>
           <Choices
             values={experiences.map((id) => ({
@@ -98,8 +110,7 @@ export default function Onboarding() {
       {index === 2 && (
         <Card>
           <Copy>
-            This changes subject applications in your path. It does not generate
-            a new painting project.
+            We will suggest ways to apply the studies to this subject.
           </Copy>
           <Choices
             values={subjects.map((id) => ({ id, label: subjectLabels[id] }))}
@@ -273,9 +284,8 @@ export default function Onboarding() {
             onPress={() => move(5)}
           />
         )}
-        <Action
+        <TextLink
           title="Use structured learning instead"
-          secondary
           onPress={() => {
             update((s) => ({ ...s, mode: "structured" }));
             router.replace("/learn/path");

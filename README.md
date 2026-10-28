@@ -8,6 +8,8 @@ Start a structured pathway immediately or create a deterministic personal path f
 
 Lesson checklists, notes, reflections and completion stay **locally on this device**, scoped to the signed-in account. They are not encrypted or synchronised; clearing app/browser storage removes them. Failed saves are reported, and invalid stored data is preserved with explicit backup/recovery. Completion is self-reported practice, not measured mastery. No paid AI calls, learner uploads or database additions are required. No videos are assigned until their resources and current platform requirements can be verified; lessons remain useful without them.
 
+See the [UI/UX quality pass with actual before/after screens](docs/review/learning-ui-quality.md).
+
 See the [implementation and review notes](docs/review/personalised-watercolour-learning-v1.md) and [executed validation](docs/review/personalised-watercolour-learning-v1-validation.json). Existing painting assessment and reference-generation features retain their production contracts.
 
 ## Supabase setup

@@ -8,6 +8,7 @@ export default function ChecklistControl({
   return (
     <label
       style={{
+        fontFamily: "-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif",
         minHeight: 48,
         padding: 13,
         borderRadius: 10,
