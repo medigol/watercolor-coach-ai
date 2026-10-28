@@ -1,0 +1,233 @@
+{
+  "date": "2026-10-28",
+  "branch": "codex/personalised-watercolour-learning-v1",
+  "baselineMain": "25ba5298072174541aa2356ecdd7aaa02347565c",
+  "testedImplementationCommit": "b631669af5d1bf42537e13eec4875103ccb8651f",
+  "baselineDeploymentVerification": "Main contains merged PR37. User reports deployed Beta; direct production HTTP blocked by proxy403, deployed revisions not independently verified.",
+  "verdict": "READY FOR REVIEW; not approved for production release",
+  "product": {
+    "modules": 12,
+    "skills": 24,
+    "availableLessons": [
+      "water-brush",
+      "three-values",
+      "edge-families",
+      "observed-structure"
+    ],
+    "guidedProject": "quiet-landscape",
+    "projectSteps": 8,
+    "originalStyleStudies": 4,
+    "modes": [
+      "structured",
+      "personal"
+    ],
+    "corePaidAIRequests": 0,
+    "persistence": "Local only; per authenticated account on this device; no sync/encryption; serial writes/conflict detection/explicit backup recovery"
+  },
+  "milestoneAcceptance": {
+    "47.1 entry": "COMPLETE",
+    "47.2 two modes": "COMPLETE",
+    "47.3 profile": "COMPLETE",
+    "47.4 styles": "COMPLETE, four original vector examples",
+    "47.5 recommendation engine": "COMPLETE, deterministic and prerequisite-aware",
+    "47.6 curriculum": "COMPLETE framework; outlines not advertised as lessons",
+    "47.7 lessons": "COMPLETE, four authored lessons",
+    "47.8 project": "COMPLETE, eight resumable steps",
+    "47.9 media": "Component and honest no-verified-resource fallback COMPLETE; real catalogue/policy verification UNVERIFIED",
+    "47.10 persistence": "COMPLETE, browser reload/failure/recovery and pure native storage contract tested; physical native restart UNVERIFIED",
+    "47.11 dashboard": "COMPLETE",
+    "47.12 regression": "PASS in isolated tests; live deployment not changed"
+  },
+  "unitIntegration": {
+    "tests": 1869,
+    "pass": 1869,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "newTests": 70
+  },
+  "frontendTypeScript": "PASS",
+  "strictEdgeTypeScript": {
+    "status": "PASS",
+    "deno": "2.5.6",
+    "trust": "system certificate store; no TLS verification bypass"
+  },
+  "exports": {
+    "configured": "PASS; fake public test Supabase configuration",
+    "unconfigured": "PASS; empty public settings",
+    "staticLearnIndex": "dist/learn/index.html"
+  },
+  "browser": {
+    "learningResponsiveCases": 35,
+    "widths": [
+      320,
+      375,
+      390,
+      430,
+      768,
+      1024,
+      1440
+    ],
+    "existingWorkspaceCases": 177,
+    "rasterPreparationCases": 40,
+    "unconfiguredRoutes": 15,
+    "runtimeErrors": 0,
+    "additionalLandscapeViewport": {
+      "width": 768,
+      "height": 390,
+      "status": "PASS"
+    },
+    "densityReflowEmulation": {
+      "cssWidth": 720,
+      "cssHeight": 500,
+      "deviceScaleFactor": 2,
+      "status": "PASS",
+      "physicalBrowserZoom": false
+    },
+    "keyboard": {
+      "focusVisible": "PASS",
+      "nativeCheckboxSpace": "PASS, actual Space toggle in both directions; failure reproduced before fix",
+      "focusableTargets": "PASS: buttons measured >=44px; associated checkbox labels have CSS minimum48px"
+    },
+    "panelNonOverlap": "PASS across seven widths; actual mobile failure fixed",
+    "savedInteractionsExtraAIUploadsArtworkWrites": 0,
+    "learningExtraAIUploadsArtworkWrites": 0,
+    "physicalDevices": false,
+    "screenReaderCertification": false,
+    "actualBrowserZoomCertification": false,
+    "existingAssessmentStage": "Final UI implementation; subsequent learning-only session estimator change does not import into assessment code"
+  },
+  "security": {
+    "isolatedPostgreSQL": "PASS, PostgreSQL16; schema twice, RLS/storage/server-only RPC/quota/idempotency/rollback/concurrent claims",
+    "productionDatabaseWrites": 0,
+    "dependencyChanges": 0,
+    "workflowChanges": 0,
+    "sourceLock": "PASS unchanged",
+    "productionModelPromptSchemaAuthQuotasStorageRLS": "UNCHANGED"
+  },
+  "reproducedAndFixed": [
+    "Static page/directory collision at /learn; nested index now supports direct reload",
+    "Stacked mobile flex sizing let media cover final reflection controls; conditional sizing and geometric regressions",
+    "Web checkbox-style Pressable ignored Space; native web checkbox and keyboard regression",
+    "Style-only confirmation could confirm unrelated onboarding drafts; isolated style update and regression",
+    "Project preview could show a botanical preference image; preview now matches the landscape project",
+    "Session count divided total time without keeping activities intact; now packs ordered whole steps (60 active minutes => six <=15-minute sessions), with failing-before regression and duration counterexamples"
+  ],
+  "educationalReview": {
+    "internalEditorialReview": "Completed; original content, variables/constants, dry observation, recovery, transfer and stylistic respect",
+    "externalInstructorReview": "NOT PERFORMED",
+    "learningGains": "NOT MEASURED",
+    "bookReferences": "Current source verification unavailable; no unverified citations or endorsements shipped"
+  },
+  "media": {
+    "productionRecords": 0,
+    "paidCalls": 0,
+    "externalMediaRequestsDuringLearning": 0,
+    "officialDocsVerification": "BLOCKED by proxy403; elevated request cancelled",
+    "liveVideoPlayback": "UNVERIFIED",
+    "fallback": "PASS, complete lessons usable without video"
+  },
+  "limitations": [
+    "Physical Android/iOS and assistive-technology review pending",
+    "Independent instructor/user review and bibliography verification pending",
+    "No verified real YouTube entries or current policy verification; catalogue remains empty",
+    "Progress is local/plaintext, not synced; clearing storage removes it; simultaneous cross-tab writes are not an atomic distributed transaction",
+    "GitHub API Forbidden; CI/PR metadata cannot be independently verified",
+    "Current production deployment revisions not independently verified"
+  ],
+  "changedFiles": [
+    "README.md",
+    "app/(tabs)/_layout.tsx",
+    "app/(tabs)/index.tsx",
+    "app/(tabs)/learn/_layout.tsx",
+    "app/(tabs)/learn/curriculum.tsx",
+    "app/(tabs)/learn/index.tsx",
+    "app/(tabs)/learn/lesson.tsx",
+    "app/(tabs)/learn/onboarding.tsx",
+    "app/(tabs)/learn/path.tsx",
+    "app/(tabs)/learn/progress.tsx",
+    "app/(tabs)/learn/styles.tsx",
+    "app/(tabs)/practice.tsx",
+    "app/_layout.tsx",
+    "components/learning/ChecklistControl.tsx",
+    "components/learning/ChecklistControl.web.tsx",
+    "components/learning/LearningFocus.tsx",
+    "components/learning/LearningFocus.web.tsx",
+    "components/learning/LearningUI.tsx",
+    "components/learning/StudyVisual.tsx",
+    "components/learning/StylePicker.tsx",
+    "components/learning/YouTubeFrame.tsx",
+    "components/learning/YouTubeFrame.web.tsx",
+    "components/learning/YouTubeResource.tsx",
+    "docs/review/personalised-watercolour-learning-v1-validation.json",
+    "docs/review/personalised-watercolour-learning-v1.md",
+    "learning/catalogue.ts",
+    "learning/content.ts",
+    "learning/engine.ts",
+    "learning/media.ts",
+    "learning/progress.ts",
+    "learning/types.ts",
+    "learning/validation.ts",
+    "providers/LearningProvider.tsx",
+    "tests/auth.test.cjs",
+    "tests/browser/learning.cjs",
+    "tests/browser/unconfigured-pages.cjs",
+    "tests/helpers/learning-loader.cjs",
+    "tests/learning.test.cjs"
+  ],
+  "screenshotArtifacts": [
+    "/tmp/watercolour-learning-browser/01-learn-first-visit.png",
+    "/tmp/watercolour-learning-browser/02-learn-returning.png",
+    "/tmp/watercolour-learning-browser/03-style-explorer-desktop.png",
+    "/tmp/watercolour-learning-browser/03-style-explorer.png",
+    "/tmp/watercolour-learning-browser/04-personalisation.png",
+    "/tmp/watercolour-learning-browser/05-personal-path.png",
+    "/tmp/watercolour-learning-browser/06-mobile-lesson.png",
+    "/tmp/watercolour-learning-browser/07-desktop-lesson.png",
+    "/tmp/watercolour-learning-browser/08-guided-project.png",
+    "/tmp/watercolour-learning-browser/09-progress.png",
+    "/tmp/watercolour-learning-browser/10-empty-progress.png",
+    "/tmp/watercolour-learning-browser/11-unavailable-study.png",
+    "/tmp/watercolour-learning-browser/12-save-failure.png",
+    "/tmp/watercolour-learning-browser/13-invalid-saved-data.png",
+    "/tmp/watercolour-learning-browser/14-dpr2-reflow.png"
+  ],
+  "logs": {
+    "unit": "/tmp/watercolour-full-tests.log",
+    "frontend": "/tmp/watercolour-frontend-typescript.log",
+    "edge": "/tmp/watercolour-edge-typescript.log",
+    "configuredExport": "/tmp/watercolour-configured-build.log",
+    "unconfiguredExport": "/tmp/watercolour-unconfigured-build.log",
+    "newBrowser": "/tmp/watercolour-learning-browser/report.json",
+    "existingBrowser": "/tmp/watercolour-existing-browser-final/report.json",
+    "raster": "/tmp/watercolour-preparation-browser.log",
+    "unconfiguredBrowser": "/tmp/watercolour-unconfigured-browser.log",
+    "security": "/tmp/watercolour-local-security.log",
+    "keyboardFailureBefore": "/tmp/watercolour-learning-keyboard-before.log",
+    "timeFailureBefore": "/tmp/watercolour-time-before.log"
+  },
+  "merged": false,
+  "deployed": false,
+  "educationalAcceptanceScenarios": {
+    "Beginner15minutes": "PASS",
+    "AtmosphericBeginner": "PASS",
+    "IntermediateUrbanWeakPerspective": "PASS",
+    "AdvancedOptionalRefreshers": "PASS",
+    "MultipleStyles": "PASS",
+    "ChangedPrimaryStyle": "PASS",
+    "ChangedTime": "PASS",
+    "RevisitCompletion": "PASS",
+    "ResumeProject": "PASS",
+    "NoVerifiedVideo": "PASS"
+  },
+  "delivery": {
+    "implementationCommits": [
+      "16b94897fa7f7bee3d9047c7debc1fc2fd222fad",
+      "b631669af5d1bf42537e13eec4875103ccb8651f"
+    ],
+    "prAPI": "GitHub API list returned Forbidden; no PR verified at validation time. Final delivery reports the subsequent creation attempt.",
+    "compareURL": "https://github.com/medigol/watercolor-coach-ai/compare/main...codex/personalised-watercolour-learning-v1?expand=1",
+    "noMergeOrDeployment": true
+  }
+}

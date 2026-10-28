@@ -1,6 +1,14 @@
 # Watercolor Coach AI
 
-A modern mobile-first watercolor learning MVP using Expo SDK 54, React Native, strict TypeScript, Expo Router, and Supabase. The project lives in the repository root. Home, My Artworks, and Practice remain the only bottom tabs. Account access is in the header.
+A mobile-first watercolour learning application using Expo SDK 54, React Native, strict TypeScript, Expo Router, and Supabase. The project lives in the repository root. The primary tabs are Home, Learn and My Artworks; the old `/practice` deep link opens Learn. Account access remains available from Home and My Artworks.
+
+## Learn Watercolour · first milestone
+
+Start a structured pathway immediately or create a deterministic personal path from experience, goals, subjects, styles, available time and optional self-reported confidence. Four original, fully authored lessons and one resumable atmospheric landscape project are available within a twelve-module curriculum framework. Other modules are honestly labelled outlines. Style studies are original explanatory vectors.
+
+Lesson checklists, notes, reflections and completion stay **locally on this device**, scoped to the signed-in account. They are not encrypted or synchronised; clearing app/browser storage removes them. Failed saves are reported, and invalid stored data is preserved with explicit backup/recovery. Completion is self-reported practice, not measured mastery. No paid AI calls, learner uploads or database additions are required. No videos are assigned until their resources and current platform requirements can be verified; lessons remain useful without them.
+
+See the [implementation and review notes](docs/review/personalised-watercolour-learning-v1.md) and [executed validation](docs/review/personalised-watercolour-learning-v1-validation.json). Existing painting assessment and reference-generation features retain their production contracts.
 
 ## Supabase setup
 
