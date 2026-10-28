@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-28",
+  "candidateVideos": [],
+  "adequatelyInspected": 0,
+  "scored": 0,
+  "approvedVideos": 0,
+  "approvedSegments": 0,
+  "reason": "All accessible discovery/creator attempts returned proxy HTTP403. No video IDs/titles/durations/timestamps can be verified. Do not manufacture 25–35 discovery records or editorial scores."
+}

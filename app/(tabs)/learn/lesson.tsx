@@ -1,6 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { Text, TextInput, View, useWindowDimensions } from "react-native";
+import {
+  Text,
+  TextInput,
+  View,
+  ScrollView,
+  useWindowDimensions,
+} from "react-native";
 import { useLearning } from "../../../providers/LearningProvider";
 import { itemById } from "../../../learning/content";
 import {
@@ -14,7 +20,7 @@ import {
 import { confidenceLabels, skills } from "../../../learning/catalogue";
 import { confidenceLevels } from "../../../learning/types";
 import { application, sessionPlan } from "../../../learning/engine";
-import { mediaResources } from "../../../learning/media";
+
 import {
   Action,
   Card,
@@ -29,7 +35,7 @@ import {
 import StudyVisual, {
   StyleVisual,
 } from "../../../components/learning/StudyVisual";
-import YouTubeResource from "../../../components/learning/YouTubeResource";
+import LessonDemonstration from "../../../components/learning/LessonDemonstration";
 import ChecklistControl from "../../../components/learning/ChecklistControl";
 import { studio } from "../../../components/learning/design";
 export default function LessonStudio() {
@@ -38,6 +44,8 @@ export default function LessonStudio() {
   const learning = useLearning(),
     { state, update } = learning,
     { width } = useWindowDimensions();
+  const studioScroll = useRef<ScrollView>(null);
+  const [demoKey, setDemoKey] = useState<string | null>(null);
   const [guideKey, setGuideKey] = useState<string | null>(null);
   const [outline, setOutline] = useState(false),
     [review, setReview] = useState(false);
@@ -77,6 +85,35 @@ export default function LessonStudio() {
   const missingEarlier = item.steps
     .slice(0, index)
     .filter((s) => !entry?.completedSteps.includes(s.id));
+  const demonstration = (
+    <View testID="studio-media">
+      <TextLink
+        title="Optional demonstration"
+        expanded={demoKey === `${item.id}:${step.id}`}
+        onPress={() =>
+          setDemoKey((v) =>
+            v === `${item.id}:${step.id}` ? null : `${item.id}:${step.id}`,
+          )
+        }
+      />
+      {demoKey === `${item.id}:${step.id}` && (
+        <LessonDemonstration
+          lessonId={item.id}
+          stepId={step.id}
+          profile={state.profile}
+          entry={entry}
+          onPractice={() => {
+            setDemoKey(null);
+            studioScroll.current?.scrollTo({ y: 0, animated: false });
+            if (typeof document !== "undefined") {
+              const target = document.getElementById("painting-exercise");
+              target?.querySelector<HTMLInputElement>("input")?.focus();
+            }
+          }}
+        />
+      )}
+    </View>
+  );
   const reference = (
     <View style={{ gap: 16 }}>
       <StudyVisual kind={step.visual} />
@@ -86,7 +123,11 @@ export default function LessonStudio() {
     </View>
   );
   return (
-    <LearnScreen nav={false} resetKey={`${item.id}:${step.id}`}>
+    <LearnScreen
+      scrollRef={studioScroll}
+      nav={false}
+      resetKey={`${item.id}:${step.id}`}
+    >
       <View testID="studio-context" style={{ gap: 8 }}>
         <Text style={learnStyles.label}>
           {item.kind === "project" ? "Guided painting" : "Learning study"}
@@ -219,6 +260,7 @@ export default function LessonStudio() {
             }}
           >
             <View
+              nativeID="painting-exercise"
               testID="studio-practice"
               style={{
                 flex: wide ? 1.05 : undefined,
@@ -418,6 +460,7 @@ export default function LessonStudio() {
                 gap: 16,
               }}
             >
+              {demonstration}
               {wide && reference}
               {item.kind === "project" && (
                 <Disclosure title="Project direction and materials">
@@ -455,15 +498,6 @@ export default function LessonStudio() {
                   </Copy>
                 )}
               </Disclosure>
-              <View testID="studio-media">
-                <Disclosure title="Optional demonstration">
-                  <YouTubeResource
-                    resource={mediaResources.find((r) =>
-                      item.resourceIds.includes(r.id),
-                    )}
-                  />
-                </Disclosure>
-              </View>
             </View>
           </View>
         </>

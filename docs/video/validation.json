@@ -1,0 +1,553 @@
+{
+  "date": "2026-10-28",
+  "branch": "codex/curated-watercolour-video-v1",
+  "baseBranch": "codex/personalised-watercolour-learning-v1",
+  "baseline": "703996ef1eedac355b76c8d282833390b455ad07",
+  "mainAtAudit": "25ba5298072174541aa2356ecdd7aaa02347565c",
+  "dependsOnPR": 39,
+  "prStateAccess": "GitHub GraphQL HTTP403; main ancestry and PR39 head verified through Git; PR39 unmerged in verified main",
+  "verdicts": {
+    "engineering": "CONDITIONALLY READY: offline tests pass; real provider/current-policy verification remains",
+    "editorial": "BLOCKED: 0 inspected/approved real videos, 0 verified segments",
+    "production": "BLOCKED: live content, playback and owner approval absent"
+  },
+  "sourceSha256": {
+    "app/(tabs)/learn/lesson.tsx": "9ae00fb73184a2f6e4bdb84ebf65f9879ea6a11cfc23d4a000682f0b53108799",
+    "components/learning/LearningUI.tsx": "8b0893d153ba092fae3a8e9cb0ffaaaa4c503b402b232a4891652bec36cdf4a7",
+    "components/learning/LessonDemonstration.tsx": "b59d67d4ab0252fd0f2d2e2c21137706b77c88be7ee90b5821def16d8e7fcc68",
+    "components/learning/YouTubeFrame.tsx": "88086e27b53445f0e0e8db49ce9c87b92c51af7602fd621f3a25a4ada91d5f08",
+    "components/learning/YouTubeFrame.web.tsx": "f8f8806081c4c35db311088d9d6089bcf045db45c9e14ab23bb4f1d36a40a6fd",
+    "components/learning/YouTubeResource.tsx": "aff3cf1f36d299cc58439c9a7feb0a4737f4908fd3ad22605afea62195dabdd2",
+    "components/learning/youtubeApi.web.ts": "5bf31ad628f2cf4b183d324c735c9cf0d55319c59d0fc3b36e6ebe813f3aa406",
+    "learning/media.ts": "235d79bb60813278b0467e0d26650504bf29f98b142c69bcd302bd022a4bff9b",
+    "learning/types.ts": "e9bb22c175d86d5735a33fbc9202dbf5405a11e9e372c573bdd3a4c97aaa4c0f",
+    "learning/videoPlayer.ts": "6c7d3166924d90ec3aeb1c483e2baac3b11a74ba5646cdebf48401bdc790e755",
+    "learning/videoSelection.ts": "e1c6549b22b135ba0f4feb696e201ba4c923b62cbd8b5ca4d0a34a9ce1366dea",
+    "learning/videoTypes.ts": "0791328ecef7b2d93fd08f3b6f6eb69171b372dbb81c7581013f8a490000545b",
+    "scripts/export-video-fixture.cjs": "a4d894456e96b11e9b9b42a2c5cb2160d8b8336db887dc968e37187935e0a1e1",
+    "scripts/validate-learning-media.cjs": "8ed758132eb676beab466d202efc4db545dee054e40df854f9ac82fd04932c82",
+    "tests/browser/learning-video.cjs": "a3493fa4cf9d045b9fbf30233f87ce1bef4ae8986d9f8e7b57c361f7f6221a2c",
+    "tests/browser/learning.cjs": "22b5c7feefc95fb80347aa3104868355b7bfd589b15bf4d7844cb416f3d8c252",
+    "tests/helpers/mock-youtube.cjs": "4bee0153c35bd8ab788eecb8c61d9e98de1b3c6b5aacede4c87258139265cd3f",
+    "tests/helpers/video-fixture.cjs": "819e364f2b0aea9517cf38457488e1e50a4780a1ade1610264e3e504ab5a315d",
+    "tests/learning-video.test.cjs": "51626c3d91c00334259193a5a8b5ff04153d92d33d96a8d8ecd732517b2022cd",
+    "tests/learning.test.cjs": "96fa8fc21724856e73131450cca15b36f8a07a8c8f3e979e48af15d2571172d2"
+  },
+  "unchangedContracts": [
+    "learning/content.ts",
+    "learning/catalogue.ts",
+    "learning/engine.ts",
+    "learning/progress.ts",
+    "providers/LearningProvider.tsx",
+    "package.json",
+    "package-lock.json",
+    "docs/benchmark/production-lock.json"
+  ],
+  "unitIntegration": {
+    "tests": 1957,
+    "passed": 1957,
+    "failed": 0,
+    "newTests": 84
+  },
+  "frontendTypeScript": "PASS",
+  "strictEdgeTypeScript": {
+    "status": "PASS",
+    "deno": "2.9.6",
+    "strict": true,
+    "dependencies": "cached; system TLS trust"
+  },
+  "webExports": {
+    "configured": "PASS with synthetic public endpoint configuration",
+    "unconfigured": "PASS with empty public settings",
+    "syntheticQA": "PASS: isolated /tmp copy; no runtime test flag or fake catalogue in production bundle"
+  },
+  "videoBrowser": {
+    "status": "PASS",
+    "mode": "SYNTHETIC CATALOGUE + MOCKED OFFICIAL API, not live YouTube verification",
+    "matrix": [
+      {
+        "width": 320,
+        "playerWidth": 292,
+        "playerHeight": 200
+      },
+      {
+        "width": 375,
+        "playerWidth": 335,
+        "playerHeight": 200
+      },
+      {
+        "width": 390,
+        "playerWidth": 350,
+        "playerHeight": 200
+      },
+      {
+        "width": 430,
+        "playerWidth": 390,
+        "playerHeight": 219
+      },
+      {
+        "width": 768,
+        "playerWidth": 728,
+        "playerHeight": 410
+      },
+      {
+        "width": 1024,
+        "playerWidth": 451,
+        "playerHeight": 254
+      },
+      {
+        "width": 1440,
+        "playerWidth": 558,
+        "playerHeight": 314
+      }
+    ],
+    "reflow": [
+      {
+        "width": 375,
+        "height": 600,
+        "replayReachable": true
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "replayReachable": true
+      },
+      {
+        "width": 1024,
+        "height": 600,
+        "replayReachable": true
+      },
+      {
+        "width": 390,
+        "height": 480,
+        "replayReachable": true
+      }
+    ],
+    "textEnlargement": "200% user stylesheet; no clipping",
+    "zeroPreConsentRequests": true,
+    "absoluteSegmentBounds": true,
+    "replayRestoresEnd": true,
+    "samePlayerForSegments": true,
+    "defaultCaptionsNotForced": true,
+    "progressUnchanged": true,
+    "cleanup": true,
+    "errors": [],
+    "unexpected": [],
+    "requests": [
+      {
+        "url": "https://www.youtube.com/iframe_api",
+        "method": "GET"
+      },
+      {
+        "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8153&cc_load_policy=1&cc_lang_pref=fa",
+        "method": "GET"
+      },
+      {
+        "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8153&cc_load_policy=1&cc_lang_pref=fa",
+        "method": "GET"
+      },
+      {
+        "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8153&cc_load_policy=1&cc_lang_pref=fa",
+        "method": "GET"
+      },
+      {
+        "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8153&cc_load_policy=1&cc_lang_pref=fa",
+        "method": "GET"
+      },
+      {
+        "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8153",
+        "method": "GET"
+      },
+      {
+        "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8153",
+        "method": "GET"
+      },
+      {
+        "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8153",
+        "method": "GET"
+      },
+      {
+        "url": "https://www.youtube.com/iframe_api",
+        "method": "GET"
+      },
+      {
+        "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8153",
+        "method": "GET"
+      }
+    ],
+    "realVideosReviewed": 0,
+    "realPlayback": false,
+    "physicalDevice": false,
+    "homeTabStopsPlayback": true
+  },
+  "learningBrowser": {
+    "status": "PASS",
+    "responsiveCases": 35,
+    "firstViewportCases": [
+      {
+        "width": 320,
+        "height": 800,
+        "actionBottom": 351,
+        "navigationHeight": 44
+      },
+      {
+        "width": 375,
+        "height": 900,
+        "actionBottom": 323,
+        "navigationHeight": 44
+      },
+      {
+        "width": 390,
+        "height": 900,
+        "actionBottom": 323,
+        "navigationHeight": 44
+      },
+      {
+        "width": 430,
+        "height": 900,
+        "actionBottom": 323,
+        "navigationHeight": 44
+      },
+      {
+        "width": 375,
+        "height": 600,
+        "actionBottom": 323,
+        "navigationHeight": 44
+      },
+      {
+        "width": 768,
+        "height": 480,
+        "actionBottom": 295,
+        "navigationHeight": 44
+      },
+      {
+        "width": 1024,
+        "height": 768,
+        "actionBottom": 408,
+        "navigationHeight": 44
+      },
+      {
+        "width": 1440,
+        "height": 1000,
+        "actionBottom": 408,
+        "navigationHeight": 44
+      }
+    ],
+    "baselineProgressReplay": true,
+    "textContrastRatios": [
+      10.57,
+      10.57,
+      5.78
+    ],
+    "textEnlargement": "200% user stylesheet; no clipping; controls reachable",
+    "keyboardViewportEmulation": {
+      "width": 390,
+      "height": 480,
+      "physicalKeyboard": false
+    },
+    "matrix": [
+      {
+        "width": 320,
+        "route": "/learn",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 320,
+        "route": "/learn/styles",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 320,
+        "route": "/learn/path",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 320,
+        "route": "/learn/lesson?id=water-brush",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 320,
+        "route": "/learn/progress",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 375,
+        "route": "/learn",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 375,
+        "route": "/learn/styles",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 375,
+        "route": "/learn/path",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 375,
+        "route": "/learn/lesson?id=water-brush",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 375,
+        "route": "/learn/progress",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 390,
+        "route": "/learn",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 390,
+        "route": "/learn/styles",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 390,
+        "route": "/learn/path",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 390,
+        "route": "/learn/lesson?id=water-brush",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 390,
+        "route": "/learn/progress",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 430,
+        "route": "/learn",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 430,
+        "route": "/learn/styles",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 430,
+        "route": "/learn/path",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 430,
+        "route": "/learn/lesson?id=water-brush",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 430,
+        "route": "/learn/progress",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 768,
+        "route": "/learn",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 768,
+        "route": "/learn/styles",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 768,
+        "route": "/learn/path",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 768,
+        "route": "/learn/lesson?id=water-brush",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 768,
+        "route": "/learn/progress",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1024,
+        "route": "/learn",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1024,
+        "route": "/learn/styles",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1024,
+        "route": "/learn/path",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1024,
+        "route": "/learn/lesson?id=water-brush",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1024,
+        "route": "/learn/progress",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1440,
+        "route": "/learn",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1440,
+        "route": "/learn/styles",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1440,
+        "route": "/learn/path",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1440,
+        "route": "/learn/lesson?id=water-brush",
+        "noOverflow": true,
+        "touchTargets": true
+      },
+      {
+        "width": 1440,
+        "route": "/learn/progress",
+        "noOverflow": true,
+        "touchTargets": true
+      }
+    ],
+    "runtimeErrors": [],
+    "unexpectedNetwork": [],
+    "providerCalls": 0,
+    "uploads": 0,
+    "artworkWrites": 0,
+    "localPersistence": true,
+    "resumeLesson": true,
+    "resumeProject": true,
+    "completionPreserved": true,
+    "storageFailureAndRecovery": true,
+    "keyboardFocus": true,
+    "landscapeViewport": {
+      "width": 768,
+      "height": 390,
+      "status": "PASS"
+    },
+    "highDensityReflowEmulation": {
+      "cssWidth": 720,
+      "cssHeight": 500,
+      "deviceScaleFactor": 2,
+      "status": "PASS",
+      "physicalBrowserZoom": false
+    },
+    "verifiedVideos": 0,
+    "scope": "Synthetic browser interactions, not physical painting or learning-outcome proof",
+    "physicalDevice": false
+  },
+  "assignedButNeverLoaded": {
+    "status": "PASS",
+    "responsiveCases": 35,
+    "providerCalls": 0,
+    "uploads": 0,
+    "completionPreserved": true,
+    "requestsToYouTube": 0
+  },
+  "regressionBrowser": {
+    "assessmentCases": 177,
+    "rasterCases": 40,
+    "unconfiguredRoutes": 15,
+    "status": "PASS"
+  },
+  "security": "PASS: real local PostgreSQL16 RLS/storage/quota/idempotency/rollback/concurrency; no production service contacted",
+  "sourceLock": "PASS unchanged",
+  "editorial": {
+    "instructorCandidates": 11,
+    "instructorsSelected": 0,
+    "videoCandidatesWithVerifiedIdentity": 0,
+    "videosInspected": 0,
+    "videosScored": 0,
+    "approvedVideos": 0,
+    "approvedSegments": 0,
+    "livePlayback": false,
+    "independentReviewers": 0,
+    "currentPolicyReview": "BLOCKED: proxy HTTP403, browser ERR_TUNNEL_CONNECTION_FAILED",
+    "approvedCatalogue": []
+  },
+  "scope": {
+    "paidAI": 0,
+    "credentialsAdded": false,
+    "newDependencies": false,
+    "productionWrites": 0,
+    "backendChanges": false,
+    "databaseChanges": false,
+    "progressSchemaOrKeysChanged": false,
+    "videosDownloadedOrRehosted": false,
+    "transcriptsCopied": false,
+    "realYouTubeFramesCommitted": false,
+    "captionPreferences": "in-memory while card is open, not synced or persisted",
+    "physicalDeviceVerified": false,
+    "merged": false,
+    "deployed": false
+  },
+  "limits": [
+    "All actual video identity, content quality, timing, caption tracks, availability and embed functionality remain unverified",
+    "Synthetic player events do not establish real seeking/end/fullscreen/caption correctness",
+    "No instructor or owner approvals; no final instructor group",
+    "Android/iOS, physical keyboard, screen-reader and actual teaching usability unverified",
+    "Current official YouTube terms/privacy/policy inspection blocked; no legal certification"
+  ],
+  "reproducedLifecycleDefect": {
+    "before": "late playing/replay callback changes unavailable to loading",
+    "after": "fatal error ignores late state/seek/replay callbacks; disposal still destroys the player",
+    "redArtifact": "stale-error-before-fix.log",
+    "regression": "learning-video.test.cjs / late provider events after a fatal error"
+  },
+  "reproducedTabDefect": {
+    "before": "Home tab retains a live hidden iframe/player",
+    "after": "Route blur explicitly pauses and unloads; current step/progress unchanged",
+    "redArtifact": "tab-background-before-fix.log",
+    "realAudioGenerated": false
+  },
+  "securityAttemptAfterEnvironmentRestart": "Initial disposable PostgreSQL startup attempt returned missing local socket; unchanged rerun passed. Both logs retained; no production database contacted.",
+  "securityRetry": "security-retry.log"
+}

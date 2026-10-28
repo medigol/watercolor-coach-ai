@@ -1,0 +1,22 @@
+[
+  {
+    "url": "https://www.bing.com/search?q=watercolor+brush+loading+Steve+Mitchell+site%3Ayoutube.com",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentReviewed": false
+  },
+  {
+    "url": "https://www.timwilmot.com/",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentReviewed": false
+  },
+  {
+    "url": "https://www.oliverpyle.com/",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentReviewed": false
+  },
+  {
+    "url": "https://www.louisedemasi.com/",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentReviewed": false
+  }
+]

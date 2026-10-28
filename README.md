@@ -12,6 +12,8 @@ See the [UI/UX quality pass with actual before/after screens](docs/review/learni
 
 See the [implementation and review notes](docs/review/personalised-watercolour-learning-v1.md) and [executed validation](docs/review/personalised-watercolour-learning-v1-validation.json). Existing painting assessment and reference-generation features retain their production contracts.
 
+Video-assisted learning development and its **unverified editorial catalogue** are documented in [the video review](docs/video/README.md). The normal lessons still work without YouTube.
+
 ## Supabase setup
 
 1. Create a Supabase project. Enable the **Email** provider in **Authentication → Providers**. Keep email confirmation enabled unless you deliberately use a disposable development project.

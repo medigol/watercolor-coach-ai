@@ -237,6 +237,7 @@ const token = [
     await noOverflow();
     for (let n = 1; n < 5; n++) await finishCurrent(n === 4);
     await heading("Lesson completed").waitFor();
+    await shot("27-lesson-completed-without-video");
     await page.goto(base + "/learn");
     await heading("Continue your practice").waitFor();
     await page.getByRole("img", { name: /translucent river-valley/ }).waitFor();

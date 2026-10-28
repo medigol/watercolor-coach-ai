@@ -1,0 +1,803 @@
+{
+  "date": "2026-10-28",
+  "principle": "Every current step mapped; video remains optional; no lesson requires watching",
+  "rows": [
+    {
+      "lessonId": "water-brush",
+      "stepId": "look",
+      "skillIds": [
+        "water-control",
+        "washes"
+      ],
+      "objective": "A pale mixture can still flood the paper if the brush carries too much liquid.",
+      "learnerLevel": "foundation",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Look at the diagram as a comparison, not a recipe for exact timing.",
+        "Choose one familiar pigment so its behaviour does not change between tests."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "paul-clark"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "skillIds": [
+        "water-control",
+        "washes"
+      ],
+      "objective": "Can you repeat a similar stroke twice? Paper texture may break the mark; that is not automatically poor control.",
+      "learnerLevel": "foundation",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Tape or steady the paper. Mark six small rectangles in two rows.",
+        "Make a small pool of colour. Keep a clean-water area separate.",
+        "Test a stroke, then adjust the load once. Keep this loading action for the dilution row."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "paul-clark"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "dilution",
+      "skillIds": [
+        "water-control",
+        "washes"
+      ],
+      "objective": "Look for three separable values. Which stayed light enough to serve as a light passage?",
+      "learnerLevel": "foundation",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Paint three similarly sized swatches on dry paper without going back into them.",
+        "Repeat below. Keep the paper, brush, pigment and loading action constant.",
+        "Allow them to dry; watercolour often changes in apparent value as it dries."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "paul-clark"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "skillIds": [
+        "water-control",
+        "washes"
+      ],
+      "objective": "Does the damp-paper mark spread farther? Record what happened rather than assuming every paper behaves identically.",
+      "learnerLevel": "foundation",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Make a dry-paper stroke.",
+        "Make a second stroke on evenly damp paper using the same mixture and loading action.",
+        "Wait and compare the boundaries. If time is short, return after drying."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "paul-clark"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "reflect",
+      "skillIds": [
+        "water-control",
+        "washes"
+      ],
+      "objective": "Can you explain one result using a condition you actually observed?",
+      "learnerLevel": "foundation",
+      "need": "unnecessary",
+      "preferredSeconds": null,
+      "mustObserve": [
+        "Compare the dry results at the same distance.",
+        "Choose one loading action and one moisture condition to reuse."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "paul-clark"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "NO_VIDEO_NEEDED",
+      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "look",
+      "skillIds": [
+        "values"
+      ],
+      "objective": "Can you distinguish the relationships without relying on colour names?",
+      "learnerLevel": "foundation",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Choose a simple subject with no more than five major masses.",
+        "Name one light, one middle and one dark relationship you can actually see."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "paul-clark",
+        "liron-yanconsky"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "map",
+      "skillIds": [
+        "values"
+      ],
+      "objective": "Is the empty paper an intentional light shape?",
+      "learnerLevel": "foundation",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Outline only major masses in both rectangles.",
+        "Choose three pencil pressures or premix three dry-tested neutral values."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "paul-clark",
+        "liron-yanconsky"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "first",
+      "skillIds": [
+        "values"
+      ],
+      "objective": "Where does your attention go first, and is that consistent with your intention?",
+      "learnerLevel": "foundation",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Keep your chosen framing.",
+        "Use the three families without adding detail.",
+        "Pause and view the small design from arm's length."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "paul-clark",
+        "liron-yanconsky"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "compare",
+      "skillIds": [
+        "values"
+      ],
+      "objective": "A calmer version may be preferable to a more dramatic one. State the effect, not a universal winner.",
+      "learnerLevel": "foundation",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Make the second arrangement.",
+        "Compare first attention, balance and quiet intervals.",
+        "Choose either version, or decide both serve different intentions."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "paul-clark",
+        "liron-yanconsky"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "reflect",
+      "skillIds": [
+        "values"
+      ],
+      "objective": "Can you name the cause and visual effect?",
+      "learnerLevel": "foundation",
+      "need": "unnecessary",
+      "preferredSeconds": null,
+      "mustObserve": [
+        "Write one sentence about the difference.",
+        "Identify one relationship worth preserving when you add colour."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "paul-clark",
+        "liron-yanconsky"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "NO_VIDEO_NEEDED",
+      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "look",
+      "skillIds": [
+        "edges"
+      ],
+      "objective": "Which edge would serve that intention?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Choose a hill, leaf or abstract mass to repeat.",
+        "Decide whether you want separation, connection or recession."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "louise-de-masi",
+        "karen-rice"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "hard",
+      "skillIds": [
+        "edges"
+      ],
+      "objective": "Look for a relatively abrupt value transition.",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Use a premixed mid-value colour.",
+        "Paint one shape on dry paper and let it dry."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "louise-de-masi",
+        "karen-rice"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "soft",
+      "skillIds": [
+        "edges"
+      ],
+      "objective": "The edge may spread and change apparent value. Note that limitation rather than pretending the comparison is perfectly controlled.",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Test surface moisture before painting.",
+        "Paint a similar-sized shape.",
+        "Compare after both tests dry; record any uncontrolled spread."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "louise-de-masi",
+        "karen-rice"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "lost",
+      "skillIds": [
+        "edges"
+      ],
+      "objective": "Does the form still read without every contour being stated?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Match neighbouring values approximately on scrap first.",
+        "Join only a portion of the boundary.",
+        "Apply the relationship to a leaf pair, hill or abstract mass."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "louise-de-masi",
+        "karen-rice"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "reflect",
+      "skillIds": [
+        "edges"
+      ],
+      "objective": "Can you connect the boundary treatment with its intended visual effect?",
+      "learnerLevel": "developing",
+      "need": "unnecessary",
+      "preferredSeconds": null,
+      "mustObserve": [
+        "Select one useful pairing of sharper and quieter edges.",
+        "Describe where you would try it in another subject."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "steve-mitchell",
+        "louise-de-masi",
+        "karen-rice"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "NO_VIDEO_NEEDED",
+      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "look",
+      "skillIds": [
+        "drawing",
+        "perspective"
+      ],
+      "objective": "Is the large envelope consistent with what you observe?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Choose a simple corner or box.",
+        "Keep one viewpoint and outline its overall envelope."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "tim-wilmot",
+        "eric-yi-lin"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "first",
+      "skillIds": [
+        "drawing",
+        "perspective"
+      ],
+      "objective": "Which edges describe the same direction in space, and which do not?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Draw only the largest planes.",
+        "Compare the direction of two edges that recede in the same spatial direction."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "tim-wilmot",
+        "eric-yi-lin"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "compare",
+      "skillIds": [
+        "drawing",
+        "perspective"
+      ],
+      "objective": "Does the change clarify the observed form or better support your expressive aim?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Recheck the selected slopes against the subject.",
+        "Draw the second version with that one change.",
+        "Compare the plane relationships and choose a purposeful version."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "tim-wilmot",
+        "eric-yi-lin"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "reflect",
+      "skillIds": [
+        "drawing",
+        "perspective"
+      ],
+      "objective": "Can this check transfer to a new subject?",
+      "learnerLevel": "developing",
+      "need": "unnecessary",
+      "preferredSeconds": null,
+      "mustObserve": [
+        "Name one assumption you replaced with observation.",
+        "Choose one check to use before your next painting."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "tim-wilmot",
+        "eric-yi-lin"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "NO_VIDEO_NEEDED",
+      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "intention",
+      "skillIds": [
+        "project-foundations",
+        "atmosphere"
+      ],
+      "objective": "How much open sky or water will support that intention?",
+      "learnerLevel": "developing",
+      "need": "unnecessary",
+      "preferredSeconds": null,
+      "mustObserve": [
+        "Prepare postcard-sized paper.",
+        "Choose a limited palette you already know.",
+        "State your intention in the optional note."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "javid-tabatabaei",
+        "matthew-white",
+        "oliver-pyle"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "NO_VIDEO_NEEDED",
+      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "values",
+      "skillIds": [
+        "project-foundations",
+        "atmosphere"
+      ],
+      "objective": "Does the large organisation serve your intention before colour is added?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Draw sky, hill and bank as three simple masses.",
+        "Choose a small landing and one quieter interval.",
+        "View the thumbnail from arm's length."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "javid-tabatabaei",
+        "matthew-white",
+        "oliver-pyle"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "wash-plan",
+      "skillIds": [
+        "project-foundations",
+        "atmosphere"
+      ],
+      "objective": "Is the pale mixture light enough after drying?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Test dilution and loading on scrap.",
+        "Choose a pause for drying before a later layer.",
+        "Keep the paper evenly damp only where you want diffusion."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "javid-tabatabaei",
+        "matthew-white",
+        "oliver-pyle"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "sky",
+      "skillIds": [
+        "project-foundations",
+        "atmosphere"
+      ],
+      "objective": "Does the broad light mass remain simple?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Work across the small sky passage.",
+        "Remove an accidental standing bead with an unloaded brush if needed.",
+        "Pause before the surface becomes patchily dry."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "javid-tabatabaei",
+        "matthew-white",
+        "oliver-pyle"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "hill",
+      "skillIds": [
+        "project-foundations",
+        "atmosphere"
+      ],
+      "objective": "Does the hill separate enough to read without taking all the attention?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Check the current surface condition.",
+        "Place one connected hill mass.",
+        "Keep the outline simple and pause for drying."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "javid-tabatabaei",
+        "matthew-white",
+        "oliver-pyle"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "bank",
+      "skillIds": [
+        "project-foundations",
+        "atmosphere"
+      ],
+      "objective": "Is the relationship between hill and bank readable?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "Recheck the value plan.",
+        "Paint one connected near mass.",
+        "Select one boundary for clearer separation and leave another less explicit."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "javid-tabatabaei",
+        "matthew-white",
+        "oliver-pyle"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "finish",
+      "skillIds": [
+        "project-foundations",
+        "atmosphere"
+      ],
+      "objective": "Can you explain why your finishing choice helps the stated intention?",
+      "learnerLevel": "developing",
+      "need": "helpful",
+      "preferredSeconds": [
+        120,
+        360
+      ],
+      "mustObserve": [
+        "View from arm's length.",
+        "Choose to stop, or test one small conditional change on scrap.",
+        "Preserve the relationships that already work."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "javid-tabatabaei",
+        "matthew-white",
+        "oliver-pyle"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "UNFILLED_ACCESS_BLOCKED",
+      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "reflect",
+      "skillIds": [
+        "project-foundations",
+        "atmosphere"
+      ],
+      "objective": "What principle can you use in a different subject?",
+      "learnerLevel": "developing",
+      "need": "unnecessary",
+      "preferredSeconds": null,
+      "mustObserve": [
+        "Compare the dry painting with the thumbnail.",
+        "Name one effective relationship and one future test.",
+        "Record a reflection to complete the project."
+      ],
+      "narration": "Explain the visible painting decision and conditions; do not rely on a speed-painting result. Verify setup and dry/result context.",
+      "instructorCandidates": [
+        "eric-yi-lin",
+        "javid-tabatabaei",
+        "matthew-white",
+        "oliver-pyle"
+      ],
+      "candidateVideoIds": [],
+      "approvedResourceId": null,
+      "approvedSegmentId": null,
+      "status": "NO_VIDEO_NEEDED",
+      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+    }
+  ]
+}

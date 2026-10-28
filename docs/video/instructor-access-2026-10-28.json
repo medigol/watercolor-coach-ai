@@ -1,0 +1,68 @@
+[
+  {
+    "candidate": "Steve Mitchell The Mind of Watercolor",
+    "source": "https://www.youtube.com/results?search_query=Steve%20Mitchell%20The%20Mind%20of%20Watercolor",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Paul Clark watercolour",
+    "source": "https://www.youtube.com/results?search_query=Paul%20Clark%20watercolour",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Eric Yi Lin Cafe Watercolor",
+    "source": "https://www.youtube.com/results?search_query=Eric%20Yi%20Lin%20Cafe%20Watercolor",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Javid Tabatabaei watercolor instruction",
+    "source": "https://www.youtube.com/results?search_query=Javid%20Tabatabaei%20watercolor%20instruction",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Matthew White watercolor",
+    "source": "https://www.youtube.com/results?search_query=Matthew%20White%20watercolor",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Tim Wilmot watercolor",
+    "source": "https://www.youtube.com/results?search_query=Tim%20Wilmot%20watercolor",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Louise De Masi watercolor",
+    "source": "https://www.youtube.com/results?search_query=Louise%20De%20Masi%20watercolor",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Oliver Pyle watercolor",
+    "source": "https://www.youtube.com/results?search_query=Oliver%20Pyle%20watercolor",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Liron Yanconsky watercolor",
+    "source": "https://www.youtube.com/results?search_query=Liron%20Yanconsky%20watercolor",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Karen Rice watercolor",
+    "source": "https://www.youtube.com/results?search_query=Karen%20Rice%20watercolor",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  },
+  {
+    "candidate": "Shibasaki watercolor",
+    "source": "https://www.youtube.com/results?search_query=Shibasaki%20watercolor",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "contentInspection": false
+  }
+]
