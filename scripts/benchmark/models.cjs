@@ -1,4 +1,5 @@
 const { hash } = require("./production.cjs");
+const { imageTokenBound } = require("./vision.cjs");
 const ARMS = Object.freeze(
   [
     {
@@ -28,6 +29,19 @@ const ARMS = Object.freeze(
   ].map(Object.freeze),
 );
 const ENDPOINT = "https://api.openai.com/v1/chat/completions";
+function selectArms(selection) {
+  if (selection === undefined) return ARMS;
+  if (typeof selection !== "string")
+    throw Error("Arm selection must name configured IDs");
+  const ids = selection.split(",");
+  if (
+    !ids.length ||
+    new Set(ids).size !== ids.length ||
+    ids.some((id) => !ARMS.some((a) => a.id === id))
+  )
+    throw Error("Unknown, empty or duplicate configured arm selection");
+  return ARMS.filter((a) => ids.includes(a.id)); // Stable registry order, never substitution.
+}
 function bodyFor(p, arm, bytes, mime) {
   return {
     ...Object.fromEntries(
@@ -61,7 +75,13 @@ function bodyFor(p, arm, bytes, mime) {
     },
   };
 }
-function attest(card, now = new Date()) {
+function attest(card, now = new Date(), arms = ARMS) {
+  if (
+    !arms.length ||
+    arms.some((a) => !ARMS.includes(a)) ||
+    new Set(arms).size !== arms.length
+  )
+    throw Error("Only fixed configured arms can be attested");
   if (
     !card ||
     card.verified !== true ||
@@ -84,7 +104,7 @@ function attest(card, now = new Date()) {
     )
   )
     throw Error("Official model, pricing and vision sources required");
-  for (const a of ARMS) {
+  for (const a of arms) {
     const r = card.arms?.[a.id];
     if (
       !r ||
@@ -112,7 +132,21 @@ function attest(card, now = new Date()) {
         "strictJsonSchema",
         "requiredNullableEnvelope",
         ...(a.reasoning_effort ? ["reasoningNone"] : []),
-      ].every((k) => r.support?.[k] === true)
+      ].every(
+        (k) =>
+          r.support?.[k] === true ||
+          // Empirical acceptance may be tested only by an explicitly authorized
+          // ordinary case-arm slot. Never relax image/endpoint/schema support or
+          // pricing, add a probe, repair a schema, or retry a failed request.
+          (["requiredNullableEnvelope", "reasoningNone"].includes(k) &&
+            card.meteredCompatibilityTrial?.approved === true &&
+            card.meteredCompatibilityTrial?.usesExistingSlots === true &&
+            Array.isArray(card.meteredCompatibilityTrial?.armIDs) &&
+            card.meteredCompatibilityTrial.armIDs.every((id) =>
+              arms.some((arm) => arm.id === id),
+            ) &&
+            card.meteredCompatibilityTrial.armIDs.includes(a.id)),
+      )
     )
       throw Error("Unverified API compatibility: " + a.id);
     if (r.cacheWriteAccounting !== "additive")
@@ -120,19 +154,26 @@ function attest(card, now = new Date()) {
   }
   return card;
 }
-function projected(p, a, bytes, mime, card) {
+function projected(p, a, bytes, mime, card, size) {
   const b = bodyFor(p, a, bytes, mime);
   // NOT an exact tokenizer. UTF-8 bytes plus 2x framing/schema allowance and
   // 4096 reserved overhead, then a separately attested image-family bound.
   b.messages[1].content[1].image_url.url = "[image billed separately]";
   const textBound = Buffer.byteLength(JSON.stringify(b)) * 2 + 4096;
   const r = card.arms[a.id],
-    inputBound = textBound + r.maxImageTokens;
+    vision = size ? imageTokenBound(a, size) : null;
+  if (vision && r.maxImageTokens < vision.maxImageTokens)
+    throw Error(
+      "Attested image bound below documented prepared-image requirement",
+    );
+  const imageBound = vision?.maxImageTokens ?? r.maxImageTokens,
+    inputBound = textBound + imageBound;
   // Cache writes pessimistically charged on every input token IN ADDITION to
   // full uncached input. Never anticipate cache savings in the prospective guard.
   return {
     textBound,
-    imageBound: r.maxImageTokens,
+    imageBound,
+    ...(vision ? { vision } : {}),
     inputBound,
     outputBound: 3000,
     usd:
@@ -228,6 +269,7 @@ function fingerprint(body) {
 }
 module.exports = {
   ARMS,
+  selectArms,
   ENDPOINT,
   bodyFor,
   attest,

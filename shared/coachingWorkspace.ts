@@ -63,9 +63,11 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
   const supplied = c.insights.filter(
     (i) =>
       i.factIds.some((id) => c.facts.some((f) => f.id === id)) &&
-      (i.classification !== "strength" || descriptiveClaimSupported(
-        i.lesson, c.facts.filter((f) => i.factIds.includes(f.id)),
-      )) &&
+      (i.classification !== "strength" ||
+        descriptiveClaimSupported(
+          i.lesson,
+          c.facts.filter((f) => i.factIds.includes(f.id)),
+        )) &&
       purposefulFigureAdvice(`${i.lesson} ${i.action}`) &&
       (i.classification === "strength" ||
         (!unsafeHierarchyAdvice(
@@ -260,20 +262,21 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
   const hasMaterialRecommendation = recommendations.some((r) =>
     materialInsight(r.insight, c.facts),
   );
-  const status =
+  let status =
     c.qualityAssessment.confidence < 0.65
       ? "This assessment is tentative. Review the observations below."
-      : ["competent", "developing"].includes(level) && !hasMaterialRecommendation
-      ? "Review the observations and studies below."
-      : clear.length
-        ? level === "developing"
-          ? "Main priority"
-          : "Main opportunity"
-        : level === "highly_resolved"
-          ? "No significant correction is needed."
-          : level === "strong"
-            ? "No major issue detected."
-            : "Main opportunity to explore";
+      : ["competent", "developing"].includes(level) &&
+          !hasMaterialRecommendation
+        ? "Review the observations and studies below."
+        : clear.length
+          ? level === "developing"
+            ? "Main priority"
+            : "Main opportunity"
+          : level === "highly_resolved"
+            ? "No significant correction is needed."
+            : level === "strong"
+              ? "No major issue detected."
+              : "Main opportunity to explore";
   const strengths = insights
     .map((i) =>
       i.classification !== "strength"
@@ -353,6 +356,18 @@ export function workspaceTeaching(value: PaintingAnalysisResult) {
         ) && !all.slice(0, index).some((a) => sameLearningInsight(a, p)),
     );
   const selectedStrengths = unique(strengths).slice(0, 4);
+  if (
+    c.qualityAssessment.confidence >= 0.65 &&
+    !clear.length &&
+    ["strong", "highly_resolved"].includes(level) &&
+    (!selectedStrengths.length || hasMaterialRecommendation)
+  ) {
+    // Absence of a found defect is not independent proof of success. In
+    // particular, an empty/filtered result must not inherit a no-issue stamp.
+    status = hasMaterialRecommendation
+      ? "Review the material improvement opportunities below."
+      : "There is not enough supported teaching for a complete verdict.";
+  }
   const selectedStudies = unique(
     insights
       .map((i) =>

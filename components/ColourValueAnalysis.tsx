@@ -53,7 +53,11 @@ export default function ColourValueAnalysis({
   const value =
     (suppliedValue && !chromaticOnly(suppliedValue) ? suppliedValue : "") ||
     c.facts
-      .filter((f) => f.domain === "colour_value" && evidenceProperties(f.observation).includes("value"))
+      .filter(
+        (f) =>
+          f.domain === "colour_value" &&
+          evidenceProperties(f.observation).includes("value"),
+      )
       .map((f) => f.observation)
       .join(" ");
   const paragraphs = [
@@ -75,7 +79,10 @@ export default function ColourValueAnalysis({
   const showAssessment =
     assessment &&
     displayText(assessment.explanation).trim() &&
-    !teachingAlreadyCovered(assessment.explanation, paragraphs.map(([, text]) => text || "")) &&
+    !teachingAlreadyCovered(
+      assessment.explanation,
+      paragraphs.map(([, text]) => text || ""),
+    ) &&
     (!assessment.insightId ||
       !omittedInsightIds.includes(assessment.insightId));
   return (
@@ -132,7 +139,9 @@ export default function ColourValueAnalysis({
                       No confidently located source detail for this colour.
                     </Text>
                   )}
-                  {role && sourceEvidence && <Text style={styles.caption}>{role.role} area</Text>}
+                  {role && sourceEvidence && (
+                    <Text style={styles.caption}>{role.role} area</Text>
+                  )}
                 </View>
               );
             })}
@@ -179,9 +188,7 @@ export default function ColourValueAnalysis({
               }[assessment.kind]
             }
           </Text>
-          <Text style={styles.body}>
-            {displayText(assessment.explanation)}
-          </Text>
+          <Text style={styles.body}>{displayText(assessment.explanation)}</Text>
         </View>
       )}
       {!!mixes.length && (
@@ -219,7 +226,8 @@ export default function ColourValueAnalysis({
           ))}
           <Text style={styles.caption}>
             Starting points only. Brand, paper, pigment strength and water load
-            change the result. Test on scrap first.
+            change the result. Lighten transparent colour with water and paper
+            white; test on scrap first.
           </Text>
         </View>
       )}

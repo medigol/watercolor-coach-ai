@@ -619,3 +619,88 @@ test("explicit null confidence keeps local, relationship and point observations 
   // confidence field was never present; an explicit null is an abstention.
   assert(geometry.noteGeometryVisible({ ...note, region }));
 });
+
+// Sanitized technical examples, not reconstructed production records. Coverage
+// is deliberately specified independently of prose: projection must preserve
+// supplied extents, not guess an object's silhouette from its name.
+for (const [name, source, supplied] of [
+  ["tall passage", { width: 915, height: 1280 },
+    { x: 0.5, y: 0.15, width: 0.3, height: 0.7 }],
+  ["lower passage", { width: 1000, height: 1000 },
+    { x: 0.55, y: 0.65, width: 0.3, height: 0.25 }],
+  ["foreground subject", { width: 857, height: 1280 },
+    { x: 0.3, y: 0.5, width: 0.4, height: 0.3 }],
+]) {
+  test(`saved-v1 ${name} keeps its supplied bounds through every view and selected SVG`, () => {
+    const painting = load("shared/paintingAnalysis.ts");
+    const saved = require("./helpers/canonical-fixture.cjs")();
+    const evidence = saved.canonicalAnalysis.visualEvidence[0].note;
+    Object.assign(evidence, {
+      type: "region_highlight",
+      region: supplied,
+      x: supplied.x * 100,
+      y: supplied.y * 100,
+      width: supplied.width * 100,
+      height: supplied.height * 100,
+    });
+    const before = structuredClone(saved);
+    const Marks = load("components/CoachingMarks.tsx").default;
+    const nodes = (tree) => !tree || typeof tree !== "object" ? [] :
+      [tree, ...[tree.props?.children].flat(Infinity).flatMap(nodes)];
+    for (const key of painting.expertViewKeys) {
+      const projected = painting.projectPaintingAnalysis(saved, key);
+      assert.equal(projected.overlays.length, 1);
+      assert.deepEqual(projected.overlays[0].region, supplied);
+      for (const width of [375, 390, 430, 768, 1024, 1440, 1800]) {
+        const frame = geometry.containFrame(source, { width, height: 620 });
+        const tree = Marks({
+          notes: projected.overlays, width, height: 620, frame,
+          selected: 0, onSelect: () => {},
+        });
+        const highlight = nodes(tree).find(
+          (node) => node.props?.testID === "active-coaching-region",
+        );
+        assert(highlight, "a useful supplied annotation must remain selectable");
+        // Independent inverse transform catches double percentages, crop
+        // offsets, letterboxing shifts and accidental expansion/shrinkage.
+        close((highlight.props.x - frame.x) / frame.width, supplied.x);
+        close((highlight.props.y - frame.y) / frame.height, supplied.y);
+        close(highlight.props.width / frame.width, supplied.width);
+        close(highlight.props.height / frame.height, supplied.height);
+        const shape = nodes(tree).find((node) => node.type === "Rect" &&
+          node.props?.testID !== "active-coaching-region");
+        assert(shape);
+        for (const k of ["x", "y", "width", "height"])
+          close(shape.props[k], highlight.props[k]);
+      }
+    }
+    assert.deepEqual(saved, before, "saved data must never be repaired in place");
+  });
+}
+
+test("a valid subject-detail note is not expanded to the whole role or padded crop context", () => {
+  const painting = load("shared/paintingAnalysis.ts");
+  const saved = require("./helpers/canonical-fixture.cjs")();
+  const detail = { x: 0.6, y: 0.35, width: 0.08, height: 0.12 };
+  Object.assign(saved.canonicalAnalysis.visualEvidence[0].note, {
+    type: "region_highlight", label: "Crisp corner detail", region: detail,
+    x: 60, y: 35, width: 8, height: 12,
+  });
+  const before = structuredClone(saved);
+  const overlays = load("lib/overlays.ts");
+  const cleaned = painting.cleanPaintingAnalysis(saved, overlays.usableOverlays);
+  assert(cleaned);
+  const projected = painting.projectPaintingAnalysis(cleaned, "overall").overlays[0];
+  assert(projected);
+  assert.deepEqual(geometry.noteRegion(projected), detail);
+  assert.notDeepEqual(detail, cleaned.canonicalAnalysis.visualRoles[0].region);
+  const crop = geometry.cropView(detail, { width: 1000, height: 1000 },
+    { width: 180, height: 180 });
+  assert(crop);
+  assert(crop.bounds.width > detail.width && crop.bounds.height > detail.height);
+  close((crop.target.x - crop.image.x) / crop.image.width, detail.x);
+  close((crop.target.y - crop.image.y) / crop.image.height, detail.y);
+  close(crop.target.width / crop.image.width, detail.width);
+  close(crop.target.height / crop.image.height, detail.height);
+  assert.deepEqual(saved, before);
+});

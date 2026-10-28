@@ -153,6 +153,25 @@ test("a quiet adjective does not override supplied active road structure", () =>
     !projected.canonicalAnalysis.visualRoles.some((r) => r.id === "field"),
   );
 });
+
+test("an active path linked to another role does not alone invalidate a supplied quiet segment", () => {
+  const source = fixture(
+    "lower foreground road",
+    "The lower foreground road remains low-contrast with few marks.",
+  );
+  source.canonicalAnalysis.facts.push({
+    id: "separate_active_path",
+    domain: "composition",
+    roleId: source.canonicalAnalysis.visualRoles[1].id,
+    observation: "The upper path guides the eye toward the focal group.",
+  });
+  const projected = display(source);
+  assert(projected.canonicalAnalysis.visualRoles.some((r) => r.id === "field"));
+  assert.deepEqual(
+    projected.canonicalAnalysis.visualEvidence,
+    source.canonicalAnalysis.visualEvidence,
+  );
+});
 test("quiet omission never fabricates Supporting or moves canonical geometry", () => {
   const source = fixture(
     "foreground",
@@ -261,7 +280,7 @@ test("workspace applies one read-only role projection to labels, overlays, notes
   assert(source.includes("planCanonicalVisualRoles(c.visualRoles)"));
   assert(source.includes("{c.visualRoles.map((r) => ("));
   assert(source.includes("source={displaySource}"));
-  assert(source.includes("const evidenceSource = {\n    ...displaySource,"));
+  assert.match(source, /const evidenceSource = useMemo\([\s\S]*?\.\.\.displaySource,[\s\S]*?visualEvidence: c\.visualEvidence\?\.filter/);
   for (const file of ["lib/visualRoles.ts"]) {
     const code = fs.readFileSync(path.join(root, file), "utf8");
     assert(

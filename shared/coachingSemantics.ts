@@ -3,17 +3,42 @@ import { observationText, suggestedMethodText } from "./coachingEvidence.ts";
 // Bounded presentation edits over supplied prose only. No inference, new
 // diagnosis, graph/classification repair, I/O or provider access belongs here.
 export function tidyTeachingText(value: string): string {
-  return value
-    .replace(
-      /\b(contrast|clear|edges?|values?|visible|soft|diffused|crisp|muted|broad|irregular)(?:\s+\1\b)+/gi,
-      "$1",
-    )
-    .replace(/([.!?])\1+/g, "$1")
-    .replace(/[,;:]\s*([.!?])/g, "$1")
-    .replace(/\s+([,;.!?])/g, "$1")
-    .replace(/\s{2,}/g, " ")
-    .replace(/^[,;:\s]+|[,;:\s]+$/g, "")
-    .trim();
+  return (
+    value
+      // Plain React text only. Decode a bounded set of common escaped prose;
+      // nothing here is interpreted as HTML, including decoded angle brackets.
+      .replace(
+        /&(amp|quot|apos|lt|gt|nbsp|#39|#34);/gi,
+        (entity) =>
+          ({
+            "&amp;": "&",
+            "&quot;": '"',
+            "&apos;": "'",
+            "&lt;": "<",
+            "&gt;": ">",
+            "&nbsp;": " ",
+            "&#39;": "'",
+            "&#34;": '"',
+          })[entity.toLowerCase()] ?? entity,
+      )
+      .replace(/<\/?(?:p|br|strong|em|b|i)\s*\/?>/gi, " ")
+      .replace(/\*\*([^*\n]+)\*\*/g, "$1")
+      // An isolated truncated slash has no safe artistic expansion. Omit the
+      // affected clause instead of guessing that 'negative/.' meant space.
+      .split(/(?<=[.!?])\s+/)
+      .filter((sentence) => !/\/[.!?]?\s*$/.test(sentence))
+      .join(" ")
+      .replace(
+        /\b(contrast|clear|edges?|values?|visible|soft|diffused|crisp|muted|broad|irregular)(?:\s+\1\b)+/gi,
+        "$1",
+      )
+      .replace(/([.!?])\1+/g, "$1")
+      .replace(/[,;:]\s*([.!?])/g, "$1")
+      .replace(/\s+([,;.!?])/g, "$1")
+      .replace(/\s{2,}/g, " ")
+      .replace(/^[,;:\s]+|[,;:\s]+$/g, "")
+      .trim()
+  );
 }
 
 const personJudgement =

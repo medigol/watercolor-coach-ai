@@ -17,7 +17,7 @@
       "approved_for_api": false,
       "ambiguous_ground_truth": false,
       "abstention_acceptable": false,
-      "notes": "Landscape · strong"
+      "notes": "Landscape \u00b7 strong"
     },
     {
       "case_id": "C02",
@@ -35,7 +35,7 @@
       "approved_for_api": false,
       "ambiguous_ground_truth": false,
       "abstention_acceptable": false,
-      "notes": "Urban/church · strong"
+      "notes": "Urban/church \u00b7 strong"
     },
     {
       "case_id": "C03",
@@ -53,7 +53,7 @@
       "approved_for_api": false,
       "ambiguous_ground_truth": false,
       "abstention_acceptable": false,
-      "notes": "Vehicle/van · developing or WIP"
+      "notes": "Vehicle/van \u00b7 developing or WIP"
     },
     {
       "case_id": "C04",
@@ -71,7 +71,7 @@
       "approved_for_api": false,
       "ambiguous_ground_truth": false,
       "abstention_acceptable": false,
-      "notes": "Boat/reflection · developing or WIP"
+      "notes": "Boat/reflection \u00b7 developing or WIP"
     },
     {
       "case_id": "C05",
@@ -221,9 +221,9 @@
       "case_id": "C13",
       "file": "originals/C13.REPLACE.png",
       "category": "screenshot",
-      "ground_truth": "reject",
-      "source_ground_truth": "reject",
-      "watercolor_status": "not_watercolor",
+      "ground_truth": "crop-needed",
+      "source_ground_truth": "crop-needed",
+      "watercolor_status": "ambiguous",
       "expected_painting_region": null,
       "preparation": "full",
       "confirmed_region": null,
@@ -239,9 +239,9 @@
       "case_id": "C14",
       "file": "originals/C14.REPLACE.png",
       "category": "screenshot",
-      "ground_truth": "reject",
-      "source_ground_truth": "reject",
-      "watercolor_status": "not_watercolor",
+      "ground_truth": "crop-needed",
+      "source_ground_truth": "crop-needed",
+      "watercolor_status": "ambiguous",
       "expected_painting_region": null,
       "preparation": "full",
       "confirmed_region": null,
@@ -257,9 +257,9 @@
       "case_id": "C15",
       "file": "originals/C15.REPLACE.png",
       "category": "screenshot",
-      "ground_truth": "reject",
-      "source_ground_truth": "reject",
-      "watercolor_status": "not_watercolor",
+      "ground_truth": "crop-needed",
+      "source_ground_truth": "crop-needed",
+      "watercolor_status": "ambiguous",
       "expected_painting_region": null,
       "preparation": "full",
       "confirmed_region": null,
@@ -275,9 +275,9 @@
       "case_id": "C16",
       "file": "originals/C16.REPLACE.png",
       "category": "screenshot",
-      "ground_truth": "reject",
-      "source_ground_truth": "reject",
-      "watercolor_status": "not_watercolor",
+      "ground_truth": "crop-needed",
+      "source_ground_truth": "crop-needed",
+      "watercolor_status": "ambiguous",
       "expected_painting_region": null,
       "preparation": "full",
       "confirmed_region": null,

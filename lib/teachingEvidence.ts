@@ -136,7 +136,9 @@ export function insightEvidence(
     noteId: typeof note?.id === "string" ? note.id : undefined,
     value:
       insight.domain === "colour_value" &&
-      evidenceProperties(facts.map((f) => f.observation).join(" ")).includes("value"),
+      evidenceProperties(facts.map((f) => f.observation).join(" ")).includes(
+        "value",
+      ),
   };
   if (objectDesignSuggestion(insight.action)) {
     if (
@@ -250,6 +252,21 @@ export function colourEvidence(
   return regions.length
     ? { label, kind: "local", regions: regions.map((r) => ({ ...r, label })) }
     : null;
+}
+
+/** A hue-first domain must not hide a later, genuinely tonal observation or
+ * turn the first colour insight into value evidence. No new facts/regions. */
+export function tonalEvidence(
+  source: PaintingAnalysisResult,
+  excluded: readonly string[] = [],
+): TeachingEvidence | null {
+  for (const insight of source.canonicalAnalysis.insights) {
+    if (insight.domain !== "colour_value" || excluded.includes(insight.id))
+      continue;
+    const plan = insightEvidence(source, insight);
+    if (plan?.value) return plan;
+  }
+  return null;
 }
 export function compositionEvidence(overlay: unknown): TeachingEvidence | null {
   const composition = drawableCompositionOverlay(overlay);

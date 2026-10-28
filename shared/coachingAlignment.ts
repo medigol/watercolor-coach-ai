@@ -49,10 +49,14 @@ export function evidenceProperties(text: string): string[] {
     "colour relationship",
   );
   const hues = new Set(
-    text.toLowerCase().match(/\b(?:red|orange|yellow|green|blue|violet|purple)\b/g) ?? [],
+    text
+      .toLowerCase()
+      .match(/\b(?:red|orange|yellow|green|blue|violet|purple)\b/g) ?? [],
   );
   const tonal =
-    /\b(?:values?|tonal|luminance|gr[ae]yscale|dark\w*|light\w*|pale|white|black|shadows?|mid[- ]?tones?)\b/i.test(text);
+    /\b(?:values?|tonal|luminance|gr[ae]yscale|dark\w*|light\w*|pale|white|black|shadows?|mid[- ]?tones?)\b/i.test(
+      text,
+    );
   return matching(
     properties,
     hues.size >= 2 && !tonal
@@ -69,13 +73,23 @@ export function descriptiveClaimSupported(
   claim: string,
   facts: readonly PaintingFact[],
 ): boolean {
+  // Improve Painting supplies one artwork, not a reference pair. Even an
+  // internally consistent drawing cannot establish an exact external likeness.
+  if (
+    /\b(?:faithful|exact|accurate) (?:likeness|reproduction|representation of the (?:reference|original subject))\b|\bmatches? (?:the |its )?reference (?:exactly|accurately)\b/i.test(
+      claim,
+    )
+  )
+    return false;
   const named = evidenceTargets(claim);
   const linked = facts.filter((f) => {
     const target = evidenceTargets(f.observation);
     return !named.length || named.some((t) => target.includes(t));
   });
   if (
-    /\b(?:value|tonal|luminance|gr[ae]yscale)\s+(?:contrast|separation|difference|hierarchy|grouping)\b/i.test(claim) &&
+    /\b(?:value|tonal|luminance|gr[ae]yscale)\s+(?:contrast|separation|difference|hierarchy|grouping)\b/i.test(
+      claim,
+    ) &&
     !linked.some((f) => evidenceProperties(f.observation).includes("value"))
   )
     return false;
@@ -84,8 +98,12 @@ export function descriptiveClaimSupported(
   if (!accuracy.test(claim)) return true;
   return linked.some(
     (f) =>
-      /\b(?:lines?|angles?|ellipses|planes?|verticals?|horizontals?|width|height|axes)\b/i.test(f.observation) &&
-      /\b(?:converg\w*|parallel|align\w*|relative|recession|consistent direction|shared direction|proportional)\b/i.test(f.observation),
+      /\b(?:lines?|angles?|ellipses|planes?|verticals?|horizontals?|width|height|axes)\b/i.test(
+        f.observation,
+      ) &&
+      /\b(?:converg\w*|parallel|align\w*|relative|recession|consistent direction|shared direction|proportional)\b/i.test(
+        f.observation,
+      ),
   );
 }
 const intersects = (a: string[], b: string[]) => a.some((x) => b.includes(x));

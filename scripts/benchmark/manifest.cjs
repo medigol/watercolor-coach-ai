@@ -67,10 +67,14 @@ function readManifest(file) {
   if (
     m.cases
       .filter((c) => c.category === "screenshot")
-      .some((c) => c.preparation !== "full" || c.ground_truth !== "reject")
+      .some(
+        (c) =>
+          c.preparation !== "full" ||
+          !["reject", "crop-needed"].includes(c.ground_truth),
+      )
   )
     throw Error(
-      "Raw screenshot controls must retain UI and reject ground truth",
+      "Raw screenshot controls must retain UI and require rejection or crop confirmation",
     );
   if (
     m.cases

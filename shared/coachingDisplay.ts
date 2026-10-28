@@ -13,6 +13,7 @@ import {
 import { supportedExplanation } from "./coachingAssessment.ts";
 import { validRect } from "./imageGeometry.ts";
 import { descriptiveClaimSupported } from "./coachingAlignment.ts";
+import { plausiblePigmentMix } from "./pigmentMixes.ts";
 
 /** English prose only: remove an isolated foreign-script tail after English.
  * Mixed/embedded CJK is not safely repairable, so omit that optional text.
@@ -179,7 +180,11 @@ export function displayRecreationMixes(
   mixes: ColourAnalysis["recreationMixes"],
 ): ColourAnalysis["recreationMixes"] {
   return mixes.flatMap((mix) => {
-    if (mix.pigments.length > 2 || !mix.pigments.length) return [];
+    if (
+      mix.pigments.length > 2 ||
+      !plausiblePigmentMix(mix.target, mix.pigments)
+    )
+      return [];
     const prose = `${mix.target} ${mix.use} ${mix.pigments.join(" ")}`;
     if (
       /\b(?:the artist used|original pigments?|exact (?:pigment|formula)|painted with)\b/i.test(
@@ -236,7 +241,8 @@ export function prepareCoachingDisplay(
         ),
         source,
       ),
-    ).split(/(?<=[.!?])\s+/)
+    )
+      .split(/(?<=[.!?])\s+/)
       .filter((sentence) => descriptiveClaimSupported(sentence, c.facts))
       .join(" ");
   const future = (text: string) =>

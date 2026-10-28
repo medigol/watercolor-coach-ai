@@ -119,13 +119,81 @@ const render = (plan, props = {}) =>
     }),
   );
 
+test("multi-region tonal evidence exposes real local grayscale with a colour return control", () => {
+  const plan = {
+    label: "Two supplied areas",
+    kind: "comparison",
+    value: true,
+    regions: [
+      { region: { x: 0, y: 0, width: 0.4, height: 0.5 }, label: "Focal area" },
+      {
+        region: { x: 0.6, y: 0.5, width: 0.4, height: 0.5 },
+        label: "Supporting area",
+      },
+    ],
+  };
+  const html = render(plan);
+  assert(html.includes("Show grayscale evidence"));
+  assert.equal((html.match(/evidence-crop/g) ?? []).length, 2);
+  assert(
+    html.includes("assessment-located area; check it against the observation"),
+  );
+  assert(!html.includes("verified observation"));
+});
+test("actual image-derived luminance is qualified separately from model interpretation", () => {
+  const tone = load("shared/imageTone.ts");
+  const rgba = new Uint8ClampedArray(16 * 16 * 4);
+  for (let y = 0; y < 16; y++)
+    for (let x = 0; x < 16; x++)
+      rgba.set(x < 8 ? [0, 0, 0, 255] : [255, 255, 255, 255], (y * 16 + x) * 4);
+  const plan = {
+    label: "Two supplied areas",
+    kind: "comparison",
+    value: true,
+    regions: [
+      { region: { x: 0, y: 0, width: 0.5, height: 1 }, label: "Area 1" },
+      { region: { x: 0.5, y: 0, width: 0.5, height: 1 }, label: "Area 2" },
+    ],
+  };
+  const html = render(plan, { tone: tone.toneSample(rgba, 16, 16) });
+  assert(html.includes("area 1 has lower median luminance"));
+  assert(html.includes("does not establish focal importance"));
+});
+
 test("hue-only evidence does not imply a grayscale value comparison", () => {
-  const r = fixture(), i = r.canonicalAnalysis.insights[2];
-  r.canonicalAnalysis.facts[2].observation = "Hue contrast separates the red vehicle from the blue background.";
+  const r = fixture(),
+    i = r.canonicalAnalysis.insights[2];
+  r.canonicalAnalysis.facts[2].observation =
+    "Hue contrast separates the red vehicle from the blue background.";
   i.lesson = "Hue contrast establishes separation.";
   const plan = helper.insightEvidence(r, i);
   assert.equal(plan.value, false);
   assert(!render(plan).includes("grayscale(1)"));
+});
+test("hue-first colour teaching does not hide a later supplied tonal comparison", () => {
+  const r = fixture(),
+    c = r.canonicalAnalysis;
+  c.facts[2].observation = "Hue contrast separates red from blue.";
+  c.facts.push({
+    id: "tonal-fact",
+    roleId: "tower",
+    domain: "colour_value",
+    observation: "The light tower separates from the darker bank value group.",
+  });
+  c.insights.push({
+    id: "tonal",
+    domain: "colour_value",
+    classification: "strength",
+    factIds: ["tonal-fact"],
+    lesson: "The light shape holds attention.",
+    action: "Preserve this value relationship.",
+  });
+  const before = structuredClone(r),
+    plan = helper.tonalEvidence(r);
+  assert.equal(plan.insightId, "tonal");
+  assert.equal(plan.value, true);
+  assert.deepEqual(r, before);
+  assert.equal(helper.tonalEvidence(r, ["tonal"]), null);
 });
 
 test("two colours sharing a role keep their own semantic evidence labels", () => {

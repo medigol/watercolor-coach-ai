@@ -20,6 +20,7 @@ function args(argv) {
     "--output": "output",
     "--rates": "ratesFile",
     "--cases": "cases",
+    "--arms": "arms",
     "--chromium": "chromiumPath",
     "--ratings": "ratings",
   };
@@ -36,6 +37,8 @@ function args(argv) {
   if (!["prepare", "run", "report"].includes(command))
     throw Error("Use prepare, run or report; see docs/benchmark/README.md");
   if (options.live && options.dryRun) throw Error("Choose live or dry-run");
+  if (options.arms !== undefined && command !== "run")
+    throw Error("Arm selection belongs only to run");
   if ((options.confirmCost || options.retainResponses) && !options.live)
     throw Error("Cost/retention consent is live-only");
   if (
@@ -66,6 +69,7 @@ async function main(argv) {
       JSON.stringify({
         preflight: true,
         plannedRequests: preflight.calls.length,
+        selectedArmIDs: preflight.arms.map((a) => a.id),
         worstCaseUSD: preflight.worstCaseUSD,
         budgetUSD: 3,
         warning:

@@ -100,8 +100,10 @@ export default function PaintingImageSelector({
       setRequired(false);
       const r = next.proposal ?? { ...fullArtwork };
       setRegion(r);
-      if (next.proposal) setEditing(true);
-      else await confirm(next, r);
+      // The detector is deliberately low recall. No proposal does not prove
+      // that an image contains only artwork (notably nested screenshots).
+      // Every source needs an explicit whole-image or crop confirmation.
+      setEditing(true);
     } catch (e) {
       if (active.current)
         setError(
@@ -180,6 +182,16 @@ export default function PaintingImageSelector({
       )}
       {source && !editing && (
         <View style={{ gap: 4 }}>
+          <Text style={styles.caption}>
+            Selected artwork · this image will be analysed
+          </Text>
+          {!!selected &&
+            Math.min(selected.width ?? 0, selected.height ?? 0) < 512 && (
+              <Text style={styles.caption}>
+                Small image: broad composition may be readable, but fine edges
+                and surface texture may be unclear.
+              </Text>
+            )}
           <Pressable
             accessibilityRole="button"
             disabled={busy || disabled}
@@ -203,6 +215,13 @@ export default function PaintingImageSelector({
             paper and painted edges.
           </Text>
         </View>
+      )}
+      {source && editing && !required && (
+        <Text style={styles.caption}>
+          This is the original upload. Confirm one complete artwork below. For a
+          screenshot, exclude browser and app controls. The selection, not the
+          surrounding image, will be assessed.
+        </Text>
       )}
       {source && editing && !required && (
         <Button

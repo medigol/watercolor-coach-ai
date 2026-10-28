@@ -115,7 +115,10 @@ test("diagonal uses only saved image-specific geometry, not a library template",
     { point: first, role: "supporting" },
   ]);
   assert.equal(plan.thirdsGrid, false);
-  const shifted = fixture({ paths: [[p(0.3, 0.1), p(0.9, 0.5)]] });
+  const shifted = fixture({
+    paths: [[p(0.3, 0.1), p(0.9, 0.5)]],
+    focalPoint: p(0.9, 0.5),
+  });
   assert.notDeepEqual(
     library.createCompositionStructurePlan(shifted).strokes,
     plan.strokes,
@@ -200,7 +203,9 @@ test("named archetypes use supplied paths, anchors, and masses without new gener
     const overlay = fixture({
       type: id,
       paths,
-      focalPoint: triangle[0],
+      focalPoint: ["diagonal", "s_curve"].includes(id)
+        ? paths[0].at(-1)
+        : triangle[0],
       secondaryPoints: triangle.slice(1),
       masses: [supporting, focal],
     });

@@ -231,6 +231,7 @@ export default function ArtworkCropEditor({
         </View>
       ) : (
         <View
+          accessibilityLabel="Selected artwork region to be analysed"
           style={{
             width: "100%",
             height: region.height * source.height * previewScale,

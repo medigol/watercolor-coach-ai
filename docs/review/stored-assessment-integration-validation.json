@@ -1,0 +1,237 @@
+{
+  "date": "2026-10-27",
+  "branch": "codex/grounded-artwork-assessment",
+  "base": "8ce3c80823b259495ff19c39189de36d32d4a5bc",
+  "codeCommit": "11eaf07e10d09962f2d31e80d6df87703669425d",
+  "unitIntegration": {
+    "tests": 1795,
+    "pass": 1795,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "newTestsThisPass": 4,
+  "focalAliasReproduction": {
+    "before": {
+      "passed": 21,
+      "failed": 2
+    },
+    "after": {
+      "passed": 23,
+      "failed": 0
+    }
+  },
+  "frontendTypeScript": "PASS",
+  "edgeTypeScript": "PASS",
+  "configuredExport": {
+    "status": "PASS",
+    "configuration": "fake public test settings; watercolor-test.supabase.co; no production credentials"
+  },
+  "unconfiguredExport": "PASS",
+  "browser": {
+    "workspaceCases": 177,
+    "counts": {
+      "preparationMatrix": 7,
+      "eligibilityMatrix": 3,
+      "matrix": 35,
+      "evidenceMatrix": 35,
+      "tonalMatrix": 7,
+      "calibrationMatrix": 4,
+      "providerMatrix": 2,
+      "finalCalibrationMatrix": 7,
+      "liveFreezeMatrix": 21,
+      "finalFreezeFixMatrix": 21,
+      "analysisDepthMatrix": 7,
+      "cleanupMatrix": 7,
+      "semanticMatrix": 21
+    },
+    "widths": [
+      375,
+      390,
+      430,
+      768,
+      1024,
+      1440,
+      1800
+    ],
+    "runtimeErrors": 0,
+    "accessibleHeadings": true,
+    "authAccountJourney": true,
+    "savedInteractionAssertions": {
+      "additionalProviderCalls": 0,
+      "additionalUploads": 0,
+      "additionalArtworkWrites": 0,
+      "reopenAdditionalProviderCalls": 0
+    },
+    "scope": "Mocked HTTP in actual exported app; no live authenticated production replay",
+    "rasterCases": 40,
+    "unconfiguredRoutes": 8,
+    "technicalBenchmarkFixtures": 6,
+    "realProviderCalls": 0,
+    "physicalDeviceVerified": false
+  },
+  "security": {
+    "status": "PASS",
+    "scope": "Isolated cached PostgreSQL16; no live Supabase",
+    "suites": [
+      "supabase/tests/rls.sql",
+      "supabase/tests/feedback.sql"
+    ],
+    "schemaExecutions": 2,
+    "concurrentClaims": "one claimed / one busy"
+  },
+  "sourceLock": "unchanged and verified",
+  "protectedPathsChangedThisPass": [],
+  "storedProductionReview": {
+    "connectionExposedInCodex": false,
+    "retrievedRecords": 0,
+    "recordsExist": "User independently verified 87 genuine OpenAI improve_painting rows and full records for four cases",
+    "requiredInput": "Private sanitized four-case result_json export",
+    "status": "Excerpt-level findings examined; complete saved-v1 replay UNVERIFIED",
+    "excerptsExamined": true,
+    "source": "Verified inline persisted excerpts supplied by user; named attachment not exposed as local file",
+    "completeEvidenceFileReceived": false,
+    "completeResultJSONReceived": false,
+    "receivedScope": [
+      "Church observation description, exact lesson, fact reference and example note region",
+      "Van active fact/role link, separate Quiet role/region, composition entry",
+      "Care Bears target/pigments/ratio, rationale fragment and incomplete note region"
+    ],
+    "boatExactExcerptReceived": false
+  },
+  "productionFacts": {
+    "evidence": "User independent authenticated inspection; not a Codex database read",
+    "projectRef": "tnclxscyryfnxnildnjn",
+    "function": "generate-feedback",
+    "activeVersion": 26,
+    "model": "gpt-4.1-mini",
+    "detail": "low",
+    "temperature": 0.3,
+    "maxCompletionTokens": 3000
+  },
+  "limitations": [
+    "Complete four-record replay remains unverified",
+    "Supplied inline evidence ends in Care Bears region; no exact boat excerpt received",
+    "Actual focal/source geometry association and independent artistic review remain pending",
+    "No physical-device or live authenticated deployment smoke test",
+    "GitHub API returned Forbidden; elevated access check was cancelled; PR creation still unverified"
+  ],
+  "initialCommandIssues": [
+    "Deno check does not accept --cached-only; correct strict check passed",
+    "Configured browser export initially used generic example hostname; rebuilt with harness test host before browser validation"
+  ],
+  "paidRequests": 0,
+  "productionWrites": 0,
+  "merged": false,
+  "deployed": false,
+  "newTestsAcrossStoredReview": 7,
+  "previousFullRunPassed": 1791,
+  "possessiveReproduction": {
+    "before": {
+      "pass": 24,
+      "fail": 2
+    },
+    "focusedAfter": {
+      "pass": 137,
+      "fail": 0
+    },
+    "directPrivateExcerptProbe": "Unsupported central-placement qualifier removed for inconsistent/uncertain placement; compatible supplied wording preserved; no full result reconstructed"
+  },
+  "logs": {
+    "unit": "/tmp/stored-assessment-review-2026-10-27/final-unit-integration.log",
+    "frontendTypeScript": "/tmp/stored-assessment-review-2026-10-27/final-frontend-typescript.log",
+    "edgeTypeScript": "/tmp/stored-assessment-review-2026-10-27/final-edge-typescript.log",
+    "configuredExport": "/tmp/stored-assessment-review-2026-10-27/final-export-configured.log",
+    "unconfiguredExport": "/tmp/stored-assessment-review-2026-10-27/final-export-unconfigured.log",
+    "workspace": "/tmp/stored-assessment-review-2026-10-27/final-workspace-browser.log",
+    "raster": "/tmp/stored-assessment-review-2026-10-27/final-preparation-browser.log",
+    "unconfiguredBrowser": "/tmp/stored-assessment-review-2026-10-27/final-unconfigured-browser.log",
+    "benchmarkTechnical": "/tmp/stored-assessment-review-2026-10-27/final-benchmark-browser.log",
+    "localSecurity": "/tmp/stored-assessment-review-2026-10-27/final-local-security.log"
+  },
+  "commands": [
+    "node --test tests/*.test.cjs",
+    "node node_modules/typescript/bin/tsc --noEmit",
+    "deno check --config supabase/functions/generate-feedback/deno.json supabase/functions/generate-feedback/index.ts",
+    "node scripts/expo-web.cjs build (fake public test configuration)",
+    "node node_modules/expo/bin/cli export --platform web --output-dir <private unconfigured export> --clear --max-workers 2",
+    "node tests/browser/professional-workspace.cjs <loopback configured export> <private artifacts>",
+    "node tests/browser/artwork-preparation.cjs <loopback configured export> <private artifacts>",
+    "node tests/browser/unconfigured-pages.cjs <loopback unconfigured export>",
+    "node tests/browser/model-benchmark.cjs (synthetic offline fixtures only)",
+    "node scripts/test-local-database.cjs (isolated no-network PostgreSQL16)"
+  ],
+  "integrationClassification": "CONDITIONALLY READY for review; no automatic merge/deployment; full record/artistic gates unverified",
+  "annotationScreenshotReview": {
+    "date": "2026-10-27 Australia/Sydney",
+    "baseHead": "2b6e2406994d9aee1f37b30920b9bf2c9eeca54a",
+    "actualProductionScreenshotsInspected": 5,
+    "completeSavedRecordsRetrieved": 0,
+    "church": "Supplied persisted region projects to visible screenshot border within approximately 2px. Unsuitable supplied extents, not a reproduced current transform defect; original raw-model/canonicalization provenance unverified.",
+    "boat": "Historical local focal box undercovers hull/reflection. Stored coordinates and clean analysed raster unavailable; no current transform defect reproduced. Separate from reported whole-image colour/value evidence.",
+    "van": "Independent reviewer accepts focal box; useful target retained. Other role/box semantics not established by this acceptance.",
+    "runtimeSourceChanges": [],
+    "testsAdded": 4,
+    "testEvidence": "tests/image-geometry.test.cjs: saved-v1 projection through selected SVG at all seven widths, no mutation, and valid detail/crop-padding counterexample",
+    "focusedTests": {
+      "pass": 181,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "fullUnitIntegration": {
+      "pass": 1799,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "frontendTypeScript": "PASS",
+    "sourceLock": "PASS, unchanged",
+    "previousValidationRetained": "Prior Edge TypeScript, configured/unconfigured exports, raster/browser/security validation remains applicable: no production code/configuration changed in this follow-up.",
+    "prNumber": 37,
+    "prURL": "https://github.com/medigol/watercolor-coach-ai/pull/37",
+    "prHeadVerifiedBeforeReview": "2b6e2406994d9aee1f37b30920b9bf2c9eeca54a via Git refs/pull/37/head",
+    "apiAccess": "GET Forbidden; elevated access request cancelled. No PR metadata/CI success claim.",
+    "limitations": [
+      "Complete historical JSON/source replay unverified",
+      "Pixel bounds and role overlap do not prove semantic object coverage",
+      "No current real-model or physical-device acceptance"
+    ],
+    "paidRequests": 0,
+    "savedResultWrites": 0,
+    "merged": false,
+    "deployed": false,
+    "logs": {
+      "unit": "/tmp/stored-assessment-review-2026-10-27/annotation-review/unit-integration.log",
+      "focused": "/tmp/stored-assessment-review-2026-10-27/annotation-focused.log",
+      "typescript": "/tmp/stored-assessment-review-2026-10-27/annotation-review/frontend-typescript.log",
+      "screenshots": "Private screenshot-findings.json (not committed)",
+      "browser": "/tmp/stored-assessment-review-2026-10-27/annotation-review/browser/report.json"
+    },
+    "browser": {
+      "status": "PASS",
+      "workspaceCases": 177,
+      "runtimeErrors": 0,
+      "savedInteractionAssertions": "Existing no additional provider/upload/artwork-write assertions passed; actual HTTP mocked",
+      "physicalDevice": false,
+      "scope": "Earlier configured export reused; application source unchanged",
+      "counts": {
+        "preparationMatrix": 7,
+        "eligibilityMatrix": 3,
+        "matrix": 35,
+        "evidenceMatrix": 35,
+        "tonalMatrix": 7,
+        "calibrationMatrix": 4,
+        "providerMatrix": 2,
+        "finalCalibrationMatrix": 7,
+        "liveFreezeMatrix": 21,
+        "finalFreezeFixMatrix": 21,
+        "analysisDepthMatrix": 7,
+        "cleanupMatrix": 7,
+        "semanticMatrix": 21
+      }
+    }
+  }
+}

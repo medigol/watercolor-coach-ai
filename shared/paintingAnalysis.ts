@@ -611,13 +611,9 @@ function evidenceNote(
  * No independent view can supply or change it. Existing renderer handles grids,
  * curves and archetype-specific masses from this one shared object. */
 function canonicalStructure(value: unknown): CompositionOverlay | null {
-  const overlay = usableCompositionOverlay(value);
-  if (!overlay) return null;
-  if (overlay.type === "diagonal" && overlay.paths?.[0]) {
-    const path = overlay.paths[0];
-    overlay.paths = [[path[0], path[path.length - 1]]];
-  }
-  return overlay;
+  // An archetype name is not permission to straighten a supplied road/edge.
+  // Preserve all supported ordered anchors; missing geometry stays missing.
+  return usableCompositionOverlay(value);
 }
 function roleDecision(
   c: PaintingAnalysisResult["canonicalAnalysis"],

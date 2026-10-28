@@ -1,5 +1,29 @@
 # Model/API and price verification record — 2026-10-18 UTC
 
+## Final restricted reconciliation — 2026-10-23
+
+The user's new independent check of the official [prompt-caching guide](https://developers.openai.com/api/docs/guides/prompt-caching) supplies the missing rule: models before GPT-5.6 have **no additional cache-write charge**. Both restricted model families qualify. Exact requests are Chat Completions, `service_tier:default`, one image, strict production schema and 3,000 completion tokens; no cache-lifetime override or extra tool/provider request is added. Use additional `cacheWrite:0`; pessimistically charge cache reads at full uncached input prices. The confirmed vision patch rules now bound each prepared image. The reconciled nine-request ceiling is **$0.4095328**, conditional on those documented standard-tier settings/rates, rather than an invoice guarantee. No production/provider adapter change is needed. Luna image accounting remains unknown and excluded. Exact account/schema/parameter acceptance stays an explicitly authorized in-slot empirical test, not a requirement to make an extra probe. See [the current pilot record](pilot-readiness.md#final-cost-reconciliation--ready-for-explicit-user-authorization); earlier unknown-cost records below are historical and unchanged.
+
+## Independently supplied official findings — 2026-10-23
+
+The user reports independent access to the official exact-model pages, pricing, vision and deprecation documentation. Record those supplied findings separately from retrieval through the blocked Codex proxy; no blocked host was retried or paid probe made in this follow-up. Published standard USD per million **input/output** tokens: `gpt-4.1-mini` **0.40/1.60**, `gpt-5.4-mini` **0.75/4.50**, `gpt-6-luna` **0.10/0.50**. Official model pages reportedly support image input, Chat Completions and Structured Outputs. These are published capabilities/rates, not complete verified request costs or empirical account compatibility.
+
+The supplied official schedule confirms **2027-01-14** shutdown for the current `gpt-4.1-mini` baseline and recommends `gpt-6-luna` for migration. Preserve the baseline while testing; this recommendation/price is not an artistic-quality result or authorization to switch production.
+
+Remaining unknowns: exact per-model request combinations (including candidate reasoning `none`), required-null strict schema acceptance, account access, cached/cache-write treatment, and exact model/detail image resizing/patch/token multipliers or defensible upper bounds. In particular, no Luna image bound may be borrowed from another family. The three-case pilot remains BLOCKED on a full bounded cost/compatibility attestation, not on absence of all published rate information. Account access remains an outcome for an explicitly authorized attempt, not grounds for an unapproved availability probe.
+
+Using the actual locked request serialization, the existing conservative **non-image** input bound plus 3,000 output tokens at the supplied uncached/output prices contributes **$0.42897 for 12 calls**. This excludes every image charge and unresolved cache-write treatment: it is **not the pilot price, an invoice ceiling, or a verified full-request upper bound**. The private draft rate card remains `verified:false`, unknown fields null, and the existing attestation rejects it.
+
+## Follow-up verification — 2026-10-23 Australia/Sydney (2026-10-22 UTC)
+
+Public requests to all three exact model pages, pricing, vision and structured-output documentation again failed with `Tunnel connection failed: 403 Forbidden`. The elevated retry was cancelled; no permission bypass or provider probe was attempted. Thus **all four arms remain unavailable for live evaluation in this environment**, pending verified compatibility, pricing and family/detail-specific bounds. This is an evidence/access limitation, not a claim that the models do not exist. No example price was promoted to a current verified price; the rate template and adapters are unchanged.
+
+The official repository's [OpenAPI specification](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) was retrieved again. SHA-256: `11ce7fc4b6ad9127e05dade75b0b1cf1cd8a6ed4441da10890d8b9a72e316d91`. Its `ModelIdsShared` includes all three configured IDs. Generic Chat Completions image/structured-output/usage fields still do not attest model-specific parameter combinations, account access, prices or image accounting. The retrieved enum metadata also announces a **2027-01-14** shutdown for `gpt-4.1-mini`; independently confirm the official deprecation notice before a future release decision. No production model change is made here.
+
+See the [real-artwork offline evaluation](../review/real-artwork-evaluation.md) for the available corpus, zero-cost pilot plan and outstanding artistic gates. The earlier record below is retained as historical evidence.
+
+## Original verification record
+
 No API request, model-availability probe or image upload was made. These are documentation findings, not account compatibility results.
 
 The public documentation hosts `developers.openai.com`, `platform.openai.com` and `openai.com/api/pricing/` returned proxy **403 Forbidden** in this environment, including an escalated attempt. Current rates, cached/write rates and family-specific image bounds could not be independently verified. The committed rate-card template is deliberately **unverified and cannot enable live mode**.

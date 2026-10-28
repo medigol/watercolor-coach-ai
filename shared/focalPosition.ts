@@ -73,8 +73,10 @@ export function neutralizeFocalPositionText(
   position: CoarseFocalPosition,
 ): string {
   let result = text;
+  // Steeple/spire name the same architectural focal target as tower. These
+  // aliases change wording only; no geometry or artistic placement is inferred.
   const subject =
-    "(?:focal(?:\\s+(?:point|area|subject|group|building|boat|vehicle|van|tower|church))?|focus|subject|boat|vehicle|van|church|tower|building)";
+    "(?:focal(?:\\s+(?:point|area|subject|group|building|boat|vehicle|van|tower|church|steeple|spire))?|focus|subject|boat|vehicle|van|church|tower|steeple|spire|building)";
   if (position !== "central") {
     result = result
       .replace(
@@ -105,6 +107,13 @@ export function neutralizeFocalPositionText(
           "gi",
         ),
         "$1within the image",
+      )
+      .replace(
+        new RegExp(
+          `\\b(${subject}['’]s\\s+)(?:central|centred|centered)\\s+(?=(?:placement|position|location)\\b)`,
+          "gi",
+        ),
+        "$1",
       );
   }
   if (position !== "off_centre") {
@@ -122,6 +131,13 @@ export function neutralizeFocalPositionText(
           "gi",
         ),
         "$1within the image",
+      )
+      .replace(
+        new RegExp(
+          `\\b(${subject}['’]s\\s+)off[- ]cent(?:re|er)(?:d|ed)?\\s+(?=(?:placement|position|location)\\b)`,
+          "gi",
+        ),
+        "$1",
       );
   }
   result = result.replace(/ {2,}/g, " ").trim();
