@@ -434,28 +434,7 @@ test("failed recovery backup cannot discard the corrupt source", async () => {
   await assert.rejects(new LearningStore(a, "learner:a").recoverWithBackup());
   assert.equal(a.data.get("learner:a"), "broken");
 });
-const resource = () => ({
-  id: "technical-test",
-  videoId: "abcDEF123_-",
-  url: "https://www.youtube.com/watch?v=abcDEF123_-",
-  creator: "Synthetic test creator",
-  title: "Test only",
-  language: "en",
-  lessonIds: ["water-brush"],
-  skillIds: ["water-control"],
-  styleTags: [],
-  subjectTags: [],
-  difficulty: "foundation",
-  purpose: "Validation fixture only, not a production video",
-  verifiedAt: "2026-01-01",
-  verified: true,
-  availability: "available",
-  embeddable: true,
-  durationSeconds: 120,
-  segments: [
-    { title: "Test segment", start: 30, end: 50, watchFor: "A technical test" },
-  ],
-});
+const resource = require("./helpers/video-fixture.cjs");
 test("production catalogue contains no guessed or fake video records", () =>
   assert.deepEqual(mediaResources, []));
 test("verified-resource contract makes canonical attributed URLs and user-controlled start parameter", () => {
@@ -472,7 +451,7 @@ for (const mutate of [
   (r) => (r.url = "https://attacker.invalid"),
   (r) => (r.verified = false),
   (r) => (r.segments[0].start = -1),
-  (r) => (r.segments[0].end = 200),
+  (r) => (r.segments[0].end = r.durationSeconds + 1),
   (r) => (r.creator = ""),
   (r) => (r.lessonIds = ["unavailable"]),
   (r) => (r.skillIds = ["invented"]),
@@ -483,6 +462,6 @@ for (const mutate of [
     mutate(r);
     assert(!validMedia(r));
   });
-for (const start of [-1, 120, 1.5, Infinity, NaN])
+for (const start of [-1, 900, 1.5, Infinity, NaN])
   test(`invalid timestamp ${start} does not produce a player URL`, () =>
     assert.equal(videoUrls(resource(), start), null));

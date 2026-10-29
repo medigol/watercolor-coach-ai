@@ -141,6 +141,10 @@ export default function Learn() {
               title="Learning progress"
               onPress={() => router.push("/learn/progress")}
             />
+            <TextLink
+              title="Video Library — Preview · 17 candidates"
+              onPress={() => router.push("/learn/videos")}
+            />
           </View>
           {returning && (
             <TextLink

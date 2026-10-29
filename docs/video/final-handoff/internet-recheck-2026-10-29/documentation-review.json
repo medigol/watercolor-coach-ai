@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-29",
+  "sources": [
+    {
+      "url": "https://developers.google.com/youtube/iframe_api_reference",
+      "httpStatus": 200,
+      "bytes": 219875,
+      "sha256": "334d734eef685d474ce68535c7cca28a99c0194c8a7e72840095e3d17ce024dc",
+      "reviewScope": "Selected API/player/policy requirements read from the official page; not legal certification, not live video compliance"
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/developer-policies",
+      "httpStatus": 200,
+      "bytes": 152018,
+      "sha256": "739535c032ebf13b63f1bbeec7f4d8ede8f5eeb0d1088bc8342081df9f51f612",
+      "reviewScope": "Selected API/player/policy requirements read from the official page; not legal certification, not live video compliance"
+    },
+    {
+      "url": "https://developers.google.com/youtube/player_parameters",
+      "httpStatus": 200,
+      "bytes": 114926,
+      "sha256": "ad6d6675377bdd835518fce57db324fc41080e030b929f1f9f6c332da50cf092",
+      "reviewScope": "Selected API/player/policy requirements read from the official page; not legal certification, not live video compliance"
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/required-minimum-functionality",
+      "httpStatus": 200,
+      "bytes": 92826,
+      "sha256": "3faabc32d051aed8025cddd62b9b244e46b581979fadfdc853ed32b93a349076",
+      "reviewScope": "Selected API/player/policy requirements read from the official page; not legal certification, not live video compliance"
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/developer-policies-guide",
+      "httpStatus": 200,
+      "bytes": 78001,
+      "sha256": "76d74bd485dcf6d5d1db6de2b83fe919724de5dbd86ee1ec31f9128647a078a8",
+      "reviewScope": "Selected API/player/policy requirements read from the official page; not legal certification, not live video compliance"
+    }
+  ],
+  "confirmedRequirements": [
+    "Object-form cueVideoById/loadVideoById support absolute start/end seconds; seekTo invalidates a previous end bound.",
+    "Player viewport minimum is 200 by 200; official recommendation is 480 by 270 when feasible; usable controls also matter.",
+    "HTTP Referer or equivalent client identification is required; strict-origin-when-cross-origin is recommended.",
+    "cc_load_policy=1 requests captions even when the user previously disabled them; default preference must omit forcing.",
+    "Made for Kids designation must be checked for each embedded video; child-directed videos require appropriate data/tracking handling.",
+    "Official controls, links, branding and advertising must remain unobscured; no background player or media/transcript extraction."
+  ],
+  "notVerified": [
+    "Any candidate video identity, availability, duration, narration or instructional action",
+    "Actual caption track, audience designation or creator consent",
+    "Actual start/end/replay/seek/caption/fullscreen/ad behaviour in the application",
+    "Whole-product legal/policy compliance"
+  ]
+}

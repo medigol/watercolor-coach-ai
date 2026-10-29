@@ -6,3 +6,27 @@ function ratio(a,b){const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.0
 for(const surface of ['background','paper','pale','blue'])test('normal muted body/caption text has 4.5:1 contrast on '+surface,()=>assert(ratio(theme.colors.muted,theme.colors[surface])>=4.5));
 test('main text has 4.5:1 contrast on paper',()=>assert(ratio(theme.colors.ink,theme.colors.paper)>=4.5));
 test('enabled primary button text has 4.5:1 contrast',()=>assert(ratio('#FFFFFF',theme.colors.accent)>=4.5));
+
+test('primary tab names remain readable without decorative icon glyphs',()=>{
+  const exports={};
+  const jsx={jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props})};
+  const mocks={
+    'react/jsx-runtime':jsx,
+    'react-native':{Pressable:'Pressable',View:'View',useWindowDimensions:()=>({width:375})},
+    'expo-router':{router:{push(){}},Tabs:Object.assign(()=>null,{Screen:'TabScreen'})},
+    '@expo/vector-icons':{Ionicons:'Ionicons'},
+    'react-native-safe-area-context':{useSafeAreaInsets:()=>({bottom:0})},
+    '@react-navigation/bottom-tabs':{BottomTabBar:'BottomTabBar'},
+    '../../components/learning/DesktopLearnNavigation':{default:'DesktopNavigation'},
+    '../../components/ui':{colors:theme.colors},
+  };
+  const source=fs.readFileSync(path.join(__dirname,'../app/(tabs)/_layout.tsx'),'utf8');
+  const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2020}}).outputText;
+  new Function('exports','require',code)(exports,name=>{assert(name in mocks,name);return mocks[name];});
+  const children=exports.default().props.children;
+  for(const [route,label] of [['index','Home'],['learn','Learn'],['artworks','My Artworks']]){
+    const tab=children.find(c=>c.props.name===route);
+    assert.equal(tab.props.options.tabBarAccessibilityLabel,label);
+  }
+  assert.equal(children.find(c=>c.props.name==='practice').props.options.href,null);
+});

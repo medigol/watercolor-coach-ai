@@ -57,6 +57,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
+          tabBarAccessibilityLabel: "Home",
           tabBarIcon: ({ color, size, focused }) => (
             <View
               style={{
@@ -79,6 +80,7 @@ export default function TabLayout() {
         name="learn"
         options={{
           title: "Learn",
+          tabBarAccessibilityLabel: "Learn",
           headerShown: false,
           tabBarIcon: ({ color, size, focused }) => (
             <View
@@ -102,6 +104,7 @@ export default function TabLayout() {
         name="artworks"
         options={{
           title: "My Artworks",
+          tabBarAccessibilityLabel: "My Artworks",
           tabBarIcon: ({ color, size, focused }) => (
             <View
               style={{

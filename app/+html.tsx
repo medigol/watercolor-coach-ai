@@ -12,7 +12,7 @@ export default function Html({ children }: PropsWithChildren) {
             __html: `
       :root { color-scheme: light; --paper:#F5F3ED; --ink:#253C3C; --teal:#236963; }
       body { background:var(--paper); color:var(--ink); }
-      [role="button"]:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible { outline:2px solid var(--teal); outline-offset:3px; }
+      [role="button"]:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline:2px solid var(--teal); outline-offset:3px; }
       @media(prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; animation:none !important; transition:none !important; } }
     `,
           }}

@@ -136,26 +136,7 @@ export interface LearningItem {
 }
 export type Lesson = LearningItem & { kind: "lesson" };
 export type GuidedProject = LearningItem & { kind: "project" };
-export interface MediaResource {
-  id: string;
-  videoId: string;
-  url: string;
-  creator: string;
-  title: string;
-  language: string;
-  lessonIds: string[];
-  skillIds: string[];
-  subjectTags: Subject[];
-  styleTags: StyleId[];
-  difficulty: Difficulty;
-  purpose: string;
-  verifiedAt: string;
-  verified: true;
-  availability: "available" | "unavailable" | "unknown";
-  embeddable: boolean | null;
-  durationSeconds: number;
-  segments: { title: string; start: number; end: number; watchFor: string }[];
-}
+export type { MediaResource } from "./videoTypes";
 export interface ExerciseReflection {
   text: string;
   difficulty: "easy" | "useful" | "challenging";

@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -183,6 +189,7 @@ export function TextLink({
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityState={expanded === undefined ? {} : { expanded }}
+      aria-expanded={expanded}
       onPress={onPress}
       style={{
         minHeight: 44,
@@ -270,6 +277,7 @@ const sections = [
   ["Curriculum", "/learn/curriculum"],
   ["Styles", "/learn/styles"],
   ["Progress", "/learn/progress"],
+  ["Videos · Preview", "/learn/videos"],
   ["Preferences", "/learn/onboarding"],
 ];
 export function LearnNav() {
@@ -384,14 +392,17 @@ export function LearnScreen({
   children,
   nav = true,
   resetKey,
+  scrollRef,
 }: {
   children: ReactNode;
   nav?: boolean;
   resetKey?: string;
+  scrollRef?: RefObject<ScrollView | null>;
 }) {
   const { width } = useWindowDimensions(),
     l = useLearning(),
-    scroll = useRef<ScrollView>(null);
+    internalScroll = useRef<ScrollView>(null);
+  const scroll = scrollRef ?? internalScroll;
   useEffect(() => {
     scroll.current?.scrollTo({ y: 0, animated: false });
   }, [resetKey]);

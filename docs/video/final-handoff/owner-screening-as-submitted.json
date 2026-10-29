@@ -1,0 +1,123 @@
+{
+  "schema": "watercolor-owner-video-review-fa-v3",
+  "exportedAt": "2026-10-29T00:17:23.698Z",
+  "statement": "Owner preliminary video screening only. Not approval to publish. No score/creator/policy/technical/embed claims implied.",
+  "researchSource": "watercolor_curated_video_research_for_codex_v2.zip",
+  "totalResearchCandidates": 17,
+  "answersCount": 4,
+  "completeThreeQuestionReviews": 4,
+  "reviewedCandidates": [
+    {
+      "candidateId": "steve-flat-wash",
+      "canonicalVideoUrl": "https://www.youtube.com/watch?v=alq0YqX86gs",
+      "videoId": "alq0YqX86gs",
+      "sourceType": "RESEARCH_CANDIDATE",
+      "researchMetadataVerifiedByDirectWatching": false,
+      "ownerScreening": {
+        "watchedScope": "yes",
+        "teachingClarity": "good",
+        "lessonFit": "exact",
+        "preliminaryRecommendation": "پیشنهاد برای بررسی نهایی",
+        "notes": null,
+        "comparison": null,
+        "observedNarrationLanguage": "english",
+        "reportedCaptions": "unknown",
+        "inspectedRange": {
+          "startSeconds": 47,
+          "endSeconds": 702,
+          "wasActuallyViewed": true
+        },
+        "rawTimeFields": null,
+        "date": "2026-10-29T00:12:45.625Z"
+      },
+      "productionApproval": false,
+      "finalSegmentVerified": false,
+      "liveEmbedVerified": false,
+      "editorialScore": null,
+      "technicalApproval": false
+    },
+    {
+      "candidateId": "paul-values",
+      "canonicalVideoUrl": "https://www.youtube.com/watch?v=iP97XXdpFpA",
+      "videoId": "iP97XXdpFpA",
+      "sourceType": "RESEARCH_CANDIDATE",
+      "researchMetadataVerifiedByDirectWatching": false,
+      "ownerScreening": {
+        "watchedScope": "yes",
+        "teachingClarity": "good",
+        "lessonFit": "exact",
+        "preliminaryRecommendation": "پیشنهاد برای بررسی نهایی",
+        "notes": null,
+        "comparison": null,
+        "observedNarrationLanguage": "english",
+        "reportedCaptions": "unknown",
+        "inspectedRange": {
+          "startSeconds": 37,
+          "endSeconds": 852,
+          "wasActuallyViewed": true
+        },
+        "rawTimeFields": null,
+        "date": "2026-10-29T00:15:04.603Z"
+      },
+      "productionApproval": false,
+      "finalSegmentVerified": false,
+      "liveEmbedVerified": false,
+      "editorialScore": null,
+      "technicalApproval": false
+    },
+    {
+      "candidateId": "louise-blend",
+      "canonicalVideoUrl": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+      "videoId": "UeIHo83pVGc",
+      "sourceType": "RESEARCH_CANDIDATE",
+      "researchMetadataVerifiedByDirectWatching": false,
+      "ownerScreening": {
+        "watchedScope": "yes",
+        "teachingClarity": "good",
+        "lessonFit": "exact",
+        "preliminaryRecommendation": "پیشنهاد برای بررسی نهایی",
+        "notes": null,
+        "comparison": null,
+        "observedNarrationLanguage": "english",
+        "reportedCaptions": "unknown",
+        "inspectedRange": null,
+        "rawTimeFields": {
+          "start": "01:30",
+          "end": "",
+          "warning": "INCOMPLETE_OR_INVALID_NOT_VERIFIED"
+        },
+        "date": "2026-10-29T00:16:24.410Z"
+      },
+      "productionApproval": false,
+      "finalSegmentVerified": false,
+      "liveEmbedVerified": false,
+      "editorialScore": null,
+      "technicalApproval": false
+    },
+    {
+      "candidateId": "cafe-cloud-tips",
+      "canonicalVideoUrl": "https://www.youtube.com/watch?v=MjUA_axxl4s",
+      "videoId": "MjUA_axxl4s",
+      "sourceType": "RESEARCH_CANDIDATE",
+      "researchMetadataVerifiedByDirectWatching": false,
+      "ownerScreening": {
+        "watchedScope": "yes",
+        "teachingClarity": "good",
+        "lessonFit": "exact",
+        "preliminaryRecommendation": "پیشنهاد برای بررسی نهایی",
+        "notes": null,
+        "comparison": null,
+        "observedNarrationLanguage": null,
+        "reportedCaptions": "unknown",
+        "inspectedRange": null,
+        "rawTimeFields": null,
+        "date": "2026-10-29T00:17:01.497Z"
+      },
+      "productionApproval": false,
+      "finalSegmentVerified": false,
+      "liveEmbedVerified": false,
+      "editorialScore": null,
+      "technicalApproval": false
+    }
+  ]
+}

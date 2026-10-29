@@ -32,6 +32,7 @@ const { chromium } = require("playwright");
       "/learn/onboarding",
       "/learn/lesson?id=water-brush",
       "/learn/progress",
+      "/learn/videos",
       "/account",
       "/upload/improve-painting",
       "/upload/create-reference",
@@ -45,7 +46,7 @@ const { chromium } = require("playwright");
     assert.deepEqual(errors, []);
     assert.deepEqual(unexpected, []);
     console.log(
-      "PASS: fifteen unconfigured Pages routes; safe setup screen; zero external requests; zero runtime errors.",
+      "PASS: sixteen unconfigured Pages routes; safe setup screen; zero external requests; zero runtime errors.",
     );
   } finally {
     await browser.close();

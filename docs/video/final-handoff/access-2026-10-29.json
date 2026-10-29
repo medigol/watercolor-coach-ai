@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://www.youtube.com/watch?v=MjUA_axxl4s",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=iP97XXdpFpA",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=nbszEH7DO6w",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=3sNvfeoXi3o",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=8sKFqQAW5Ns",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://developers.google.com/youtube/iframe_api_reference",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://developers.google.com/youtube/player_parameters",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://developers.google.com/youtube/terms/developer-policies",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://developers.google.com/youtube/terms/required-minimum-functionality",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  },
+  {
+    "url": "https://developers.google.com/youtube/terms/developer-policies-guide",
+    "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "actualContentInspected": false,
+    "date": "2026-10-29"
+  }
+]

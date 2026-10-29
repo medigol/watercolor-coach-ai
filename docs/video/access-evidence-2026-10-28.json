@@ -1,0 +1,62 @@
+[
+  {
+    "id": "iframe-api",
+    "url": "https://developers.google.com/youtube/iframe_api_reference",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  },
+  {
+    "id": "parameters",
+    "url": "https://developers.google.com/youtube/player_parameters",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  },
+  {
+    "id": "policies",
+    "url": "https://developers.google.com/youtube/terms/developer-policies",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  },
+  {
+    "id": "minimum",
+    "url": "https://developers.google.com/youtube/terms/required-minimum-functionality",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  },
+  {
+    "id": "youtube",
+    "url": "https://www.youtube.com/",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  },
+  {
+    "id": "cafe",
+    "url": "https://cafewatercolor.com/",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  },
+  {
+    "id": "paul",
+    "url": "https://www.artbypaulclark.co.uk/",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  },
+  {
+    "id": "mind",
+    "url": "https://mindofwatercolor.com/",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  },
+  {
+    "id": "terms",
+    "url": "https://www.youtube.com/static?template=terms",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  },
+  {
+    "id": "privacy",
+    "url": "https://policies.google.com/privacy",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "date": "2026-10-28"
+  }
+]

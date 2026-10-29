@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-29",
+  "timezone": "Australia/Sydney",
+  "scope": "Online preview release, independently unapproved educational candidates",
+  "pr39Merge": "7e48e0f5158d446be923013fd257d79f44515001",
+  "pr39PagesRun": 40815696473,
+  "pr39PagesStatus": "success",
+  "fullUnitIntegration": {
+    "tests": 1995,
+    "pass": 1995,
+    "fail": 0,
+    "skipped": 0
+  },
+  "frontendTypeScript": "PASS",
+  "strictEdgeTypeScript": "PASS (Deno 2.5.6, system certificate store; no TLS bypass)",
+  "configuredProductionExport": "PASS",
+  "unconfiguredExport": "PASS",
+  "videoBrowser": {
+    "scenarios": 14,
+    "pass": 14,
+    "errors": 0,
+    "unexpectedRequests": 0,
+    "syntheticProvider": true,
+    "liveYouTubeVerified": false,
+    "viewports": [
+      320,
+      375,
+      390,
+      430,
+      768,
+      1024,
+      1440
+    ]
+  },
+  "learningBrowser": {
+    "responsiveCases": 35,
+    "firstViewportCases": 8,
+    "status": "PASS"
+  },
+  "assessmentBrowser": {
+    "cases": 177,
+    "runtimeErrors": 0,
+    "status": "PASS",
+    "savedResultsAndGeometry": "PRESERVED",
+    "provider": "synthetic network only"
+  },
+  "imagePreparationBrowser": {
+    "checks": 40,
+    "status": "PASS"
+  },
+  "unconfiguredBrowser": {
+    "routes": 16,
+    "status": "PASS"
+  },
+  "isolatedPostgreSQLSecurity": "PASS, real disposable PostgreSQL 16, no live Supabase",
+  "productionSourceLock": "PASS, unchanged",
+  "preview": {
+    "candidates": 17,
+    "javidAdvancedOptional": 3,
+    "ownerScreeningsPreserved": 4,
+    "proposedWindows": 18,
+    "approvedLessonMediaResources": 0,
+    "privateOwnerNotesShipped": false
+  },
+  "architecture": {
+    "newDependencies": false,
+    "authChanged": false,
+    "supabaseChanges": false,
+    "quotaChanges": false,
+    "paidAICalls": 0,
+    "learnerProgressSchemaChanged": false
+  },
+  "unverified": [
+    "Real YouTube availability/playback/captions/ads/fullscreen and exact segments",
+    "Independent artistic/educational acceptance",
+    "Physical-device usability",
+    "Live authenticated owner-account interaction; signed-in regression uses controlled fixtures"
+  ]
+}
