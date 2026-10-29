@@ -189,6 +189,7 @@ export function TextLink({
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityState={expanded === undefined ? {} : { expanded }}
+      aria-expanded={expanded}
       onPress={onPress}
       style={{
         minHeight: 44,
@@ -276,6 +277,7 @@ const sections = [
   ["Curriculum", "/learn/curriculum"],
   ["Styles", "/learn/styles"],
   ["Progress", "/learn/progress"],
+  ["Videos · Preview", "/learn/videos"],
   ["Preferences", "/learn/onboarding"],
 ];
 export function LearnNav() {

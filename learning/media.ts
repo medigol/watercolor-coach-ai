@@ -449,7 +449,7 @@ export function displayTime(seconds: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 /** Defense at the iframe boundary as well as at catalogue ingestion. */
-export function validPlayerUrl(src: string, origin: string): boolean {
+export function validPlayerUrl(src: string, origin: string, allowOriginal = false): boolean {
   try {
     const u = new URL(src),
       q = u.searchParams;
@@ -489,11 +489,11 @@ export function validPlayerUrl(src: string, origin: string): boolean {
       end = q.get("end");
     if (
       !start ||
-      !end ||
       !/^\d+$/.test(start) ||
-      !/^\d+$/.test(end) ||
-      Number(end) <= Number(start) ||
-      Number(end) > 86400
+      Number(start) > 86400 ||
+      (end === null
+        ? !allowOriginal
+        : !/^\d+$/.test(end) || Number(end) <= Number(start) || Number(end) > 86400)
     )
       return false;
     if (q.has("cc_load_policy") && q.get("cc_load_policy") !== "1")

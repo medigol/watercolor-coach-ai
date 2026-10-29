@@ -25,6 +25,7 @@ export default function LearnLayout() {
       />
       <Stack.Screen name="lesson" options={{ title: "Learning studio" }} />
       <Stack.Screen name="progress" options={{ title: "Learning progress" }} />
+      <Stack.Screen name="videos" options={{ title: "Video Library — Preview" }} />
     </Stack>
   );
 }

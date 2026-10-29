@@ -38,6 +38,8 @@ import StudyVisual, {
 import LessonDemonstration from "../../../components/learning/LessonDemonstration";
 import ChecklistControl from "../../../components/learning/ChecklistControl";
 import { studio } from "../../../components/learning/design";
+import { previewCandidates } from "../../../learning/videoPreviewCatalogue";
+import { previewMatches } from "../../../learning/videoPreview";
 export default function LessonStudio() {
   const { id } = useLocalSearchParams<{ id?: string }>(),
     item = typeof id === "string" ? itemById(id) : undefined;
@@ -97,7 +99,7 @@ export default function LessonStudio() {
         }
       />
       {demoKey === `${item.id}:${step.id}` && (
-        <LessonDemonstration
+        <View style={{ gap: 12 }}><LessonDemonstration
           lessonId={item.id}
           stepId={step.id}
           profile={state.profile}
@@ -111,6 +113,11 @@ export default function LessonStudio() {
             }
           }}
         />
+        {previewCandidates.some(c => previewMatches(c, item.id, step.id)) && <>
+          <TextLink title="Explore related video previews (unverified)" onPress={() => router.push({ pathname: "/learn/videos", params: { lesson: item.id, step: step.id } })} />
+          <Copy muted>Optional research previews, separate from approved teaching resources. Viewing does not complete this exercise.</Copy>
+        </>}
+        </View>
       )}
     </View>
   );

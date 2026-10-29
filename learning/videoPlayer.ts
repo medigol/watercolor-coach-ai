@@ -1,4 +1,4 @@
-import type { OfficialPlayer, PlaybackState, SegmentCue } from "./videoTypes";
+import type { OfficialPlayer, PlaybackState, PlaybackCue } from "./videoTypes";
 export type PlayerNotice = { state: PlaybackState; message: string };
 export function playerFailure(code: number): PlayerNotice {
   if ([101, 150].includes(code))
@@ -29,16 +29,16 @@ export function playerFailure(code: number): PlayerNotice {
 export class SegmentPlayback {
   private alive = true;
   private failed = false;
-  private cue: SegmentCue;
+  private cue: PlaybackCue;
   private stopping = false;
   constructor(
     private player: OfficialPlayer,
-    cue: SegmentCue,
+    cue: PlaybackCue,
     private notify: (value: PlayerNotice) => void,
   ) {
     this.cue = { ...cue };
   }
-  select(cue: SegmentCue) {
+  select(cue: PlaybackCue) {
     if (!this.alive || this.failed) return;
     this.cue = { ...cue };
     this.stopping = false;
@@ -84,7 +84,8 @@ export class SegmentPlayback {
     else if (code === 0) {
       const t = this.player.getCurrentTime();
       this.notify(
-        t >= this.cue.endSeconds - 0.75 && t <= this.cue.endSeconds + 1
+        this.cue.endSeconds !== undefined &&
+          t >= this.cue.endSeconds - 0.75 && t <= this.cue.endSeconds + 1
           ? {
               state: "segment-ended",
               message:
@@ -92,8 +93,9 @@ export class SegmentPlayback {
             }
           : {
               state: "paused",
-              message:
-                "Playback stopped before the suggested endpoint. You can replay or return to practice.",
+              message: this.cue.endSeconds === undefined
+                ? "Original-video playback ended. Watching does not complete a painting exercise."
+                : "Playback stopped before the suggested endpoint. You can replay or return to practice.",
             },
       );
     }
@@ -103,10 +105,11 @@ export class SegmentPlayback {
       return;
     const t = this.player.getCurrentTime();
     if (!Number.isFinite(t)) return;
-    if (t >= this.cue.endSeconds || t < this.cue.startSeconds - 1) {
+    const end = this.cue.endSeconds;
+    if ((end !== undefined && t >= end) || t < this.cue.startSeconds - 1) {
       this.stopping = true;
       this.player.pauseVideo();
-      const nearEnd = t >= this.cue.endSeconds && t <= this.cue.endSeconds + 1;
+      const nearEnd = end !== undefined && t >= end && t <= end + 1;
       this.notify(
         nearEnd
           ? {

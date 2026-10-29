@@ -126,14 +126,17 @@ export type PlaybackState =
   | "restricted"
   | "unavailable"
   | "error";
-export interface SegmentCue {
+export interface PlaybackCue {
   videoId: string;
   startSeconds: number;
+  endSeconds?: number;
+}
+export interface SegmentCue extends PlaybackCue {
   endSeconds: number;
 }
 export interface OfficialPlayer {
-  cueVideoById(cue: SegmentCue): void;
-  loadVideoById(cue: SegmentCue): void;
+  cueVideoById(cue: PlaybackCue): void;
+  loadVideoById(cue: PlaybackCue): void;
   playVideo(): void;
   pauseVideo(): void;
   getCurrentTime(): number;

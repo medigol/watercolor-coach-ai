@@ -10,6 +10,7 @@ export default function YouTubeFrame({
   cue,
   controls,
   onState,
+  allowOriginal = false,
 }: YouTubeFrameProps) {
   const root = useRef<HTMLDivElement>(null),
     controller = useRef<SegmentPlayback | null>(null);
@@ -57,7 +58,7 @@ export default function YouTubeFrame({
       if (releaseActive === cleanup) releaseActive = null;
     };
     releaseActive = cleanup;
-    if (!validPlayerUrl(src, window.location.origin)) {
+    if (!validPlayerUrl(src, window.location.origin, allowOriginal)) {
       notify({
         state: "error",
         message:
@@ -141,7 +142,7 @@ export default function YouTubeFrame({
       clearTimeout(readyTimeout);
       cleanup();
     };
-  }, [src]);
+  }, [src, allowOriginal]);
   useEffect(() => {
     controller.current?.select(cue);
   }, [cue.videoId, cue.startSeconds, cue.endSeconds]);

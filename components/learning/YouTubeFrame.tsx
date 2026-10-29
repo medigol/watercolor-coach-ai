@@ -1,6 +1,6 @@
 import type { MutableRefObject } from "react";
 import { Text } from "react-native";
-import type { SegmentCue } from "../../learning/videoTypes";
+import type { PlaybackCue } from "../../learning/videoTypes";
 import type { PlayerNotice } from "../../learning/videoPlayer";
 export interface VideoControls {
   play(): void;
@@ -10,7 +10,9 @@ export interface VideoControls {
 export interface YouTubeFrameProps {
   src: string;
   title: string;
-  cue: SegmentCue;
+  cue: PlaybackCue;
+  /** Explicit original-video preview, never an approved segment. */
+  allowOriginal?: boolean;
   controls: MutableRefObject<VideoControls | null>;
   onState: (notice: PlayerNotice) => void;
 }
