@@ -71,7 +71,7 @@ function SmallScene({ x, tonal = false }: { x: number; tonal?: boolean }) {
     </G>
   );
 }
-export default function StudyVisual({ kind }: { kind: LessonStep["visual"] }) {
+export default function StudyVisual({ kind, caption = true }: { kind: LessonStep["visual"]; caption?: boolean }) {
   const uid = useId().replace(/:/g, "");
   const id = (s: string) => `guide-${uid}-${s}`;
   return (
@@ -325,10 +325,10 @@ export default function StudyVisual({ kind }: { kind: LessonStep["visual"] }) {
           )}
         </Svg>
       </View>
-      <Text style={learnStyles.muted}>
+      {caption && <Text style={learnStyles.muted}>
         {labels[kind]} Original explanatory illustration; compare with your own
         dry paint tests.
-      </Text>
+      </Text>}
     </View>
   );
 }

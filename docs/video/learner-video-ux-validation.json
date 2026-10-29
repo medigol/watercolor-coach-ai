@@ -1,0 +1,249 @@
+{
+  "date": "2026-10-29T10:39:31.731Z",
+  "branch": "codex/video-learning-ux",
+  "baseline": "787a07e57928a47fc8d657eb847e61ba533b5eaa",
+  "unitIntegration": {
+    "tests": 2026,
+    "passed": 2026,
+    "failed": 0,
+    "skipped": 0
+  },
+  "previewBrowser": {
+    "source": "Actual configured Expo export, synthetic account/provider only",
+    "date": "2026-10-29T10:35:19.928Z",
+    "tests": 22,
+    "pass": 22,
+    "errors": [],
+    "unexpectedRequests": [],
+    "matrix": [
+      {
+        "name": "All 17 candidates and all three Javid videos remain available with learning titles and levels",
+        "status": "PASS"
+      },
+      {
+        "name": "Library works at seven widths with keyboard-reachable 44px Watch actions and no overflow",
+        "status": "PASS"
+      },
+      {
+        "name": "A single library Watch action loads the selected default, without a redundant Load action",
+        "status": "PASS"
+      },
+      {
+        "name": "Replay and endpoint enforcement use absolute proposed boundaries, never lesson completion",
+        "status": "PASS"
+      },
+      {
+        "name": "Return to practice pauses, removes the frame and focuses the visible physical exercise",
+        "status": "PASS"
+      },
+      {
+        "name": "Deep link, reload and URL watch hints never auto-load; every candidate Watch uses its evidence-based default",
+        "status": "PASS"
+      },
+      {
+        "name": "Watch and owner-mode navigation work by keyboard with accurate disclosure state",
+        "status": "PASS"
+      },
+      {
+        "name": "Mapped lesson step chooses Louise’s relevant chapter rather than unrelated introduction",
+        "status": "PASS"
+      },
+      {
+        "name": "Chapter switching, outside-window seeking and replay restore correct bounds on the same player",
+        "status": "PASS"
+      },
+      {
+        "name": "Owner review is a separate explicit mode; learner view contains no timestamps form, export or caption settings",
+        "status": "PASS"
+      },
+      {
+        "name": "Caption preference requests remain in owner mode and preserve selected boundaries",
+        "status": "PASS"
+      },
+      {
+        "name": "Private review saves and exports explicit observations; never grants approval or leaks account identity",
+        "status": "PASS"
+      },
+      {
+        "name": "Seven responsive player widths meet 200×200, and mobile first viewport exposes Watch with no technical form",
+        "status": "PASS"
+      },
+      {
+        "name": "Short viewport, keyboard focus and enlarged-text reflow retain reachable practice and player actions",
+        "status": "PASS"
+      },
+      {
+        "name": "Topic and experience filters retain all candidates and avoid unrelated step claims",
+        "status": "PASS"
+      },
+      {
+        "name": "Café conflict and Louise start-only stay unverified; unseen content is labelled suggested focus",
+        "status": "PASS"
+      },
+      {
+        "name": "Provider restriction and failed API connection preserve written practice and offer retry or original",
+        "status": "PASS"
+      },
+      {
+        "name": "Continue lesson resumes existing step and checklist, with no learning writes from video playback",
+        "status": "PASS"
+      },
+      {
+        "name": "Route cleanup pauses/destroys the player, and returning to Learn does not start background playback",
+        "status": "PASS"
+      },
+      {
+        "name": "Unknown candidate is not silently substituted and never loads a player",
+        "status": "PASS"
+      },
+      {
+        "name": "Invalid private review data remains untouched outside owner mode; explicit recovery keeps learning",
+        "status": "PASS"
+      },
+      {
+        "name": "Failed owner save is truthful and exportable, with learner progress unchanged",
+        "status": "PASS"
+      }
+    ],
+    "liveYouTubeVerified": false,
+    "physicalDeviceTested": false
+  },
+  "existingLearningBrowser": {
+    "status": "PASS",
+    "responsiveCases": 35,
+    "firstViewportChecks": 8
+  },
+  "approvedPlayerBrowser": {
+    "status": "PASS",
+    "mode": "SYNTHETIC CATALOGUE + MOCKED OFFICIAL API, not live YouTube verification",
+    "matrix": [
+      {
+        "width": 320,
+        "playerWidth": 292,
+        "playerHeight": 200
+      },
+      {
+        "width": 375,
+        "playerWidth": 335,
+        "playerHeight": 200
+      },
+      {
+        "width": 390,
+        "playerWidth": 350,
+        "playerHeight": 200
+      },
+      {
+        "width": 430,
+        "playerWidth": 390,
+        "playerHeight": 219
+      },
+      {
+        "width": 768,
+        "playerWidth": 728,
+        "playerHeight": 410
+      },
+      {
+        "width": 1024,
+        "playerWidth": 451,
+        "playerHeight": 254
+      },
+      {
+        "width": 1440,
+        "playerWidth": 558,
+        "playerHeight": 314
+      }
+    ],
+    "reflow": [
+      {
+        "width": 375,
+        "height": 600,
+        "replayReachable": true
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "replayReachable": true
+      },
+      {
+        "width": 1024,
+        "height": 600,
+        "replayReachable": true
+      },
+      {
+        "width": 390,
+        "height": 480,
+        "replayReachable": true
+      }
+    ],
+    "textEnlargement": "200% user stylesheet; no clipping",
+    "zeroPreConsentRequests": true,
+    "absoluteSegmentBounds": true,
+    "replayRestoresEnd": true,
+    "samePlayerForSegments": true,
+    "defaultCaptionsNotForced": true,
+    "progressUnchanged": true,
+    "cleanup": true,
+    "errors": [],
+    "unexpected": [],
+    "realVideosReviewed": 0,
+    "realPlayback": false,
+    "physicalDevice": false,
+    "simulatedRequests": 10
+  },
+  "savedAssessmentBrowser": {
+    "status": "PASS",
+    "cases": 177,
+    "source": "Actual configured export; synthetic saved results; no production interaction"
+  },
+  "imagePreparationBrowser": {
+    "status": "PASS",
+    "checks": 40
+  },
+  "unconfiguredBrowser": {
+    "status": "PASS",
+    "routes": 16,
+    "externalRequests": 0
+  },
+  "frontendTypeScript": "PASS",
+  "strictEdgeTypeScript": "PASS",
+  "configuredProductionBuild": "PASS",
+  "unconfiguredProductionBuild": "PASS",
+  "isolatedPostgreSQLSecurity": "PASS — PostgreSQL 16, no network/production service",
+  "sourceLock": "PASS — unchanged",
+  "catalogue": {
+    "candidates": 17,
+    "ownerScreenings": 4,
+    "proposedWindows": 18,
+    "optionalJavidCandidates": 3,
+    "approvedLessonResources": 0
+  },
+  "bundleAudit": {
+    "all17IdsPresent": true,
+    "noRawOwnerScreeningData": true,
+    "noSyntheticMediaFixture": true
+  },
+  "accessibility": {
+    "keyboardActivation": "PASS",
+    "disclosureState": "PASS",
+    "touchTargets": "PASS ≥44px",
+    "noHorizontalOverflow": "PASS at seven widths",
+    "enlargedText": "PASS synthetic CSS enlargement/reflow",
+    "fullWcagAudit": false
+  },
+  "evidenceLimits": {
+    "liveYouTubePlaybackVerified": false,
+    "newContentInspection": false,
+    "physicalDeviceTested": false,
+    "humanUsabilityTested": false,
+    "exactClipApproval": false
+  },
+  "productionEffects": {
+    "paidAICalls": 0,
+    "productionDataWrites": 0,
+    "newDependencies": 0,
+    "newCredentials": 0,
+    "backendChanges": 0,
+    "merge": false,
+    "deploy": false
+  }
+}

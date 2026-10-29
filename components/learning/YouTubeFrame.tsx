@@ -13,6 +13,8 @@ export interface YouTubeFrameProps {
   cue: PlaybackCue;
   /** Explicit original-video preview, never an approved segment. */
   allowOriginal?: boolean;
+  /** Only after an explicit Watch gesture. Default preserves cue-only lessons. */
+  playOnReady?: boolean;
   controls: MutableRefObject<VideoControls | null>;
   onState: (notice: PlayerNotice) => void;
 }

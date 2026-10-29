@@ -11,11 +11,12 @@ export default function YouTubeFrame({
   controls,
   onState,
   allowOriginal = false,
+  playOnReady = false,
 }: YouTubeFrameProps) {
   const root = useRef<HTMLDivElement>(null),
     controller = useRef<SegmentPlayback | null>(null);
-  const latest = useRef({ cue, onState });
-  latest.current = { cue, onState };
+  const latest = useRef({ cue, onState, playOnReady });
+  latest.current = { cue, onState, playOnReady };
   // src changes only for a different video or explicitly applied caption settings.
   useEffect(() => {
     releaseActive?.();
@@ -94,6 +95,10 @@ export default function YouTubeFrame({
               );
               controls.current = controller.current;
               controller.current.select(latest.current.cue);
+              // A Watch gesture may request play; browser policy can still
+              // require the official Play control. Only provider events may
+              // report that playback actually started.
+              if (latest.current.playOnReady) controller.current.play();
               interval = setInterval(() => {
                 try {
                   controller.current?.poll();
@@ -145,6 +150,7 @@ export default function YouTubeFrame({
   }, [src, allowOriginal]);
   useEffect(() => {
     controller.current?.select(cue);
+    if (playOnReady) controller.current?.play();
   }, [cue.videoId, cue.startSeconds, cue.endSeconds]);
   return (
     <div
