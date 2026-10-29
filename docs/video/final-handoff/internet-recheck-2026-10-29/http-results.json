@@ -1,0 +1,134 @@
+{
+  "clientDate": "2026-10-29",
+  "clientTimezone": "Australia/Sydney",
+  "attempts": [
+    {
+      "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "contentInspected": false,
+      "playbackVerified": false,
+      "failureStage": "proxy CONNECT tunnel",
+      "proxyConnectStatus": 403,
+      "originHttpStatus": null,
+      "videoAvailabilityConclusion": "UNKNOWN"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=iP97XXdpFpA",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "contentInspected": false,
+      "playbackVerified": false,
+      "failureStage": "proxy CONNECT tunnel",
+      "proxyConnectStatus": 403,
+      "originHttpStatus": null,
+      "videoAvailabilityConclusion": "UNKNOWN"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "contentInspected": false,
+      "playbackVerified": false,
+      "failureStage": "proxy CONNECT tunnel",
+      "proxyConnectStatus": 403,
+      "originHttpStatus": null,
+      "videoAvailabilityConclusion": "UNKNOWN"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=MjUA_axxl4s",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "contentInspected": false,
+      "playbackVerified": false,
+      "failureStage": "proxy CONNECT tunnel",
+      "proxyConnectStatus": 403,
+      "originHttpStatus": null,
+      "videoAvailabilityConclusion": "UNKNOWN"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=nbszEH7DO6w",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "contentInspected": false,
+      "playbackVerified": false,
+      "failureStage": "proxy CONNECT tunnel",
+      "proxyConnectStatus": 403,
+      "originHttpStatus": null,
+      "videoAvailabilityConclusion": "UNKNOWN"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=3sNvfeoXi3o",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "contentInspected": false,
+      "playbackVerified": false,
+      "failureStage": "proxy CONNECT tunnel",
+      "proxyConnectStatus": 403,
+      "originHttpStatus": null,
+      "videoAvailabilityConclusion": "UNKNOWN"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=8sKFqQAW5Ns",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "contentInspected": false,
+      "playbackVerified": false,
+      "failureStage": "proxy CONNECT tunnel",
+      "proxyConnectStatus": 403,
+      "originHttpStatus": null,
+      "videoAvailabilityConclusion": "UNKNOWN"
+    },
+    {
+      "url": "https://developers.google.com/youtube/iframe_api_reference",
+      "httpStatus": 200,
+      "finalUrl": "https://developers.google.com/youtube/iframe_api_reference",
+      "bytesRead": 219875,
+      "contentType": "text/html; charset=utf-8",
+      "contentInspected": false,
+      "playbackVerified": false,
+      "transport": "HTTPS with default system certificate verification",
+      "pageSuccessDoesNotVerifyPlayback": true
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/developer-policies",
+      "httpStatus": 200,
+      "finalUrl": "https://developers.google.com/youtube/terms/developer-policies",
+      "bytesRead": 152018,
+      "contentType": "text/html; charset=utf-8",
+      "contentInspected": false,
+      "playbackVerified": false,
+      "transport": "HTTPS with default system certificate verification",
+      "pageSuccessDoesNotVerifyPlayback": true
+    },
+    {
+      "url": "https://www.youtube.com/iframe_api",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "failureStage": "proxy CONNECT tunnel",
+      "proxyConnectStatus": 403,
+      "originHttpStatus": null,
+      "videoAvailabilityConclusion": "UNKNOWN"
+    },
+    {
+      "url": "https://www.youtube-nocookie.com/embed/alq0YqX86gs",
+      "status": 200,
+      "bytes": 135736,
+      "transport": "HTTPS with default system certificate verification",
+      "pageSuccessDoesNotVerifyPlayback": true
+    },
+    {
+      "url": "https://developers.google.com/youtube/player_parameters",
+      "status": 200,
+      "bytes": 114926,
+      "transport": "HTTPS with default system certificate verification",
+      "pageSuccessDoesNotVerifyPlayback": true
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/required-minimum-functionality",
+      "status": 200,
+      "bytes": 92826,
+      "transport": "HTTPS with default system certificate verification",
+      "pageSuccessDoesNotVerifyPlayback": true
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/developer-policies-guide",
+      "status": 200,
+      "bytes": 78001,
+      "transport": "HTTPS with default system certificate verification",
+      "pageSuccessDoesNotVerifyPlayback": true
+    }
+  ]
+}

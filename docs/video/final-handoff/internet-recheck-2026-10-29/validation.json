@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-29",
+  "baseline": "4c4e510533eeb643908a01442e5310cb1a0e0521",
+  "branch": "codex/curated-watercolour-video-v1",
+  "existingPR": 40,
+  "dependencyPR": 39,
+  "runtimeSourceChanged": false,
+  "normalHttpAttempts": 14,
+  "watchPagesProxyBlocked": 7,
+  "iframeApiScriptProxyBlocked": true,
+  "officialDocsHttp200": 5,
+  "officialEmbedHtmlHttp200": 1,
+  "browserWatchTunnelFailures": 7,
+  "browserAllowedHostCertificateFailures": 2,
+  "realVideosInspected": 0,
+  "newVerifiedSegments": 0,
+  "newVerifiedTimestamps": [],
+  "newEditorialScores": 0,
+  "productionCatalogueSize": 0,
+  "ownerScreeningsPreserved": 4,
+  "tests": {
+    "focusedOfflineTests": 99,
+    "pass": 99,
+    "fail": 0,
+    "handoffValidator": "PASS",
+    "productionValidator": "PASS",
+    "fullTypeScriptBuildAndBrowserRegressionRerun": false,
+    "reason": "Documentation/evidence-only update; runtime source and approval records unchanged"
+  },
+  "githubApiAccess": "WORKING; both PRs OPEN and Draft; #40 base is the PR39 branch",
+  "restrictions": {
+    "paidAI": 0,
+    "credentialsAdded": 0,
+    "productionWrites": 0,
+    "playerRebuilt": false,
+    "newPR": false,
+    "merge": false,
+    "deployment": false
+  }
+}

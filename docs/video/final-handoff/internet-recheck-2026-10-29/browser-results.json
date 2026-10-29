@@ -1,0 +1,78 @@
+{
+  "clientDate": "2026-10-29",
+  "browser": "Chromium / Playwright, normal certificate verification; no ignore-certificate flags",
+  "attempts": [
+    {
+      "videoId": "alq0YqX86gs",
+      "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+      "metadataVerified": false,
+      "contentInspected": false,
+      "livePlayback": false,
+      "failure": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://www.youtube.com/watch?v=alq0YqX86gs\nCall log:\n\u001b[2m  - navigating to \"https://www.youtube.com/watch?v=alq0YqX86gs\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "videoId": "iP97XXdpFpA",
+      "url": "https://www.youtube.com/watch?v=iP97XXdpFpA",
+      "metadataVerified": false,
+      "contentInspected": false,
+      "livePlayback": false,
+      "failure": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://www.youtube.com/watch?v=iP97XXdpFpA\nCall log:\n\u001b[2m  - navigating to \"https://www.youtube.com/watch?v=iP97XXdpFpA\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "videoId": "UeIHo83pVGc",
+      "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+      "metadataVerified": false,
+      "contentInspected": false,
+      "livePlayback": false,
+      "failure": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://www.youtube.com/watch?v=UeIHo83pVGc\nCall log:\n\u001b[2m  - navigating to \"https://www.youtube.com/watch?v=UeIHo83pVGc\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "videoId": "MjUA_axxl4s",
+      "url": "https://www.youtube.com/watch?v=MjUA_axxl4s",
+      "metadataVerified": false,
+      "contentInspected": false,
+      "livePlayback": false,
+      "failure": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://www.youtube.com/watch?v=MjUA_axxl4s\nCall log:\n\u001b[2m  - navigating to \"https://www.youtube.com/watch?v=MjUA_axxl4s\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "videoId": "nbszEH7DO6w",
+      "url": "https://www.youtube.com/watch?v=nbszEH7DO6w",
+      "metadataVerified": false,
+      "contentInspected": false,
+      "livePlayback": false,
+      "failure": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://www.youtube.com/watch?v=nbszEH7DO6w\nCall log:\n\u001b[2m  - navigating to \"https://www.youtube.com/watch?v=nbszEH7DO6w\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "videoId": "3sNvfeoXi3o",
+      "url": "https://www.youtube.com/watch?v=3sNvfeoXi3o",
+      "metadataVerified": false,
+      "contentInspected": false,
+      "livePlayback": false,
+      "failure": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://www.youtube.com/watch?v=3sNvfeoXi3o\nCall log:\n\u001b[2m  - navigating to \"https://www.youtube.com/watch?v=3sNvfeoXi3o\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "videoId": "8sKFqQAW5Ns",
+      "url": "https://www.youtube.com/watch?v=8sKFqQAW5Ns",
+      "metadataVerified": false,
+      "contentInspected": false,
+      "livePlayback": false,
+      "failure": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://www.youtube.com/watch?v=8sKFqQAW5Ns\nCall log:\n\u001b[2m  - navigating to \"https://www.youtube.com/watch?v=8sKFqQAW5Ns\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "url": "https://www.youtube-nocookie.com/embed/alq0YqX86gs",
+      "contentInspected": false,
+      "livePlayback": false,
+      "failure": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://www.youtube-nocookie.com/embed/alq0YqX86gs\nCall log:\n\u001b[2m  - navigating to \"https://www.youtube-nocookie.com/embed/alq0YqX86gs\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    {
+      "url": "https://developers.google.com/youtube/iframe_api_reference",
+      "contentInspected": false,
+      "livePlayback": false,
+      "failure": "page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://developers.google.com/youtube/iframe_api_reference\nCall log:\n\u001b[2m  - navigating to \"https://developers.google.com/youtube/iframe_api_reference\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    }
+  ],
+  "playerLoadSucceeded": false,
+  "playClicked": false,
+  "contentActuallyInspected": false,
+  "mediaDownloaded": false
+}

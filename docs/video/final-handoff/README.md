@@ -1,5 +1,7 @@
 # Final owner handoff · executed 29 October 2026
 
+Latest: [live access recheck — Google documentation and GitHub now work; YouTube watch/API routes and browser TLS still blocked](internet-recheck-2026-10-29/README.md). Prior access failures below are historical observations.
+
 Existing Draft **PR #40**, branch `codex/curated-watercolour-video-v1`, continues from verified head `422695c38addb7cbbfc1e7e08e41fb9f4452d7d9`; PR #39 stays at `703996ef1eedac355b76c8d282833390b455ad07` (see delivery validation for the verified full SHA). No new PR, merge, deployment or production write is authorised.
 
 The final attached archive is authoritative. Its SHA-256 is `5f164b32b1388b6abaaaf09c50fae9a64c2a930309c1e1aa1aaae35f6e1c3b5f`; every one of its 17 manifest entries was checked against its supplied hash/length. Earlier empty-candidate research is historical. **The four completed owner screenings are evidence, not a request to repeat the questionnaire.**
