@@ -1,0 +1,417 @@
+import type {
+  CurriculumModule,
+  LearningProfile,
+  Skill,
+  StyleId,
+  WatercolourStyle,
+} from "./types";
+export const goalLabels = {
+  start: "Learn from scratch",
+  technique: "Improve technique",
+  atmosphere: "Atmospheric landscapes",
+  realism: "Observational realism",
+  expression: "Expressive painting",
+  composition: "Composition",
+  colour: "Colour and value",
+  urban: "Urban sketching",
+  independence: "My own artistic voice",
+};
+export const experienceLabels = {
+  beginner: "Complete beginner",
+  developing: "Some experience",
+  intermediate: "Intermediate",
+  advanced: "Advanced",
+};
+export const subjectLabels = {
+  landscape: "Landscape",
+  urban: "Urban architecture",
+  water: "Water",
+  mountains: "Mountains",
+  boats: "Boats",
+  botanical: "Botanical",
+  animals: "Animals",
+  figures: "Figures",
+  "still-life": "Still life",
+  abstract: "Abstract",
+};
+export const confidenceLabels = {
+  new: "New to me",
+  developing: "Developing",
+  comfortable: "Comfortable",
+  confident: "Confident",
+};
+export const defaultProfile: LearningProfile = {
+  experience: "beginner",
+  goal: "start",
+  subject: "landscape",
+  primaryStyle: "atmospheric",
+  secondaryStyles: [],
+  minutes: 15,
+  diagnostic: {},
+  format: "mixed",
+};
+export const styles: WatercolourStyle[] = [
+  {
+    id: "atmospheric",
+    title: "Atmospheric realism",
+    description:
+      "Recognisable places, simplified into connected tones and breathing space.",
+    decisions: [
+      "Compress contrast in distance; reserve sharper contrast selectively.",
+      "Let some contours disappear into neighbouring masses.",
+    ],
+    skillIds: ["values", "washes", "edges", "atmosphere"],
+    subjects: ["landscape", "mountains", "water"],
+    exercise:
+      "Compare the same hill with a hard contour and a softened contour; keep its value constant.",
+    related: ["urban", "expressive"],
+  },
+  {
+    id: "urban",
+    title: "Loose urban sketching",
+    description:
+      "Observed structure with selective lines, lively marks and economical colour.",
+    decisions: [
+      "Check large alignments before describing windows.",
+      "Choose which lines to state and which to leave open.",
+    ],
+    skillIds: ["drawing", "perspective", "values", "composition"],
+    subjects: ["urban", "boats", "figures"],
+    exercise:
+      "Draw one corner twice: a continuous contour, then only the lines needed to explain the planes.",
+    related: ["atmospheric", "expressive"],
+  },
+  {
+    id: "botanical",
+    title: "Botanical observation",
+    description:
+      "Patient shape observation, precise selected edges and transparent colour relationships.",
+    decisions: [
+      "Compare negative spaces and proportions before small veins.",
+      "Let a pale passage dry before testing a transparent overlap.",
+    ],
+    skillIds: ["drawing", "water-control", "edges", "colour"],
+    subjects: ["botanical", "still-life"],
+    exercise:
+      "Observe one leaf silhouette. Compare a clear outside edge with one small softened transition inside.",
+    related: ["atmospheric"],
+  },
+  {
+    id: "expressive",
+    title: "Expressive and gestural",
+    description:
+      "Rhythm, chosen distortion and purposeful marks over exhaustive description.",
+    decisions: [
+      "Vary a mark's direction deliberately, rather than adding detail everywhere.",
+      "Keep a readable value relationship even when colours are invented.",
+    ],
+    skillIds: ["edges", "values", "composition", "independence"],
+    subjects: ["abstract", "landscape", "figures"],
+    exercise:
+      "Paint the same three masses twice, changing only the direction and length of the marks.",
+    related: ["urban", "atmospheric"],
+  },
+];
+const moduleSpecs = [
+  [
+    "materials",
+    "01",
+    "Materials & fundamentals",
+    "Understand the surface, brush and water before adding complexity.",
+    [
+      "Paper and surfaces",
+      "Brush types and loading",
+      "Transparency and opacity",
+      "Pigment properties",
+      "Water quantity",
+      "Palette preparation",
+      "Paper moisture and drying",
+      "Care and safety",
+    ],
+  ],
+  [
+    "washes",
+    "02",
+    "Water control & washes",
+    "Observe how water, pigment and timing interact.",
+    [
+      "Flat, graded and variegated washes",
+      "Wet-on-wet",
+      "Wet-on-dry",
+      "Blooms and backruns",
+      "Timing",
+      "Transitions",
+      "Wash failures",
+    ],
+  ],
+  [
+    "values",
+    "03",
+    "Tonal values",
+    "Organise light, middle and dark before colour.",
+    [
+      "Three values",
+      "Tonal grouping",
+      "Grayscale",
+      "Thumbnails",
+      "Compression",
+      "Focal contrast",
+      "Value planning",
+    ],
+  ],
+  [
+    "colour",
+    "04",
+    "Colour theory & mixing",
+    "Separate hue, value, chroma and temperature.",
+    [
+      "Hue, value and chroma",
+      "Temperature",
+      "Limited palettes",
+      "Neutral mixing",
+      "Harmony",
+      "Transparency and layering",
+      "Approximate pigment mixes",
+    ],
+  ],
+  [
+    "edges",
+    "05",
+    "Edges, brushwork & texture",
+    "Make edges and marks serve a visual intention.",
+    [
+      "Hard, soft and lost edges",
+      "Edge hierarchy",
+      "Brush loading",
+      "Dry brush",
+      "Mark economy",
+      "Expressive marks",
+      "Texture and detail",
+    ],
+  ],
+  [
+    "drawing",
+    "06",
+    "Drawing & observation",
+    "Compare visible relationships rather than naming objects.",
+    [
+      "Shapes and proportion",
+      "Simplified drawing",
+      "Perspective",
+      "Negative space",
+      "Architecture",
+      "Observation versus assumption",
+    ],
+  ],
+  [
+    "composition",
+    "07",
+    "Composition",
+    "Arrange masses and intervals with purpose.",
+    [
+      "Masses",
+      "Focal hierarchy",
+      "Balance and rhythm",
+      "Eye movement",
+      "Directions",
+      "Quiet areas",
+      "Simplification",
+      "Cropping and thumbnails",
+    ],
+  ],
+  [
+    "atmosphere",
+    "08",
+    "Light, atmosphere & depth",
+    "Use relationships of value, colour and edges to suggest space.",
+    [
+      "Atmospheric perspective",
+      "Light direction",
+      "Spatial planes",
+      "Mist and rain",
+      "Backlighting",
+      "Soft distance",
+      "Tonal recession",
+    ],
+  ],
+  [
+    "subjects",
+    "09",
+    "Subject studies",
+    "Transfer a shared skill to a subject you enjoy.",
+    [
+      "Skies and clouds",
+      "Mountains",
+      "Trees and foliage",
+      "Water and reflections",
+      "Coasts and boats",
+      "Urban architecture",
+      "Streets and vehicles",
+      "Botanical",
+      "Figures",
+      "Animals",
+      "Still life",
+    ],
+  ],
+  [
+    "planning",
+    "10",
+    "Planning a painting",
+    "Make a few useful decisions before the first wash.",
+    [
+      "Choosing references",
+      "Subject analysis",
+      "Intention",
+      "Cropping",
+      "Composition",
+      "Value thumbnails",
+      "Limited palette",
+      "Sequence",
+      "Focal and supporting elements",
+    ],
+  ],
+  [
+    "projects",
+    "11",
+    "Guided paintings",
+    "Combine isolated skills in a small, resumable project.",
+    [
+      "Simple studies",
+      "Value plan",
+      "Wash plan",
+      "Main masses",
+      "Depth and focal choices",
+      "Reflection",
+    ],
+  ],
+  [
+    "independence",
+    "12",
+    "Style & independence",
+    "Choose and evaluate your own visual language.",
+    [
+      "Visual languages",
+      "Atmospheric realism",
+      "Expression",
+      "Personal decisions",
+      "Experimentation",
+      "Self-critique",
+      "Independent projects",
+    ],
+  ],
+] as const;
+const skillSpecs: [string, string, string, string[]][] = [
+  ["materials", "materials", "Material choices", []],
+  ["water-control", "materials", "Water and brush control", []],
+  ["washes", "washes", "Wash behaviour", ["water-control"]],
+  ["values", "values", "Three-value grouping", []],
+  ["colour", "colour", "Colour relationships", ["values", "water-control"]],
+  ["edges", "edges", "Hard, soft and lost edges", ["water-control"]],
+  ["drawing", "drawing", "Observed shapes", []],
+  ["perspective", "drawing", "Relative planes and convergence", ["drawing"]],
+  [
+    "composition",
+    "composition",
+    "Major masses and hierarchy",
+    ["values", "drawing"],
+  ],
+  ["atmosphere", "atmosphere", "Atmospheric depth", ["values", "edges"]],
+  ["planning", "planning", "Painting decisions", ["values", "composition"]],
+  [
+    "project-foundations",
+    "projects",
+    "Combining foundational skills",
+    ["water-control", "values", "edges"],
+  ],
+  [
+    "independence",
+    "independence",
+    "Reflective artistic choices",
+    ["composition", "colour"],
+  ],
+  ...[
+    "skies",
+    "mountains",
+    "foliage",
+    "reflections",
+    "coast-boats",
+    "architecture",
+    "streets-vehicles",
+    "botanical",
+    "figures",
+    "animals",
+    "still-life",
+  ].map((id): [string, string, string, string[]] => [
+    "subject-" + id,
+    "subjects",
+    id.replace(/-/g, " "),
+    ["water-control", "values"],
+  ]),
+];
+export const skills: Skill[] = skillSpecs.map(
+  ([id, moduleId, title, prerequisites]) => ({
+    id,
+    moduleId,
+    title,
+    description: `Develop deliberate decisions in ${title.toLowerCase()}.`,
+    objectives: [
+      `Observe and compare ${title.toLowerCase()} in a controlled study.`,
+    ],
+    prerequisites,
+    difficulty: prerequisites.length ? "developing" : "foundation",
+    subjectTags: [],
+    styleTags: styles.filter((s) => s.skillIds.includes(id)).map((s) => s.id),
+    version: 1,
+    instructionMinutes: null,
+    practiceMinutes: null,
+    materials: [],
+    resourceIds: [],
+    editorialStatus: "outline",
+  }),
+);
+const moduleLessons: Record<string, string[]> = {
+  materials: ["water-brush"],
+  values: ["three-values"],
+  edges: ["edge-families"],
+  drawing: ["observed-structure"],
+  projects: ["quiet-landscape"],
+};
+export const modules: CurriculumModule[] = moduleSpecs.map(
+  ([id, , title, description, topics]) => ({
+    id,
+    title,
+    description,
+    topics: [...topics],
+    objectives: [
+      `Explore ${title.toLowerCase()} through observation, controlled practice and reflection.`,
+    ],
+    editorialStatus: "framework",
+    skillIds: skills.filter((s) => s.moduleId === id).map((s) => s.id),
+    lessonIds: moduleLessons[id] ?? [],
+    version: 1,
+  }),
+);
+export const diagnosticSkills = [
+  "water-control",
+  "washes",
+  "edges",
+  "values",
+  "colour",
+  "drawing",
+  "composition",
+  "perspective",
+  "atmosphere",
+  "planning",
+];
+export const styleById = (id: StyleId) => styles.find((s) => s.id === id)!;
+/** Style-only confirmation must not confirm unrelated onboarding drafts. */
+export function withStylePreferences(
+  base: LearningProfile,
+  selected: LearningProfile,
+): LearningProfile {
+  return {
+    ...base,
+    primaryStyle: selected.primaryStyle,
+    secondaryStyles: [...selected.secondaryStyles],
+  };
+}

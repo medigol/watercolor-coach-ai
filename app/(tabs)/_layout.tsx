@@ -1,13 +1,26 @@
-import { Pressable, View } from "react-native";
+import { Pressable, View, useWindowDimensions } from "react-native";
 import { router, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomTabBar } from "@react-navigation/bottom-tabs";
+import DesktopLearnNavigation from "../../components/learning/DesktopLearnNavigation";
 import { colors } from "../../components/ui";
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   return (
     <Tabs
-      screenOptions={{
+      tabBar={(props) =>
+        width >= 1000 &&
+        props.state.routes[props.state.index].name === "learn" ? (
+          <DesktopLearnNavigation {...props} />
+        ) : (
+          <BottomTabBar {...props} />
+        )
+      }
+      screenOptions={({ route }) => ({
+        tabBarPosition:
+          width >= 1000 && route.name === "learn" ? "top" : "bottom",
         headerStyle: { backgroundColor: colors.background },
         headerShadowVisible: false,
         headerTitleAlign: "center",
@@ -38,7 +51,7 @@ export default function TabLayout() {
           paddingBottom: Math.max(insets.bottom, 12),
         },
         tabBarLabelStyle: { fontSize: 12, fontWeight: "600" },
-      }}
+      })}
     >
       <Tabs.Screen
         name="index"
@@ -55,6 +68,29 @@ export default function TabLayout() {
             >
               <Ionicons
                 name={focused ? "home" : "home-outline"}
+                color={color}
+                size={size}
+              />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="learn"
+        options={{
+          title: "Learn",
+          headerShown: false,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View
+              style={{
+                backgroundColor: focused ? colors.pale : "transparent",
+                paddingHorizontal: 14,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}
+            >
+              <Ionicons
+                name={focused ? "brush" : "brush-outline"}
                 color={color}
                 size={size}
               />
@@ -84,28 +120,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="practice"
-        options={{
-          title: "Practice",
-          tabBarIcon: ({ color, size, focused }) => (
-            <View
-              style={{
-                backgroundColor: focused ? colors.pale : "transparent",
-                paddingHorizontal: 14,
-                paddingVertical: 4,
-                borderRadius: 12,
-              }}
-            >
-              <Ionicons
-                name={focused ? "brush" : "brush-outline"}
-                color={color}
-                size={size}
-              />
-            </View>
-          ),
-        }}
-      />
+      <Tabs.Screen name="practice" options={{ href: null }} />
     </Tabs>
   );
 }
