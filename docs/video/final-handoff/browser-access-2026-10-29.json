@@ -1,0 +1,12 @@
+[
+  {
+    "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+    "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://www.youtube.com/watch?v=alq0YqX86gs\nCall log:\n\u001b[2m  - navigating to \"https://www.youtube.com/watch?v=alq0YqX86gs\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "videoInspected": false
+  },
+  {
+    "url": "https://developers.google.com/youtube/iframe_api_reference",
+    "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://developers.google.com/youtube/iframe_api_reference\nCall log:\n\u001b[2m  - navigating to \"https://developers.google.com/youtube/iframe_api_reference\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "videoInspected": false
+  }
+]

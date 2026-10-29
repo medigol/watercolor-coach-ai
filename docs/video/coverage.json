@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-28",
+  "date": "2026-10-29",
   "principle": "Every current step mapped; video remains optional; no lesson requires watching",
   "rows": [
     {
@@ -25,11 +25,20 @@
         "steve-mitchell",
         "paul-clark"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "cafe-brushstrokes",
+        "steve-flat-wash"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "cafe-brushstrokes",
+      "alternativeCandidateId": "steve-flat-wash",
+      "alternativeExperience": null,
+      "matchingRisk": "HIGH",
+      "mustVerify": "Observe pigment concentration and actual water load without assuming pale means dry",
+      "qaNote": null
     },
     {
       "lessonId": "water-brush",
@@ -55,11 +64,20 @@
         "steve-mitchell",
         "paul-clark"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "steve-flat-wash",
+        "cafe-brushstrokes"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "steve-flat-wash",
+      "alternativeCandidateId": "cafe-brushstrokes",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Observe brush load and how the wash starts",
+      "qaNote": null
     },
     {
       "lessonId": "water-brush",
@@ -85,11 +103,19 @@
         "steve-mitchell",
         "paul-clark"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "steve-flat-wash"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "steve-flat-wash",
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "HIGH",
+      "mustVerify": "Confirm actual dilution comparison is shown, not just a flat wash",
+      "qaNote": null
     },
     {
       "lessonId": "water-brush",
@@ -115,11 +141,20 @@
         "steve-mitchell",
         "paul-clark"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "louise-blend",
+        "cafe-cloud-wet"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "louise-blend",
+      "alternativeCandidateId": "cafe-cloud-wet",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Compare wet-on-wet vs wet-on-dry on the same or similar paper",
+      "qaNote": null
     },
     {
       "lessonId": "water-brush",
@@ -145,7 +180,13 @@
       "approvedResourceId": null,
       "approvedSegmentId": null,
       "status": "NO_VIDEO_NEEDED",
-      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+      "reason": "Learner-owned intention/reflection; no filler video.",
+      "primaryCandidateId": null,
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "NO_VIDEO",
+      "mustVerify": "Learner-owned reflection; avoid filler video",
+      "qaNote": null
     },
     {
       "lessonId": "three-values",
@@ -170,11 +211,20 @@
         "paul-clark",
         "liron-yanconsky"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "paul-values",
+        "matthew-3stage"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "paul-values",
+      "alternativeCandidateId": "matthew-3stage",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Observe grouping by value independent of hue",
+      "qaNote": null
     },
     {
       "lessonId": "three-values",
@@ -199,11 +249,20 @@
         "paul-clark",
         "liron-yanconsky"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "paul-values",
+        "matthew-3stage"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "paul-values",
+      "alternativeCandidateId": "matthew-3stage",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Ensure presenter visibly constructs three-value plan",
+      "qaNote": null
     },
     {
       "lessonId": "three-values",
@@ -229,11 +288,20 @@
         "paul-clark",
         "liron-yanconsky"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "paul-values",
+        "matthew-3stage"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "paul-values",
+      "alternativeCandidateId": "matthew-3stage",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Observe where the dominant dark connects; no unsupported focal rules",
+      "qaNote": "Previous brushstrokes match was wrong: verify actual tonal hierarchy in a values example."
     },
     {
       "lessonId": "three-values",
@@ -259,11 +327,19 @@
         "paul-clark",
         "liron-yanconsky"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "paul-values"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "paul-values",
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "HIGH",
+      "mustVerify": "Check that alternatives are actually demonstrated, not merely repeated",
+      "qaNote": null
     },
     {
       "lessonId": "three-values",
@@ -289,7 +365,13 @@
       "approvedResourceId": null,
       "approvedSegmentId": null,
       "status": "NO_VIDEO_NEEDED",
-      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+      "reason": "Learner-owned intention/reflection; no filler video.",
+      "primaryCandidateId": null,
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "NO_VIDEO",
+      "mustVerify": "Learner reflection; video optional and unnecessary",
+      "qaNote": null
     },
     {
       "lessonId": "edge-families",
@@ -314,11 +396,20 @@
         "louise-de-masi",
         "karen-rice"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "louise-blend",
+        "louise-soft-edges"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "louise-blend",
+      "alternativeCandidateId": "louise-soft-edges",
+      "alternativeExperience": null,
+      "matchingRisk": "HIGH",
+      "mustVerify": "Distinguish hard, soft, lost; blending is not automatically lost edge",
+      "qaNote": null
     },
     {
       "lessonId": "edge-families",
@@ -343,11 +434,19 @@
         "louise-de-masi",
         "karen-rice"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "louise-blend"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "louise-blend",
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Verify actual wet-on-dry sharp-edge demonstration",
+      "qaNote": null
     },
     {
       "lessonId": "edge-families",
@@ -373,11 +472,20 @@
         "louise-de-masi",
         "karen-rice"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "louise-blend",
+        "cafe-cloud-tips"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "louise-blend",
+      "alternativeCandidateId": "cafe-cloud-tips",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Observe wetness and control of a soft transition",
+      "qaNote": null
     },
     {
       "lessonId": "edge-families",
@@ -403,11 +511,19 @@
         "louise-de-masi",
         "karen-rice"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "louise-soft-edges"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": null,
+      "alternativeCandidateId": "louise-soft-edges",
+      "alternativeExperience": null,
+      "matchingRisk": "CRITICAL",
+      "mustVerify": "A soft edge is not a genuinely lost contour; reject without demonstration",
+      "qaNote": "DO NOT SUBSTITUTE soft/blended edges for genuine lost edges; no primary clip until observed."
     },
     {
       "lessonId": "edge-families",
@@ -433,7 +549,13 @@
       "approvedResourceId": null,
       "approvedSegmentId": null,
       "status": "NO_VIDEO_NEEDED",
-      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+      "reason": "Learner-owned intention/reflection; no filler video.",
+      "primaryCandidateId": null,
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "NO_VIDEO",
+      "mustVerify": "Learner reflection; no video necessary",
+      "qaNote": null
     },
     {
       "lessonId": "observed-structure",
@@ -458,11 +580,19 @@
         "tim-wilmot",
         "eric-yi-lin"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "tim-perspective"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "tim-perspective",
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Observe envelope and proportion, not only perspective lines",
+      "qaNote": null
     },
     {
       "lessonId": "observed-structure",
@@ -487,11 +617,19 @@
         "tim-wilmot",
         "eric-yi-lin"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "tim-perspective"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "tim-perspective",
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Identify horizon, related orthogonals and observed verticals",
+      "qaNote": null
     },
     {
       "lessonId": "observed-structure",
@@ -517,11 +655,23 @@
         "tim-wilmot",
         "eric-yi-lin"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "tim-perspective",
+        "javid-cityscape"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "tim-perspective",
+      "alternativeCandidateId": "javid-cityscape",
+      "alternativeExperience": [
+        "intermediate",
+        "advanced"
+      ],
+      "matchingRisk": "HIGH",
+      "mustVerify": "Verify comparison of naturalistic versus simplified structure is actually discussed",
+      "qaNote": "Javid only advanced optional comparison if directly demonstrated and teaching sufficient, not a perspective prerequisite."
     },
     {
       "lessonId": "observed-structure",
@@ -547,7 +697,13 @@
       "approvedResourceId": null,
       "approvedSegmentId": null,
       "status": "NO_VIDEO_NEEDED",
-      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+      "reason": "Learner-owned intention/reflection; no filler video.",
+      "primaryCandidateId": null,
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "NO_VIDEO",
+      "mustVerify": "Learner reflection; no video necessary",
+      "qaNote": null
     },
     {
       "lessonId": "quiet-landscape",
@@ -576,7 +732,13 @@
       "approvedResourceId": null,
       "approvedSegmentId": null,
       "status": "NO_VIDEO_NEEDED",
-      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+      "reason": "Learner-owned intention/reflection; no filler video.",
+      "primaryCandidateId": null,
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "NO_VIDEO",
+      "mustVerify": "Personal intention setting; avoid filler video",
+      "qaNote": null
     },
     {
       "lessonId": "quiet-landscape",
@@ -604,11 +766,20 @@
         "matthew-white",
         "oliver-pyle"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "paul-values",
+        "matthew-3stage"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "paul-values",
+      "alternativeCandidateId": "matthew-3stage",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Observe simplified arrangement rather than copying surface detail",
+      "qaNote": null
     },
     {
       "lessonId": "quiet-landscape",
@@ -636,11 +807,20 @@
         "matthew-white",
         "oliver-pyle"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "matthew-process-2024",
+        "steve-flat-wash"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "matthew-process-2024",
+      "alternativeCandidateId": "steve-flat-wash",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Confirm prep, order and moisture setup are visible",
+      "qaNote": null
     },
     {
       "lessonId": "quiet-landscape",
@@ -668,11 +848,20 @@
         "matthew-white",
         "oliver-pyle"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "cafe-cloud-tips",
+        "cafe-cloud-wet"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "cafe-cloud-tips",
+      "alternativeCandidateId": "cafe-cloud-wet",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Watch moisture timing and intentional stop; cloud details may not fit minimal sky",
+      "qaNote": "Use only a verified technique segment. Publisher chapters approved as hints only."
     },
     {
       "lessonId": "quiet-landscape",
@@ -700,11 +889,20 @@
         "matthew-white",
         "oliver-pyle"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "matthew-3stage",
+        "oliver-landscape"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "matthew-3stage",
+      "alternativeCandidateId": "oliver-landscape",
+      "alternativeExperience": null,
+      "matchingRisk": "MEDIUM",
+      "mustVerify": "Observe distant mass value/edge without universal rule",
+      "qaNote": null
     },
     {
       "lessonId": "quiet-landscape",
@@ -732,11 +930,20 @@
         "matthew-white",
         "oliver-pyle"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "matthew-3stage",
+        "paul-simple-landscape"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "matthew-3stage",
+      "alternativeCandidateId": "paul-simple-landscape",
+      "alternativeExperience": null,
+      "matchingRisk": "HIGH",
+      "mustVerify": "Observe foreground value and contrast without over-darkening",
+      "qaNote": null
     },
     {
       "lessonId": "quiet-landscape",
@@ -764,11 +971,23 @@
         "matthew-white",
         "oliver-pyle"
       ],
-      "candidateVideoIds": [],
+      "candidateVideoIds": [
+        "matthew-process-2024",
+        "javid-atmosphere"
+      ],
       "approvedResourceId": null,
       "approvedSegmentId": null,
-      "status": "UNFILLED_ACCESS_BLOCKED",
-      "reason": "Direct video inspection and exact boundaries unavailable; no metadata, technique or captions invented."
+      "status": "OWNER_ACCEPTED_RESEARCH_PENDING_VERIFICATION",
+      "reason": "Final owner handoff accepted these proposals; exact clips, duration, captions, audience, live player and final approval remain unresolved.",
+      "primaryCandidateId": "matthew-process-2024",
+      "alternativeCandidateId": "javid-atmosphere",
+      "alternativeExperience": [
+        "intermediate",
+        "advanced"
+      ],
+      "matchingRisk": "HIGH",
+      "mustVerify": "Choose selective accents and stopping point; advanced video optional",
+      "qaNote": "Javid only optional intermediate/advanced inspiration; foundational finishing remains independent."
     },
     {
       "lessonId": "quiet-landscape",
@@ -797,7 +1016,14 @@
       "approvedResourceId": null,
       "approvedSegmentId": null,
       "status": "NO_VIDEO_NEEDED",
-      "reason": "Personal planning/reflection is served by the original exercise; video adds no necessary evidence."
+      "reason": "Learner-owned intention/reflection; no filler video.",
+      "primaryCandidateId": null,
+      "alternativeCandidateId": null,
+      "alternativeExperience": null,
+      "matchingRisk": "NO_VIDEO",
+      "mustVerify": "Learner reflection; no video necessary",
+      "qaNote": null
     }
-  ]
+  ],
+  "source": "Final owner handoff, corrected mapping; research suggestions only"
 }

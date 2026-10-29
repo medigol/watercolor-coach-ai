@@ -100,6 +100,12 @@ export interface MediaResource {
   active: boolean;
   replacementId: string | null;
   durationSeconds: number;
+  audience: {
+    status: "unknown" | "not-made-for-kids" | "made-for-kids";
+    checkedAt: string | null;
+    source: string | null;
+    reviewer: string | null;
+  };
   captions: CaptionObservation;
   review: {
     status: EditorialStatus;

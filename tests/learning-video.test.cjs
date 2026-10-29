@@ -370,7 +370,15 @@ test("coverage matrix maps every actual step once, without guessed video identif
         .find((i) => i.id === r.lessonId)
         .steps.some((s) => s.id === r.stepId),
     );
-    assert.deepEqual(r.candidateVideoIds, []);
+    const known = new Set(
+      require("../docs/video/final-handoff/evidence.json").candidates.map(
+        (c) => c.id,
+      ),
+    );
+    assert(
+      r.candidateVideoIds.every((id) => known.has(id)),
+      "research IDs must come from the final owner handoff",
+    );
     assert.equal(r.approvedResourceId, null);
   }
 });

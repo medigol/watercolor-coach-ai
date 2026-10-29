@@ -144,6 +144,28 @@ export function validMedia(v: unknown): v is MediaResource {
     !texts(v.limitations)
   )
     return false;
+  const audience = v.audience;
+  if (
+    !record(audience) ||
+    !["unknown", "not-made-for-kids", "made-for-kids"].includes(
+      String(audience.status),
+    )
+  )
+    return false;
+  if (audience.status === "unknown") {
+    if (
+      audience.checkedAt !== null ||
+      audience.source !== null ||
+      audience.reviewer !== null
+    )
+      return false;
+  } else if (
+    !validDate(audience.checkedAt) ||
+    audience.checkedAt > String(v.verifiedAt) ||
+    audience.source !== v.url ||
+    !text(audience.reviewer)
+  )
+    return false;
   const c = v.captions,
     r = v.review;
   if (
@@ -293,6 +315,10 @@ export function publicationErrors(v: unknown): string[] {
   if (!validMedia(v))
     return ["Invalid media metadata, curriculum references or segment ranges"];
   const errors: string[] = [];
+  if (v.audience.status !== "not-made-for-kids")
+    errors.push(
+      "Audience/Made for Kids review unresolved or excluded from this release",
+    );
   if (!v.active || v.review.status === "retired")
     errors.push("Resource retired/inactive");
   if (v.review.status !== "owner-approved")

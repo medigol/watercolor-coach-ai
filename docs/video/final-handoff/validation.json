@@ -1,0 +1,328 @@
+{
+  "date": "2026-10-29",
+  "branch": "codex/curated-watercolour-video-v1",
+  "existingDraftPR": 40,
+  "dependsOnPR": 39,
+  "baseline": "422695c38addb7cbbfc1e7e08e41fb9f4452d7d9",
+  "dependencyHead": "703996ef1eedac355b76c8d282833390b455ad07",
+  "sourceSha256": {
+    "docs/video/README.md": "0796d346d80a01780624a9add630c69589080b204c0e86ab359769edc43cd28a",
+    "docs/video/coverage.json": "cd4e17779de95678d788a547e531ac45ae163a39c96d4a107225a65632cd0885",
+    "docs/video/editorial-candidates.json": "2c4efc8abc67d6a5d6d3da1ae6ee58fc83fef9f907e5c650a67f2f3a4a29c4b8",
+    "docs/video/final-handoff/OWNER_REVIEW_BOARD.html": "b4dd3fa0b081017e63bc073e6fc6748b7d062d8c4d1cc1c809d4a0b8c2884d22",
+    "docs/video/final-handoff/README.md": "c21335ba07c4d525976bb25a73a7973d3630359f6125e8aae3ff7d9c116000fc",
+    "docs/video/final-handoff/access-2026-10-29.json": "408b73381672ed35be5f605f0e959b50a019cfd66c65ef313a729751a50084a8",
+    "docs/video/final-handoff/browser-access-2026-10-29.json": "8b63367316f1b7027f923bdda42f5768a10a76401af19d5a0c8f0de71ff33355",
+    "docs/video/final-handoff/evidence.json": "761a43c73922cdd72303badeab6a2b8e35f819ec383787cb9bb8a4f44df3f918",
+    "docs/video/final-handoff/owner-screening-as-submitted.json": "96fa70b98de515945086f5cb6489c1a3caf793afdb67e1db64e8a51570db160f",
+    "docs/video/final-handoff/screenshots/01-steve-already-screened.png": "dd762126aa5f419764a97bca23f60561a6fb7164f71155c0f80045b61d1647b9",
+    "docs/video/final-handoff/screenshots/02-javid-advanced-plan.png": "c6523481a8e9a694884ff56b67c31c1ec1594deb5a684c46cf673b78cf89f927",
+    "docs/video/final-handoff/screenshots/03-mobile-board.png": "82ad106ec1c0d8a77e3e2353d4b659e3863c0a66d8e22dcbf929e82d5f2b1d34",
+    "docs/video/instructors.json": "de8acf31c2131f9aacfcc66f5b930523a7af3f08f1b05b226b7809253eb8946c",
+    "learning/media.ts": "2d9dae69858a847029eb233942d26fba831d02309a26569c6db0637dd4d933b5",
+    "learning/videoTypes.ts": "cb7f64b05939cc5806e70d66cd78c51aa4a347ab834640b762f458d3db49f6d3",
+    "scripts/build-video-review-board.cjs": "426d371d370444b5f4775b11d7e5799bc6ced932d4a6f8789abcf131eeee97f5",
+    "scripts/import-video-handoff.cjs": "9cb636a19c7adeb7d1df506ab783dbc39a9294b879e8c6f9145ab8f16d8ea334",
+    "tests/browser/video-review-board.cjs": "48c5fd46feadc81cf007e5541319b2ba5ee6d5f2c5eaf936617bdce31bc15c16",
+    "tests/helpers/video-fixture.cjs": "9e29e35162373757daa755bd16df0e72114d81e55b4b9bc38c154b8c59780ce9",
+    "tests/learning-video.test.cjs": "06d20c7ec20972cd0a1a1ce9f1ac4069a16f8a70b83a810eeb999155b55ec87d",
+    "tests/video-handoff.test.cjs": "6feb98d4af0cf523fdba5b8bf1b102bcd83119c2388c41a011a2fedb08cc39e6"
+  },
+  "unchangedPlayerAndProductionContracts": [
+    "components/learning/YouTubeResource.tsx",
+    "components/learning/YouTubeFrame.web.tsx",
+    "components/learning/YouTubeFrame.tsx",
+    "components/learning/youtubeApi.web.ts",
+    "components/learning/LessonDemonstration.tsx",
+    "app/(tabs)/learn/lesson.tsx",
+    "providers/LearningProvider.tsx",
+    "learning/content.ts",
+    "learning/catalogue.ts",
+    "learning/engine.ts",
+    "learning/progress.ts",
+    "learning/types.ts",
+    "package.json",
+    "package-lock.json",
+    "docs/benchmark/production-lock.json"
+  ],
+  "inputArchiveSha256": "5f164b32b1388b6abaaaf09c50fae9a64c2a930309c1e1aa1aaae35f6e1c3b5f",
+  "inputManifestEntriesVerified": 17,
+  "editorial": {
+    "candidates": 17,
+    "ownerScreened": 4,
+    "ownerFullWitnessedWindows": 2,
+    "ownerStartOnly": 1,
+    "publisherHints": 14,
+    "steps": 27,
+    "noVideoSteps": 6,
+    "teachingDrafts": 11,
+    "javidCandidates": 3,
+    "published": 0
+  },
+  "ownerScreeningIsIndependentRubricReview": false,
+  "independentContentReviews": 0,
+  "approvedProductionResources": 0,
+  "approvedSegments": 0,
+  "scoresInvented": false,
+  "liveYouTubeVerified": false,
+  "freshHttpAttempts": [
+    {
+      "url": "https://www.youtube.com/watch?v=MjUA_axxl4s",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=iP97XXdpFpA",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=nbszEH7DO6w",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=3sNvfeoXi3o",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=8sKFqQAW5Ns",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://developers.google.com/youtube/iframe_api_reference",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://developers.google.com/youtube/player_parameters",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/developer-policies",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/required-minimum-functionality",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/developer-policies-guide",
+      "failure": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "actualContentInspected": false,
+      "date": "2026-10-29"
+    }
+  ],
+  "verdicts": {
+    "engineering": "CONDITIONALLY READY for review; current live/policy verification unavailable",
+    "editorial": "BLOCKED for publication; four real owner screenings and 17 accepted research candidates preserved",
+    "production": "BLOCKED"
+  },
+  "tests": {
+    "unitIntegration": 1972,
+    "pass": 1972,
+    "fail": 0,
+    "newHandoffTests": 15,
+    "frontendTypeScript": "PASS",
+    "strictEdgeTypeScript": "PASS, Deno2.9.6 cached dependencies/system TLS trust",
+    "configuredExport": "PASS",
+    "unconfiguredExport": "PASS",
+    "isolatedSyntheticFixtureExport": "PASS",
+    "learningResponsiveCases": 35,
+    "learningFirstViewportCases": 8,
+    "videoBrowser": {
+      "status": "PASS",
+      "mode": "SYNTHETIC CATALOGUE + MOCKED OFFICIAL API, not live YouTube verification",
+      "matrix": [
+        {
+          "width": 320,
+          "playerWidth": 292,
+          "playerHeight": 200
+        },
+        {
+          "width": 375,
+          "playerWidth": 335,
+          "playerHeight": 200
+        },
+        {
+          "width": 390,
+          "playerWidth": 350,
+          "playerHeight": 200
+        },
+        {
+          "width": 430,
+          "playerWidth": 390,
+          "playerHeight": 219
+        },
+        {
+          "width": 768,
+          "playerWidth": 728,
+          "playerHeight": 410
+        },
+        {
+          "width": 1024,
+          "playerWidth": 451,
+          "playerHeight": 254
+        },
+        {
+          "width": 1440,
+          "playerWidth": 558,
+          "playerHeight": 314
+        }
+      ],
+      "reflow": [
+        {
+          "width": 375,
+          "height": 600,
+          "replayReachable": true
+        },
+        {
+          "width": 844,
+          "height": 390,
+          "replayReachable": true
+        },
+        {
+          "width": 1024,
+          "height": 600,
+          "replayReachable": true
+        },
+        {
+          "width": 390,
+          "height": 480,
+          "replayReachable": true
+        }
+      ],
+      "textEnlargement": "200% user stylesheet; no clipping",
+      "zeroPreConsentRequests": true,
+      "absoluteSegmentBounds": true,
+      "replayRestoresEnd": true,
+      "samePlayerForSegments": true,
+      "defaultCaptionsNotForced": true,
+      "progressUnchanged": true,
+      "cleanup": true,
+      "errors": [],
+      "unexpected": [],
+      "requests": [
+        {
+          "url": "https://www.youtube.com/iframe_api",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8163&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8163&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8163&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8163&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8163",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8163",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8163",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube.com/iframe_api",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8163",
+          "method": "GET"
+        }
+      ],
+      "realVideosReviewed": 0,
+      "realPlayback": false,
+      "physicalDevice": false
+    },
+    "editorialBoardBrowser": {
+      "status": "PASS",
+      "widths": [
+        320,
+        375,
+        390,
+        430,
+        768,
+        1024,
+        1440
+      ],
+      "ownerAnswersPreserved": true,
+      "noGuessedEndpoints": true,
+      "conflictVisible": true,
+      "javidAdvancedOnly": true,
+      "draftExportNotApproval": true,
+      "invalidRangeBlocked": true,
+      "noThirdPartyRequests": true,
+      "errors": [],
+      "external": [],
+      "realPlayback": false
+    },
+    "assessmentBrowserCases": 177,
+    "rasterBrowserCases": 40,
+    "unconfiguredRoutes": 15,
+    "localPostgreSQLSecurity": "PASS",
+    "productionSourceLock": "PASS unchanged",
+    "realMediaAbsentFromProductionBundle": true
+  },
+  "reproducedFix": {
+    "defect": "An otherwise complete synthetic resource with unresolved audience/Made for Kids status passed publicationErrors",
+    "beforeTest": "focused-before.log (expected failing regression)",
+    "after": "Known dated identity-matched audience evidence required; unknown and made-for-kids excluded from this release",
+    "playerRebuilt": false
+  },
+  "limits": [
+    "YouTube and official policy HTTP attempts remain 403; browser tunnel failures",
+    "No true final clip duration/boundary, audience/caption/embeddability, independent score or exact release approval manufactured",
+    "file-protocol board launch blocked by managed Chromium; board tested using loopback HTTP",
+    "No physical Android/iOS, real captions/fullscreen/advertising inspection or real video frames"
+  ],
+  "operations": {
+    "paidAI": 0,
+    "newCredentials": 0,
+    "newDependencies": 0,
+    "databaseChanges": 0,
+    "productionWrites": 0,
+    "merge": false,
+    "deployment": false,
+    "newPR": false
+  }
+}

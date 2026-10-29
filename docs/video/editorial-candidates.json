@@ -1,9 +1,165 @@
 {
-  "date": "2026-10-28",
-  "candidateVideos": [],
-  "adequatelyInspected": 0,
+  "date": "2026-10-29",
+  "source": "final-handoff/evidence.json",
+  "candidateVideos": [
+    {
+      "id": "cafe-cloud-tips",
+      "videoId": "MjUA_axxl4s",
+      "url": "https://www.youtube.com/watch?v=MjUA_axxl4s",
+      "suppliedTitleLabel": "5 TIPS for EASY Watercolor Cloud - NO MORE muddy clouds",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": true,
+      "approvedForProduction": false
+    },
+    {
+      "id": "louise-blend",
+      "videoId": "UeIHo83pVGc",
+      "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+      "suppliedTitleLabel": "How to Blend Watercolor Paint. Watercolor Painting Techniques for Beginners",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": true,
+      "approvedForProduction": false
+    },
+    {
+      "id": "paul-values",
+      "videoId": "iP97XXdpFpA",
+      "url": "https://www.youtube.com/watch?v=iP97XXdpFpA",
+      "suppliedTitleLabel": "How to improve your paintings by understanding tonal values & contrast",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": true,
+      "approvedForProduction": false
+    },
+    {
+      "id": "steve-flat-wash",
+      "videoId": "alq0YqX86gs",
+      "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+      "suppliedTitleLabel": "Flat wash basics \u2014 first episode in the wash series (descriptive label; confirm exact title)",
+      "titleStatus": "DESCRIPTIVE_LABEL_EXACT_TITLE_UNCONFIRMED",
+      "ownerScreened": true,
+      "approvedForProduction": false
+    },
+    {
+      "id": "cafe-cloud-wet",
+      "videoId": "OowOblcJ3pA",
+      "url": "https://www.youtube.com/watch?v=OowOblcJ3pA",
+      "suppliedTitleLabel": "Painting Clouds with Watercolor - wet on wet watercolor technique",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "tim-perspective",
+      "videoId": "R8LLCN_HtGY",
+      "url": "https://www.youtube.com/watch?v=R8LLCN_HtGY",
+      "suppliedTitleLabel": "Perspective painting tutorial with a watercolor demo by Tim Wilmot #52",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "cafe-brushstrokes",
+      "videoId": "lPSQsQGAf80",
+      "url": "https://www.youtube.com/watch?v=lPSQsQGAf80",
+      "suppliedTitleLabel": "Watercolor Brushstrokes Guide - get the most out of your brushes",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "matthew-3stage",
+      "videoId": "EXogVtqcaho",
+      "url": "https://www.youtube.com/watch?v=EXogVtqcaho",
+      "suppliedTitleLabel": "Step by Step Landscape Painting for Beginners",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "matthew-process-2024",
+      "videoId": "Ihksu_1qSvI",
+      "url": "https://www.youtube.com/watch?v=Ihksu_1qSvI",
+      "suppliedTitleLabel": "Step by Step Watercolor Landscape Tutorial (my exact process)",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "paul-simple-landscape",
+      "videoId": "43oD8_ihjBI",
+      "url": "https://www.youtube.com/watch?v=43oD8_ihjBI",
+      "suppliedTitleLabel": "How to paint a simple landscape in Watercolour - No.1",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "louise-soft-edges",
+      "videoId": "PUoNrUd1JXk",
+      "url": "https://www.youtube.com/watch?v=PUoNrUd1JXk",
+      "suppliedTitleLabel": "How to soften paint edges in watercolor for beginners.",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "javid-cityscape",
+      "videoId": "nbszEH7DO6w",
+      "url": "https://www.youtube.com/watch?v=nbszEH7DO6w",
+      "suppliedTitleLabel": "How to paint Cityscape in watercolor",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "javid-cityscape-confirmed-2021",
+      "videoId": "3sNvfeoXi3o",
+      "url": "https://www.youtube.com/watch?v=3sNvfeoXi3o",
+      "suppliedTitleLabel": "How to paint cityscape in watercolor painting demo by javid tabatabaei",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "javid-atmosphere",
+      "videoId": "8sKFqQAW5Ns",
+      "url": "https://www.youtube.com/watch?v=8sKFqQAW5Ns",
+      "suppliedTitleLabel": "Atmospheric Landscape -Watercolor Painting Tutorial",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "louise-clouds",
+      "videoId": "8Pi7wf23T2I",
+      "url": "https://www.youtube.com/watch?v=8Pi7wf23T2I",
+      "suppliedTitleLabel": "Easy Techniques for Painting Clouds in Watercolor",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "matthew-landscape-2025",
+      "videoId": "-cGD6FSMa9c",
+      "url": "https://www.youtube.com/watch?v=-cGD6FSMa9c",
+      "suppliedTitleLabel": "Watercolor Landscape - Step by step",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    },
+    {
+      "id": "oliver-landscape",
+      "videoId": "HJTA93jrRJo",
+      "url": "https://www.youtube.com/watch?v=HJTA93jrRJo",
+      "suppliedTitleLabel": "Painting a Watercolour Landscape - An Introduction for Beginners",
+      "titleStatus": "SUPPLIED_RESEARCH_TITLE_NOT_RECHECKED",
+      "ownerScreened": false,
+      "approvedForProduction": false
+    }
+  ],
+  "ownerScreened": 4,
+  "independentlyContentReviewed": 0,
   "scored": 0,
   "approvedVideos": 0,
   "approvedSegments": 0,
-  "reason": "All accessible discovery/creator attempts returned proxy HTTP403. No video IDs/titles/durations/timestamps can be verified. Do not manufacture 25–35 discovery records or editorial scores."
+  "reason": "Final owner evidence consumed. Do not equate accepted research, owner screening or publisher hints with exact segment/live/release approval."
 }

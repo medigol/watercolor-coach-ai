@@ -25,6 +25,12 @@ module.exports = function videoFixture() {
     active: true,
     replacementId: null,
     durationSeconds: 900,
+    audience: {
+      status: "not-made-for-kids",
+      checkedAt: date,
+      source: url,
+      reviewer: "SYNTHETIC contract fixture; no real audience inspection",
+    },
     captions: {
       presence: "unknown",
       languages: [],

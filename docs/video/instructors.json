@@ -1,15 +1,15 @@
 {
-  "date": "2026-10-28",
+  "date": "2026-10-29",
   "finalSelection": [],
-  "provisionalScreeningPlan": "Compare Steve Mitchell and Paul Clark for a foundations lead; Eric Yi Lin for values/atmosphere; use only a necessary specialist after actual review. No educator is selected or endorsed yet.",
+  "provisionalScreeningPlan": "Use the four already screened specific videos as accepted research leads; do not repeat their screening questionnaire. Confirm exact clips and technical/policy evidence. Include Javid as optional intermediate/advanced, not a beginner prerequisite.",
   "instructors": [
     {
       "id": "steve-mitchell",
-      "name": "Steve Mitchell — The Mind of Watercolor",
+      "name": "Steve Mitchell \u2014 The Mind of Watercolor",
       "proposedFit": "Water/brush handling and materials",
       "screeningRole": "Primary candidate; continuity with water and edges",
-      "basis": "Owner-supplied candidate hypotheses, not verified teaching findings",
-      "status": "DEFERRED_ACCESS_BLOCKED",
+      "basis": "Owner directly screened this specific video; independent rubric dimensions remain unassessed.",
+      "status": "OWNER_SCREENED_SPECIFIC_VIDEO_NOT_FINAL_RELEASE",
       "assessedDimensions": {
         "artisticCompetence": null,
         "technicalCorrectness": null,
@@ -29,15 +29,35 @@
       },
       "confirmedExamples": [],
       "approvedRole": null,
-      "independentReviewer": null
+      "independentReviewer": null,
+      "ownerScreeningEvidence": {
+        "candidateId": "steve-flat-wash",
+        "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+        "screening": {
+          "watchedRelevantPart": true,
+          "clarity": "good",
+          "fit": "exact",
+          "date": "2026-10-29T00:12:45.625Z",
+          "narrationAsObserved": "english",
+          "witnessedWindow": {
+            "startSeconds": 47,
+            "endSeconds": 702,
+            "scope": "OWNER_WITNESSED_PROPOSAL_NOT_FINAL_CLIP"
+          },
+          "startOnlyHint": null,
+          "rawTimeFields": null,
+          "captions": "unknown",
+          "releaseApproval": false
+        }
+      }
     },
     {
       "id": "paul-clark",
       "name": "Paul Clark",
       "proposedFit": "Beginner technique and values",
       "screeningRole": "Primary candidate; compare beginner sequencing",
-      "basis": "Owner-supplied candidate hypotheses, not verified teaching findings",
-      "status": "DEFERRED_ACCESS_BLOCKED",
+      "basis": "Owner directly screened this specific video; independent rubric dimensions remain unassessed.",
+      "status": "OWNER_SCREENED_SPECIFIC_VIDEO_NOT_FINAL_RELEASE",
       "assessedDimensions": {
         "artisticCompetence": null,
         "technicalCorrectness": null,
@@ -57,15 +77,35 @@
       },
       "confirmedExamples": [],
       "approvedRole": null,
-      "independentReviewer": null
+      "independentReviewer": null,
+      "ownerScreeningEvidence": {
+        "candidateId": "paul-values",
+        "url": "https://www.youtube.com/watch?v=iP97XXdpFpA",
+        "screening": {
+          "watchedRelevantPart": true,
+          "clarity": "good",
+          "fit": "exact",
+          "date": "2026-10-29T00:15:04.603Z",
+          "narrationAsObserved": "english",
+          "witnessedWindow": {
+            "startSeconds": 37,
+            "endSeconds": 852,
+            "scope": "OWNER_WITNESSED_PROPOSAL_NOT_FINAL_CLIP"
+          },
+          "startOnlyHint": null,
+          "rawTimeFields": null,
+          "captions": "unknown",
+          "releaseApproval": false
+        }
+      }
     },
     {
       "id": "eric-yi-lin",
-      "name": "Eric Yi Lin — Café Watercolor",
+      "name": "Eric Yi Lin \u2014 Caf\u00e9 Watercolor",
       "proposedFit": "Tonal simplification and artistic decisions",
       "screeningRole": "Primary candidate; bridge values to atmosphere",
-      "basis": "Owner-supplied candidate hypotheses, not verified teaching findings",
-      "status": "DEFERRED_ACCESS_BLOCKED",
+      "basis": "Owner directly screened this specific video; independent rubric dimensions remain unassessed.",
+      "status": "OWNER_SCREENED_SPECIFIC_VIDEO_NOT_FINAL_RELEASE",
       "assessedDimensions": {
         "artisticCompetence": null,
         "technicalCorrectness": null,
@@ -85,7 +125,23 @@
       },
       "confirmedExamples": [],
       "approvedRole": null,
-      "independentReviewer": null
+      "independentReviewer": null,
+      "ownerScreeningEvidence": {
+        "candidateId": "cafe-cloud-tips",
+        "url": "https://www.youtube.com/watch?v=MjUA_axxl4s",
+        "screening": {
+          "watchedRelevantPart": true,
+          "clarity": "good",
+          "fit": "exact",
+          "date": "2026-10-29T00:17:01.497Z",
+          "narrationAsObserved": null,
+          "witnessedWindow": null,
+          "startOnlyHint": null,
+          "rawTimeFields": null,
+          "captions": "unknown",
+          "releaseApproval": false
+        }
+      }
     },
     {
       "id": "javid-tabatabaei",
@@ -93,7 +149,7 @@
       "proposedFit": "Atmospheric and urban demonstrations",
       "screeningRole": "Specialist candidate; separately inspect English/Persian narration and paid-preview dependency",
       "basis": "Owner-supplied candidate hypotheses, not verified teaching findings",
-      "status": "DEFERRED_ACCESS_BLOCKED",
+      "status": "OWNER_REQUIRED_ADVANCED_OPTIONAL_RESEARCH",
       "assessedDimensions": {
         "artisticCompetence": null,
         "technicalCorrectness": null,
@@ -113,7 +169,14 @@
       },
       "confirmedExamples": [],
       "approvedRole": null,
-      "independentReviewer": null
+      "independentReviewer": null,
+      "structuredTeachingPlan": "final-handoff/evidence.json#advancedPlan",
+      "candidateIds": [
+        "javid-cityscape",
+        "javid-cityscape-confirmed-2021",
+        "javid-atmosphere"
+      ],
+      "selectedForNextInspection": "javid-cityscape"
     },
     {
       "id": "matthew-white",
@@ -176,8 +239,8 @@
       "name": "Louise De Masi",
       "proposedFit": "Observation, layering and edges",
       "screeningRole": "Botanical specialist candidate",
-      "basis": "Owner-supplied candidate hypotheses, not verified teaching findings",
-      "status": "DEFERRED_ACCESS_BLOCKED",
+      "basis": "Owner directly screened this specific video; independent rubric dimensions remain unassessed.",
+      "status": "OWNER_SCREENED_SPECIFIC_VIDEO_NOT_FINAL_RELEASE",
       "assessedDimensions": {
         "artisticCompetence": null,
         "technicalCorrectness": null,
@@ -197,7 +260,27 @@
       },
       "confirmedExamples": [],
       "approvedRole": null,
-      "independentReviewer": null
+      "independentReviewer": null,
+      "ownerScreeningEvidence": {
+        "candidateId": "louise-blend",
+        "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+        "screening": {
+          "watchedRelevantPart": true,
+          "clarity": "good",
+          "fit": "exact",
+          "date": "2026-10-29T00:16:24.410Z",
+          "narrationAsObserved": "english",
+          "witnessedWindow": null,
+          "startOnlyHint": 90,
+          "rawTimeFields": {
+            "start": "01:30",
+            "end": "",
+            "warning": "INCOMPLETE_OR_INVALID_NOT_VERIFIED"
+          },
+          "captions": "unknown",
+          "releaseApproval": false
+        }
+      }
     },
     {
       "id": "oliver-pyle",
@@ -311,5 +394,37 @@
       "approvedRole": null,
       "independentReviewer": null
     }
-  ]
+  ],
+  "ownerAcceptedProvisionalAllocation": [
+    {
+      "instructor": "Steve Mitchell",
+      "role": "Brush loading and wash foundations",
+      "screenedCandidate": "steve-flat-wash"
+    },
+    {
+      "instructor": "Paul Clark",
+      "role": "Values and contrast",
+      "screenedCandidate": "paul-values"
+    },
+    {
+      "instructor": "Louise De Masi",
+      "role": "Moisture and hard/soft edges; no lost-edge approval inferred",
+      "screenedCandidate": "louise-blend"
+    },
+    {
+      "instructor": "Eric Yi Lin / Caf\u00e9 Watercolor",
+      "role": "Cloud moisture/timing and optional atmosphere applications",
+      "screenedCandidate": "cafe-cloud-tips"
+    },
+    {
+      "instructor": "Javid Tabatabaei",
+      "role": "Owner-required intermediate/advanced optional urban/atmospheric plan",
+      "candidateIds": [
+        "javid-cityscape",
+        "javid-cityscape-confirmed-2021",
+        "javid-atmosphere"
+      ]
+    }
+  ],
+  "allocationScope": "Accepted research direction and specific preliminary screening; no blanket channel, final segment or release approval."
 }
