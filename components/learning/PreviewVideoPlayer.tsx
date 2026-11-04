@@ -10,16 +10,19 @@ import { defaultPreviewWindow, previewWindowSummary, videoLearningGuides, type V
 import type { CaptionPreferences } from "../../learning/videoTypes";
 import type { PlayerNotice } from "../../learning/videoPlayer";
 
-export default function PreviewVideoPlayer({ candidate, context, initiallyRequested = false, reviewMode = false, onWindowChange, onPractice }: {
+export default function PreviewVideoPlayer({ candidate, context, initiallyRequested = false, reviewMode = false, onWindowChange, onPractice, initialWindowId, contextual = false }: {
   candidate: PreviewCandidate;
   context: VideoContext;
+  /** Explicit evidence-bound inline reference; never a new inferred clip. */
+  initialWindowId?: string;
+  contextual?: boolean;
   /** Ephemeral in-app Watch gesture, never derived from a URL or local storage. */
   initiallyRequested?: boolean;
   reviewMode?: boolean;
   onWindowChange: (id: string) => void;
   onPractice: () => void;
 }) {
-  const [selected, setSelected] = useState(() => defaultPreviewWindow(candidate, context));
+  const [selected, setSelected] = useState(() => initialWindowId ?? defaultPreviewWindow(candidate, context));
   const [width, setWidth] = useState(0), [requested, setRequested] = useState(initiallyRequested);
   const [captions, setCaptions] = useState<CaptionPreferences>(defaultCaptions);
   const [frame, setFrame] = useState<{ url: string; revision: number; original: boolean } | null>(null);
@@ -35,6 +38,7 @@ export default function PreviewVideoPlayer({ candidate, context, initiallyReques
   const canEmbed = Platform.OS === "web" && width >= 200;
   const failed = !!notice && ["error", "unavailable", "restricted"].includes(notice.state);
   function load() {
+    if (!urls) return;
     setRequested(true); launched.current = true;
     setNotice({ state: "loading", message: "Opening YouTube…" });
     setFrame(f => ({ url: urls.embed, original: urls.cue.endSeconds === undefined, revision: (f?.revision ?? 0) + 1 }));
@@ -49,6 +53,7 @@ export default function PreviewVideoPlayer({ candidate, context, initiallyReques
   }, [requested, canEmbed]);
   async function external(full: boolean) {
     controls.current?.pause();
+    if (!urls) return;
     try { await Linking.openURL(full ? urls.full : urls.external); }
     catch { setNotice({ state: "error", message: "The YouTube link could not open. You can still try the exercise below." }); }
   }
@@ -60,6 +65,7 @@ export default function PreviewVideoPlayer({ candidate, context, initiallyReques
   function select(id: string) {
     controls.current?.pause();
     const next = previewUrls(candidate, id, captions, origin)!;
+    if (!next) return;
     setSelected(id); setNotice(null);
     if (frame && (frame.original !== (next.cue.endSeconds === undefined) || failed)) {
       // The existing frame cues bounded-to-bounded changes. Remount only when
@@ -67,6 +73,7 @@ export default function PreviewVideoPlayer({ candidate, context, initiallyReques
       setFrame(f => ({ url: next.embed, original: next.cue.endSeconds === undefined, revision: (f?.revision ?? 0) + 1 }));
     }
   }
+  if (!urls) return <Copy muted>This preview window is unavailable. Continue with the written exercise.</Copy>;
   return <View testID="preview-player" onLayout={e => setWidth(e.nativeEvent.layout.width)} style={{ gap: 12 }}>
     <Copy muted>{previewWindowSummary(candidate, selected)}</Copy>
     {frame && canEmbed && !failed ? <>
@@ -83,7 +90,7 @@ export default function PreviewVideoPlayer({ candidate, context, initiallyReques
     </>}
     {notice && <Text role="status" accessibilityLiveRegion="polite" style={learnStyles.muted}>{notice.state === "ready" ? "Ready · use YouTube Play if needed." : notice.message}</Text>}
     <Disclosure title="Video options">
-      {candidate.windows.length > 0 && <Disclosure title="Choose another chapter">
+      {!contextual && candidate.windows.length > 0 && <Disclosure title="Choose another chapter">
         <Choices values={windowChoices} selected={selected} onSelect={select} />
         {candidate.id === "cafe-cloud-tips" && <Copy muted>The 2:18 chapter has two conflicting proposed endpoints (2:42 and 4:58). Neither is selected by default. Both remain in owner review.</Copy>}
       </Disclosure>}

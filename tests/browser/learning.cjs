@@ -423,6 +423,7 @@ const token = [
     const preserved = await read();
     const loadLearning = require("../helpers/learning-loader.cjs");
     const water = loadLearning("learning/content.ts").itemById("water-brush");
+    const teachingFocus = loadLearning("learning/instruction.ts").unitsForStep(water.id, "set-up")[0];
     const { newEntry, checklistId } = loadLearning("learning/progress.ts");
     const older = require("../helpers/learning-progress-v1.json");
     await page.evaluate(
@@ -461,7 +462,7 @@ const token = [
       await page.goto(base + "/learn/lesson?id=water-brush");
       await heading("Prepare a repeatable brush load").waitFor();
       const action = await page
-        .getByText(water.steps[1].actions[0], { exact: true })
+        .getByText(teachingFocus.actions[0], { exact: true })
         .boundingBox();
       assert(
         action &&
@@ -505,8 +506,8 @@ const token = [
     }
     const textContrast = [];
     for (const target of [
-      page.getByText(water.steps[1].actions[0], { exact: true }),
-      page.getByText(water.steps[1].observe, { exact: true }),
+      page.getByText(teachingFocus.actions[0], { exact: true }),
+      page.getByText(teachingFocus.observe, { exact: true }),
       button("Learn home").locator("div").first(),
     ]) {
       const ratio = await target.evaluate((el) => {

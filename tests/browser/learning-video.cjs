@@ -375,6 +375,22 @@ const key = "watercolor:learning:v1:" + user.id;
       () => window.YT_TEST.instances.filter((p) => !p.dead).length === 1,
     );
     await page.evaluate(()=>window.YT_TEST.emit(1,40));
+    // The pilot's preview pathway must coordinate with the separate approved
+    // fixture, not merely rely on the global controller to hide stale frames.
+    await button("Teaching focuses in this step").click();
+    await button("Focus 2: Load the belly, then test the delivery").click();
+    await heading("Load the belly, then test the delivery").waitFor();
+    assert.equal(await iframe.count(), 0, "focus change disposes approved playback");
+    await button("Watch related preview: wb-loading-steve").click();
+    await page.waitForFunction(() => window.YT_TEST.calls.filter(c=>c[0]==="cue").at(-1)?.[1].videoId === "alq0YqX86gs");
+    assert.equal(await page.evaluate(() => window.YT_TEST.instances.filter(p=>!p.dead).length),1);
+    assert.equal(await page.evaluate(() => window.YT_TEST.calls.filter(c=>c[0]==="cue").at(-1)[1].endSeconds),702);
+    await button("Optional demonstration").click();
+    assert.equal(await iframe.count(),0,"approved selection removes the preview frame");
+    await button("Load YouTube demonstration").click();
+    await page.waitForFunction(() => window.YT_TEST.calls.filter(c=>c[0]==="cue").at(-1)?.[1].videoId === "abcDEF123_-");
+    assert.equal(await page.evaluate(() => window.YT_TEST.instances.filter(p=>!p.dead).length),1);
+    assert.deepEqual(await read(),before,"switching media classification never changes practice");
     await page.getByRole("tab", { name: "Home", exact: true }).click();
     await button("Learn watercolour").waitFor();
     assert.equal(await iframe.count(), 0);
@@ -424,6 +440,7 @@ const key = "watercolor:learning:v1:" + user.id;
           absoluteSegmentBounds: true,
           replayRestoresEnd: true,
           samePlayerForSegments: true,
+          previewApprovedSwitchCleanup: true,
           defaultCaptionsNotForced: true,
           progressUnchanged: true,
           cleanup: true,
