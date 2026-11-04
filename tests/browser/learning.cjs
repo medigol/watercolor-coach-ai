@@ -462,13 +462,13 @@ const token = [
       await page.goto(base + "/learn/lesson?id=water-brush");
       await heading("Prepare a repeatable brush load").waitFor();
       const action = await page
-        .getByText(teachingFocus.actions[0], { exact: true })
+        .getByText(teachingFocus.outcome, { exact: true })
         .boundingBox();
       assert(
         action &&
           action.y >= 0 &&
           action.y + action.height < h - (w >= 1000 ? 0 : 80),
-        "current practical instruction must be visible in the first viewport",
+        "learning goal must be visible before the physical instructions in the first viewport",
       );
       const nav = await page.getByTestId("learn-section-nav").boundingBox();
       assert(nav && nav.height <= 56, "secondary navigation stays one row");
@@ -487,26 +487,32 @@ const token = [
           "desktop navigation belongs at the top across the available width",
         );
       }
-      if ((w === 375 && h === 900) || w === 390) {
-        const check = await page.getByRole("checkbox").first().boundingBox();
-        assert(
-          check.y + check.height < h - 80,
-          "beginning the practical checklist must be visible without scrolling",
-        );
-      }
+      // Owner review supersedes the former action/checklist-first layout.
+      // Preserve viewport, touch and contrast gates while requiring preparation
+      // before action and evidence before the original final practice record.
+      const order = await page.getByTestId("instructional-unit").evaluate(el => {
+        const ids = ["unit-goal", "unit-concept", "unit-preparation", "current-practical-action", "unit-exercise", "unit-practice-record"];
+        return ids.every((id,n) => n === 0 || !!(el.querySelector(`[data-testid="${ids[n-1]}"]`).compareDocumentPosition(el.querySelector(`[data-testid="${id}"]`)) & Node.DOCUMENT_POSITION_FOLLOWING));
+      });
+      assert(order, "logical reading order includes a final practice checklist");
+      const check = page.getByRole("checkbox").first();
+      await check.scrollIntoViewIfNeeded();
+      const checkBox = await check.boundingBox();
+      assert(checkBox.y >= 0 && checkBox.y + checkBox.height < h - (w >= 1000 ? 0 : 65), "final checklist remains reachable above fixed navigation");
+      await page.getByText(teachingFocus.outcome, {exact:true}).scrollIntoViewIfNeeded();
       if (w === 375 && h === 600) await shot("16-short-height-studio");
-      if (w === 390 && h === 900) await shot("17-action-first-390");
+      if (w === 390 && h === 900) await shot("17-goal-first-390");
       if (w === 1440) await shot("20-desktop-navigation");
       fold.push({
         width: w,
         height: h,
-        actionBottom: Math.round(action.y + action.height),
+        goalBottom: Math.round(action.y + action.height),
         navigationHeight: nav.height,
       });
     }
     const textContrast = [];
     for (const target of [
-      page.getByText(teachingFocus.actions[0], { exact: true }),
+      page.getByText(teachingFocus.outcome, { exact: true }),
       page.getByText(teachingFocus.observe, { exact: true }),
       button("Learn home").locator("div").first(),
     ]) {

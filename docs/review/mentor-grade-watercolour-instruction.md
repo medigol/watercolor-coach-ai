@@ -10,9 +10,9 @@ The baseline supplies useful short comparisons but gives little detail on wettin
 
 `instructionTypes.ts` defines additive teaching units, controlled experiments, conditional diagnostics and a separate provisional-video link type. `waterInstruction.ts` authors the pilot. `instruction.ts` validates identities, canonical references, order, diagnostics, time totals and evidence-bound preview links. These are not `MediaResource` objects and cannot satisfy publication checks.
 
-The canonical lesson route renders a selected focus within each existing step, with the physical action and original checklist near the top. Setup, concept, remaining physical actions, observation and controlled practice are visible without opening media or theory disclosures. The diagnosis focus exposes symptom selectors directly in the main instruction. A separate visual/reference column supplies original diagrams, fuller causal explanation, tips, optional related diagnosis and variations; mobile retains an independent visual-guide disclosure. Experienced self-reported learners can fold basic terminology and see the decision variation directly. All essential written teaching remains present for video-preferring learners.
+The canonical lesson route renders a selected focus within each existing step in this reading order: learning goal → essential concept/terms → preparation → sequenced physical actions → optional contextual preview → observation → controlled experiment → symptom guide → original practice record → next focus. Essential instructions stay visible on mobile. Symptom guides have one disclosure per symptom, without an enclosing diagnosis disclosure. A separate visual/reference column supplies original diagrams, fuller causal explanation, tips, optional related diagnosis and variations; mobile retains an independent visual-guide disclosure. Experienced self-reported learners can fold basic terminology and see the decision variation directly. All essential written teaching remains present for video-preferring learners.
 
-Teaching-focus navigation is temporary reading state, not a second course, completion mechanism or stored competence score. It never writes progress. Reload resumes the same canonical step; the focus selector starts at that step’s first focus. The selected focus is retained while opening/closing its video. The UI does not claim that a sub-focus position was saved.
+Teaching-focus navigation is reading state, not a second course or completion mechanism. On web, explicit choices are retained in `sessionStorage` under `watercolor:teaching-focus:v1:<account>:<lesson>:<step>`; each value is only a validated existing unit ID. Refresh and returning in the same tab restore that focus, without loading media. Account/step changes use separate keys. Blocked storage falls back to in-memory navigation, and unknown/removed IDs fall back to the first focus. The existing learner-progress schema, storage and data are untouched. Native retains in-memory selection only. Tab closure normally ends session storage; this is not cross-device or durable progress.
 
 | Canonical step | Implemented focuses | Active estimate |
 | --- | --- | --- |
@@ -34,7 +34,7 @@ Before, the drying warning says: “Do not scrub a partly drying stroke. Let it 
 
 The diagnostic guide now connects a lighter bloom and darker rim to possible water imbalance, asks whether sheen was already disappearing or an edge pool fed back, proposes a fresh one-variable comparison, and says when to leave the original passage alone. It also recognises intentional blooms and texture.
 
-Before, mobile’s “Do” list leads directly to a checklist while the concept is optional. The new focus has a practical first action, then visible setup, technical distinction, sequenced hand actions, observation and a controlled experiment with constants and dry-result criteria. The old practice checklist remains its original record; it is not replaced with new mastery claims.
+Before, mobile’s “Do” list led directly to a checklist while the concept was optional. The initial PR pilot also placed its first action and original checklist too early. Final owner-directed revision places the learning goal, concept and preparation before every physical action, then keeps video/observation/experiment together and puts the original checklist after troubleshooting. The checklist records only the original activities; focus navigation adds no mandatory gates.
 
 ## Technical accuracy and instructional coherence
 
@@ -90,7 +90,7 @@ No new live YouTube/footage diagnostics were attempted. Browser video frames are
 
 ## Saved work and safe rollout
 
-No lesson ID, step ID, checklist ID/wording, version, storage key/schema, reflection, completion rule, provider, auth, Supabase/RLS, quota, artwork assessment or production source lock changes. A snapshot regression compares all five canonical item contracts against fetched `main`. Old partial work resumes its step; completed work retains its reflection and completion, with an explicit note that extended teaching did not reassess it.
+No lesson ID, step ID, checklist ID/wording, version, storage key/schema, reflection, completion rule, provider, auth, Supabase/RLS, quota, artwork assessment or production source lock changes. A snapshot regression compares all five canonical item contracts against fetched `main`. Old partial work resumes its canonical step and, when available, that account’s tab-session reading focus. Completed work retains its reflection and completion, with an explicit note that extended teaching did not reassess it.
 
 Only timing and a safer fresh-test/short-session summary change in the canonical Water & Brush record. The other three lessons and project content are unchanged. No migrations, dependencies, paid AI calls, learner uploads, merge or deployment.
 
@@ -103,6 +103,26 @@ Next rollout is editorially gated, not automated bulk expansion:
 
 Owner review is needed for technical/learner suitability, real physical failure scenarios, and whether the related footage actually supports each proposed teaching point. Do not repeat the four already supplied clarity/fit screenings. No exact clip is approved by reviewing this UI.
 
+
+## Focused final instructional and editorial review — 4 November 2026
+
+Reviewed every field of all ten units and every symptom/cause/check/correction/stop/material-variation field of the eight diagnostic guides. [Per-unit and per-guide decisions](mentor-grade-watercolour-editorial-followup.json) distinguish author review from instructor approval. The five existing video links and their evidence classifications were compared byte-for-byte against the initial PR head; no footage inspection or new approval occurred.
+
+Corrections of substance:
+
+- Loading now regulates residual rinse water **before** taking colour, loads both point and reservoir without submerging the ferrule, and describes moving/lifting at the end rather than parking a loaded belly on the sheet.
+- Contact comparison holds a similar hand angle and speed while gently changing pressure/contact area. Turning the brush onto its side is a separate variation. Fast skipping is distinguished from a reservoir actually running out.
+- Wash passes explicitly move across and down the rectangle, overlapping the freely wet lower edge. A prominent bead is optional on a level sheet. Excess removal requires the entire passage to remain freely wet and a rinsed, blotted brush; repeat touches require renewed blotting.
+- Dilution starts from comparable shares of one well-mixed stock. Rinsing/blotting between concentrations avoids uncontrolled carry-over water. Dry values, rather than wet gloss, determine the comparison.
+- The second moisture patch is prepared when needed, rather than assumed to remain damp while the first stroke is painted. An unevenly drying patch is replaced with fresh test space. Observation-only and painted comparisons are separate exercises.
+- Diagnostic repeats change one cause at a time. Pooling cleanup cannot spread into a setting wash; an exhausted stroke is tested at the original length before a separate shorter test. Reflections describe an observed relationship rather than certifying a cause from one sample.
+
+Navigation now focuses the selected explanation instead of leaving focus on a removed button or scrolling to the whole page’s top. “Return to practice” still closes video and focuses the same experiment. “Back to explanation” provides a local return. The next focus names its destination and transition. The focus chooser is secondary, after the practice record; no reload warning or repeated competence disclaimer interrupts the teaching.
+
+The earlier first-viewport action/checklist tests expressed the old action-first design and contradict the owner’s requested concept-first sequence. Their acceptance criteria now require the goal first, uncollapsed essential instruction in order, a reachable final checklist above fixed navigation, and the existing no-overflow/touch/contrast/navigation thresholds. They are not silently skipped. Before/after screenshots retain the original baseline; the updated after views and [review captures](screenshots/mentor-instruction/) show the revised order.
+
+Review limitation: this is an explicit author/self-review supported by source inspection and synthetic browser acceptance, not independent artistic certification or a physical learner trial. Instructor judgement on handling/material variation, Android Chrome use and real footage matching remains open. No new screening questions are requested.
+
 ## Screenshots and validation
 
 [Executed commands, counts and limitations](mentor-grade-watercolour-instruction-validation.json). Captures are the actual exported app with synthetic accounts, original diagrams and simulated provider frames; they contain no private artwork or copied footage.
@@ -112,4 +132,6 @@ Owner review is needed for technical/learner suitability, real physical failure 
 | Mobile lesson | ![Before](screenshots/mentor-instruction/before-mobile.png) | ![After](screenshots/mentor-instruction/after-mobile.png) |
 | Desktop lesson | ![Before desktop](screenshots/mentor-instruction/before-desktop.png) | ![After desktop](screenshots/mentor-instruction/after-desktop.png) |
 
-[Inline before load](screenshots/mentor-instruction/inline-before.png) · [Synthetic player](screenshots/mentor-instruction/inline-synthetic.png) · [Diagnosis](screenshots/mentor-instruction/diagnosis.png) · [Physical exercise](screenshots/mentor-instruction/practice.png).
+[Initial PR pilot mobile](screenshots/mentor-instruction/before-final-review-mobile.png) · [Initial PR pilot desktop](screenshots/mentor-instruction/before-final-review-desktop.png) show the action/checklist-first order that prompted this final correction. The after column above shows the corrected pilot.
+
+Follow the actual revised sequence: [goal/concept/preparation](screenshots/mentor-instruction/reading-order.png) → [brush instructions](screenshots/mentor-instruction/brush-physical-sequence.png) → [inline preview before loading](screenshots/mentor-instruction/inline-before.png) → [synthetic player](screenshots/mentor-instruction/inline-synthetic.png) → [painting exercise](screenshots/mentor-instruction/practice.png) → [diagnosis](screenshots/mentor-instruction/diagnosis.png) → [final practice checklist and next focus](screenshots/mentor-instruction/final-practice-checklist.png).

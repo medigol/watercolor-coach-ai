@@ -84,3 +84,40 @@ test('a full-original future link remains a preview, never approved lesson media
  const link={...links[0],unitId:unit.id,candidateId:'cafe-cloud-wet',windowId:'original',scope:'original'};
  const r=resolveInstructionVideo(link,unit);assert(r);assert.equal(r.window,undefined);assert(publicationErrors(r.candidate).length);
 });
+
+const focusSession=load('learning/teachingFocus.ts');
+test('reading-position keys isolate account, canonical lesson and canonical step',()=>{
+ const key=focusSession.teachingFocusKey;
+ assert.notEqual(key('learner-a','water-brush','set-up'),key('learner-b','water-brush','set-up'));
+ assert.notEqual(key('learner-a','water-brush','set-up'),key('learner-a','water-brush','moisture'));
+ assert.notEqual(key('learner-a','water-brush','set-up'),key('learner-a','three-values','set-up'));
+ assert.notEqual(key('a:b','c','d'),key('a','b:c','d'),'untrusted delimiters cannot collide');
+ assert.equal(key(undefined,'water-brush','set-up'),null);
+});
+test('session reading position stores only an existing unit ID and cannot alter progress or player intent',()=>{
+ const map=new Map(),store={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)};
+ const key=focusSession.teachingFocusKey('learner','water-brush','set-up'),allowed=unitsForStep('water-brush','set-up').map(u=>u.id);
+ focusSession.writeTeachingFocus(store,key,allowed,'wb-load-round');
+ assert.equal(map.size,1);assert.equal(map.get(key),'wb-load-round');
+ assert.equal(focusSession.readTeachingFocus(store,key,allowed),'wb-load-round');
+ focusSession.writeTeachingFocus(store,key,allowed,'wb-moisture-pair');assert.equal(map.get(key),'wb-load-round');
+ assert.equal(focusSession.readTeachingFocus(store,key,['wb-materials']),undefined);
+ assert.equal(focusSession.readTeachingFocus(store,focusSession.teachingFocusKey('other','water-brush','set-up'),allowed),undefined);
+ focusSession.writeTeachingFocus(store,null,allowed,allowed[0]);assert.equal(map.size,1);
+});
+test('blocked/unavailable or stale session position always falls back without touching learner progress',()=>{
+ const key=focusSession.teachingFocusKey('learner','water-brush','set-up'),allowed=['wb-load-round'];
+ const blocked={getItem(){throw Error('blocked')},setItem(){throw Error('quota')}};
+ assert.equal(focusSession.readTeachingFocus(blocked,key,allowed),undefined);
+ assert.doesNotThrow(()=>focusSession.writeTeachingFocus(blocked,key,allowed,allowed[0]));
+ assert.equal(focusSession.readTeachingFocus(null,key,allowed),undefined);
+ assert.equal(focusSession.readTeachingFocus({getItem:()=>'{"playing":true}',setItem(){}},key,allowed),undefined);
+});
+test('editorial corrections retain independent loading/dilution controls and safe conditional cleanup',()=>{
+ const loading=units.find(u=>u.id==='wb-load-round'),dilution=units.find(u=>u.id==='wb-dilution-test');
+ assert.match(loading.actions[0],/rinse water/);assert.match(loading.actions[2],/Lift as you finish/);
+ assert.match(dilution.concept,/comparable amounts/);assert.match(dilution.actions[1],/blot off excess rinse water/);
+ assert.match(units.find(u=>u.id==='wb-moisture-pair').actions[2],/unevenly dry/);
+ assert.match(diagnostics.find(d=>d.id==='pooling').correction,/choosing just one change/);
+ assert.match(diagnostics.find(d=>d.id==='dry-brush').correction,/separate shorter-stroke test/);
+});

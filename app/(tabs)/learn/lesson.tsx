@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useLearning } from "../../../providers/LearningProvider";
+import { useAuth } from "../../../providers/AuthProvider";
 import { itemById } from "../../../learning/content";
 import {
   checklistId,
@@ -42,18 +43,28 @@ import { previewCandidates } from "../../../learning/videoPreviewCatalogue";
 import { previewMatches } from "../../../learning/videoPreview";
 import { unitsForStep } from "../../../learning/instruction";
 import { InstructionalUnitContent, InstructionalUnitReference } from "../../../components/learning/InstructionalUnit";
+import { useTeachingFocus } from "../../../components/learning/useTeachingFocus";
 export default function LessonStudio() {
   const { id } = useLocalSearchParams<{ id?: string }>(),
     item = typeof id === "string" ? itemById(id) : undefined;
   const learning = useLearning(),
     { state, update } = learning,
     { width } = useWindowDimensions();
+  const { session } = useAuth();
+  const account = session?.user.id;
   const studioScroll = useRef<ScrollView>(null);
   const [demoKey, setDemoKey] = useState<string | null>(null);
-  const [activePreview, setActivePreview] = useState<string | null>(null);
-  const [focuses, setFocuses] = useState<Record<string,string>>({});
-  useFocusEffect(useCallback(() => () => { setActivePreview(null); setDemoKey(null); }, []));
-  useEffect(() => { setActivePreview(null); setDemoKey(null); }, [id, state.entries[typeof id === "string" ? id : ""]?.stepId]);
+  const [previewIntent, setPreviewIntent] = useState<{scope:string; id:string} | null>(null);
+  const entry = item ? state.entries[item.id] : undefined;
+  const index = item ? resumeStep(item, entry) : 0;
+  const step = item?.steps[index];
+  const teaching = item && step ? unitsForStep(item.id, step.id) : [];
+  const { focus, select } = useTeachingFocus(account, item?.id ?? "", step?.id ?? "", teaching);
+  const previewScope = `${account}:${item?.id}:${step?.id}:${focus?.id}`;
+  const activePreview = previewIntent?.scope === previewScope ? previewIntent.id : null;
+  const setActivePreview = (id: string | null) => setPreviewIntent(id ? {scope:previewScope,id} : null);
+  useFocusEffect(useCallback(() => () => { setPreviewIntent(null); setDemoKey(null); }, []));
+  useEffect(() => { setActivePreview(null); setDemoKey(null); }, [account, id, step?.id, focus?.id]);
   const [guideKey, setGuideKey] = useState<string | null>(null);
   const [outline, setOutline] = useState(false),
     [review, setReview] = useState(false);
@@ -72,18 +83,20 @@ export default function LessonStudio() {
         />
       </LearnScreen>
     );
-  const entry = state.entries[item.id],
-    index = resumeStep(item, entry),
-    step = item.steps[index],
-    final = index === item.steps.length - 1,
+  if (!step) return null;
+  const final = index === item.steps.length - 1,
     isComplete = completed(item, entry),
     wide = width >= studio.desktop;
-  const teaching = unitsForStep(item.id, step.id);
-  const focus = teaching.find(u => u.id === focuses[`${item.id}:${step.id}`]) ?? teaching[0];
   const selectFocus = (unitId: string) => {
     setActivePreview(null); setDemoKey(null);
-    setFocuses(v => ({ ...v, [`${item.id}:${step.id}`]: unitId }));
-    studioScroll.current?.scrollTo({ y: 0, animated: false });
+    select(unitId);
+    requestAnimationFrame(() => {
+      if (typeof document !== "undefined") {
+        const target = document.getElementById("teaching-focus-start");
+        target?.scrollIntoView({block:"start",behavior:"instant"});
+        target?.focus({preventScroll:true});
+      } else studioScroll.current?.scrollTo({y:0,animated:false});
+    });
   };
   const note = (key: string, value: string) =>
     update((s) =>

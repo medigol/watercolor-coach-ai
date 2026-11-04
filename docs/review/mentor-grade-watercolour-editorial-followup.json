@@ -1,0 +1,157 @@
+{
+  "schema": "instruction-editorial-followup/v1",
+  "date": "2026-11-04",
+  "baselinePR": 42,
+  "baselineHead": "98452f184794c2d2a3b2fa605bc56c66707ba537",
+  "reviewer": "Codex author/self-review; not independent artistic approval",
+  "scope": "Line-by-line review of all ten units and eight guides; every field inspected. No external video content newly inspected.",
+  "unitFieldsReviewed": [
+    "title",
+    "outcome",
+    "transition",
+    "setup",
+    "concept",
+    "beginnerTerm",
+    "actions",
+    "observe",
+    "why",
+    "tip",
+    "advanced",
+    "exercise.action",
+    "exercise.variable",
+    "exercise.constants",
+    "exercise.success",
+    "exercise.transfer",
+    "minutes",
+    "drying",
+    "illustration",
+    "diagnosticIds"
+  ],
+  "units": [
+    {
+      "unitId": "wb-three-decisions",
+      "editorialDecision": "Beginner first comparison now includes wetting/loading instead of assuming an already prepared brush. Concentration versus deposited pigment remains conditional.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    },
+    {
+      "unitId": "wb-materials",
+      "editorialDecision": "Dry rehearsal is explicit so the preparation exercise no longer implies painting before loading is taught; area and reach are tested independently.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    },
+    {
+      "unitId": "wb-load-round",
+      "editorialDecision": "Residual rinse water is regulated before taking colour; load tip and belly without submerging ferrule; move and lift rather than park at stroke end.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    },
+    {
+      "unitId": "wb-contact",
+      "editorialDecision": "Hold a similar angle while changing gentle pressure/contact; compare side contact or speed separately. Do not treat skipping as proof of an empty reservoir.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    },
+    {
+      "unitId": "wb-flat-wash",
+      "editorialDecision": "Passes move across/down a rectangle and slightly overlap the freely wet lower edge. Bead optional on level sheet; excess removal uses rinsed/blotted brush only while whole passage is freely wet.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    },
+    {
+      "unitId": "wb-dilution-test",
+      "editorialDecision": "Start with comparable shares of mixed stock, add different water amounts and stir. Rinse/blot between swatches; compare dry values and keep load comparable.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    },
+    {
+      "unitId": "wb-read-moisture",
+      "editorialDecision": "Observation patch remains untouched; record stage/prediction, then test on fresh areas in next unit. Lost sheen is not proof of internal dryness.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    },
+    {
+      "unitId": "wb-moisture-pair",
+      "editorialDecision": "Wet second patch when ready, regulate clean-water carry-over and reload. Replace unevenly drying test space instead of assuming prepared patch stays damp.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    },
+    {
+      "unitId": "wb-diagnose-repeat",
+      "editorialDecision": "Describe evidence first; use direct symptom controls after the experiment, then choose one cause for a fresh test. Removed redundant instruction to open a second guide.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    },
+    {
+      "unitId": "wb-transfer",
+      "editorialDecision": "Describe an observed relationship and repeatable action, not proof of causation. Retained existing reflection field/criteria; removed administrative competence disclaimer from essential concept.",
+      "authorReview": "PASS for internal clarity/sequence and conditional wording; NEEDS HUMAN REVIEW for physical accuracy, learner suitability and material-dependent reproducibility"
+    }
+  ],
+  "diagnosticFieldsReviewed": [
+    "symptom",
+    "causes",
+    "check",
+    "correction",
+    "stop",
+    "normalVariation"
+  ],
+  "diagnostics": [
+    {
+      "id": "pooling",
+      "editorialDecision": "Rinse/blot before local excess removal; repeat blotting; whole passage must remain freely wet. Separate load and tilt tests; retain stop on loss of sheen.",
+      "authorReview": "PASS for explicit symptom/hypothesis/check/safe-stop path; NEEDS HUMAN REVIEW for actual physical diagnosis"
+    },
+    {
+      "id": "dry-brush",
+      "editorialDecision": "Removed fast contact as evidence of reservoir depletion. Contrast continuous beginning/depleted end with gaps from start; test proper load at same length before separate shorter test.",
+      "authorReview": "PASS for explicit symptom/hypothesis/check/safe-stop path; NEEDS HUMAN REVIEW for actual physical diagnosis"
+    },
+    {
+      "id": "join-line",
+      "editorialDecision": "Check mixture changes as well as gaps/drying. Resolve interruption first; reduce area in a separate attempt rather than changing all controls together.",
+      "authorReview": "PASS for explicit symptom/hypothesis/check/safe-stop path; NEEDS HUMAN REVIEW for actual physical diagnosis"
+    },
+    {
+      "id": "spread",
+      "editorialDecision": "Tie first hypothesis to observed standing water; a smaller load is a separate experiment, with material-dependent outcome. Never chase pigment in drying passage.",
+      "authorReview": "PASS for explicit symptom/hypothesis/check/safe-stop path; NEEDS HUMAN REVIEW for actual physical diagnosis"
+    },
+    {
+      "id": "backrun",
+      "editorialDecision": "Retained: late/wetter input and returning edge pools are plausible alternatives; leave bloom, test timing or load separately. No scrubbing or repeated water repair.",
+      "authorReview": "PASS for explicit symptom/hypothesis/check/safe-stop path; NEEDS HUMAN REVIEW for actual physical diagnosis"
+    },
+    {
+      "id": "overworked",
+      "editorialDecision": "Distinguish merely neutral colour from disturbed fibres/sizing. Retained clean premix/fewer passes on fresh sheet; drying does not restore damaged paper.",
+      "authorReview": "PASS for explicit symptom/hypothesis/check/safe-stop path; NEEDS HUMAN REVIEW for actual physical diagnosis"
+    },
+    {
+      "id": "dry-value",
+      "editorialDecision": "Added rinse-water carry-over to checks. Compare dry samples under similar light; test concentration only with comparable loading. Retained no fixed dry-lightening percentage.",
+      "authorReview": "PASS for explicit symptom/hypothesis/check/safe-stop path; NEEDS HUMAN REVIEW for actual physical diagnosis"
+    },
+    {
+      "id": "broken-mark",
+      "editorialDecision": "Repeat on fresh same-type paper with same load and steadier contact; adjust load/contact/speed separately. Retained intentional texture and stopping at abrasion.",
+      "authorReview": "PASS for explicit symptom/hypothesis/check/safe-stop path; NEEDS HUMAN REVIEW for actual physical diagnosis"
+    }
+  ],
+  "readingOrder": [
+    "Learning goal",
+    "Essential concept and terms",
+    "Preparation",
+    "Physical actions",
+    "Optional contextual video",
+    "Observation",
+    "Guided experiment",
+    "Troubleshooting",
+    "Original step practice record",
+    "Next teaching focus"
+  ],
+  "navigation": {
+    "focusMovement": "Next/previous and Back to explanation focus local teaching start. Returning from video focuses same exercise.",
+    "webReadingPosition": "Optional tab sessionStorage, account/lesson/step scoped, validated unit ID only. Never part of progress; never media intent.",
+    "unavailableStorage": "In-memory navigation remains usable; refresh returns to first focus.",
+    "native": "In-memory focus; no new native persistence or physical-device claim."
+  },
+  "videoEvidence": "All five reference objects unchanged byte-for-byte; 17 discovery candidates/18 proposals/zero approved resources preserved.",
+  "ownerReviewRemaining": [
+    "Physical painting reproducibility and material variation",
+    "Beginner interpretation and diagnostic judgement",
+    "Real Android Chrome and assistive-technology use",
+    "Actual source footage/action matching, live playback, caption availability and final clip approval"
+  ]
+}

@@ -39,7 +39,7 @@
       "learningObjective": "Arrange a small, stable working area and enough mixture for an uninterrupted passage.",
       "topic": "materials",
       "exercise": {
-        "action": "Rehearse moving from puddle to scrap, across one rectangle and back to the palette. Adjust the working area until the sequence is comfortable.",
+        "action": "Without touching paint to paper yet, rehearse moving from the puddle to the rectangle and back. Reduce the planned rectangle if the reach is awkward; leave the palette in place.",
         "variable": "Working-area size",
         "constants": [
           "Your available brush",
@@ -222,7 +222,7 @@
       "learningObjective": "Describe moisture from visible conditions rather than elapsed seconds.",
       "topic": "paper-moisture",
       "exercise": {
-        "action": "Record two visible surface states on the scrap and predict which would let a similar stroke spread more. Test that prediction only on fresh comparison patches.",
+        "action": "Write down two surface states as the scrap dries and predict how a stroke might spread in each. Keep this patch untouched; use the next dry/damp comparison to test the prediction on fresh areas.",
         "variable": "Observed paper moisture",
         "constants": [
           "Same sheet type",
