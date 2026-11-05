@@ -33,16 +33,15 @@ import {
   TextLink,
   learnStyles,
 } from "../../../components/learning/LearningUI";
-import StudyVisual, {
-  StyleVisual,
-} from "../../../components/learning/StudyVisual";
+import StudyVisual from "../../../components/learning/StudyVisual";
 import LessonDemonstration from "../../../components/learning/LessonDemonstration";
 import ChecklistControl from "../../../components/learning/ChecklistControl";
 import { studio } from "../../../components/learning/design";
-import { previewCandidates } from "../../../learning/videoPreviewCatalogue";
-import { previewMatches } from "../../../learning/videoPreview";
-import { unitsForStep } from "../../../learning/instruction";
-import { InstructionalUnitContent, InstructionalUnitReference } from "../../../components/learning/InstructionalUnit";
+import { unitsForStep, instructionUnits, contextualVideoLinks } from "../../../learning/instruction";
+import { selectDemonstrations } from "../../../learning/videoSelection";
+import { artworkForUnit } from "../../../learning/artwork";
+import ArtworkStudy from "../../../components/learning/ArtworkStudy";
+import { InstructionalUnitContent } from "../../../components/learning/InstructionalUnit";
 import { useTeachingFocus } from "../../../components/learning/useTeachingFocus";
 export default function LessonStudio() {
   const { id } = useLocalSearchParams<{ id?: string }>(),
@@ -53,7 +52,6 @@ export default function LessonStudio() {
   const { session } = useAuth();
   const account = session?.user.id;
   const studioScroll = useRef<ScrollView>(null);
-  const [demoKey, setDemoKey] = useState<string | null>(null);
   const [previewIntent, setPreviewIntent] = useState<{scope:string; id:string} | null>(null);
   const entry = item ? state.entries[item.id] : undefined;
   const index = item ? resumeStep(item, entry) : 0;
@@ -63,8 +61,15 @@ export default function LessonStudio() {
   const previewScope = `${account}:${item?.id}:${step?.id}:${focus?.id}`;
   const activePreview = previewIntent?.scope === previewScope ? previewIntent.id : null;
   const setActivePreview = (id: string | null) => setPreviewIntent(id ? {scope:previewScope,id} : null);
-  useFocusEffect(useCallback(() => () => { setPreviewIntent(null); setDemoKey(null); }, []));
-  useEffect(() => { setActivePreview(null); setDemoKey(null); }, [account, id, step?.id, focus?.id]);
+  useFocusEffect(useCallback(() => () => { setPreviewIntent(null); }, []));
+  useEffect(() => { setActivePreview(null); }, [account, id, step?.id, focus?.id]);
+  const pendingFocus = useRef<{unitId:string;account:string|undefined;lesson:string}|null>(null);
+  useEffect(() => {
+    const pending=pendingFocus.current;
+    if(!pending)return;
+    if(pending.account!==account||pending.lesson!==item?.id){pendingFocus.current=null;return;}
+    if(teaching.some(u=>u.id===pending.unitId)){pendingFocus.current=null;select(pending.unitId);}
+  },[account,item?.id,step?.id]);
   const [guideKey, setGuideKey] = useState<string | null>(null);
   const [outline, setOutline] = useState(false),
     [review, setReview] = useState(false);
@@ -88,7 +93,7 @@ export default function LessonStudio() {
     isComplete = completed(item, entry),
     wide = width >= studio.desktop;
   const selectFocus = (unitId: string) => {
-    setActivePreview(null); setDemoKey(null);
+    setActivePreview(null);
     select(unitId);
     requestAnimationFrame(() => {
       if (typeof document !== "undefined") {
@@ -138,40 +143,21 @@ export default function LessonStudio() {
                 })}
               </View>
   );
-  const demonstration = (
-    <View testID="studio-media">
-      <TextLink
-        title="Optional demonstration"
-        expanded={demoKey === `${item.id}:${step.id}`}
-        onPress={() => {
-          setActivePreview(null);
-          setDemoKey((v) => v === `${item.id}:${step.id}` ? null : `${item.id}:${step.id}`);
-        }}
-      />
-      {demoKey === `${item.id}:${step.id}` && (
-        <View style={{ gap: 12 }}><LessonDemonstration
-          lessonId={item.id}
-          stepId={step.id}
-          profile={state.profile}
-          entry={entry}
-          onPractice={() => {
-            setDemoKey(null);
-            studioScroll.current?.scrollTo({ y: 0, animated: false });
-            if (typeof document !== "undefined") {
-              const target = document.getElementById("painting-exercise");
-              target?.querySelector<HTMLInputElement>("input")?.focus();
-            }
-          }}
-        />
-        {previewCandidates.some(c => previewMatches(c, item.id, step.id)) && <>
-          <TextLink title="Explore related video previews (unverified)" onPress={() => router.push({ pathname: "/learn/videos", params: { lesson: item.id, step: step.id } })} />
-          <Copy muted>Optional research previews, separate from approved teaching resources. Viewing does not complete this exercise.</Copy>
-        </>}
-        </View>
-      )}
-    </View>
-  );
-  const reference = focus ? <InstructionalUnitReference unit={focus} profile={state.profile} /> : (
+  const approvedMedia = selectDemonstrations({lessonId:item.id,stepId:step.id,profile:state.profile,entry}).length ? (
+    <LessonDemonstration lessonId={item.id} stepId={step.id} profile={state.profile} entry={entry} onPractice={() => {
+      if(typeof document!=="undefined"){
+        const target=document.querySelector<HTMLElement>('[data-testid="unit-exercise"]');
+        target?.scrollIntoView({block:"nearest",behavior:"instant"});target?.focus({preventScroll:true});
+      }
+    }} />
+  ) : null;
+  const relatedFocus = focus && step.id!=="reflect" ? instructionUnits.find(u=>u.lessonId===item.id&&u.id!==focus.id&&contextualVideoLinks.some(l=>l.unitId===u.id)) : undefined;
+  const jumpToRelated = () => {
+    if(!relatedFocus)return;
+    if(relatedFocus.stepId===step.id)selectFocus(relatedFocus.id);
+    else {pendingFocus.current={unitId:relatedFocus.id,account,lesson:item.id};go(item.steps.findIndex(s=>s.id===relatedFocus.stepId));}
+  };
+  const reference = !focus && (
     <View style={{ gap: 16 }}>
       <StudyVisual kind={step.visual} />
       <Heading level={3}>Understand the decision</Heading>
@@ -201,15 +187,7 @@ export default function LessonStudio() {
             title={`Begin ${item.kind === "project" ? "project" : "lesson"}`}
             onPress={() => update((s) => editEntry(s, item, () => {}))}
           />
-          {item.kind === "project" && (
-            <>
-              <StyleVisual styleId="atmospheric" />
-              <Copy muted>
-                Original illustrated study direction, not a finished physical
-                painting. Your own shapes and palette are welcome.
-              </Copy>
-            </>
-          )}
+          <ArtworkStudy id={artworkForUnit[unitsForStep(item.id,item.steps[0].id)[0].id]} eager />
           <View style={learnStyles.section}>
             <Heading>What you will explore</Heading>
             {item.objectives.map((t) => (
@@ -258,7 +236,7 @@ export default function LessonStudio() {
             Recorded practice and reflection — self-reported, not a mastery
             score.
           </Copy>
-          {focus && <Copy muted>Your five-step practice record is preserved. The extended teaching is available for review; completion has not been reassessed.</Copy>}
+          {focus && <Copy muted>Your recorded practice is preserved. Added teaching does not reassess its completion.</Copy>}
           <Copy>Next experiment: {item.exercise.extension}</Copy>
           <Action
             title="Choose my next study"
@@ -308,12 +286,13 @@ export default function LessonStudio() {
               </View>
             )}
             <Heading>{step.title}</Heading>
+            {focus&&!approvedMedia&&!contextualVideoLinks.some(l=>l.unitId===focus.id)&&relatedFocus&&<TextLink title={`Related preview in: ${relatedFocus.title}`} onPress={jumpToRelated} /> }
           </View>
           <View
             testID="studio-columns"
             style={{
-              flexDirection: wide ? "row" : "column",
-              gap: wide ? 36 : 20,
+              flexDirection: "column",
+              gap: 20,
               alignItems: "flex-start",
             }}
           >
@@ -321,13 +300,12 @@ export default function LessonStudio() {
               nativeID="painting-exercise"
               testID="studio-practice"
               style={{
-                flex: wide ? 1.05 : undefined,
-                width: wide ? undefined : "100%",
+                width: "100%",
                 minWidth: 0,
                 gap: 18,
               }}
             >
-              {focus ? <InstructionalUnitContent key={focus.id} unit={focus} group={teaching} onSelect={selectFocus} profile={state.profile} practiceRecord={practiceRecord} activePreview={activePreview} onPreview={id => { setDemoKey(null); setActivePreview(id); }} /> : <>
+              {focus ? <InstructionalUnitContent key={focus.id} unit={focus} group={teaching} onSelect={selectFocus} profile={state.profile} practiceRecord={practiceRecord} approvedMedia={approvedMedia} activePreview={activePreview} onPreview={id => { setActivePreview(id); }} /> : <>
               <View
                 testID="current-practical-action"
                 style={{ gap: 10, paddingVertical: 4 }}
@@ -364,7 +342,7 @@ export default function LessonStudio() {
                 <Copy>{step.observe}</Copy>
               </View>
               </>}
-              {!wide && (
+              {!focus && !wide && (
                 <View>
                   <TextLink
                     title="Visual guide and explanation"
@@ -492,20 +470,17 @@ export default function LessonStudio() {
             <View
               testID="studio-reference"
               style={{
-                flex: wide ? 1 : undefined,
-                width: wide ? undefined : "100%",
+                width: "100%",
                 minWidth: 0,
                 gap: 16,
               }}
             >
-              {demonstration}
-              {wide && reference}
+              {!focus && wide && reference}
               {item.kind === "project" && (
                 <Disclosure title="Project direction and materials">
-                  <StyleVisual styleId="atmospheric" />
+                  <ArtworkStudy id="quiet-landscape-finished" />
                   <Copy muted>
-                    Illustrated composition direction, not a promised finished
-                    painting.
+                    The same generated finished reference; its details are not photographs of progressive painting stages.
                   </Copy>
                   <Copy>{item.materials.join(" · ")}</Copy>
                   <Copy>{item.exercise.shortVersion}</Copy>

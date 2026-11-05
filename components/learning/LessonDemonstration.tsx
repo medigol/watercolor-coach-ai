@@ -19,6 +19,7 @@ export default function LessonDemonstration({
   const [alternative, setAlternative] = useState(false);
   const choices = selectDemonstrations({ lessonId, stepId, profile, entry }),
     selected = choices[alternative ? 1 : 0] ?? choices[0];
+  if (!selected) return null;
   return (
     <>
       <YouTubeResource

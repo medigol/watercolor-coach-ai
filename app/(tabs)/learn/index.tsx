@@ -12,7 +12,7 @@ import {
   TextLink,
   learnStyles,
 } from "../../../components/learning/LearningUI";
-import { StyleVisual } from "../../../components/learning/StudyVisual";
+import ArtworkStudy from "../../../components/learning/ArtworkStudy";
 export default function Learn() {
   const { state, update } = useLearning(),
     { width } = useWindowDimensions(),
@@ -161,7 +161,7 @@ export default function Learn() {
             gap: 12,
           }}
         >
-          <StyleVisual styleId="atmospheric" />
+          <ArtworkStudy id="quiet-landscape-finished" />
           <Text style={learnStyles.label}>Bring the studies together</Text>
           <Heading>{project.title}</Heading>
           <Copy>
@@ -178,8 +178,7 @@ export default function Learn() {
             }
           />
           <Copy muted>
-            Original teaching illustration · not a finished physical
-            watercolour.
+            An original generated reference for the project; your shapes and palette may differ.
           </Copy>
         </View>
       </View>

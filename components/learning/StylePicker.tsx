@@ -28,7 +28,7 @@ export default function StylePicker({
         choices shape the studies in your path.
       </Copy>
       <Copy muted>
-        Original digital illustrations, not physical paint samples.
+        Original generated watercolour studies, not physical paint samples or video stills.
       </Copy>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 28 }}>
         {styles.map((s, n) => (
@@ -138,7 +138,7 @@ export default function StylePicker({
         <Copy muted>
           {compare.length === 2
             ? "Look at the edges, connected masses and where detail is concentrated."
-            : "Choose two Compare controls to place the illustrations together."}
+            : "Choose two Compare controls to place the painted studies together."}
         </Copy>
         <View style={{ flexDirection: "row", gap: 14 }}>
           {compare.map((id) => (
@@ -152,11 +152,7 @@ export default function StylePicker({
       </View>
       <Disclosure title="About these style examples">
         <Copy muted>
-          Original digital teaching illustrations created for this project. They
-          illustrate transparency, edge and mark decisions; they are not scans
-          of physical watercolour or botanical specimen references. No named
-          artist’s painting is reproduced. Real, permissioned watercolour
-          examples remain a curation follow-up.
+          Original generated watercolour studies created for this project, not scans of physical paintings or botanical specimen records. No external artist’s painting is reproduced. Material behaviour and artistic choices still need human review.
         </Copy>
       </Disclosure>
     </View>

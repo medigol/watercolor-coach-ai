@@ -20,7 +20,7 @@ export default function VideoPlayPoster({ visual, title, onPress }: {
     </View>
     <View style={{ paddingHorizontal: 16, paddingVertical: 14, gap: 3, backgroundColor: colors.accent }}>
       <Text style={{ color: "#fff", fontSize: 16, lineHeight: 24, fontWeight: "600" }}>{title}</Text>
-      <Text style={{ color: "#fff", fontSize: 12, lineHeight: 18 }}>Topic illustration · not a video still</Text>
+      <Text style={{ color: "#fff", fontSize: 12, lineHeight: 18 }}>Generated topic study · not a video still</Text>
     </View>
   </Pressable>;
 }

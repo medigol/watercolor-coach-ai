@@ -204,7 +204,7 @@ export default function YouTubeResource({
           ) : (
             <Copy muted>
               {canEmbed
-                ? "Load only when you are ready. YouTube receives connection information; its terms and privacy practices apply."
+                ? "Watch when you are ready. YouTube receives connection information; its terms and privacy practices apply."
                 : "Use the original YouTube player on this device. This lesson stays open for your practice."}
             </Copy>
           )}
@@ -213,7 +213,7 @@ export default function YouTubeResource({
               title={
                 failed
                   ? "Retry YouTube connection"
-                  : "Load YouTube demonstration"
+                  : "Watch demonstration"
               }
               secondary
               onPress={load}

@@ -189,9 +189,10 @@ const token = [
     await saved();
     await heading("Notice the three water decisions").waitFor();
     await shot("06-mobile-lesson");
-    await button("Optional demonstration").click();
-    assert(await page.getByText(/No verified video is assigned/).count());
-    await button("Optional demonstration").click();
+    assert.equal(await button("Optional demonstration").count(), 0);
+    assert.equal(await page.getByText(/No verified video is assigned/).count(),0);
+    assert.equal(await page.getByTestId("contextual-video").count(),0,"concept comparison deliberately has no matching video");
+    await page.getByRole("button",{name:/Related preview in:/}).waitFor();
     assert.equal(await page.locator("iframe").count(), 0);
     const firstCheck = page.getByRole("checkbox").first();
     await firstCheck.focus();
@@ -240,7 +241,7 @@ const token = [
     await shot("27-lesson-completed-without-video");
     await page.goto(base + "/learn");
     await heading("Continue your practice").waitFor();
-    await page.getByRole("img", { name: /translucent river-valley/ }).waitFor();
+    await page.getByRole("img", { name: /quiet river valley/ }).waitFor();
     await shot("02-learn-returning");
     await page.setViewportSize({ width: 390, height: 900 });
     await page.goto(base + "/learn/lesson?id=quiet-landscape");
@@ -315,40 +316,18 @@ const token = [
         if (route.startsWith("/learn/lesson")) {
           await button("Review this completed study").click();
           const main = page.getByRole("main");
-          const reference = await main
-            .getByTestId("studio-reference")
-            .boundingBox();
-          const practice = await main
-            .getByTestId("studio-practice")
-            .boundingBox();
-          const media = await main.getByTestId("studio-media").boundingBox();
-          assert(reference && practice && media);
-          if (width < 1000)
-            assert(
-              practice.y + practice.height <= reference.y + 1,
-              "action-first panels must not overlap below the practice",
-            );
-          else
-            assert(
-              practice.x + practice.width <= reference.x + 1,
-              "desktop action and visual columns must not overlap",
-            );
-          const intersection =
-            Math.max(
-              0,
-              Math.min(practice.x + practice.width, media.x + media.width) -
-                Math.max(practice.x, media.x),
-            ) *
-            Math.max(
-              0,
-              Math.min(practice.y + practice.height, media.y + media.height) -
-                Math.max(practice.y, media.y),
-            );
-          assert.equal(
-            intersection,
-            0,
-            "media must not cover reflection controls",
-          );
+          const painting=await main.getByTestId('painted-study').first().boundingBox();
+          const concept=await main.getByTestId('unit-concept').boundingBox();
+          const action=await main.getByTestId('current-practical-action').boundingBox();
+          const record=await main.getByTestId('unit-practice-record').boundingBox();
+          assert(painting&&concept&&action&&record);
+          if(width<1000)assert(concept.y+concept.height<=painting.y+1,'mobile concept precedes painted example');
+          else assert(concept.x+concept.width<=painting.x+1,'desktop concept and its corresponding painted example do not overlap');
+          assert(painting.y+painting.height<=action.y+1,'physical actions follow the concept and painting');
+          assert(action.y+action.height<=record.y+1,'practice record follows essential instruction');
+          const media=main.getByTestId('contextual-video');
+          if(await media.count()){const m=await media.boundingBox();assert(m.y+m.height<=record.y+1,'contextual media never covers the practice record');}
+
         }
         await noOverflow();
         if (width === 1440 && route === "/learn/styles") {
@@ -647,7 +626,7 @@ const token = [
       );
       await page.goto(base + "/learn/lesson?id=" + id);
       await heading(item.steps[0].title).waitFor();
-      const guide = page.getByTestId("studio-reference");
+      const guide = page.getByTestId("concept-and-painting");
       assert.equal(
         await guide.getByRole("img").count(),
         1,

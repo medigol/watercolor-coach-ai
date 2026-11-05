@@ -100,8 +100,8 @@ const key = "watercolor:learning:v1:" + user.id;
   const shot = async (name) =>
     page.screenshot({ path: path.join(dir, name + ".png"), fullPage: true });
   const reveal = async () => {
-    await button("Optional demonstration").click();
-    await heading("Brush loading comparison").waitFor();
+    assert.equal(await button("Optional demonstration").count(),0);
+    await page.getByTestId("demonstration-card").waitFor();
   };
   const assertNoOverflow = async () =>
     assert(
@@ -127,14 +127,14 @@ const key = "watercolor:learning:v1:" + user.id;
     await button("Complete step and continue").click();
     await heading("Prepare a repeatable brush load").waitFor();
     await saved();
-    const before = await read();
+    let before = await read();
     await reveal();
     assert.equal(
       external.length,
       0,
       "no third-party request before an explicit load",
     );
-    await button("Load YouTube demonstration").scrollIntoViewIfNeeded();
+    await button("Watch demonstration").scrollIntoViewIfNeeded();
     await page
       .getByTestId("demonstration-card")
       .evaluate((e) => e.scrollIntoView({ block: "start" }));
@@ -150,7 +150,7 @@ const key = "watercolor:learning:v1:" + user.id;
       .waitFor();
     await shot("02-caption-request-unknown-tracks");
     await button("Caption preferences").click();
-    await button("Load YouTube demonstration").click();
+    await button("Watch demonstration").click();
     await button("Replay this demonstration").waitFor({ state: "visible" });
     await page.waitForFunction(() =>
       window.YT_TEST?.calls.some((c) => c[0] === "cue"),
@@ -345,12 +345,13 @@ const key = "watercolor:learning:v1:" + user.id;
     assert.deepEqual(await read(), before);
     await button("Return to the painting exercise").click();
     await heading("Prepare a repeatable brush load").waitFor();
-    const check = await page.getByRole("checkbox").first().boundingBox();
-    assert(check.y >= 0 && check.y + check.height < 920);
+    const experiment=page.getByTestId("unit-exercise");
+    const check = await experiment.boundingBox();
+    assert(check.y >= 0 && check.y < 920);
     assert.equal(
-      await page.evaluate(() => document.activeElement.type),
-      "checkbox",
-      "return restores focus to the physical checklist",
+      await experiment.evaluate(e=>e===document.activeElement),
+      true,
+      "return restores focus to the current physical experiment",
     );
     await shot("08-returned-to-practice");
     await page.setViewportSize({ width: 390, height: 480 });
@@ -370,27 +371,35 @@ const key = "watercolor:learning:v1:" + user.id;
     await page.setViewportSize({ width: 1440, height: 1000 });
     // Route cleanup and stale events cannot revive audio or modify progress.
     await reveal();
-    await button("Load YouTube demonstration").click();
+    await button("Watch demonstration").click();
     await page.waitForFunction(
       () => window.YT_TEST.instances.filter((p) => !p.dead).length === 1,
     );
     await page.evaluate(()=>window.YT_TEST.emit(1,40));
-    // The pilot's preview pathway must coordinate with the separate approved
-    // fixture, not merely rely on the global controller to hide stale frames.
-    await button("Teaching focuses in this step").click();
-    await button("Focus 2: Load the belly, then test the delivery").click();
-    await heading("Load the belly, then test the delivery").waitFor();
-    assert.equal(await iframe.count(), 0, "focus change disposes approved playback");
-    await button("Watch related preview: wb-loading-steve").click();
-    await page.waitForFunction(() => window.YT_TEST.calls.filter(c=>c[0]==="cue").at(-1)?.[1].videoId === "alq0YqX86gs");
-    assert.equal(await page.evaluate(() => window.YT_TEST.instances.filter(p=>!p.dead).length),1);
-    assert.equal(await page.evaluate(() => window.YT_TEST.calls.filter(c=>c[0]==="cue").at(-1)[1].endSeconds),702);
-    await button("Optional demonstration").click();
-    assert.equal(await iframe.count(),0,"approved selection removes the preview frame");
-    await button("Load YouTube demonstration").click();
-    await page.waitForFunction(() => window.YT_TEST.calls.filter(c=>c[0]==="cue").at(-1)?.[1].videoId === "abcDEF123_-");
-    assert.equal(await page.evaluate(() => window.YT_TEST.instances.filter(p=>!p.dead).length),1);
-    assert.deepEqual(await read(),before,"switching media classification never changes practice");
+    // Eligible approved media takes priority at its exact canonical step. A
+    // different step may retain a provisional preview; never two competing frames.
+    assert.equal(await page.getByTestId('watch-inline-wb-loading-steve').count(),0);
+    if(await button('Show lesson outline').count())await button('Show lesson outline').click();
+    await button('3. Vary dilution, not everything').click();
+    await heading('Join a small wash while its edge is wet').waitFor();
+    assert.equal(await iframe.count(),0,'step navigation disposes approved playback');
+    const previewBefore=await read();
+    await page.getByTestId('watch-inline-wb-wash-steve').click();
+    await page.waitForFunction(()=>window.YT_TEST.calls.filter(c=>c[0]==='cue').at(-1)?.[1].videoId==='alq0YqX86gs');
+    assert.equal(await page.evaluate(()=>window.YT_TEST.instances.filter(p=>!p.dead).length),1);
+    assert.equal(await page.evaluate(()=>window.YT_TEST.calls.filter(c=>c[0]==='cue').at(-1)[1].endSeconds),702);
+    assert.deepEqual(await read(),previewBefore,'preview viewing never records physical practice');
+    if(await button('Show lesson outline').count())await button('Show lesson outline').click();
+    await button('2. Prepare a repeatable brush load').click();
+    await heading('Prepare a wash you can finish').waitFor();
+    assert.equal(await iframe.count(),0,'approved step removes the preview frame');
+    await button('Watch demonstration').click();
+    await page.waitForFunction(()=>window.YT_TEST.calls.filter(c=>c[0]==='cue').at(-1)?.[1].videoId==='abcDEF123_-');
+    assert.equal(await page.evaluate(()=>window.YT_TEST.instances.filter(p=>!p.dead).length),1);
+    const returned=await read();
+    const navigationOnly={...before,updatedAt:returned.updatedAt,entries:{...before.entries,'water-brush':{...before.entries['water-brush'],updatedAt:returned.entries['water-brush'].updatedAt}}};
+    assert.deepEqual(returned,navigationOnly,'explicit step navigation changes only existing navigation timestamps; all practice, notes and reflection remain exact');
+    before=returned;
     await page.getByRole("tab", { name: "Home", exact: true }).click();
     await button("Learn watercolour").waitFor();
     assert.equal(await iframe.count(), 0);
@@ -411,7 +420,7 @@ const key = "watercolor:learning:v1:" + user.id;
     assert.deepEqual(await read(), before);
     // Offline API attempt; real error recovery, still a mocked network failure.
     failAPI = true;
-    await button("Load YouTube demonstration").click();
+    await button("Watch demonstration").click();
     await page.getByText(/YouTube could not connect/).waitFor();
     await button("Retry YouTube connection").scrollIntoViewIfNeeded();
     await shot("09-network-failure-synthetic");

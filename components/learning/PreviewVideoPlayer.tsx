@@ -75,7 +75,7 @@ export default function PreviewVideoPlayer({ candidate, context, initiallyReques
   }
   if (!urls) return <Copy muted>This preview window is unavailable. Continue with the written exercise.</Copy>;
   return <View testID="preview-player" onLayout={e => setWidth(e.nativeEvent.layout.width)} style={{ gap: 12 }}>
-    <Copy muted>{previewWindowSummary(candidate, selected)}</Copy>
+    {!contextual&&<Copy muted>{previewWindowSummary(candidate, selected)}</Copy>}
     {frame && canEmbed && !failed ? <>
       <YouTubeFrame key={frame.revision} src={frame.url} title={`${candidate.creator} · video preview`} cue={urls.cue} allowOriginal={frame.original} playOnReady controls={controls} onState={setNotice} />
       <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 16 }}>
@@ -89,7 +89,8 @@ export default function PreviewVideoPlayer({ candidate, context, initiallyReques
       <Copy muted>Watch opens YouTube, which receives connection information. Playback uses its official controls.</Copy>
     </>}
     {notice && <Text role="status" accessibilityLiveRegion="polite" style={learnStyles.muted}>{notice.state === "ready" ? "Ready · use YouTube Play if needed." : notice.message}</Text>}
-    <Disclosure title="Video options">
+    {contextual&&<TextLink title="View original on YouTube" onPress={()=>void external(true)} />}
+    {!contextual && <Disclosure title="Video options">
       {!contextual && candidate.windows.length > 0 && <Disclosure title="Choose another chapter">
         <Choices values={windowChoices} selected={selected} onSelect={select} />
         {candidate.id === "cafe-cloud-tips" && <Copy muted>The 2:18 chapter has two conflicting proposed endpoints (2:42 and 4:58). Neither is selected by default. Both remain in owner review.</Copy>}
@@ -101,7 +102,7 @@ export default function PreviewVideoPlayer({ candidate, context, initiallyReques
       <TextLink title="YouTube privacy policy" onPress={() => void Linking.openURL("https://policies.google.com/privacy")} />
       <TextLink title="YouTube terms" onPress={() => void Linking.openURL("https://www.youtube.com/t/terms")} />
       </Disclosure>
-    </Disclosure>
+    </Disclosure>}
     {reviewMode && <Disclosure title="Owner caption preference test">
       <Choices values={[{ id: "default", label: "Follow YouTube settings" }, { id: "prefer", label: "Prefer captions when available" }]} selected={captions.mode} onSelect={mode => setCaptions(p => ({ ...p, mode: mode as CaptionPreferences["mode"] }))} />
       {captions.mode === "prefer" && <Choices values={[{ id: "default", label: "YouTube language" }, { id: "en", label: "English preference" }, { id: "fa", label: "Persian preference" }]} selected={captions.language} onSelect={language => setCaptions(p => ({ ...p, language: language as CaptionPreferences["language"] }))} />}

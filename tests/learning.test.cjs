@@ -170,7 +170,7 @@ test("beginner with 15 minutes receives feasible multiple sessions, not a fictit
   assert.equal(p.recommendations[0].itemId, "water-brush");
   assert.match(
     p.recommendations.find((r) => r.itemId === project.id).sessionPlan,
-    /6 short sessions.*15/,
+    /8 short sessions.*15/,
   );
   assert.match(
     p.recommendations.find((r) => r.itemId === project.id).sessionPlan,
@@ -237,21 +237,15 @@ test("all 10,15,30,45,60 minute settings produce bounded useful session descript
     for (const i of items) assert.match(sessionPlan(i.id, n), /active minutes/);
 });
 test("project session estimates keep whole ordered activities rather than dividing total time", () => {
-  // Independently packed durations: 4,7,6,8,8,10,10,7. At 15 minutes:
-  // [4+7], [6+8], [8], [10], [10], [7]; at 30: [4+7+6+8], [8+10+10], [7].
-  for (const [minutes, count] of [
-    [10, 8],
-    [15, 6],
-    [30, 3],
-    [45, 2],
-  ]) {
-    assert.match(
-      sessionPlan(project.id, minutes),
-      new RegExp(`^${count} short sessions`),
-    );
-    assert.match(sessionPlan(project.id, minutes), /60 active minutes total/);
+  // Expanded authored stages: 6,10,8,12,12,14,10,8 (80 active minutes).
+  // At 15 each remains separate; at 30: [6+10+8], [12+12], [14+10], [8].
+  assert.match(sessionPlan(project.id,10), /^80 active minutes total, including a 14-minute activity/);
+  assert.match(sessionPlan(project.id,10), /authored short comparison/);
+  for (const [minutes,count] of [[15,8],[30,4],[45,2],[60,2]]) {
+    assert.match(sessionPlan(project.id,minutes),new RegExp(`^${count} short sessions`));
+    assert.match(sessionPlan(project.id,minutes),/80 active minutes total/);
   }
-  assert.match(sessionPlan(project.id, 60), /^60 active minutes, plus/);
+  assert.match(sessionPlan(project.id,90),/^80 active minutes, plus/);
 });
 test("a completed study remains available for revisiting after changing preferences", () => {
   const s = finish(lessons[0], personal());
