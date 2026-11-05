@@ -1,0 +1,2480 @@
+{
+  "schema": "visual-video-learning-validation/v2",
+  "executedAt": "2026-11-05T09:41:49.342Z",
+  "reviewBaseline": "f5bd14a940e532f81c346ce734bcc7ac4e3952dc",
+  "productionBaseline": "f2a4631eea09ac667a84c92e9ff9892acb2edcde",
+  "branch": "codex/visual-video-learning-upgrade",
+  "pr": "https://github.com/medigol/watercolor-coach-ai/pull/43",
+  "verdict": "CONDITIONALLY READY FOR OWNER REVIEW",
+  "previousEvidence": "docs/review/evidence/visual-video-learning/pr43-initial-validation.json",
+  "checks": [
+    {
+      "command": "node --test --test-concurrency=2 tests/*.test.cjs",
+      "status": "PASS",
+      "scope": "Full existing unit/integration suite plus final review cases.",
+      "logSha256": "3a5e3d0e4640b913be325c17d3f26c683ede67c0f8085262b122d9759238ab0f",
+      "tests": 2083,
+      "pass": 2083,
+      "fail": 0,
+      "skipped": 0
+    },
+    {
+      "command": "node --test tests/final-art-review.test.cjs tests/visual-video-learning.test.cjs tests/instruction.test.cjs",
+      "status": "PASS",
+      "scope": "57 focused tests: individual original-review records, stage mappings/labels, candidate/window metadata, missing images, misleading physical-stage designation, canonical content/progress and protected media contracts.",
+      "logSha256": "8712f339cce33f41e0afe1627ed6c61b38414f4b070fa05be125f77b3b435ff3",
+      "tests": 57,
+      "pass": 57,
+      "additionalToFullSuite": false
+    },
+    {
+      "command": "npm run typecheck",
+      "status": "PASS",
+      "scope": "Frontend TypeScript, no emit",
+      "logSha256": "cf211dd2ce0ed67a9c222bccc6e4c7af5133e7bebb81b6b15e071394bc782ffe"
+    },
+    {
+      "command": "DENO_DIR=/tmp/visual-video-upgrade/deno-cache DENO_TLS_CA_STORE=system /tmp/visual-video-upgrade/bin/deno check --config supabase/functions/generate-feedback/deno.json supabase/functions/generate-feedback/index.ts",
+      "status": "PASS",
+      "scope": "Strict Edge TypeScript; normal certificate validation and system trust store, no TLS bypass",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "EXPO_PUBLIC_SUPABASE_URL=https://watercolor-test.supabase.co EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_browser_test_only EXPO_WEB_BASE_PATH=/watercolor-coach-ai npm run build:web",
+      "status": "PASS",
+      "scope": "Configured production export including final bounded comparison UI, synthetic public config; 16 routes",
+      "logSha256": "e1571963201c039e19bc8f845ea5c62bfcceefa32e244a2c20554be086e46558"
+    },
+    {
+      "command": "env -u EXPO_PUBLIC_SUPABASE_URL -u EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_WEB_BASE_PATH=/watercolor-coach-ai npm run build:web",
+      "status": "PASS",
+      "scope": "Final unconfigured production export, 16 setup routes",
+      "logSha256": "efebf1385eed1d13b4233a97b2816f80d377b93bb9ad522ae4b7d97b1fc35cf6"
+    },
+    {
+      "command": "node tests/browser/unconfigured-pages.cjs http://127.0.0.1:8225/watercolor-coach-ai",
+      "status": "PASS",
+      "scope": "16 actual final unconfigured app routes; zero external requests/runtime errors",
+      "logSha256": "86f23fe7bcd4421004f26cc190f4e4e3474521d7b355b387e29a9d43ba75d192"
+    },
+    {
+      "command": "node tests/browser/learning.cjs http://127.0.0.1:8221/watercolor-coach-ai /tmp/video-art-final-review/browser-learning",
+      "status": "PASS",
+      "scope": "35 responsive route cases and eight first-viewport cases, keyboard/touch/contrast/text scaling, completion/resume, preferences and storage failure/recovery.",
+      "logSha256": "680d02cd5ee4d5ec791beebf4fcd00cca77c96407f83cfff61a7702a9b1557a0",
+      "responsiveCases": 35,
+      "firstViewportCases": 8
+    },
+    {
+      "command": "node tests/browser/mentor-instruction.cjs http://127.0.0.1:8221/watercolor-coach-ai /tmp/video-art-final-review/browser-mentor",
+      "status": "PASS",
+      "scope": "19 water-unit teaching/reading-order/progress/account-focus/player scenarios; repeated-overview evidence now accessed through secondary video details.",
+      "logSha256": "cdc57dd9cdb7cfa030913ee8598428a55453741effbbd741557cdefc7ee363a3",
+      "tests": 19,
+      "pass": 19
+    },
+    {
+      "command": "node tests/browser/video-preview.cjs http://127.0.0.1:8221/watercolor-coach-ai /tmp/video-art-final-review/browser-library",
+      "status": "PASS",
+      "scope": "22 discovery/owner-mode/default-window/caption/error/cleanup scenarios; all 17 candidates retained.",
+      "logSha256": "b1bb7ae5db15ea1c6a8db74f68c613ed1553ade40d28a80de35b145da92e4b45",
+      "tests": 22,
+      "pass": 22
+    },
+    {
+      "command": "node tests/browser/visual-video-learning.cjs http://127.0.0.1:8224/watercolor-coach-ai /tmp/video-art-final-review/browser-course-final",
+      "status": "PASS",
+      "scope": "Final configured app: 32 units, 30 views, five introductions, all 17 posters, 12 cues, seven widths, landscape, enlarged text, missing-image retry, local poster keyboard Watch, bounded one/two-view project comparisons and no progress writes.",
+      "logSha256": "b73d96f47676739510a7946c9aabdebfe7c0de66438962b80474657b0732eecb",
+      "scenarios": 9,
+      "units": 32,
+      "views": 30,
+      "previewReferences": 12,
+      "widths": [
+        320,
+        375,
+        390,
+        430,
+        768,
+        1024,
+        1440
+      ]
+    },
+    {
+      "command": "node tests/browser/artwork-quality-review.cjs http://127.0.0.1:8221/watercolor-coach-ai /tmp/video-art-final-review/artwork-720 720",
+      "status": "PASS",
+      "scope": "26 actual in-app source renderings at 390px/DPR1; decoded 720px derivative, screenshot and visual review, zero third-party media requests.",
+      "logSha256": "1d8e0f91fb1ef8f2b8fa080874ccac825d6abee65e70723c87486161edfa621e",
+      "renderings": 26,
+      "nativeFileVisualInspectionSeparate": true
+    },
+    {
+      "command": "node tests/browser/artwork-quality-review.cjs http://127.0.0.1:8221/watercolor-coach-ai /tmp/video-art-final-review/artwork-1440 1440",
+      "status": "PASS",
+      "scope": "26 actual in-app source renderings at 1440px/DPR2; decoded 1440px derivative, screenshot and visual review, zero third-party media requests.",
+      "logSha256": "b7ed4ef987d2e84f168819608ac25030384db3cded1df7ae26190b93269e35c9",
+      "renderings": 26,
+      "nativeFileVisualInspectionSeparate": true
+    },
+    {
+      "command": "node scripts/export-video-fixture.cjs /tmp/video-art-final-review/approved-dist",
+      "status": "PASS",
+      "scope": "Isolated synthetic approved-media export, never the production catalogue",
+      "logSha256": "5ace1bcb132cb77ce4893d9b1a6dd6c7237b302c657090bad20a260ea6b03eb5"
+    },
+    {
+      "command": "node tests/browser/learning-video.cjs http://127.0.0.1:8223/watercolor-coach-ai /tmp/video-art-final-review/browser-approved",
+      "status": "PASS",
+      "scope": "Existing official controller integration: seven widths/minimum dimensions, consent, segment bounds, replay/end/seek, captions, external return, restrictions/retry, approved-vs-preview priority, cleanup and unchanged physical practice.",
+      "logSha256": "99ea22c92fb2aa254a79757df8a75ca10bb9820f5a5795233136cf3dc7f948a0"
+    },
+    {
+      "command": "node tests/browser/professional-workspace.cjs http://127.0.0.1:8221/watercolor-coach-ai /tmp/video-art-final-review/browser-assessment",
+      "status": "PASS",
+      "scope": "Existing assessment/auth/saved artwork, read-only geometry, upload/error/retry, depth and freeze/semantic browser matrices; synthetic responses only",
+      "logSha256": "b6a764ac3487aa63c53c8aabb53b423bd72cd92db24ae95fb425ef70328c28a5"
+    },
+    {
+      "command": "node tests/browser/artwork-preparation.cjs http://127.0.0.1:8221/watercolor-coach-ai /tmp/video-art-final-review/browser-preparation",
+      "status": "PASS",
+      "scope": "40 existing artwork-preparation browser checks.",
+      "logSha256": "865f1190cdd326efd699928d83669849c0a768b0ac75aa4b938387f82c842ec1",
+      "cases": 40
+    },
+    {
+      "command": "node scripts/test-local-database.cjs",
+      "status": "PASS",
+      "scope": "Real isolated PostgreSQL16: schema rerun, owner RLS/storage, server-only RPCs, quota/idempotency/rollback/concurrency. No production Supabase.",
+      "logSha256": "4605a17113dfa80e4e13f60616ef4b96b03f4d2d9181bbbfe346820094a9cf02"
+    },
+    {
+      "command": "node scripts/validate-learning-media.cjs",
+      "status": "PASS",
+      "scope": "Approved catalogue empty; publication gate intact; editorial completeness honestly BLOCKED_NO_VERIFIED_CONTENT",
+      "logSha256": "387801b464c8afac16602b146505b1293fdbb43544dc389b3bb08c57723b6fd0"
+    },
+    {
+      "command": "node scripts/validate-video-preview.cjs",
+      "status": "PASS",
+      "scope": "17 candidates, 18 windows/hints, four screening records unchanged",
+      "logSha256": "d284fe18e12587e0a5605964d76e439d90cd50152dba5a338478fb5b73b2b4b4"
+    },
+    {
+      "command": "node scripts/validate-instruction.cjs",
+      "status": "PASS",
+      "scope": "Original pilot contract: ten units, eight diagnoses and five original references",
+      "logSha256": "c926f1624749b3748c22e29b6f23840169bc97bef496dfd39bfcad50ac5c48e3"
+    },
+    {
+      "command": "node scripts/validate-learning-upgrade.cjs --write",
+      "status": "PASS",
+      "scope": "Composite course, manifest/hash/existence, individual reviews and evidence crosswalk; 26 sources/30 views",
+      "logSha256": "051b39c94c8defcc4f4ffe822d7e6f6358b49559269a969d648b8b9b2f9a5008"
+    },
+    {
+      "command": "node scripts/audit-instruction-bundle.cjs /tmp/video-art-final-review/final-dist",
+      "status": "PASS",
+      "scope": "Final ordinary app entry contains all 17 video IDs and no private/raw owner QA or synthetic approval fixture markers",
+      "logSha256": "722a85844d188cf9822f02230d6f0d4b1096ad3146911eaeb5559624e3bf71a8"
+    },
+    {
+      "command": "node -e 'const p=require(\"./scripts/benchmark/production.cjs\");p.verifyProductionFiles(p.lockedProduction().identity)'",
+      "status": "PASS",
+      "scope": "Locked production provider/source contracts unchanged",
+      "logSha256": "d87d80ae67dcc1ae94aed42c6bed6466137c477ba3319cf67ddd26098961ed30"
+    },
+    {
+      "command": "git diff --exit-code f5bd14a -- learning/progress.ts learning/types.ts providers lib shared supabase learning/media.ts learning/videoPreviewCatalogue.ts learning/videoLearning.ts docs/video package.json package-lock.json .github",
+      "status": "PASS",
+      "scope": "Protected production/progress/assessment/auth/media-evidence/dependency/release files unchanged",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "node tests/browser/capture-visual-video-learning.cjs http://127.0.0.1:8224/watercolor-coach-ai /tmp/video-art-final-review/after-final",
+      "status": "PASS",
+      "scope": "60 final actual app viewport screenshots at 390/1440. Eleven additional bounded comparison screenshots come from the final course test; 52 derivative figures from the artwork review.",
+      "logSha256": "7ee89c63acce93ac11901f1bf92dc2e80bd4489f4bdf2cfc1ad9009c5eabfc05",
+      "viewportCaptures": 60,
+      "comparisonCaptures": 11,
+      "derivativeCaptures": 52,
+      "realVideoFrames": 0
+    },
+    {
+      "command": "node /tmp/video-art-final-review/card-metrics.cjs http://127.0.0.1:8216/watercolor-coach-ai /tmp/video-art-final-review/card-before\nnode /tmp/video-art-final-review/card-metrics.cjs http://127.0.0.1:8221/watercolor-coach-ai /tmp/video-art-final-review/card-after",
+      "status": "PASS",
+      "scope": "Actual before/after brush-card measurements, paired with the preserved before record.",
+      "logSha256": "c69c757ee04d4e14266b2cd6697f42b2c8d439d96db999b2b3830db4aa740efc",
+      "before": [
+        {
+          "width": 390,
+          "cardHeight": 615,
+          "visibleCharacters": 555,
+          "thirdPartyMediaRequests": 0
+        },
+        {
+          "width": 1440,
+          "cardHeight": 474,
+          "visibleCharacters": 555,
+          "thirdPartyMediaRequests": 0
+        }
+      ],
+      "after": [
+        {
+          "width": 390,
+          "cardHeight": 442,
+          "visibleCharacters": 365,
+          "thirdPartyMediaRequests": 0
+        },
+        {
+          "width": 1440,
+          "cardHeight": 380,
+          "visibleCharacters": 365,
+          "thirdPartyMediaRequests": 0
+        }
+      ]
+    }
+  ],
+  "artwork": {
+    "originalsReviewed": 22,
+    "nativeOriginalResolution": [
+      1536,
+      1024
+    ],
+    "originalVerdicts": {
+      "ACCEPT": 8,
+      "ACCEPT WITH LIMITATIONS": 13,
+      "REVISE / REGENERATE": 1,
+      "BLOCKED": 0
+    },
+    "originalsRetainedUnchanged": 21,
+    "originalsRevised": 1,
+    "blockedOriginals": 0,
+    "newReconstructedStates": 4,
+    "currentSources": 26,
+    "currentResponsiveFiles": 52,
+    "currentViews": 30,
+    "webpBytes": 5708562,
+    "method": "image_gen.imagegen constrained edits using only our own generated sources; Pillow resize/WebP compression only",
+    "developmentImageGenerationCalls": 6,
+    "independentArtistApproval": false,
+    "physicalPaintingEvidence": false,
+    "derivativesVisuallyInspectedInApp": 52,
+    "originalFileRetentionVerified": true
+  },
+  "landscape": {
+    "strategy": "Four illustrative reconstructed states plus retained plan/master and optional finished details; bounded one/two-view comparison",
+    "masterUnchanged": true,
+    "mainAnchorsVisuallyCompared": [
+      "3:2 framing",
+      "low ridge crest",
+      "right-of-centre house footprint/roof",
+      "S-shaped open river",
+      "diagonal near-bank relationship"
+    ],
+    "registration": "Main relationships stable on native/app visual review; small painterly silhouette, texture and density differences remain. No pixel-exact guarantee.",
+    "physicalProcessHistoryClaimed": false
+  },
+  "teaching": {
+    "items": 5,
+    "units": 32,
+    "canonicalSteps": 27,
+    "diagnostics": 17,
+    "alignmentReview": [
+      {
+        "unitId": "wb-three-decisions",
+        "lessonId": "water-brush",
+        "stepId": "look",
+        "imageId": "brush-loading",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Left: tapered ends. Right: fuller end deposits. Your load test explores possible causes.",
+        "physicalExercise": "Make the two load-test strokes above. Beside them, name which control changed and which two you kept similar.",
+        "observableOutcome": [
+          "You can name the changed control without calling it dilution.",
+          "You can describe a visible difference or a useful inconclusive result."
+        ],
+        "troubleshooting": [
+          "pooling"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "wb-materials",
+        "lessonId": "water-brush",
+        "stepId": "set-up",
+        "imageId": "flat-wash",
+        "imageRole": "generated-study",
+        "visibleImageCue": "A connected wash can retain material variation without becoming a set of separate bands.",
+        "physicalExercise": "Without touching paint to paper yet, rehearse moving from the puddle to the rectangle and back. Reduce the planned rectangle if the reach is awkward; leave the palette in place.",
+        "observableOutcome": [
+          "The sheet stays stable.",
+          "You can reach mixture, clean water and wiping material without crossing the painted passage."
+        ],
+        "troubleshooting": [
+          "dry-brush"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "wb-load-round",
+        "lessonId": "water-brush",
+        "stepId": "set-up",
+        "imageId": "brush-loading",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Left: tapered ends. Right: fuller end deposits. Your load test explores possible causes.",
+        "physicalExercise": "Make a row of three similar strokes, reloading before each. Keep the puddle unchanged and repeat the same unloading action.",
+        "observableOutcome": [
+          "At least two strokes have comparable delivery.",
+          "You can identify whether any problem appears at the start, middle or end."
+        ],
+        "troubleshooting": [
+          "pooling",
+          "dry-brush",
+          "broken-mark"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "wb-loading-steve",
+            "scope": "long-proposal",
+            "provenance": "owner-proposal",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "wb-contact",
+        "lessonId": "water-brush",
+        "stepId": "set-up",
+        "imageId": "brush-contact",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Narrow contact, broad contact, and intentionally broken contact with paper tooth.",
+        "physicalExercise": "Compare the two rows. Change only the amount of hair in contact with the paper; keep the colour and loading sequence unchanged.",
+        "observableOutcome": [
+          "A narrow and a broader mark are distinguishable.",
+          "You can make both without flattening the hairs against the ferrule."
+        ],
+        "troubleshooting": [
+          "broken-mark",
+          "overworked"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "wb-flat-wash",
+        "lessonId": "water-brush",
+        "stepId": "dilution",
+        "imageId": "wet-edge",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Left: quiet interior. Right: two darker joins. Follow the pass sequence below.",
+        "physicalExercise": "Paint one small rectangle using connected passes from the same mixture. On fresh scrap, repeat after adjusting only the load if the first wash pooled.",
+        "observableOutcome": [
+          "Most adjacent passes connect without a dry gap.",
+          "The final edge is left without an uncontrolled pool, or you can identify why you stopped."
+        ],
+        "troubleshooting": [
+          "join-line",
+          "pooling",
+          "backrun",
+          "overworked"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "wb-wash-steve",
+            "scope": "long-proposal",
+            "provenance": "owner-proposal",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "wb-dilution-test",
+        "lessonId": "water-brush",
+        "stepId": "dilution",
+        "imageId": "dilution",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Compare the value relationships across a row, then look for their repetition below.",
+        "physicalExercise": "Complete both three-swatch rows. Label the three concentrations in order after they dry, and circle any pair that is too similar to judge confidently.",
+        "observableOutcome": [
+          "Three dry value groups are recognisable, or a specific repeat test is planned.",
+          "Wet and dry swatches are not compared as if their conditions were equal."
+        ],
+        "troubleshooting": [
+          "dry-value",
+          "pooling"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "wb-read-moisture",
+        "lessonId": "water-brush",
+        "stepId": "moisture",
+        "imageId": "dry-damp",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Left: definite boundary. Right: broader spread. Compare with your own surface tests.",
+        "physicalExercise": "Write down two surface states as the scrap dries and predict how a stroke might spread in each. Keep this patch untouched; use the next dry/damp comparison to test the prediction on fresh areas.",
+        "observableOutcome": [
+          "You distinguish standing water from an evenly damp surface.",
+          "You do not treat lost sheen as permission to scrub a partly drying wash."
+        ],
+        "troubleshooting": [
+          "spread",
+          "backrun"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "wb-moisture-overview",
+            "scope": "start-only",
+            "provenance": "owner-start-only",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "wb-moisture-pair",
+        "lessonId": "water-brush",
+        "stepId": "moisture",
+        "imageId": "dry-damp",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Left: definite boundary. Right: broader spread. Compare with your own surface tests.",
+        "physicalExercise": "Complete the dry/damp pair. Describe one observed condition and its boundary, without calling every soft transition a lost edge.",
+        "observableOutcome": [
+          "Both conditions are recorded, including an inconclusive difference.",
+          "You distinguish a soft transition from a genuinely disappearing contour."
+        ],
+        "troubleshooting": [
+          "spread",
+          "backrun",
+          "broken-mark"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "wb-moisture-wet",
+            "scope": "chapter-hint",
+            "provenance": "publisher-hint",
+            "independentlyInspected": false
+          },
+          {
+            "referenceId": "wb-moisture-dry",
+            "scope": "chapter-hint",
+            "provenance": "publisher-hint",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "wb-diagnose-repeat",
+        "lessonId": "water-brush",
+        "stepId": "moisture",
+        "imageId": "pool-backrun",
+        "imageRole": "generated-study",
+        "visibleImageCue": "An end pool and a backrun have different shapes and different questions to check.",
+        "physicalExercise": "Write a symptom, a plausible cause, the condition you checked and the single variable for a fresh repeat. Make the repeat only if the surface and materials are ready.",
+        "observableOutcome": [
+          "The proposed cause is conditional, not certain from appearance alone.",
+          "You can explain when to stop instead of disturbing the current passage."
+        ],
+        "troubleshooting": [
+          "pooling",
+          "dry-brush",
+          "join-line",
+          "spread",
+          "backrun",
+          "overworked",
+          "dry-value",
+          "broken-mark"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "wb-transfer",
+        "lessonId": "water-brush",
+        "stepId": "reflect",
+        "imageId": "intentional-texture",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Texture can have a deliberate visual job. It does not automatically require repair.",
+        "physicalExercise": "Use the existing reflection field to record a relationship, a condition to repeat, an uncertainty and a small application to your own subject.",
+        "observableOutcome": [
+          "The reflection refers to visible evidence, not a guessed hidden process.",
+          "The proposed transfer names a physical action and an observation."
+        ],
+        "troubleshooting": [],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "tv-observe",
+        "lessonId": "three-values",
+        "stepId": "look",
+        "imageId": "value-subject",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Use the jug, fruit, tabletop and background as large masses before naming small details.",
+        "physicalExercise": "Make three small pencil patches beside your sketch and assign one visible mass to each. Check the order against your subject.",
+        "observableOutcome": [
+          "Three relative families are named without relying on hue.",
+          "Any uncertain grouping is identified rather than forced."
+        ],
+        "troubleshooting": [
+          "value-hue"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "tv-paul-overview",
+            "scope": "long-proposal",
+            "provenance": "owner-proposal",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "tv-map",
+        "lessonId": "three-values",
+        "stepId": "map",
+        "imageId": "value-plan",
+        "imageRole": "planning-interpretation",
+        "visibleImageCue": "The three families remain readable without relying on colour names.",
+        "physicalExercise": "Prepare both frames and a three-value key. Compare their major silhouettes before filling either frame.",
+        "observableOutcome": [
+          "Both frames describe the same placement.",
+          "The intended light remains legible before dark accents are added."
+        ],
+        "troubleshooting": [
+          "value-fragmentation"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "tv-first",
+        "lessonId": "three-values",
+        "stepId": "first",
+        "imageId": "value-plan",
+        "imageRole": "planning-interpretation",
+        "visibleImageCue": "The three families remain readable without relying on colour names.",
+        "physicalExercise": "Finish the first three-family plan. Point to its main light, middle and dark at arm's length and name the first point of attention.",
+        "observableOutcome": [
+          "Large masses remain readable.",
+          "You can explain the emphasis without naming a compulsory darkest focal point."
+        ],
+        "troubleshooting": [
+          "value-fragmentation",
+          "value-dark-area"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "tv-compare",
+        "lessonId": "three-values",
+        "stepId": "compare",
+        "imageId": "value-alternative",
+        "imageRole": "planning-interpretation",
+        "visibleImageCue": "Compare the changed emphasis with the first plan. There is no universal winning arrangement.",
+        "physicalExercise": "Complete the alternative plan and write one sentence connecting the moved accent with an observed change in attention.",
+        "observableOutcome": [
+          "One meaningful change can be identified.",
+          "Your preference refers to an intention, or you explain why both remain useful."
+        ],
+        "troubleshooting": [
+          "value-dark-area"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "tv-transfer",
+        "lessonId": "three-values",
+        "stepId": "reflect",
+        "imageId": "value-alternative",
+        "imageRole": "planning-interpretation",
+        "visibleImageCue": "Compare the changed emphasis with the first plan. There is no universal winning arrangement.",
+        "physicalExercise": "Use the original reflection controls to name the changed relationship, its effect and one colour application. No video is required for this decision.",
+        "observableOutcome": [
+          "The reflection identifies an observed difference.",
+          "A next test names a practical decision rather than a universal value rule."
+        ],
+        "troubleshooting": [],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ef-read",
+        "lessonId": "edge-families",
+        "stepId": "look",
+        "imageId": "edge-boundaries",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Left: hard. Middle: soft. In the right pair, the shared middle contour disappears.",
+        "physicalExercise": "Name three intervals in the comparison and choose one edge relationship for your own small shape.",
+        "observableOutcome": [
+          "Soft and lost are distinguished.",
+          "The chosen edge has an intended job."
+        ],
+        "troubleshooting": [
+          "edge-still-visible"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ef-hard",
+        "lessonId": "edge-families",
+        "stepId": "hard",
+        "imageId": "edge-boundaries",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Left: hard. Middle: soft. In the right pair, the shared middle contour disappears.",
+        "physicalExercise": "Paint and leave the baseline shape. Describe one dry boundary interval without claiming every material makes the same edge.",
+        "observableOutcome": [
+          "A relatively abrupt interval can be identified.",
+          "The drying shape is left undisturbed."
+        ],
+        "troubleshooting": [
+          "pooling",
+          "broken-mark"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "ef-hard-louise",
+            "scope": "chapter-hint",
+            "provenance": "publisher-hint",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ef-soft",
+        "lessonId": "edge-families",
+        "stepId": "soft",
+        "imageId": "dry-damp",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Left: definite boundary. Right: broader spread. Compare with your own surface tests.",
+        "physicalExercise": "Compare the dry hard/soft pair and record the actual surface condition you observed. Keep an inconclusive comparison as evidence too.",
+        "observableOutcome": [
+          "One gradual transition is identified or a specific fresh test is planned.",
+          "A visible soft boundary is not called lost."
+        ],
+        "troubleshooting": [
+          "spread",
+          "backrun"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "ef-soft-louise",
+            "scope": "chapter-hint",
+            "provenance": "publisher-hint",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ef-lost",
+        "lessonId": "edge-families",
+        "stepId": "lost",
+        "imageId": "edge-leaves",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Follow the upright leaf’s right edge: find it, lose it through the middle join, then find it again.",
+        "physicalExercise": "Complete a merging pair and a small application. Name the interval that disappeared and the found edge that keeps the form readable.",
+        "observableOutcome": [
+          "A truly disappearing interval is distinguished from soft visibility.",
+          "The application still communicates a form or mass."
+        ],
+        "troubleshooting": [
+          "edge-still-visible",
+          "backrun"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ef-transfer",
+        "lessonId": "edge-families",
+        "stepId": "reflect",
+        "imageId": "edge-leaves",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Follow the upright leaf’s right edge: find it, lose it through the middle join, then find it again.",
+        "physicalExercise": "Record one deliberate pairing of found and quieter edges and a physical next-use plan. No video is needed to complete this reflection.",
+        "observableOutcome": [
+          "The next application names both purpose and action.",
+          "Softness is not substituted for proof of a lost contour."
+        ],
+        "troubleshooting": [],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "os-envelope",
+        "lessonId": "observed-structure",
+        "stepId": "look",
+        "imageId": "structure-painted",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Read the envelope and the major planes before following small windows or brush details.",
+        "physicalExercise": "Draw one small outer envelope and mark its main corner. Check one width/height relationship against your subject.",
+        "observableOutcome": [
+          "The large extents have been compared.",
+          "One uncertain proportion is named rather than concealed by detail."
+        ],
+        "troubleshooting": [
+          "structure-viewpoint"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "os-directions",
+        "lessonId": "observed-structure",
+        "stepId": "first",
+        "imageId": "structure-plan",
+        "imageRole": "planning-interpretation",
+        "visibleImageCue": "Compare related edges within each direction rather than forcing every diagonal to one point.",
+        "physicalExercise": "Complete the first few-line study and mark one truly related receding pair for the next comparison.",
+        "observableOutcome": [
+          "A related edge pair is identified.",
+          "Other diagonals are not forced toward that pair's point."
+        ],
+        "troubleshooting": [
+          "structure-directions"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "os-tim-overview",
+            "scope": "original",
+            "provenance": "unknown",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "os-compare",
+        "lessonId": "observed-structure",
+        "stepId": "compare",
+        "imageId": "structure-plan",
+        "imageRole": "planning-interpretation",
+        "visibleImageCue": "Compare related edges within each direction rather than forcing every diagonal to one point.",
+        "physicalExercise": "Complete the second study, identify the changed pair and explain one observed or expressive consequence.",
+        "observableOutcome": [
+          "One structural change can be identified.",
+          "A remaining distortion is either intentional or named for a later test."
+        ],
+        "troubleshooting": [
+          "structure-viewpoint",
+          "structure-directions"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "os-transfer",
+        "lessonId": "observed-structure",
+        "stepId": "reflect",
+        "imageId": "structure-painted",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Read the envelope and the major planes before following small windows or brush details.",
+        "physicalExercise": "Record one changed relationship, one deliberate choice and one next-use check. No video is needed for this reflection.",
+        "observableOutcome": [
+          "The next check names an action and an observation.",
+          "Expressive choice and uncertain measurement remain distinct."
+        ],
+        "troubleshooting": [],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ql-intention",
+        "lessonId": "quiet-landscape",
+        "stepId": "intention",
+        "imageId": "quiet-landscape-finished",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Finished reference: open light, a quiet middle distance and one restrained landing.",
+        "physicalExercise": "Prepare the small sheet and choose one sentence of intention, one open light and one restrained landing.",
+        "observableOutcome": [
+          "An intention is named.",
+          "The open space has a purpose before details are planned."
+        ],
+        "troubleshooting": [],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ql-values",
+        "lessonId": "quiet-landscape",
+        "stepId": "values",
+        "imageId": "landscape-value-plan",
+        "imageRole": "planning-interpretation",
+        "visibleImageCue": "Keep the river light open while grouping the hill and near bank into larger families.",
+        "physicalExercise": "Complete the small three-family plan and identify one light shape that the painting must preserve.",
+        "observableOutcome": [
+          "The large groups read at a distance.",
+          "A specific open light and quieter interval are planned."
+        ],
+        "troubleshooting": [
+          "value-fragmentation",
+          "value-dark-area"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "ql-paul-values",
+            "scope": "long-proposal",
+            "provenance": "owner-proposal",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ql-wash-plan",
+        "lessonId": "quiet-landscape",
+        "stepId": "wash-plan",
+        "imageId": "landscape-preparation",
+        "imageRole": "reconstructed-stage",
+        "visibleImageCue": "Reserve the river opening and house wall before colour. Keep the pencil plan light.",
+        "physicalExercise": "Dry-test the pale and middle relationships and rehearse one connected sky pass. Mark the intended drying pause on the plan.",
+        "observableOutcome": [
+          "The light mixture is chosen from a dry comparison.",
+          "A stopping/drying decision is explicit."
+        ],
+        "troubleshooting": [
+          "pooling",
+          "dry-brush",
+          "dry-value"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "ql-steve-wash",
+            "scope": "long-proposal",
+            "provenance": "owner-proposal",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ql-sky",
+        "lessonId": "quiet-landscape",
+        "stepId": "sky",
+        "imageId": "landscape-sky-stage",
+        "imageRole": "reconstructed-stage",
+        "visibleImageCue": "Sky first: compare the broad light wash with the untouched land and river shapes.",
+        "physicalExercise": "Paint the small light sky passage and pause. Note the surface condition and whether the planned light remains open.",
+        "observableOutcome": [
+          "A broad light mass remains.",
+          "A drying passage is left without repeated scrubbing."
+        ],
+        "troubleshooting": [
+          "pooling",
+          "join-line",
+          "backrun",
+          "project-light"
+        ],
+        "videoRole": [
+          {
+            "referenceId": "ql-cafe-sky",
+            "scope": "chapter-hint",
+            "provenance": "publisher-hint",
+            "independentlyInspected": false
+          }
+        ],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ql-hill",
+        "lessonId": "quiet-landscape",
+        "stepId": "hill",
+        "imageId": "landscape-hill-stage",
+        "imageRole": "reconstructed-stage",
+        "visibleImageCue": "Add the quiet hill; keep the reserved lower light open and the house in place.",
+        "physicalExercise": "Place one connected hill using the safe surface option you tested. Record the observed condition and the relationship with the light sky.",
+        "observableOutcome": [
+          "The hill remains readable.",
+          "The selected handling does not rely on scrubbing the sky into submission."
+        ],
+        "troubleshooting": [
+          "project-depth",
+          "overworked",
+          "backrun"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ql-bank",
+        "lessonId": "quiet-landscape",
+        "stepId": "bank",
+        "imageId": "landscape-bank-stage",
+        "imageRole": "reconstructed-stage",
+        "visibleImageCue": "Connect the land masses before texture. The river and house wall remain light.",
+        "physicalExercise": "Paint one connected bank, inspect the relationship dry, and choose whether any texture is needed. Preserve one clearer and one quieter interval.",
+        "observableOutcome": [
+          "The bank reads before its small details.",
+          "Any added texture has a named visual job."
+        ],
+        "troubleshooting": [
+          "project-depth",
+          "value-fragmentation",
+          "broken-mark",
+          "project-light"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ql-finish",
+        "lessonId": "quiet-landscape",
+        "stepId": "finish",
+        "imageId": "quiet-landscape-finished",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Finished reference: open light, a quiet middle distance and one restrained landing.",
+        "physicalExercise": "Choose to stop or perform one tested adjustment. Record its intended job; a decision to stop is a complete response to this stage.",
+        "observableOutcome": [
+          "The decision has a reason.",
+          "Effective light and middle relationships are preserved."
+        ],
+        "troubleshooting": [
+          "project-finish",
+          "overworked"
+        ],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      },
+      {
+        "unitId": "ql-reflect",
+        "lessonId": "quiet-landscape",
+        "stepId": "reflect",
+        "imageId": "quiet-landscape-finished",
+        "imageRole": "generated-study",
+        "visibleImageCue": "Finished reference: open light, a quiet middle distance and one restrained landing.",
+        "physicalExercise": "Complete the original reflection with an observed relationship, a condition to repeat and a separate future test.",
+        "observableOutcome": [
+          "The reflection refers to visible evidence.",
+          "The next test identifies an action and an observation, not a claim of mastery."
+        ],
+        "troubleshooting": [],
+        "videoRole": [],
+        "selfReview": "PASS for inspected sequence/image/exercise alignment with recorded limitations; human material/learner acceptance open",
+        "ownerApproved": false
+      }
+    ]
+  },
+  "video": {
+    "contextualLinks": 12,
+    "distinctSources": 5,
+    "candidates": 17,
+    "allTwelveRecordsExactlyPreserved": true,
+    "proposedWindows": 18,
+    "ownerScreenings": 4,
+    "approvedResources": 0,
+    "newFootageInspected": 0,
+    "realPlaybackVerified": false,
+    "captionTracksNewlyVerified": 0,
+    "thirdPartyThumbnailRequests": 0
+  },
+  "progress": {
+    "schemaChanged": false,
+    "storageKeysChanged": false,
+    "versionsChanged": false,
+    "checklistIdsOrWordingChanged": false,
+    "completionRulesChanged": false,
+    "notesAndReflectionsPreserved": true,
+    "accountScopedFocusUnchanged": true,
+    "mandatoryUnitGatesAdded": false,
+    "watchingCompletesPractice": false
+  },
+  "reports": {
+    "course": {
+      "status": "PASS",
+      "matrix": [
+        {
+          "name": "All 32 units render the correct decoded raster, logical teaching order and original checklist without progress writes",
+          "status": "PASS"
+        },
+        {
+          "name": "Seven widths, landscape and enlarged text reflow around the actual artwork and physical instructions",
+          "status": "PASS"
+        },
+        {
+          "name": "The first concept honestly has no clip but its preview shortcut preserves the canonical route and does not load YouTube",
+          "status": "PASS"
+        },
+        {
+          "name": "All 12 inline proposals cue existing absolute bounds in one Watch; replay and return preserve practice",
+          "status": "PASS"
+        },
+        {
+          "name": "Image failure has a readable retry and complete written fallback; successful retry restores the same study",
+          "status": "PASS"
+        },
+        {
+          "name": "Four independently generated style studies decode and every one of the 30 views is reachable",
+          "status": "PASS"
+        },
+        {
+          "name": "All five introductions, the project home image and all 17 discovery posters render their mapped local studies without loading YouTube",
+          "status": "PASS"
+        },
+        {
+          "name": "Compact local poster loads the official preview in one gesture and keeps evidence details secondary",
+          "status": "PASS"
+        },
+        {
+          "name": "Bounded project comparisons preserve ordered reconstructions and never write practice",
+          "status": "PASS"
+        }
+      ],
+      "units": 32,
+      "widths": [
+        320,
+        375,
+        390,
+        430,
+        768,
+        1024,
+        1440
+      ],
+      "landscape": [
+        844,
+        390
+      ],
+      "deviceScaleFactor": 3,
+      "enlargedText": "200% user stylesheet",
+      "renderedViews": [
+        "brush-loading",
+        "flat-wash",
+        "brush-contact",
+        "wet-edge",
+        "dilution",
+        "dry-damp",
+        "pool-backrun",
+        "intentional-texture",
+        "value-subject",
+        "value-plan",
+        "value-alternative",
+        "edge-boundaries",
+        "edge-leaves",
+        "structure-painted",
+        "structure-plan",
+        "quiet-landscape-finished",
+        "landscape-value-plan",
+        "landscape-preparation",
+        "landscape-palette",
+        "landscape-sky-stage",
+        "landscape-sky-detail",
+        "landscape-hill-stage",
+        "landscape-hill-detail",
+        "landscape-bank-stage",
+        "landscape-bank-detail",
+        "landscape-edge-detail",
+        "style-atmospheric",
+        "style-urban",
+        "style-botanical",
+        "style-expressive"
+      ],
+      "provisionalReferencesTested": 12,
+      "requests": 26,
+      "errors": [],
+      "unexpected": [],
+      "realYouTubePlayback": false,
+      "physicalAndroidDevice": false,
+      "artisticApproval": false
+    },
+    "mentor": {
+      "source": "actual exported canonical lesson with synthetic auth/API only",
+      "tests": 19,
+      "pass": 19,
+      "matrix": [
+        {
+          "name": "A first-time learner can open and begin the canonical lesson without a saved entry",
+          "status": "PASS"
+        },
+        {
+          "name": "Essential three-control teaching is visible in canonical lesson without media or disclosures",
+          "status": "PASS"
+        },
+        {
+          "name": "Seven widths plus landscape keep essential teaching visible, touch targets and no horizontal overflow",
+          "status": "PASS"
+        },
+        {
+          "name": "Ten authored focuses have essential actions, controlled variables and visible outcomes without changing progress",
+          "status": "PASS"
+        },
+        {
+          "name": "Keyboard next/previous focus lands at the new explanation; back from experiment keeps the same focus",
+          "status": "PASS"
+        },
+        {
+          "name": "Steve broad proposal loads inline in one gesture and retains absolute 47–702 boundaries",
+          "status": "PASS"
+        },
+        {
+          "name": "Returning to practice closes video and focuses the same unit exercise without writes",
+          "status": "PASS"
+        },
+        {
+          "name": "Switching canonical step cleans up; the repeated Steve proposal is not relabelled a short clip",
+          "status": "PASS"
+        },
+        {
+          "name": "Louise start-only reference remains 90s onwards without a fabricated endpoint",
+          "status": "PASS"
+        },
+        {
+          "name": "Two independently referenced Louise chapter hints maintain one active official player",
+          "status": "PASS"
+        },
+        {
+          "name": "Restricted embedding keeps current written exercise, original link and unchanged checklist",
+          "status": "PASS"
+        },
+        {
+          "name": "Expert tip and symptom→cause→check→safe action→stop guide are accessible on mobile",
+          "status": "PASS"
+        },
+        {
+          "name": "Reading and experienced presentation share the complete teaching without inferring competence",
+          "status": "PASS"
+        },
+        {
+          "name": "Leaving lesson disposes playback; refresh and navigation restore the reading focus without altering checks or notes",
+          "status": "PASS"
+        },
+        {
+          "name": "Historical complete record stays complete and preserves its reflection",
+          "status": "PASS"
+        },
+        {
+          "name": "No reflection video or owner QA tools; enlarged text and controls remain reachable",
+          "status": "PASS"
+        },
+        {
+          "name": "A stale saved focus is ignored, and the final practice checklist follows the experiment without a micro-unit gate",
+          "status": "PASS"
+        },
+        {
+          "name": "Another signed-in account never inherits the reading focus or playback intent",
+          "status": "PASS"
+        },
+        {
+          "name": "Blocked session storage preserves in-memory navigation and never blocks the lesson or writes progress",
+          "status": "PASS"
+        }
+      ],
+      "errors": [],
+      "unexpected": [],
+      "realPlayback": false,
+      "newVideoContentInspected": false,
+      "physicalAndroidTested": false
+    },
+    "learning": {
+      "status": "PASS",
+      "responsiveCases": 35,
+      "firstViewportCases": [
+        {
+          "width": 320,
+          "height": 800,
+          "goalBottom": 439,
+          "navigationHeight": 44
+        },
+        {
+          "width": 375,
+          "height": 900,
+          "goalBottom": 414,
+          "navigationHeight": 44
+        },
+        {
+          "width": 390,
+          "height": 900,
+          "goalBottom": 414,
+          "navigationHeight": 44
+        },
+        {
+          "width": 430,
+          "height": 900,
+          "goalBottom": 394,
+          "navigationHeight": 44
+        },
+        {
+          "width": 375,
+          "height": 600,
+          "goalBottom": 414,
+          "navigationHeight": 44
+        },
+        {
+          "width": 768,
+          "height": 480,
+          "goalBottom": 369,
+          "navigationHeight": 44
+        },
+        {
+          "width": 1024,
+          "height": 768,
+          "goalBottom": 448,
+          "navigationHeight": 44
+        },
+        {
+          "width": 1440,
+          "height": 1000,
+          "goalBottom": 448,
+          "navigationHeight": 44
+        }
+      ],
+      "baselineProgressReplay": true,
+      "textContrastRatios": [
+        10.57,
+        10.57,
+        5.78
+      ],
+      "textEnlargement": "200% user stylesheet; no clipping; controls reachable",
+      "keyboardViewportEmulation": {
+        "width": 390,
+        "height": 480,
+        "physicalKeyboard": false
+      },
+      "matrix": [
+        {
+          "width": 320,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 320,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 320,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 320,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 320,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        }
+      ],
+      "runtimeErrors": [],
+      "unexpectedNetwork": [],
+      "providerCalls": 0,
+      "uploads": 0,
+      "artworkWrites": 0,
+      "localPersistence": true,
+      "resumeLesson": true,
+      "resumeProject": true,
+      "completionPreserved": true,
+      "storageFailureAndRecovery": true,
+      "keyboardFocus": true,
+      "landscapeViewport": {
+        "width": 768,
+        "height": 390,
+        "status": "PASS"
+      },
+      "highDensityReflowEmulation": {
+        "cssWidth": 720,
+        "cssHeight": 500,
+        "deviceScaleFactor": 2,
+        "status": "PASS",
+        "physicalBrowserZoom": false
+      },
+      "verifiedVideos": 0,
+      "scope": "Synthetic browser interactions, not physical painting or learning-outcome proof",
+      "physicalDevice": false
+    },
+    "library": {
+      "source": "Actual configured Expo export, synthetic account/provider only",
+      "date": "2026-11-05T09:12:45.353Z",
+      "tests": 22,
+      "pass": 22,
+      "errors": [],
+      "unexpectedRequests": [],
+      "matrix": [
+        {
+          "name": "All 17 candidates and all three Javid videos remain available with learning titles and levels",
+          "status": "PASS"
+        },
+        {
+          "name": "Library works at seven widths with keyboard-reachable 44px Watch actions and no overflow",
+          "status": "PASS"
+        },
+        {
+          "name": "A single library Watch action loads the selected default, without a redundant Load action",
+          "status": "PASS"
+        },
+        {
+          "name": "Replay and endpoint enforcement use absolute proposed boundaries, never lesson completion",
+          "status": "PASS"
+        },
+        {
+          "name": "Return to practice pauses, removes the frame and focuses the visible physical exercise",
+          "status": "PASS"
+        },
+        {
+          "name": "Deep link, reload and URL watch hints never auto-load; every candidate Watch uses its evidence-based default",
+          "status": "PASS"
+        },
+        {
+          "name": "Watch and owner-mode navigation work by keyboard with accurate disclosure state",
+          "status": "PASS"
+        },
+        {
+          "name": "Mapped lesson step chooses Louise’s relevant chapter rather than unrelated introduction",
+          "status": "PASS"
+        },
+        {
+          "name": "Chapter switching, outside-window seeking and replay restore correct bounds on the same player",
+          "status": "PASS"
+        },
+        {
+          "name": "Owner review is a separate explicit mode; learner view contains no timestamps form, export or caption settings",
+          "status": "PASS"
+        },
+        {
+          "name": "Caption preference requests remain in owner mode and preserve selected boundaries",
+          "status": "PASS"
+        },
+        {
+          "name": "Private review saves and exports explicit observations; never grants approval or leaks account identity",
+          "status": "PASS"
+        },
+        {
+          "name": "Seven responsive player widths meet 200×200, and mobile first viewport exposes Watch with no technical form",
+          "status": "PASS"
+        },
+        {
+          "name": "Short viewport, keyboard focus and enlarged-text reflow retain reachable practice and player actions",
+          "status": "PASS"
+        },
+        {
+          "name": "Topic and experience filters retain all candidates and avoid unrelated step claims",
+          "status": "PASS"
+        },
+        {
+          "name": "Café conflict and Louise start-only stay unverified; unseen content is labelled suggested focus",
+          "status": "PASS"
+        },
+        {
+          "name": "Provider restriction and failed API connection preserve written practice and offer retry or original",
+          "status": "PASS"
+        },
+        {
+          "name": "Continue lesson resumes existing step and checklist, with no learning writes from video playback",
+          "status": "PASS"
+        },
+        {
+          "name": "Route cleanup pauses/destroys the player, and returning to Learn does not start background playback",
+          "status": "PASS"
+        },
+        {
+          "name": "Unknown candidate is not silently substituted and never loads a player",
+          "status": "PASS"
+        },
+        {
+          "name": "Invalid private review data remains untouched outside owner mode; explicit recovery keeps learning",
+          "status": "PASS"
+        },
+        {
+          "name": "Failed owner save is truthful and exportable, with learner progress unchanged",
+          "status": "PASS"
+        }
+      ],
+      "liveYouTubeVerified": false,
+      "physicalDeviceTested": false
+    },
+    "approved": {
+      "status": "PASS",
+      "mode": "SYNTHETIC CATALOGUE + MOCKED OFFICIAL API, not live YouTube verification",
+      "matrix": [
+        {
+          "width": 320,
+          "playerWidth": 292,
+          "playerHeight": 200
+        },
+        {
+          "width": 375,
+          "playerWidth": 335,
+          "playerHeight": 200
+        },
+        {
+          "width": 390,
+          "playerWidth": 350,
+          "playerHeight": 200
+        },
+        {
+          "width": 430,
+          "playerWidth": 390,
+          "playerHeight": 219
+        },
+        {
+          "width": 768,
+          "playerWidth": 728,
+          "playerHeight": 410
+        },
+        {
+          "width": 1024,
+          "playerWidth": 780,
+          "playerHeight": 439
+        },
+        {
+          "width": 1440,
+          "playerWidth": 780,
+          "playerHeight": 439
+        }
+      ],
+      "reflow": [
+        {
+          "width": 375,
+          "height": 600,
+          "replayReachable": true
+        },
+        {
+          "width": 844,
+          "height": 390,
+          "replayReachable": true
+        },
+        {
+          "width": 1024,
+          "height": 600,
+          "replayReachable": true
+        },
+        {
+          "width": 390,
+          "height": 480,
+          "replayReachable": true
+        }
+      ],
+      "textEnlargement": "200% user stylesheet; no clipping",
+      "zeroPreConsentRequests": true,
+      "absoluteSegmentBounds": true,
+      "replayRestoresEnd": true,
+      "samePlayerForSegments": true,
+      "previewApprovedSwitchCleanup": true,
+      "defaultCaptionsNotForced": true,
+      "progressUnchanged": true,
+      "cleanup": true,
+      "errors": [],
+      "unexpected": [],
+      "requests": [
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8223&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube.com/iframe_api",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8223&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8223&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8223&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8223",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8223",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8223",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/alq0YqX86gs?start=47&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=702&origin=http%3A%2F%2F127.0.0.1%3A8223",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8223",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8223",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube.com/iframe_api",
+          "method": "GET"
+        }
+      ],
+      "realVideosReviewed": 0,
+      "realPlayback": false,
+      "physicalDevice": false
+    },
+    "artwork720": {
+      "status": "PASS",
+      "expectedDerivative": 720,
+      "records": [
+        {
+          "sourceId": "brush-loading",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/brush-loading-720.0f30e33258feb527ed038d0198274b4b.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "brush-contact",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/brush-contact-720.99eec9c0f10b66ed8f00c3b9c140c200.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "flat-wash",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/flat-wash-720.b06c7700e3909a1406469b27e3404bd7.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "wet-edge",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/wet-edge-720.b06245b71be3566054b7a728bd1e40c2.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "dilution",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/dilution-720.5ff0687c90cb523e05da7050738377d9.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "dry-damp",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/dry-damp-720.b3001ffa7139247bf3674673fc34a407.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "pool-backrun",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/pool-backrun-720.44486b49196adf60ec307dfd3251578f.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "intentional-texture",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/intentional-texture-720.1f71bc5fcf5abfd1c71d0aa43e8c324a.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "value-subject",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/value-subject-720.172312752ffa7fe6e6e580b169adc601.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "value-plan",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/value-plan-720.513bbbe048dc62ccb4fbea20e4b891d9.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "value-alternative",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/value-alternative-720.2221e2d4449cbf6b1a7912a95c5a026d.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "edge-boundaries",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/edge-boundaries-720.211f84e11d7331413ed2109f10a1e6f1.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "edge-leaves",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/edge-leaves-720.fafbb448e0bf2da2e19d603247298aec.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "structure-painted",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/structure-painted-720.0032bab2dd16e72dfc89326f9cd50698.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "structure-plan",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/structure-plan-720.35356d9d8c7ec7c5dca81cbdf72d7320.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "quiet-landscape-finished",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/quiet-landscape-finished-720.a2f1f989d24f9a826644316e5fd26cac.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-value-plan",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-value-plan-720.b7c87b5acf0a2e8670a947c95da99ccd.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-palette",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-palette-720.8ffb4400e561b094c3e61ba4bb1d13d6.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-preparation",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-preparation-720.b8058c828f600d6d276aa978f62949ff.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-sky-stage",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-sky-stage-720.adc90cbe98ed35177aca25c3f371e41e.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-hill-stage",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-hill-stage-720.d4aa9c595c5f279d37c638c7d2102571.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-bank-stage",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-bank-stage-720.cb5cd5f67e031e41f0eb150f543af036.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "style-atmospheric",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/style-atmospheric-720.154d882300e643e888def123daabdc6f.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "style-urban",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/style-urban-720.8af2f15764e179bd88296d8bbf4bdc9d.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "style-botanical",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/style-botanical-720.49b0ddb169d968da540c23285a784689.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "style-expressive",
+          "expected": 720,
+          "dimensions": {
+            "width": 720,
+            "height": 480,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/style-expressive-720.659257781702e2e1dc1eb79a49b7b466.webp"
+          },
+          "decoded": true
+        }
+      ],
+      "errors": [],
+      "unexpected": [],
+      "thirdPartyMediaRequests": 0,
+      "source": "Actual configured Expo app, synthetic account; figure screenshots for visual inspection"
+    },
+    "artwork1440": {
+      "status": "PASS",
+      "expectedDerivative": 1440,
+      "records": [
+        {
+          "sourceId": "brush-loading",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/brush-loading-1440.4a490b26b908dc71a1dd60b6e8aacd67.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "brush-contact",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/brush-contact-1440.5250a1f1da064af3aeb9ef3487249817.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "flat-wash",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/flat-wash-1440.424168ae9ce738b34c4bbc277285bffa.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "wet-edge",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/wet-edge-1440.427c1a4a9195820064dcfeabad0b67d7.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "dilution",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/dilution-1440.4fcaf31ced1d031d1e9b1e289f973d15.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "dry-damp",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/dry-damp-1440.518b605481e13ebe9b8365b61666a7ff.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "pool-backrun",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/pool-backrun-1440.db979535a8a73c8779324f7a03416e11.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "intentional-texture",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/intentional-texture-1440.542d5ea39e8286bc19173e81eee8039a.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "value-subject",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/value-subject-1440.f6a6c5a0b260aae529d3e2997e0d542e.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "value-plan",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/value-plan-1440.eead9c95c3ff37ab7c6cfe90fc950303.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "value-alternative",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/value-alternative-1440.5823835026fefc1b906e7169ed2c3877.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "edge-boundaries",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/edge-boundaries-1440.5a9f792395995c891a13b5b796a8d102.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "edge-leaves",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/edge-leaves-1440.e9897bc9398458374b414440fb737c6c.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "structure-painted",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/structure-painted-1440.1ba76299ab0fa244ef2e2e5b16cd277b.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "structure-plan",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/structure-plan-1440.c0696b20f628791a1b33e1682f7eadda.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "quiet-landscape-finished",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/quiet-landscape-finished-1440.0a2fcfabbc8e59aa2518c6bfa282bcc8.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-value-plan",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-value-plan-1440.d7f347dbd1be680298f1fed70f2d528d.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-palette",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-palette-1440.a66cf71542096130b3b4e14bcf76dd95.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-preparation",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-preparation-1440.85949911306f590f6891241749616034.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-sky-stage",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-sky-stage-1440.80c65d33a4cd6e1d3537b4f927353e7a.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-hill-stage",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-hill-stage-1440.b91379ae99532a830df54655a0ec9d57.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "landscape-bank-stage",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/landscape-bank-stage-1440.558c70ac0c511dad8d07d127198824da.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "style-atmospheric",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/style-atmospheric-1440.ad235acc89e6b475db8f9d16669fc4ad.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "style-urban",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/style-urban-1440.127bd800cb3dad91d532e1b53d136916.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "style-botanical",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/style-botanical-1440.f834b820b55b03a1bcc5d0c9f9722780.webp"
+          },
+          "decoded": true
+        },
+        {
+          "sourceId": "style-expressive",
+          "expected": 1440,
+          "dimensions": {
+            "width": 1440,
+            "height": 960,
+            "src": "http://127.0.0.1:8221/watercolor-coach-ai/assets/assets/learning/style-expressive-1440.fc7d40736513adeba3e76c834633322c.webp"
+          },
+          "decoded": true
+        }
+      ],
+      "errors": [],
+      "unexpected": [],
+      "thirdPartyMediaRequests": 0,
+      "source": "Actual configured Expo app, synthetic account; figure screenshots for visual inspection"
+    }
+  },
+  "releaseGates": {
+    "artwork": "CONDITIONAL — all 22 reviewed, one corrected; internal visual acceptance with explicit limitations, owner material/artistic judgement open",
+    "landscape": "CONDITIONAL — four coherent reconstructed states implemented and compared; small variations and no physical history disclosed",
+    "video": "PASS for compact application mechanics/evidence preservation; real footage/playback separate",
+    "instruction": "PASS for implemented coherence and self-review; physical learner testing remains open",
+    "safety": "PASS — protected contracts/records/publication gates intact",
+    "engineering": "PASS for actual executed commands; no full WCAG or physical Android certification"
+  },
+  "limitations": [
+    "Internal self-review is not independent artist or owner approval.",
+    "No physical material/brush execution or learning-outcome study was conducted.",
+    "Desktop Chromium emulation is not a physical Android or assistive-technology acceptance test.",
+    "No real YouTube footage, embed or caption track was newly verified; cloud playback diagnostics were deliberately not repeated.",
+    "Generated reconstructions cannot prove wetting, layering, drying or actual painting history."
+  ],
+  "resolvedTestUpdates": [
+    "Image retry assertion now expects the new primary sky reconstruction; failure/retry/written fallback assertions retained.",
+    "Existing repeated-overview evidence test opens the compact card secondary details.",
+    "Sequence acceptance now asserts bounded mounted views, ordered comparison navigation and unchanged raw progress; viewport captures replace invalid long clipped element captures."
+  ],
+  "securityAndCost": {
+    "newCredentials": false,
+    "newDependencies": false,
+    "productionDatabaseChanged": false,
+    "runtimeProvidersOrQuotasChanged": false,
+    "runtimePaidImageGeneration": false,
+    "videoDownloadedOrRehosted": false,
+    "TLSVerificationDisabled": false
+  },
+  "delivery": {
+    "newBranch": false,
+    "newPR": false,
+    "merged": false,
+    "deployed": false
+  },
+  "screenshots": {
+    "index": "docs/review/screenshots/visual-video-learning/README.md",
+    "previousPreserved": 102,
+    "followupAppViewports": 60,
+    "followupBoundedComparisons": 11,
+    "followupDerivativeFigures": 52,
+    "standaloneMockups": 0,
+    "realYouTubeFrames": 0
+  },
+  "changedFileInventory": [
+    "assets/learning/edge-leaves-1440.webp",
+    "assets/learning/edge-leaves-720.webp",
+    "assets/learning/landscape-bank-stage-1440.webp",
+    "assets/learning/landscape-bank-stage-720.webp",
+    "assets/learning/landscape-hill-stage-1440.webp",
+    "assets/learning/landscape-hill-stage-720.webp",
+    "assets/learning/landscape-preparation-1440.webp",
+    "assets/learning/landscape-preparation-720.webp",
+    "assets/learning/landscape-sky-stage-1440.webp",
+    "assets/learning/landscape-sky-stage-720.webp",
+    "components/learning/ArtworkStudy.tsx",
+    "components/learning/ContextualPreview.tsx",
+    "components/learning/InstructionalUnit.tsx",
+    "components/learning/LandscapeSequence.tsx",
+    "docs/review/evidence/visual-video-learning/pr43-initial-report.md",
+    "docs/review/evidence/visual-video-learning/pr43-initial-validation.json",
+    "docs/review/screenshots/visual-video-learning/README.md",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/brush-contact.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/brush-loading.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/dilution.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/dry-damp.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/edge-boundaries.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/edge-leaves.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/flat-wash.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/intentional-texture.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/landscape-bank-stage.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/landscape-hill-stage.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/landscape-palette.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/landscape-preparation.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/landscape-sky-stage.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/landscape-value-plan.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/pool-backrun.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/quiet-landscape-finished.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/structure-painted.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/structure-plan.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/style-atmospheric.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/style-botanical.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/style-expressive.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/style-urban.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/value-alternative.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/value-plan.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/value-subject.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/1440/wet-edge.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/brush-contact.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/brush-loading.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/dilution.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/dry-damp.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/edge-boundaries.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/edge-leaves.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/flat-wash.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/intentional-texture.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/landscape-bank-stage.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/landscape-hill-stage.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/landscape-palette.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/landscape-preparation.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/landscape-sky-stage.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/landscape-value-plan.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/pool-backrun.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/quiet-landscape-finished.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/structure-painted.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/structure-plan.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/style-atmospheric.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/style-botanical.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/style-expressive.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/style-urban.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/value-alternative.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/value-plan.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/value-subject.png",
+    "docs/review/screenshots/visual-video-learning/follow-up-artwork/720/wet-edge.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-00-learn-home.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-01-curriculum.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-02-water-concept.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-03-brush-loading.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-04-brush-contact.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-05-flat-wash.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-06-moisture.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-07-inline-card.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-08-synthetic-player.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-09-three-values.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-10-edges.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-11-structure.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-12-project-introduction.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-13-landscape-values.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-14-landscape-sky.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-15-landscape-hill.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-16-landscape-bank.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-17-landscape-finish.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-18-troubleshooting.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-19-styles.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-20-botanical.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-21-expressive.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-22-physical-actions.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-23-experiment.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-24-practice-record.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-25-painted-value-subject.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-26-value-alternative.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-27-expert-tip.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-28-edge-comparison.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-29-landscape-preparation.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-sequence-comparison-0.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-sequence-comparison-2.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-sequence-comparison-3.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-sequence-comparison-4.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/1440-sequence-comparison-5.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-00-learn-home.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-01-curriculum.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-02-water-concept.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-03-brush-loading.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-04-brush-contact.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-05-flat-wash.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-06-moisture.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-07-inline-card.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-08-synthetic-player.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-09-three-values.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-10-edges.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-11-structure.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-12-project-introduction.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-13-landscape-values.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-14-landscape-sky.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-15-landscape-hill.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-16-landscape-bank.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-17-landscape-finish.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-18-troubleshooting.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-19-styles.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-20-botanical.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-21-expressive.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-22-physical-actions.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-23-experiment.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-24-practice-record.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-25-painted-value-subject.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-26-value-alternative.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-27-expert-tip.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-28-edge-comparison.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-29-landscape-preparation.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-sequence-comparison-0.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-sequence-comparison-2.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-sequence-comparison-3.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-sequence-comparison-4.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-sequence-comparison-5.png",
+    "docs/review/screenshots/visual-video-learning/follow-up/390-sequence-comparison-6.png",
+    "docs/review/visual-video-learning-crosswalk.json",
+    "docs/review/visual-video-learning-upgrade.md",
+    "docs/review/visual-video-learning-validation.json",
+    "docs/review/watercolour-visual-assets.json",
+    "learning/artwork.ts",
+    "learning/contextualVideo.ts",
+    "learning/courseInstruction.ts",
+    "learning/projectInstruction.ts",
+    "scripts/validate-learning-upgrade.cjs",
+    "tests/browser/artwork-quality-review.cjs",
+    "tests/browser/capture-visual-video-learning.cjs",
+    "tests/browser/mentor-instruction.cjs",
+    "tests/browser/visual-video-learning.cjs",
+    "tests/final-art-review.test.cjs",
+    "tests/visual-video-learning.test.cjs"
+  ]
+}

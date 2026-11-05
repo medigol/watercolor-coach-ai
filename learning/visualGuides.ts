@@ -27,7 +27,7 @@ export const styleFeatures = {
       "Soft distance; a few found edges",
       "One restrained focal accent",
     ],
-    cue: "Compare the pale, softened hill with the more defined roof and near bank.",
+    cue: "Compare the pale headland and open water with the few more definite near marks.",
   },
   urban: {
     short: "Loose urban sketching",

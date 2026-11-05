@@ -72,7 +72,7 @@ let responseUser = user;
     if(!complete)await page.getByTestId('instructional-unit').waitFor();
   }
   const selectFocus=async id=>{await click('Teaching focuses in this step');const u=units.find(u=>u.id===id),group=units.filter(x=>x.stepId===u.stepId);await click('Focus '+(group.findIndex(x=>x.id===id)+1)+': '+u.title);await h(u.title).waitFor();};
-  const loadInline=async id=>{await click('Watch related preview: '+id);await ready();assert.equal(await page.locator('iframe').count(),1);assert.equal(await page.evaluate(()=>window.YT_TEST.instances.filter(p=>!p.dead).length),1);};
+  const loadInline=async id=>{const link=load('learning/instruction.ts').instructionVideoLinks.find(l=>l.id===id),r=load('learning/instruction.ts').resolveInstructionVideo(link,units.find(u=>u.id===link.unitId));const trigger=page.getByTestId('watch-inline-'+id);await trigger.scrollIntoViewIfNeeded();await page.waitForTimeout(180);await trigger.click();await page.waitForFunction(expected=>window.YT_TEST?.calls.filter(c=>c[0]==='cue').at(-1)?.[1].startSeconds===expected,r.window.start);await ready();assert.equal(await page.locator('iframe').count(),1);assert.equal(await page.evaluate(()=>window.YT_TEST.instances.filter(p=>!p.dead).length),1);};
   await scenario('A first-time learner can open and begin the canonical lesson without a saved entry',async()=>{
     await page.evaluate(k=>localStorage.removeItem(k),learningKey);
     await page.goto(base+'/learn/lesson?id=water-brush');await h('Water & brush control').waitFor();await b('Begin lesson').waitFor();
@@ -105,7 +105,7 @@ let responseUser = user;
         const ids=['unit-goal','unit-concept','unit-preparation','current-practical-action',...(await page.getByTestId('contextual-video').count()?['contextual-video']:[]),'studio-observation','unit-exercise',...(u.diagnosticIds.length?['inline-diagnostics']:[]),'unit-practice-record','unit-focus-navigation'];
         assert(await page.getByTestId('instructional-unit').evaluate((el,ids)=>ids.every((id,n)=>n===0||!!(el.querySelector(`[data-testid="${ids[n-1]}"]`).compareDocumentPosition(el.querySelector(`[data-testid="${id}"]`))&Node.DOCUMENT_POSITION_FOLLOWING)),ids),'goal → concept → preparation → actions → optional video → observation → experiment → diagnosis → record → next');
         assert.equal(await page.getByTestId('unit-practice-record').getByRole('checkbox').count(),step.checklist.length);
-        assert.equal(await page.getByTestId('unit-concept').getByRole('button').count(),0,'essential beginner concept is not hidden in a disclosure');
+        assert.equal(await page.getByText(u.concept,{exact:true}).isVisible(),true,'essential beginner concept stays visible');
         assert.equal(await raw(),before,'reading and focus navigation must not write progress');
       }
     }
@@ -121,7 +121,7 @@ let responseUser = user;
   });
   await scenario('Steve broad proposal loads inline in one gesture and retains absolute 47–702 boundaries',async()=>{
     await seed('set-up');await selectFocus('wb-load-round');await page.setViewportSize({width:1440,height:1000});await b('Learn home').scrollIntoViewIfNeeded();await shot('11-desktop-brush');await page.setViewportSize({width:390,height:900});const before=await raw();const requests=external.length;
-    assert.equal(await page.locator('iframe').count(),0);await page.getByTestId('current-practical-action').scrollIntoViewIfNeeded();await shot('17-brush-physical-sequence');await b('Watch related preview: wb-loading-steve').scrollIntoViewIfNeeded();await shot('03-inline-before-load');
+    assert.equal(await page.locator('iframe').count(),0);await page.getByTestId('current-practical-action').scrollIntoViewIfNeeded();await shot('17-brush-physical-sequence');await page.getByTestId('watch-inline-wb-loading-steve').scrollIntoViewIfNeeded();await shot('03-inline-before-load');
     const y=await page.getByTestId('inline-reference-wb-loading-steve').evaluate(e=>e.getBoundingClientRect().top);
     await loadInline('wb-loading-steve');assert(external.length>requests);assert.equal((await cue()).startSeconds,47);assert.equal((await cue()).endSeconds,702);
     assert.equal(await b('Load YouTube preview').count(),0);assert(page.url().includes('/learn/lesson'));
@@ -137,9 +137,9 @@ let responseUser = user;
   await scenario('Switching canonical step cleans up; the repeated Steve proposal is not relabelled a short clip',async()=>{
     await loadInline('wb-loading-steve');
     await click('Show lesson outline');await click('3. Vary dilution, not everything');await h('Join a small wash while its edge is wet').waitFor();assert.equal(await page.locator('iframe').count(),0);
-    await page.getByText('The same longer wash proposal, not a newly verified short wash segment.',{exact:false}).waitFor();
+    await click('Video details and privacy');await page.getByText('This is an owner-proposed longer viewing window, not a newly verified short clip.',{exact:false}).waitFor();
     await loadInline('wb-wash-steve');assert.equal((await cue()).startSeconds,47);assert.equal((await cue()).endSeconds,702);
-    await click('Optional demonstration');assert.equal(await page.locator('iframe').count(),0);await page.getByText(/No verified video is assigned/).waitFor();
+    await click('Go to this experiment');assert.equal(await page.locator('iframe').count(),0);assert(await page.getByTestId('unit-exercise').evaluate(e=>e===document.activeElement));assert.equal(await b('Optional demonstration').count(),0);
   });
   await scenario('Louise start-only reference remains 90s onwards without a fabricated endpoint',async()=>{
     await seed('moisture');await loadInline('wb-moisture-overview');assert.equal((await cue()).startSeconds,90);assert(!('endSeconds' in await cue()));
@@ -156,7 +156,7 @@ let responseUser = user;
   });
   await scenario('Restricted embedding keeps current written exercise, original link and unchanged checklist',async()=>{
     const before=await raw();await page.evaluate(()=>window.YT_TEST.error(101));await page.getByRole('status').filter({hasText:'restricted embedding'}).waitFor();assert.equal(await page.locator('iframe').count(),0);
-    await options();await click('Watch full original on YouTube');assert.equal(await page.evaluate(()=>window.QA_OPENED.at(-1)),'https://www.youtube.com/watch?v=UeIHo83pVGc');
+    await page.getByTestId('inline-reference-wb-moisture-dry').getByRole('button',{name:'View original on YouTube',exact:true}).click();assert.equal(await page.evaluate(()=>window.QA_OPENED.at(-1)),'https://www.youtube.com/watch?v=UeIHo83pVGc');
     await page.getByText(units.find(u=>u.id==='wb-moisture-pair').exercise.action,{exact:true}).waitFor();assert.equal(await raw(),before);await shot('06-inline-error');
   });
   await scenario('Expert tip and symptom→cause→check→safe action→stop guide are accessible on mobile',async()=>{
@@ -165,7 +165,7 @@ let responseUser = user;
     await page.getByText('Stop and start fresh: Do not scrub',{exact:false}).waitFor();await page.getByText('Check: Was the wash losing sheen',{exact:false}).waitFor();await shot('07-diagnose-backrun');
     await b('A large mobile puddle collects at a stroke’s end').focus();await page.keyboard.press('Enter');
     assert.equal(await b('A large mobile puddle collects at a stroke’s end').getAttribute('aria-expanded'),'true');
-    await page.getByText('Safest next action: If everything is still wet',{exact:false}).waitFor();await click('Visual guide and explanation');await click('Instructor’s tip');await page.getByText(units.find(u=>u.id==='wb-diagnose-repeat').tip,{exact:true}).waitFor();await shot('12-instructor-tip');
+    await page.getByText('Safest next action: If everything is still wet',{exact:false}).waitFor();await click('Why this works and instructor’s tip');await page.getByText(units.find(u=>u.id==='wb-diagnose-repeat').tip,{exact:true}).waitFor();await shot('12-instructor-tip');
   });
   await scenario('Reading and experienced presentation share the complete teaching without inferring competence',async()=>{
     const {defaultProfile}=load('learning/catalogue.ts');await seed('set-up',{...defaultProfile,experience:'intermediate',format:'reading'});

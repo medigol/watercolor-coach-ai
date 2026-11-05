@@ -105,7 +105,7 @@ export const lessons: Lesson[] = [
         "water",
         "Dilution changes pigment concentration. Brush loading changes the amount of liquid delivered. Paper moisture changes how far that liquid can move. A glossy wet surface, a damp surface with little sheen and dry paper behave differently; room conditions and paper sizing change the timing.",
         [
-          "Look at the diagram as a comparison, not a recipe for exact timing.",
+          "Look at the painted comparisons and optional technical aid, not a recipe for exact timing.",
           "Choose one familiar pigment so its behaviour does not change between tests.",
         ],
         ["I reviewed dilution, loading and surface moisture"],
@@ -193,8 +193,8 @@ export const lessons: Lesson[] = [
     difficulty: "foundation",
     skillIds: ["values"],
     prerequisiteSkillIds: [],
-    instructionMinutes: 6,
-    practiceMinutes: 19,
+    instructionMinutes: 10,
+    practiceMinutes: 30,
     materials: [
       "Paper and a soft pencil, or one neutral watercolour",
       "A simple object, view or your own reference",
@@ -238,7 +238,7 @@ export const lessons: Lesson[] = [
       step(
         "look",
         "See tone separately from hue",
-        3,
+        6,
         "values",
         "Hue is a colour family; value is its lightness or darkness. A saturated red can attract attention without being the darkest area. Squinting may help you group masses, but it is not a calibrated grayscale measurement. Compare neighbouring tones rather than judging by colour names.",
         [
@@ -252,7 +252,7 @@ export const lessons: Lesson[] = [
       step(
         "map",
         "Group before detail",
-        5,
+        8,
         "values",
         "Draw two small equal rectangles. Mark the largest light and middle shapes, then decide where the dark belongs. Keep paper for the light. Small variations can join one family; this is purposeful simplification, not a claim that the subject has only three tones.",
         [
@@ -266,7 +266,7 @@ export const lessons: Lesson[] = [
       step(
         "first",
         "Make the first thumbnail",
-        6,
+        10,
         "values",
         "Fill each mass with one family. Let neighbouring masses connect when their values are close. A focal area may be supported by local contrast, isolation or shape; it does not have to be centred or extremely dark.",
         [
@@ -281,7 +281,7 @@ export const lessons: Lesson[] = [
       step(
         "compare",
         "Change one dark relationship",
-        7,
+        10,
         "values",
         "In the second thumbnail, relocate one small dark accent while retaining similar total dark area. Keep framing, main shapes and values constant. If several things change, you cannot tell which decision caused the effect.",
         [
@@ -300,7 +300,7 @@ export const lessons: Lesson[] = [
       step(
         "reflect",
         "Take the principle to a painting",
-        4,
+        6,
         "values",
         "The transferable skill is choosing large value relationships before committing. Keep both thumbnails; the less preferred version is evidence of a decision, not wasted work.",
         [
@@ -322,8 +322,8 @@ export const lessons: Lesson[] = [
     difficulty: "developing",
     skillIds: ["edges"],
     prerequisiteSkillIds: ["water-control"],
-    instructionMinutes: 6,
-    practiceMinutes: 24,
+    instructionMinutes: 10,
+    practiceMinutes: 33,
     materials,
     objectives: [
       "Distinguish hard, soft and lost boundaries",
@@ -366,7 +366,7 @@ export const lessons: Lesson[] = [
       step(
         "look",
         "Read boundaries, not labels",
-        3,
+        6,
         "edges",
         "Look at each diagram boundary. Hard and soft describe transition width. A lost interval joins adjacent similar passages; the rest of a shape may remain legible. An atmospheric painting may use many soft edges, while an observational botanical study may need selected crisp ones. Neither distribution is universally superior.",
         [
@@ -380,7 +380,7 @@ export const lessons: Lesson[] = [
       step(
         "hard",
         "Establish a hard edge",
-        5,
+        8,
         "edges",
         "Paint a small shape on dry paper with enough liquid to flow but not flood. Leave the boundary alone as it dries. This gives a baseline for comparison. Rough paper may break the mark; describe that separately from softness.",
         [
@@ -394,7 +394,7 @@ export const lessons: Lesson[] = [
       step(
         "soft",
         "Make a gradual transition",
-        7,
+        10,
         "edges",
         "Use the same mixture on evenly damp paper for the second shape. Alternatively, on a fresh test, touch one still-wet boundary with a clean damp brush. These are future practice methods, not methods inferred from someone else's painting. More water can travel back into a drying passage and make a bloom.",
         [
@@ -413,7 +413,7 @@ export const lessons: Lesson[] = [
       step(
         "lost",
         "Lose an interval, keep the form",
-        10,
+        13,
         "edges",
         "Place a similar-value neighbouring passage beside part of a third shape, allowing the two to meet. Aim for a short boundary to become difficult to distinguish while the rest of the shape still reads. Then make a tiny application with one selected sharper edge and one quieter interval.",
         [
@@ -432,7 +432,7 @@ export const lessons: Lesson[] = [
       step(
         "reflect",
         "Choose edges deliberately",
-        5,
+        6,
         "edges",
         "Compare separation and connection in the dry studies. You are building a vocabulary of choices. Your selected style can influence which boundary relationships you practise next, while leaving other choices available.",
         [
@@ -454,8 +454,8 @@ export const lessons: Lesson[] = [
     difficulty: "developing",
     skillIds: ["drawing", "perspective"],
     prerequisiteSkillIds: [],
-    instructionMinutes: 5,
-    practiceMinutes: 15,
+    instructionMinutes: 8,
+    practiceMinutes: 26,
     materials: [
       "Pencil and paper",
       "A box or a simple building viewed from a fixed position",
@@ -498,7 +498,7 @@ export const lessons: Lesson[] = [
       step(
         "look",
         "Compare the envelope",
-        3,
+        6,
         "drawing",
         "Look at the overall width and height before naming doors, roofs or windows. Negative shapes between objects can help check placement. This lesson uses your own observed subject; it does not claim exact likeness without a reference.",
         [
@@ -515,7 +515,7 @@ export const lessons: Lesson[] = [
       step(
         "first",
         "Record the first reading",
-        5,
+        10,
         "drawing",
         "Draw a few major edges. Look at their slopes relative to horizontal and vertical. In a conventional linear-perspective description, parallel edges in the same spatial direction may converge toward a shared vanishing point, possibly far outside the page; different directions need not share it.",
         [
@@ -529,7 +529,7 @@ export const lessons: Lesson[] = [
       step(
         "compare",
         "Test one structural change",
-        8,
+        12,
         "drawing",
         "Make a second study of the same framing and size. Change only the slopes you have re-observed. Keep detail out. If you intend expressive distortion, describe what the altered relationship communicates instead of treating realism as the only success criterion.",
         [
@@ -548,7 +548,7 @@ export const lessons: Lesson[] = [
       step(
         "reflect",
         "Carry the check forward",
-        4,
+        6,
         "drawing",
         "A quick structural study can guide urban marks, leaf proportions or an abstract arrangement. It need not become an elaborate underdrawing. Observation supplies options; intention guides which option you use.",
         [
@@ -577,15 +577,15 @@ export const project: GuidedProject = {
   difficulty: "developing",
   skillIds: ["project-foundations", "atmosphere"],
   prerequisiteSkillIds: ["water-control", "values", "edges"],
-  instructionMinutes: 10,
-  practiceMinutes: 50,
+  instructionMinutes: 16,
+  practiceMinutes: 64,
   materials: [
     "Postcard-sized watercolour paper",
     "One round brush",
     "One blue or neutral pigment; an optional familiar earth colour",
     "Pencil, palette, clean water and cloth",
   ],
-  why: "A small invented landscape lets you test value and edge decisions without needing a photograph or copying an artist's work. The example is an original diagram, not a promised painted result. Use your own shape variations and palette.",
+  why: "A small invented landscape lets you test value and edge decisions without needing a photograph or copying an artist's work. The example is an original generated watercolour study, not a physical painting or a promised result. Use your own shape variations and palette.",
   exercise: {
     target:
       "One postcard-sized landscape with sky, distant hill and near bank.",
@@ -608,7 +608,7 @@ export const project: GuidedProject = {
     recovery:
       "If masses merge unintentionally, let the work dry and reassess. Test any change on scrap. Starting a second small study is often safer than repeatedly repairing a drying wash.",
     shortVersion:
-      "Work in short 10–15 minute sessions, pausing at step boundaries. Allow about 60 active minutes in total; drying time is additional and depends on conditions.",
+      "Work in short 10–15 minute sessions, pausing at step boundaries. Allow about 80 active minutes in total; drying time is additional and depends on conditions.",
     extension:
       "Apply the same value and edge plan to a boat, street or abstract arrangement; change the subject without copying this silhouette.",
   },
@@ -624,7 +624,7 @@ export const project: GuidedProject = {
     step(
       "intention",
       "Choose a quiet intention",
-      4,
+      6,
       "landscape",
       "Imagine a broad sky, one distant hill and a near bank. Choose a calm or more dramatic intention; the demonstration suggests calm, but that is an option rather than a universal standard.",
       [
@@ -634,12 +634,12 @@ export const project: GuidedProject = {
       ],
       ["Paper and materials ready", "An intention chosen"],
       "How much open sky or water will support that intention?",
-      "Do not copy every contour in the diagram or assume a specific pigment is essential.",
+      "Do not copy every contour in the generated study or assume a specific pigment is essential.",
     ),
     step(
       "values",
       "Plan three major values",
-      7,
+      10,
       "values",
       "Make a tiny pencil plan beside the painting. Decide where the light paper remains, which mass is middle value and where a limited dark can belong. A misty plan can compress the whole range; the darkest area need not be black.",
       [
@@ -658,7 +658,7 @@ export const project: GuidedProject = {
     step(
       "wash-plan",
       "Test the wash and boundary",
-      6,
+      8,
       "water",
       "Premix enough pale colour for the sky and test the intended hill value on scrap. Decide where damp-paper diffusion is useful and where you want a dry-paper edge. Watch sheen rather than a clock.",
       [
@@ -673,7 +673,7 @@ export const project: GuidedProject = {
     step(
       "sky",
       "Lay a light sky passage",
-      8,
+      12,
       "landscape",
       "Apply the pale mixture across the sky area with a consistent load. Leave intended paper lights. A little variation can be appropriate; avoid repeatedly chasing an even finish as the passage dries.",
       [
@@ -688,7 +688,7 @@ export const project: GuidedProject = {
     step(
       "hill",
       "Place the distant mass",
-      8,
+      12,
       "landscape",
       "Use the tested middle mixture for a simple distant hill. For this atmospheric option, let part of its boundary soften into a suitable damp passage. If the sky has dried, use a fresh scrap test rather than scrubbing it back into submission.",
       [
@@ -707,7 +707,7 @@ export const project: GuidedProject = {
     step(
       "bank",
       "Connect a near mass",
-      10,
+      14,
       "landscape",
       "When the relevant passage is dry enough for the boundary you want, place a near bank using the planned darker mixture. Leave some intervals quiet. A nearer mass can be differentiated through value, edge or shape; do not increase all of them automatically.",
       [
@@ -741,7 +741,7 @@ export const project: GuidedProject = {
     step(
       "reflect",
       "Keep the lesson, not just the result",
-      7,
+      8,
       "landscape",
       "Your notes describe a self-reported experiment, not a score. Keep the thumbnail and painting together. A separate second study can test one boundary treatment without risking the finished work.",
       [

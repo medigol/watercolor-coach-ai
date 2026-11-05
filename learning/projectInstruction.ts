@@ -1,0 +1,136 @@
+import type { InstructionalUnit, TroubleshootingEntry, InstructionVideoLink } from "./instructionTypes";
+const unit=(u:Omit<InstructionalUnit,"lessonId"|"editorial">):InstructionalUnit=>({...u,lessonId:"quiet-landscape",editorial:{status:"self-reviewed-awaiting-owner",version:1}});
+
+/** One coherent design. Detail images are views of the finished reference, not fabricated painting stages. */
+export const projectInstruction:InstructionalUnit[]=[
+  unit({
+    id:"ql-intention",stepId:"intention",topic:"landscape-intention",title:"Choose what should remain quiet",
+    outcome:"State a visual intention and identify the light space and small landing that support it.",
+    transition:"Begin with the finished study as a choice of relationships, then make your own small plan.",
+    setup:"Steady postcard-sized watercolour paper. Have pencil, a manageable round brush, familiar blue or neutral pigment, optional earth colour, water and cloth ready.",
+    concept:"The reference uses pale open sky, a low hill, a light river opening and a connected nearer bank. The farmhouse is one possible landing; it is optional in your own study. You can replace it with a gap or shape while keeping a deliberate quiet/detailed relationship.",
+    beginnerTerm:"A landing is a place where attention can settle. It can be supported by a shape or a light gap as well as by a darker accent.",
+    actions:["Look at the whole reference from arm's length. Point to its largest light, middle distance and nearer group before inspecting the cottage or grasses.","Choose a calm or more forceful intention for your own study. Decide how much sky and river-like open space it needs.","Mark the main proportions very lightly and state the intention in the optional note or on scrap. Keep the small format manageable for the brush you have."],
+    observe:"Which part of the reference remains understated, and where does attention settle? Describe a relationship rather than a colour recipe.",
+    why:"An intention provides a reason to preserve some passages and leave others alone later. The reference is an option, not a result you must reproduce.",
+    tip:"Keep the intention short enough to guide a later stopping decision: for example, an open light route with one quieter landing.",
+    advanced:"Choose whether the landing needs contrast, isolation or a recognisable shape. Do not increase all three by habit.",
+    exercise:{action:"Prepare the small sheet and choose one sentence of intention, one open light and one restrained landing.",variable:"Your intended emphasis",constants:["Small format","A limited familiar palette","Three major mass relationships"],success:["An intention is named.","The open space has a purpose before details are planned."],transfer:"Use the same intention-led start for a boat, street mass or abstract landscape."},
+    minutes:{reading:2,practice:4},drying:"This planning choice requires no drying; later painted comparisons do.",diagnosticIds:[]
+  }),
+  unit({
+    id:"ql-values",stepId:"values",topic:"landscape-values",title:"Keep the light route open",
+    outcome:"Make a small value plan that preserves the main light and separates the two land masses deliberately.",
+    transition:"Turn the intention into a cheap small plan before committing the large light passages.",
+    setup:"Use pencil or one neutral mixture on a spare small rectangle. Keep the finished reference and its generated value interpretation in view.",
+    concept:"The sky and river can share the light family while the hill occupies a quieter middle relationship. The connected bank and a limited accent can supply a deeper group. These are selected relationships for this study, not a law that every distant object must be light.",
+    beginnerTerm:"Reserved paper is an intentionally unpainted light shape. Decide where it belongs before a wash fills the sheet.",
+    actions:["Draw the sky/hill/bank boundaries without leaves, grass blades or windows. Keep the river opening connected rather than splitting it into small leftover white holes.","Assign three dominant values. If a cottage is included, keep its large light wall within the design before placing any small roof or door accent.","View the tiny plan from arm's length and compare it with your intention. Alter the plan on fresh scrap if the dark group overwhelms the open space."],
+    observe:"Does the light passage carry the eye into the design? Can the hill and bank be distinguished without outlining every contour?",
+    why:"A value plan lets you test emphasis before transparent colour makes restoring clean paper more difficult.",
+    tip:"Compare the light river opening in the plan and the finished reference. Keep that opening legible when the hill and bank are grouped.",
+    advanced:"Try a compressed middle/dark relationship for a quieter intention, preserving enough separation for the shape to read.",
+    exercise:{action:"Complete the small three-family plan and identify one light shape that the painting must preserve.",variable:"Chosen value relationships",constants:["Your framing and main shapes","The stated intention","No small descriptive detail"],success:["The large groups read at a distance.","A specific open light and quieter interval are planned."],transfer:"Keep the plan beside the painting as a decision aid, while still responding to actual dry results."},
+    minutes:{reading:2,practice:8},drying:"A painted plan must dry before its values guide the painting mixture.",illustration:"values",diagnosticIds:["value-fragmentation","value-dark-area"]
+  }),
+  unit({
+    id:"ql-wash-plan",stepId:"wash-plan",topic:"landscape-wash-plan",title:"Prepare the light mixture and the stopping point",
+    outcome:"Test the light/middle relationships, brush delivery and a safe drying pause before starting the sky.",
+    transition:"Use the plan to decide what to mix and what to leave, rather than improvising every control during the wash.",
+    setup:"Use scrap of the painting paper, a premixed pale puddle, a second tested middle mixture and clean wiping material.",
+    concept:"Keep the ridge, house wall and open river lightly planned before colour. Choose familiar pigments and use the palette comparison for light, middle and nearer relationships. Premix enough pale colour so emergency mixing does not interrupt the wet edge.",
+    beginnerTerm:"A drying pause separates wet stages when the next boundary should stay definite. It lasts as long as the sheet needs, not a fixed number of minutes.",
+    actions:["Make a pale test swatch with a repeatable load. Compare it dry with the reserved paper light; make it paler on fresh scrap if it will compete with the intended light.","Test a middle swatch beside it. Keep load and paper similar so the comparison is about the chosen mixture relationship.","Rehearse how the brush crosses the small sky area. Choose dry-paper or evenly damp sky handling, and identify a place to stop safely before the hill."],
+    observe:"Can the brush carry the small passage without scrubbing or running out? Does the pale dry sample leave room for the later middle mass?",
+    why:"A workable load and an adequate puddle help preserve a connected wet edge. Separating mixture and delivery makes later diagnosis more useful.",
+    tip:"Reduce the area before assuming you need a more expensive brush. Keep the river light and any chosen building wall out of the first colour passage.",
+    advanced:"Test any planned rewetting over a dry sky-colour sample now; some pigments and sized surfaces lift easily.",
+    exercise:{action:"Dry-test the pale and middle relationships and rehearse one connected sky pass. Mark the intended drying pause on the plan.",variable:"Selected sky concentration during the swatch test",constants:["Paper and brush","Comparable loading","Small working size"],success:["The light mixture is chosen from a dry comparison.","A stopping/drying decision is explicit."],transfer:"Use the same preparation before a large connected colour shape in another subject."},
+    minutes:{reading:2,practice:6},drying:"Wait for the samples; this waiting is additional to active preparation.",illustration:"water",diagnosticIds:["pooling","dry-brush","dry-value"]
+  }),
+  unit({
+    id:"ql-sky",stepId:"sky",topic:"landscape-sky",title:"Lay the broad light without chasing perfection",
+    outcome:"Establish a simple connected sky while preserving the planned light space.",
+    transition:"Keep the tested mixture and delivery. Commit one broad passage, then leave it to settle.",
+    setup:"Have enough pale mixture ready. Keep the river opening and any reserved light wall clear. Choose the surface condition you tested.",
+    concept:"Observe the broad light sky wash above the unpainted land. Keep the reserved lower lights clear while joining the sky passage. Variation can support the open atmosphere; watch the wet edge on your own sheet to decide when to leave it.",
+    beginnerTerm:"A connected passage is wet enough to mingle across the next join; a wandering pool or patchily drying area is a different condition.",
+    actions:["If using the damp option, wet only the planned sky area evenly with clean water, avoiding reserved lower lights. Inspect for standing pools before adding colour.","Use the tested load and move across the small sky in connected passes, joining a still-workable edge. Leave the intended lights rather than painting every white gap.","If excess liquid collects while the whole passage remains freely wet, touch only the pool with a rinsed, blotted damp brush and lift away. Otherwise stop.","Leave a setting passage alone. Allow it to dry before any later layer unless a deliberately tested wet connection is still workable."],
+    observe:"Is the broad light still simple? Distinguish useful wash variation from an accidental pool or a hard setting join.",
+    why:"Repeated wet corrections can displace pigment or disturb sizing as the sky starts to set. A quiet light mass does not require identical tone at every point.",
+    tip:"Do not force a cloud outline from the reference. Preserve the job of the light shape instead.",
+    advanced:"Choose whether the sky needs any descriptive marks at all. Its quietness may be what supports the later landing.",
+    exercise:{action:"Paint the small light sky passage and pause. Note the surface condition and whether the planned light remains open.",variable:"Sky handling within the chosen plan",constants:["Tested pale mixture","Small format and load","Reserved light shapes"],success:["A broad light mass remains.","A drying passage is left without repeated scrubbing."],transfer:"Use the same stopping judgement in a light background or pale petal wash."},
+    minutes:{reading:2,practice:10},drying:"Allow a safe pause. Loss of surface shine alone does not prove internal dryness.",illustration:"water",diagnosticIds:["pooling","join-line","backrun","project-light"]
+  }),
+  unit({
+    id:"ql-hill",stepId:"hill",topic:"landscape-distance",title:"Place one quiet middle-distance mass",
+    outcome:"Make the hill readable while keeping its value and selected boundary subordinate to the intended landing.",
+    transition:"Read the actual sky condition before choosing the hill boundary. Do not force the reference's softness at the expense of the sheet.",
+    setup:"Keep the dry value plan, tested middle mixture and scrap nearby. For this first hill comparison, let the sky dry fully before choosing a boundary treatment.",
+    concept:"Recession depends on the hill's relationships with adjacent passages. A lower-contrast or quieter contour is one atmospheric choice. A harder ridge can also work when the value remains restrained; distance is not governed by one universal formula.",
+    beginnerTerm:"Rewetting means introducing clean water over an existing passage; it can reactivate or lift some pigments even after drying.",
+    actions:["If the sky is still wet, partly drying or its condition is uncertain, pause. Once it is dry, test one gentle clean-water pass over a dry sky-colour sample if you want a softer option. For a definite boundary, use the dry-paper option directly.","If you choose dry paper or the dampening sample lifts or streaks, use a dry-paper hill in the painting and keep its value quiet. If you choose the softer option and the sample tolerates the pass, dampen the intended hill and a narrow adjoining interval once, without standing water or repeated rubbing.","Place the tested middle mixture as one connected hill mass. Keep its silhouette simple, let only the selected interval merge where workable, then leave it to dry."],
+    observe:"Does the hill read without becoming the strongest contrast? A visible soft boundary is not automatically a lost contour.",
+    why:"A surface test protects the established sky. Value, edge and shape can suggest depth together without increasing all contrasts at once.",
+    tip:"Compare the hill with the earlier sky-only view. Add the hill as one quiet group; leave the house and river lights intact.",
+    advanced:"Leave some ridge intervals more definite if they help the design; uniform softness can be as unselective as uniform hardness.",
+    exercise:{action:"Place one connected hill using the safe surface option you tested. Record the observed condition and the relationship with the light sky.",variable:"Selected hill boundary treatment",constants:["Tested middle value","Simple mass and framing","The preserved light"],success:["The hill remains readable.","The selected handling does not rely on scrubbing the sky into submission."],transfer:"Use a tested boundary option for any supporting mass behind a clearer focal shape."},
+    minutes:{reading:2,practice:10},drying:"Wait for a workable or fully dry condition; do not assume a fixed time.",illustration:"landscape",diagnosticIds:["project-depth","overworked","backrun"]
+  }),
+  unit({
+    id:"ql-bank",stepId:"bank",topic:"landscape-near-mass",title:"Connect the bank before describing its texture",
+    outcome:"Establish a coherent nearer group with one chosen clearer interval and a quieter supporting interval.",
+    transition:"Keep the hill's job intact. Add the nearer relationship from the value plan before small descriptive marks.",
+    setup:"Check that the adjoining passage is dry enough for the boundary you intend. Prepare a tested deeper mixture and a manageable loading action.",
+    concept:"A nearer mass can differ through value, edge or shape. Increasing all three automatically can overwhelm a quiet plan. Compare the broad connected bank here with the finished reference's grass marks. Establish that underlying mass before deciding whether texture is useful.",
+    beginnerTerm:"A broken mark can describe texture while the large underlying mass stays connected. It is different from scattered unrelated dark spots.",
+    actions:["Recheck the dry plan and the light river opening. Trace the intended bank silhouette with your eye before touching the painting.","Paint the larger bank with connected belly movements, working from the main shape rather than adding isolated tufts. Keep the reserved river light open.","Select a short interval for clearer separation and leave a supporting interval less explicit. Call it lost only if the neighbouring dry appearances actually merge.","After the mass dries, try a few reduced-load directional texture marks on scrap. Add them to the painting only if the bank needs that description."],
+    observe:"Does the land still read as one mass at arm's length? Are texture marks supporting it or fragmenting the light and dark organisation?",
+    why:"A coherent near group can support depth before detail arrives. Late small marks easily consume the quiet intervals that made the first plan useful.",
+    tip:"A second small study is a safer place to compare a different near-mass shape than repeatedly repairing a drying bank.",
+    advanced:"Use selective negative space as well as positive marks. A few existing paper gaps may describe texture without another dark stroke.",
+    exercise:{action:"Paint one connected bank, inspect the relationship dry, and choose whether any texture is needed. Preserve one clearer and one quieter interval.",variable:"Near-mass relationship chosen from the plan",constants:["Original framing","The river light and hill","Limited tested palette"],success:["The bank reads before its small details.","Any added texture has a named visual job."],transfer:"Build a connected foliage, street-shadow or still-life mass before breaking it into small descriptions."},
+    minutes:{reading:2,practice:12},drying:"Let the relevant mass dry before separate definite texture marks; waiting is extra.",illustration:"landscape",diagnosticIds:["project-depth","value-fragmentation","broken-mark","project-light"]
+  }),
+  unit({
+    id:"ql-finish",stepId:"finish",topic:"landscape-finishing",title:"Make a stopping decision before another mark",
+    outcome:"Choose to stop or make one justified, tested adjustment without sacrificing relationships that already work.",
+    transition:"The large groups are in place. Evaluate their jobs before treating detail as automatic progress.",
+    setup:"Use the dry painting, original intention and thumbnail. Keep a fresh margin or separate scrap for any adjustment test.",
+    concept:"The finished reference's small roof or door accents suggest one possible landing. Your study may already read through a light gap, shape or edge. More darkness, saturation and detail are separate choices; none is a compulsory finish.",
+    beginnerTerm:"A finishing adjustment should solve a named visual need, not merely occupy the time left in a session.",
+    actions:["View the whole dry study at arm's length. Name the first point of attention and compare it with the intention.","If the landing already reads, stop. If not, choose one possible value or edge change and test its size and mixture on scrap.","Make at most that chosen adjustment only if the test supports it. Step back before considering another mark; leave incidental variations that do not conflict with the intention."],
+    observe:"Did the contemplated mark clarify the intended relationship, or merely add another small object to inspect?",
+    why:"A stopping decision preserves the open passages and hierarchy that detail can quickly erode.",
+    tip:"Do not scrape, scrub or add repeated water to a fragile area in order to match the reference. Some changes cannot safely be reversed on the current sheet.",
+    advanced:"Compare the painting with and without the proposed accent mentally or on a separate thumbnail. Restraint can be an active finishing choice.",
+    exercise:{action:"Choose to stop or perform one tested adjustment. Record its intended job; a decision to stop is a complete response to this stage.",variable:"One conditional finishing adjustment",constants:["Main masses and framing","The stated intention","No automatic detail pass"],success:["The decision has a reason.","Effective light and middle relationships are preserved."],transfer:"Use the same test-before-mark habit on an urban, botanical or expressive study."},
+    minutes:{reading:2,practice:8},drying:"Evaluate dry. If the sheet is still damp, pause instead of forcing a finish.",illustration:"landscape",diagnosticIds:["project-finish","overworked"]
+  }),
+  unit({
+    id:"ql-reflect",stepId:"reflect",topic:"landscape-reflection",title:"Keep the decision that transfers",
+    outcome:"Compare intention, plan and dry result, naming one useful relationship and one separate future test.",
+    transition:"The painting is finished for this session. Preserve it while choosing what to learn next.",
+    setup:"Place the dry painting and its thumbnail side by side. Keep the finished reference available as an example, not an answer key.",
+    concept:"A useful reflection distinguishes what you intended, what you observed and what remains uncertain. A different palette or contour is not a failure to copy the example.",
+    beginnerTerm:"Transfer means using a principle in another subject or study rather than repeating every contour of this reference.",
+    actions:["Compare the large light, middle and near relationships with the original intention before listing small differences.","Name a physical condition you recorded and one useful visual result. Keep an uncertain explanation conditional.","Use the existing reflection controls to record one future test, such as a different hill boundary on a second small study while keeping the main masses fixed."],
+    observe:"Can the next experiment change one variable without risking the finished painting?",
+    why:"Keeping the plan and painting together makes a decision reusable, including when an unexpected material result was useful.",
+    tip:"No upload or video is needed to complete this reflection. Keep the physical study if it helps you compare later dry results.",
+    advanced:"Transfer the same value/edge intention to a new subject and name which relationship can change with it.",
+    exercise:{action:"Complete the original reflection with an observed relationship, a condition to repeat and a separate future test.",variable:"One choice reserved for a new study",constants:["Comparable main design if testing a hill edge","A named intention"],success:["The reflection refers to visible evidence.","The next test identifies an action and an observation, not a claim of mastery."],transfer:"Carry the principle into your own landscape, boat, street or abstract arrangement."},
+    minutes:{reading:2,practice:6},drying:"Return for the comparison after the painting is dry.",diagnosticIds:[]
+  }),
+];
+export const projectDiagnostics:TroubleshootingEntry[]=[
+  {id:"project-light",symptom:"The intended river or sky light has been filled unintentionally",causes:["Reserved shapes were not planned before the wash","Small corrective marks gradually consumed the light"],check:"Is the passage actually dry, and does the remaining light still serve the intention? Does your pigment lift safely on a separate dry sample?",correction:"First consider accepting the changed design. If a lifting test on spare paper is safe, treat it as a separate possible method, not a guaranteed restoration of clean paper.",stop:"Do not scrub a fragile passage to force paper white back. Start a new small study if that light is essential.",normalVariation:"A changed light shape may support a different valid intention; compare the whole design before repairing it."},
+  {id:"project-depth",symptom:"Hill and near bank compete without a clear intended relationship",causes:["Values, edges and saturation were increased together","Small dark details fragmented the nearer group"],check:"Compare the dry masses at arm's length. Which contrast attracts attention, and is that what the plan intended?",correction:"Make a fresh tiny plan changing only one value or edge relationship. Test any later painting adjustment on scrap before applying it.",stop:"Do not darken every near edge or wash over the hill while it is setting to enforce a distance formula.",normalVariation:"A narrow or reversed depth relationship can be intentional. Distant forms are not universally lighter in observed scenes."},
+  {id:"project-finish",symptom:"Each finishing mark creates another area that seems to need detail",causes:["No visual job was assigned to the next mark","Local inspection replaced the whole-painting intention"],check:"Step back: does the landing already read, and are new marks competing with it?",correction:"Stop the detail pass. On a separate thumbnail test one proposed accent or choose no further mark.",stop:"Do not add a general dark outline or scrape wet paint to force a resolved appearance.",normalVariation:"An economical finish can be deliberate. More description is a choice rather than evidence of greater completion."},
+];
+export const projectVideoLinks:InstructionVideoLink[]=[
+  {id:"ql-paul-values",unitId:"ql-values",candidateId:"paul-values",windowId:"owner-proposal",scope:"long-proposal",status:"provisional-preview",watchLabel:"Watch the longer value overview",suggestedRelevance:"The same 37–852s owner proposal used in value planning; not a demonstration of this generated landscape.",verify:"Inspect the actual value grouping and surrounding context before identifying any project-specific or shorter clip."},
+  {id:"ql-steve-wash",unitId:"ql-wash-plan",candidateId:"steve-flat-wash",windowId:"owner-proposal",scope:"long-proposal",status:"provisional-preview",watchLabel:"Watch the longer wash overview",suggestedRelevance:"The same broad 47–702s wash proposal, offered here for preparation rather than as a newly certified sky clip.",verify:"Confirm the actual loading/pass sequence and context. No new short bounds or exact-action claims are introduced."},
+  {id:"ql-cafe-sky",unitId:"ql-sky",candidateId:"cafe-cloud-tips",windowId:"cafe-cloud-tips-publisher-3",scope:"chapter-hint",status:"provisional-preview",watchLabel:"Watch the cloud-practice chapter preview",suggestedRelevance:"Publisher's 439–725s practice chapter hint for a related sky topic. The conflicting 138s hints are not used.",verify:"Inspect the actual paper condition, preserved lights, pacing and narration before approving any technique match. This is not the app's landscape being painted."},
+];

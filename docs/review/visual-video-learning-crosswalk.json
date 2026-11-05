@@ -1,0 +1,1146 @@
+{
+  "schema": "visual-video-learning-crosswalk/v1",
+  "units": [
+    {
+      "lessonId": "water-brush",
+      "stepId": "look",
+      "unitId": "wb-three-decisions",
+      "objective": "Explain a mark using mixture concentration, brush load and paper condition separately.",
+      "exercise": {
+        "action": "Make the two load-test strokes above. Beside them, name which control changed and which two you kept similar.",
+        "variable": "Liquid load in the brush",
+        "constants": [
+          "One premixed pigment concentration",
+          "Dry paper of the same type",
+          "Similar stroke size and contact"
+        ],
+        "success": [
+          "You can name the changed control without calling it dilution.",
+          "You can describe a visible difference or a useful inconclusive result."
+        ],
+        "transfer": "Before a sky, petal or architectural wash, name the palette, brush and surface conditions separately."
+      },
+      "artworkId": "brush-loading",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: tapered ends. Right: fuller end deposits. Your load test explores possible causes.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 3
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "unitId": "wb-materials",
+      "objective": "Arrange a small, stable working area and enough mixture for an uninterrupted passage.",
+      "exercise": {
+        "action": "Without touching paint to paper yet, rehearse moving from the puddle to the rectangle and back. Reduce the planned rectangle if the reach is awkward; leave the palette in place.",
+        "variable": "Working-area size",
+        "constants": [
+          "Your available brush",
+          "One palette arrangement"
+        ],
+        "success": [
+          "The sheet stays stable.",
+          "You can reach mixture, clean water and wiping material without crossing the painted passage."
+        ],
+        "transfer": "Prepare the largest connected wash of your next subject before beginning it."
+      },
+      "artworkId": "flat-wash",
+      "artworkKind": "generated-study",
+      "imageObservation": "A connected wash can retain material variation without becoming a set of separate bands.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 1,
+        "practice": 2
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "unitId": "wb-load-round",
+      "objective": "Repeat a loading action that produces a usable stroke without an uncontrolled final drop.",
+      "exercise": {
+        "action": "Make a row of three similar strokes, reloading before each. Keep the puddle unchanged and repeat the same unloading action.",
+        "variable": "Loading action during initial adjustment; then repeat it",
+        "constants": [
+          "Palette concentration",
+          "Dry paper",
+          "Similar mark length and movement"
+        ],
+        "success": [
+          "At least two strokes have comparable delivery.",
+          "You can identify whether any problem appears at the start, middle or end."
+        ],
+        "transfer": "Use a scrap stroke before laying a clean light passage in your painting."
+      },
+      "artworkId": "brush-loading",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: tapered ends. Right: fuller end deposits. Your load test explores possible causes.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 3
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "wb-loading-steve",
+          "candidateId": "steve-flat-wash",
+          "videoId": "alq0YqX86gs",
+          "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+          "windowId": "owner-proposal",
+          "startSeconds": 47,
+          "endSeconds": 702,
+          "provenance": "owner-proposal",
+          "scope": "long-proposal",
+          "believedTopic": "Broad brush/wash viewing proposal, not an isolated loading clip.",
+          "requiresDirectVerification": "Locate actual wetting, belly loading, unloading and result context within the owner’s longer proposal; those actions are not individually witnessed in this record.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "unitId": "wb-contact",
+      "objective": "Change mark width deliberately while separating contact pressure from liquid load.",
+      "exercise": {
+        "action": "Compare the two rows. Change only the amount of hair in contact with the paper; keep the colour and loading sequence unchanged.",
+        "variable": "Contact area / gentle pressure",
+        "constants": [
+          "Mixture and load",
+          "Similar speed and length",
+          "Dry paper"
+        ],
+        "success": [
+          "A narrow and a broader mark are distinguishable.",
+          "You can make both without flattening the hairs against the ferrule."
+        ],
+        "transfer": "Use tip contact for a selected stem or edge and broader contact for the supporting mass."
+      },
+      "artworkId": "brush-contact",
+      "artworkKind": "generated-study",
+      "imageObservation": "Narrow contact, broad contact, and intentionally broken contact with paper tooth.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 5
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "dilution",
+      "unitId": "wb-flat-wash",
+      "objective": "Connect successive passes and finish without dragging a puddle through a drying area.",
+      "exercise": {
+        "action": "Paint one small rectangle using connected passes from the same mixture. On fresh scrap, repeat after adjusting only the load if the first wash pooled.",
+        "variable": "Brush load, only between fresh attempts",
+        "constants": [
+          "One concentration and pigment",
+          "Dry starting surface",
+          "Similar rectangle and working pace"
+        ],
+        "success": [
+          "Most adjacent passes connect without a dry gap.",
+          "The final edge is left without an uncontrolled pool, or you can identify why you stopped."
+        ],
+        "transfer": "Use the wet-edge decision for a quiet sky or a single broad colour shape, without requiring every surface to be perfectly smooth."
+      },
+      "artworkId": "wet-edge",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: quiet interior. Right: two darker joins. Follow the pass sequence below.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 5
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "wb-wash-steve",
+          "candidateId": "steve-flat-wash",
+          "videoId": "alq0YqX86gs",
+          "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+          "windowId": "owner-proposal",
+          "startSeconds": 47,
+          "endSeconds": 702,
+          "provenance": "owner-proposal",
+          "scope": "long-proposal",
+          "believedTopic": "The same longer wash proposal, not a newly verified short wash segment.",
+          "requiresDirectVerification": "Confirm the actual pass sequence, wet bead and final result; no brush-action sub-boundaries have been supplied.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "dilution",
+      "unitId": "wb-dilution-test",
+      "objective": "Produce distinguishable dry values while keeping brush delivery reasonably comparable.",
+      "exercise": {
+        "action": "Complete both three-swatch rows. Label the three concentrations in order after they dry, and circle any pair that is too similar to judge confidently.",
+        "variable": "Palette pigment concentration",
+        "constants": [
+          "Pigment, brush and paper",
+          "Comparable liquid load",
+          "Swatch size and dry starting surface"
+        ],
+        "success": [
+          "Three dry value groups are recognisable, or a specific repeat test is planned.",
+          "Wet and dry swatches are not compared as if their conditions were equal."
+        ],
+        "transfer": "Select a tested light or middle mixture for a petal, building plane or landscape passage."
+      },
+      "artworkId": "dilution",
+      "artworkKind": "generated-study",
+      "imageObservation": "Compare the value relationships across a row, then look for their repetition below.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 6
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "unitId": "wb-read-moisture",
+      "objective": "Describe moisture from visible conditions rather than elapsed seconds.",
+      "exercise": {
+        "action": "Write down two surface states as the scrap dries and predict how a stroke might spread in each. Keep this patch untouched; use the next dry/damp comparison to test the prediction on fresh areas.",
+        "variable": "Observed paper moisture",
+        "constants": [
+          "Same sheet type",
+          "One room and viewing light"
+        ],
+        "success": [
+          "You distinguish standing water from an evenly damp surface.",
+          "You do not treat lost sheen as permission to scrub a partly drying wash."
+        ],
+        "transfer": "Read a sky or foliage passage before deciding whether to connect another shape or leave it alone."
+      },
+      "artworkId": "dry-damp",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: definite boundary. Right: broader spread. Compare with your own surface tests.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 1
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "wb-moisture-overview",
+          "candidateId": "louise-blend",
+          "videoId": "UeIHo83pVGc",
+          "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+          "windowId": "owner-start",
+          "startSeconds": 90,
+          "endSeconds": null,
+          "provenance": "owner-start-only",
+          "scope": "start-only",
+          "believedTopic": "Owner-screened blending topic, beginning at 1:30; the endpoint is unknown.",
+          "requiresDirectVerification": "Establish the complete moisture sequence and its endpoint without inferring dry or damp conditions from the title.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "unitId": "wb-moisture-pair",
+      "objective": "Connect an observed surface condition to a changed edge and spread.",
+      "exercise": {
+        "action": "Complete the dry/damp pair. Describe one observed condition and its boundary, without calling every soft transition a lost edge.",
+        "variable": "Paper moisture",
+        "constants": [
+          "One concentration",
+          "Similar brush load and contact",
+          "Same paper and stroke size"
+        ],
+        "success": [
+          "Both conditions are recorded, including an inconclusive difference.",
+          "You distinguish a soft transition from a genuinely disappearing contour."
+        ],
+        "transfer": "Try the same comparison on a simple hill, leaf or abstract shape before using it in a painting."
+      },
+      "artworkId": "dry-damp",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: definite boundary. Right: broader spread. Compare with your own surface tests.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 5
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "wb-moisture-wet",
+          "candidateId": "louise-blend",
+          "videoId": "UeIHo83pVGc",
+          "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+          "windowId": "louise-blend-publisher-1",
+          "startSeconds": 109,
+          "endSeconds": 410,
+          "provenance": "publisher-hint",
+          "scope": "chapter-hint",
+          "believedTopic": "Publisher’s wet-on-wet chapter hint; suggested comparison context only.",
+          "requiresDirectVerification": "Inspect actual surface moisture, load, spread and result; published chapter boundaries are not certified instructional clips.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        },
+        {
+          "referenceId": "wb-moisture-dry",
+          "candidateId": "louise-blend",
+          "videoId": "UeIHo83pVGc",
+          "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+          "windowId": "louise-blend-publisher-2",
+          "startSeconds": 515,
+          "endSeconds": 758,
+          "provenance": "publisher-hint",
+          "scope": "chapter-hint",
+          "believedTopic": "Publisher’s wet-on-dry chapter hint; compare with the separate wet-on-wet proposal.",
+          "requiresDirectVerification": "Inspect the actual dry-paper demonstration, setup and result. This is not evidence of a lost edge.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "unitId": "wb-diagnose-repeat",
+      "objective": "Use a visible symptom to select a plausible cause and a fresh controlled experiment.",
+      "exercise": {
+        "action": "Write a symptom, a plausible cause, the condition you checked and the single variable for a fresh repeat. Make the repeat only if the surface and materials are ready.",
+        "variable": "One selected cause at a time",
+        "constants": [
+          "All controls other than the selected one",
+          "Comparable viewing after drying"
+        ],
+        "success": [
+          "The proposed cause is conditional, not certain from appearance alone.",
+          "You can explain when to stop instead of disturbing the current passage."
+        ],
+        "transfer": "Use a margin or separate scrap to test a correction before applying it to an important painting."
+      },
+      "artworkId": "pool-backrun",
+      "artworkKind": "generated-study",
+      "imageObservation": "An end pool and a backrun have different shapes and different questions to check.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 1,
+        "practice": 4
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "reflect",
+      "unitId": "wb-transfer",
+      "objective": "Name one observed relationship, one remaining uncertainty and a small real-painting application.",
+      "exercise": {
+        "action": "Use the existing reflection field to record a relationship, a condition to repeat, an uncertainty and a small application to your own subject.",
+        "variable": "Chosen handling in a new shape",
+        "constants": [
+          "The tested mixture or loading sequence where useful"
+        ],
+        "success": [
+          "The reflection refers to visible evidence, not a guessed hidden process.",
+          "The proposed transfer names a physical action and an observation."
+        ],
+        "transfer": "Use the chosen decision in the next guided landscape or your own subject; keep the other controls simple."
+      },
+      "artworkId": "intentional-texture",
+      "artworkKind": "generated-study",
+      "imageObservation": "Texture can have a deliberate visual job. It does not automatically require repair.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 3
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "look",
+      "unitId": "tv-observe",
+      "objective": "Identify three large value families without using hue as a substitute for lightness.",
+      "exercise": {
+        "action": "Make three small pencil patches beside your sketch and assign one visible mass to each. Check the order against your subject.",
+        "variable": "Grouping of observed tones",
+        "constants": [
+          "Same subject and light",
+          "One viewpoint",
+          "No rearranged objects"
+        ],
+        "success": [
+          "Three relative families are named without relying on hue.",
+          "Any uncertain grouping is identified rather than forced."
+        ],
+        "transfer": "Use the same comparison before choosing the first mixture for another subject."
+      },
+      "artworkId": "value-subject",
+      "artworkKind": "generated-study",
+      "imageObservation": "Use the jug, fruit, tabletop and background as large masses before naming small details.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 4
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "tv-paul-overview",
+          "candidateId": "paul-values",
+          "videoId": "iP97XXdpFpA",
+          "url": "https://www.youtube.com/watch?v=iP97XXdpFpA",
+          "windowId": "owner-proposal",
+          "startSeconds": 37,
+          "endSeconds": 852,
+          "provenance": "owner-proposal",
+          "scope": "long-proposal",
+          "believedTopic": "Owner-screened value overview, not a precise clip of this still life. Viewing is additional to the short study.",
+          "requiresDirectVerification": "Confirm the actual grouping decisions and surrounding context within the unchanged 37–852s owner proposal; no new action boundaries are inferred.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "map",
+      "unitId": "tv-map",
+      "objective": "Prepare two matching small frames and three working values before adding details.",
+      "exercise": {
+        "action": "Prepare both frames and a three-value key. Compare their major silhouettes before filling either frame.",
+        "variable": "Choice of grouped boundaries",
+        "constants": [
+          "Matching crop and subject positions",
+          "Three chosen values",
+          "Similar frame size"
+        ],
+        "success": [
+          "Both frames describe the same placement.",
+          "The intended light remains legible before dark accents are added."
+        ],
+        "transfer": "Use a light-shape map to protect paper white in a sky, petal or building."
+      },
+      "artworkId": "value-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "The three families remain readable without relying on colour names.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 6
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "first",
+      "unitId": "tv-first",
+      "objective": "Complete a readable first plan with three dominant families and no small descriptive detail.",
+      "exercise": {
+        "action": "Finish the first three-family plan. Point to its main light, middle and dark at arm's length and name the first point of attention.",
+        "variable": "Initial value arrangement",
+        "constants": [
+          "Prepared map",
+          "Chosen three-family key",
+          "No new detail"
+        ],
+        "success": [
+          "Large masses remain readable.",
+          "You can explain the emphasis without naming a compulsory darkest focal point."
+        ],
+        "transfer": "Protect those broad relationships when you make a colour study."
+      },
+      "artworkId": "value-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "The three families remain readable without relying on colour names.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 8
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "compare",
+      "unitId": "tv-compare",
+      "objective": "Compare two intentions while keeping crop, large shapes and overall dark area similar.",
+      "exercise": {
+        "action": "Complete the alternative plan and write one sentence connecting the moved accent with an observed change in attention.",
+        "variable": "Position of one small dark accent",
+        "constants": [
+          "Major shapes and crop",
+          "Three values",
+          "Similar total dark area"
+        ],
+        "success": [
+          "One meaningful change can be identified.",
+          "Your preference refers to an intention, or you explain why both remain useful."
+        ],
+        "transfer": "Try an alternative emphasis cheaply before committing dark paint to a larger study."
+      },
+      "artworkId": "value-alternative",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Compare the changed emphasis with the first plan. There is no universal winning arrangement.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 8
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "reflect",
+      "unitId": "tv-transfer",
+      "objective": "Retain a useful value decision and one question for a later painting.",
+      "exercise": {
+        "action": "Use the original reflection controls to name the changed relationship, its effect and one colour application. No video is required for this decision.",
+        "variable": "Value decision applied in colour",
+        "constants": [
+          "Chosen framing where useful",
+          "The relationship selected for preservation"
+        ],
+        "success": [
+          "The reflection identifies an observed difference.",
+          "A next test names a practical decision rather than a universal value rule."
+        ],
+        "transfer": "Apply the plan to a landscape, urban mass or a single observed leaf."
+      },
+      "artworkId": "value-alternative",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Compare the changed emphasis with the first plan. There is no universal winning arrangement.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 4
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "look",
+      "unitId": "ef-read",
+      "objective": "Distinguish a hard boundary, a soft transition and a locally lost contour.",
+      "exercise": {
+        "action": "Name three intervals in the comparison and choose one edge relationship for your own small shape.",
+        "variable": "Intended boundary relationship",
+        "constants": [
+          "One simple shape family",
+          "One broad visual intention"
+        ],
+        "success": [
+          "Soft and lost are distinguished.",
+          "The chosen edge has an intended job."
+        ],
+        "transfer": "Use the same reading when deciding which contour matters in a sky, petal or street."
+      },
+      "artworkId": "edge-boundaries",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: hard. Middle: soft. In the right pair, the shared middle contour disappears.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 4
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "hard",
+      "unitId": "ef-hard",
+      "objective": "Paint a definite boundary without scrubbing a setting edge.",
+      "exercise": {
+        "action": "Paint and leave the baseline shape. Describe one dry boundary interval without claiming every material makes the same edge.",
+        "variable": "Baseline dry-paper application",
+        "constants": [
+          "One mixture",
+          "Small shape and brush",
+          "Dry starting surface"
+        ],
+        "success": [
+          "A relatively abrupt interval can be identified.",
+          "The drying shape is left undisturbed."
+        ],
+        "transfer": "Use a dry-paper boundary for a selected roof, leaf tip or near mass when it serves the intention."
+      },
+      "artworkId": "edge-boundaries",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: hard. Middle: soft. In the right pair, the shared middle contour disappears.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 6
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "ef-hard-louise",
+          "candidateId": "louise-blend",
+          "videoId": "UeIHo83pVGc",
+          "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+          "windowId": "louise-blend-publisher-2",
+          "startSeconds": 515,
+          "endSeconds": 758,
+          "provenance": "publisher-hint",
+          "scope": "chapter-hint",
+          "believedTopic": "Publisher's wet-on-dry chapter hint; exact brush and surface actions remain unverified.",
+          "requiresDirectVerification": "Inspect the actual dry-paper setup and boundary before approving this as an exact hard-edge demonstration.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "soft",
+      "unitId": "ef-soft",
+      "objective": "Make a gradual boundary while keeping concentration and brush delivery reasonably similar.",
+      "exercise": {
+        "action": "Compare the dry hard/soft pair and record the actual surface condition you observed. Keep an inconclusive comparison as evidence too.",
+        "variable": "Paper moisture",
+        "constants": [
+          "Mixture concentration",
+          "Comparable load/contact",
+          "Similar shape and paper"
+        ],
+        "success": [
+          "One gradual transition is identified or a specific fresh test is planned.",
+          "A visible soft boundary is not called lost."
+        ],
+        "transfer": "Try the same relationship on a supporting hill or leaf passage before applying it to a larger painting."
+      },
+      "artworkId": "dry-damp",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: definite boundary. Right: broader spread. Compare with your own surface tests.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 8
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "ef-soft-louise",
+          "candidateId": "louise-blend",
+          "videoId": "UeIHo83pVGc",
+          "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+          "windowId": "louise-blend-publisher-1",
+          "startSeconds": 109,
+          "endSeconds": 410,
+          "provenance": "publisher-hint",
+          "scope": "chapter-hint",
+          "believedTopic": "Publisher's wet-on-wet chapter hint, related to diffusion rather than proof of a lost contour.",
+          "requiresDirectVerification": "Inspect actual paper condition, delivery and resulting edge. No lost-edge claim is supported by this mapping.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "lost",
+      "unitId": "ef-lost",
+      "objective": "Create a short genuinely disappearing contour while retaining enough information for the form to read.",
+      "exercise": {
+        "action": "Complete a merging pair and a small application. Name the interval that disappeared and the found edge that keeps the form readable.",
+        "variable": "Local adjoining-value relationship",
+        "constants": [
+          "Small related shapes",
+          "Similar paper and delivery",
+          "Only one interval joined"
+        ],
+        "success": [
+          "A truly disappearing interval is distinguished from soft visibility.",
+          "The application still communicates a form or mass."
+        ],
+        "transfer": "Use the relationship where neighbouring foliage, petals or land masses can share a value."
+      },
+      "artworkId": "edge-leaves",
+      "artworkKind": "generated-study",
+      "imageObservation": "Follow the upright leaf’s right edge: find it, lose it through the middle join, then find it again.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 11
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "reflect",
+      "unitId": "ef-transfer",
+      "objective": "Connect a dry boundary relationship with the visual job it should do in another subject.",
+      "exercise": {
+        "action": "Record one deliberate pairing of found and quieter edges and a physical next-use plan. No video is needed to complete this reflection.",
+        "variable": "Boundary treatment in a new subject",
+        "constants": [
+          "The chosen visual intention",
+          "A tested handling condition where useful"
+        ],
+        "success": [
+          "The next application names both purpose and action.",
+          "Softness is not substituted for proof of a lost contour."
+        ],
+        "transfer": "Use that pairing in the landscape project or a subject you have observed."
+      },
+      "artworkId": "edge-leaves",
+      "artworkKind": "generated-study",
+      "imageObservation": "Follow the upright leaf’s right edge: find it, lose it through the middle join, then find it again.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 4
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "look",
+      "unitId": "os-envelope",
+      "objective": "Compare a subject's large width, height and placement from one fixed viewpoint.",
+      "exercise": {
+        "action": "Draw one small outer envelope and mark its main corner. Check one width/height relationship against your subject.",
+        "variable": "Observed proportion check",
+        "constants": [
+          "Fixed subject/viewpoint",
+          "One framing",
+          "No small details"
+        ],
+        "success": [
+          "The large extents have been compared.",
+          "One uncertain proportion is named rather than concealed by detail."
+        ],
+        "transfer": "Use the same check before painting a street mass, boat or botanical silhouette."
+      },
+      "artworkId": "structure-painted",
+      "artworkKind": "generated-study",
+      "imageObservation": "Read the envelope and the major planes before following small windows or brush details.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 4
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "first",
+      "unitId": "os-directions",
+      "objective": "Record the principal plane boundaries and re-observe one related pair of receding edges.",
+      "exercise": {
+        "action": "Complete the first few-line study and mark one truly related receding pair for the next comparison.",
+        "variable": "Observed receding directions",
+        "constants": [
+          "Same subject and head position",
+          "Envelope and framing",
+          "No tonal detail"
+        ],
+        "success": [
+          "A related edge pair is identified.",
+          "Other diagonals are not forced toward that pair's point."
+        ],
+        "transfer": "Use the group check before adding selective structural lines in an urban wash."
+      },
+      "artworkId": "structure-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Compare related edges within each direction rather than forcing every diagonal to one point.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 8
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "os-tim-overview",
+          "candidateId": "tim-perspective",
+          "videoId": "R8LLCN_HtGY",
+          "url": "https://www.youtube.com/watch?v=R8LLCN_HtGY",
+          "windowId": "original",
+          "startSeconds": 0,
+          "endSeconds": null,
+          "provenance": "unknown",
+          "scope": "original",
+          "believedTopic": "Research mapping for observed structure. No exact instructional window or duration has been verified.",
+          "requiresDirectVerification": "Inspect narration, related edge grouping and level before defining any precise segment. Original-video access only; do not infer footage from its title.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "compare",
+      "unitId": "os-compare",
+      "objective": "Make a second study that isolates one structural change or explains an intentional distortion.",
+      "exercise": {
+        "action": "Complete the second study, identify the changed pair and explain one observed or expressive consequence.",
+        "variable": "Selected receding slopes",
+        "constants": [
+          "Same envelope and corner placement",
+          "Fixed subject/viewpoint",
+          "No added windows or colour"
+        ],
+        "success": [
+          "One structural change can be identified.",
+          "A remaining distortion is either intentional or named for a later test."
+        ],
+        "transfer": "Carry only the necessary structure into a small urban colour study."
+      },
+      "artworkId": "structure-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Compare related edges within each direction rather than forcing every diagonal to one point.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 10
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "reflect",
+      "unitId": "os-transfer",
+      "objective": "Name an assumption replaced by observation and a practical check for the next painting.",
+      "exercise": {
+        "action": "Record one changed relationship, one deliberate choice and one next-use check. No video is needed for this reflection.",
+        "variable": "Observation habit applied to a new subject",
+        "constants": [
+          "One clearly named comparison",
+          "A fixed viewpoint for each separate study"
+        ],
+        "success": [
+          "The next check names an action and an observation.",
+          "Expressive choice and uncertain measurement remain distinct."
+        ],
+        "transfer": "Use the check before the next landscape structure, street corner or still life."
+      },
+      "artworkId": "structure-painted",
+      "artworkKind": "generated-study",
+      "imageObservation": "Read the envelope and the major planes before following small windows or brush details.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 4
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "intention",
+      "unitId": "ql-intention",
+      "objective": "State a visual intention and identify the light space and small landing that support it.",
+      "exercise": {
+        "action": "Prepare the small sheet and choose one sentence of intention, one open light and one restrained landing.",
+        "variable": "Your intended emphasis",
+        "constants": [
+          "Small format",
+          "A limited familiar palette",
+          "Three major mass relationships"
+        ],
+        "success": [
+          "An intention is named.",
+          "The open space has a purpose before details are planned."
+        ],
+        "transfer": "Use the same intention-led start for a boat, street mass or abstract landscape."
+      },
+      "artworkId": "quiet-landscape-finished",
+      "artworkKind": "generated-study",
+      "imageObservation": "Finished reference: open light, a quiet middle distance and one restrained landing.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 4
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "values",
+      "unitId": "ql-values",
+      "objective": "Make a small value plan that preserves the main light and separates the two land masses deliberately.",
+      "exercise": {
+        "action": "Complete the small three-family plan and identify one light shape that the painting must preserve.",
+        "variable": "Chosen value relationships",
+        "constants": [
+          "Your framing and main shapes",
+          "The stated intention",
+          "No small descriptive detail"
+        ],
+        "success": [
+          "The large groups read at a distance.",
+          "A specific open light and quieter interval are planned."
+        ],
+        "transfer": "Keep the plan beside the painting as a decision aid, while still responding to actual dry results."
+      },
+      "artworkId": "landscape-value-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Keep the river light open while grouping the hill and near bank into larger families.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 8
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "ql-paul-values",
+          "candidateId": "paul-values",
+          "videoId": "iP97XXdpFpA",
+          "url": "https://www.youtube.com/watch?v=iP97XXdpFpA",
+          "windowId": "owner-proposal",
+          "startSeconds": 37,
+          "endSeconds": 852,
+          "provenance": "owner-proposal",
+          "scope": "long-proposal",
+          "believedTopic": "The same 37–852s owner proposal used in value planning; not a demonstration of this generated landscape.",
+          "requiresDirectVerification": "Inspect the actual value grouping and surrounding context before identifying any project-specific or shorter clip.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "wash-plan",
+      "unitId": "ql-wash-plan",
+      "objective": "Test the light/middle relationships, brush delivery and a safe drying pause before starting the sky.",
+      "exercise": {
+        "action": "Dry-test the pale and middle relationships and rehearse one connected sky pass. Mark the intended drying pause on the plan.",
+        "variable": "Selected sky concentration during the swatch test",
+        "constants": [
+          "Paper and brush",
+          "Comparable loading",
+          "Small working size"
+        ],
+        "success": [
+          "The light mixture is chosen from a dry comparison.",
+          "A stopping/drying decision is explicit."
+        ],
+        "transfer": "Use the same preparation before a large connected colour shape in another subject."
+      },
+      "artworkId": "landscape-preparation",
+      "artworkKind": "reconstructed-stage",
+      "imageObservation": "Reserve the river opening and house wall before colour. Keep the pencil plan light.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 6
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "ql-steve-wash",
+          "candidateId": "steve-flat-wash",
+          "videoId": "alq0YqX86gs",
+          "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+          "windowId": "owner-proposal",
+          "startSeconds": 47,
+          "endSeconds": 702,
+          "provenance": "owner-proposal",
+          "scope": "long-proposal",
+          "believedTopic": "The same broad 47–702s wash proposal, offered here for preparation rather than as a newly certified sky clip.",
+          "requiresDirectVerification": "Confirm the actual loading/pass sequence and context. No new short bounds or exact-action claims are introduced.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "sky",
+      "unitId": "ql-sky",
+      "objective": "Establish a simple connected sky while preserving the planned light space.",
+      "exercise": {
+        "action": "Paint the small light sky passage and pause. Note the surface condition and whether the planned light remains open.",
+        "variable": "Sky handling within the chosen plan",
+        "constants": [
+          "Tested pale mixture",
+          "Small format and load",
+          "Reserved light shapes"
+        ],
+        "success": [
+          "A broad light mass remains.",
+          "A drying passage is left without repeated scrubbing."
+        ],
+        "transfer": "Use the same stopping judgement in a light background or pale petal wash."
+      },
+      "artworkId": "landscape-sky-stage",
+      "artworkKind": "reconstructed-stage",
+      "imageObservation": "Sky first: compare the broad light wash with the untouched land and river shapes.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 10
+      },
+      "noVideo": false,
+      "previews": [
+        {
+          "referenceId": "ql-cafe-sky",
+          "candidateId": "cafe-cloud-tips",
+          "videoId": "MjUA_axxl4s",
+          "url": "https://www.youtube.com/watch?v=MjUA_axxl4s",
+          "windowId": "cafe-cloud-tips-publisher-3",
+          "startSeconds": 439,
+          "endSeconds": 725,
+          "provenance": "publisher-hint",
+          "scope": "chapter-hint",
+          "believedTopic": "Publisher's 439–725s practice chapter hint for a related sky topic. The conflicting 138s hints are not used.",
+          "requiresDirectVerification": "Inspect the actual paper condition, preserved lights, pacing and narration before approving any technique match. This is not the app's landscape being painted.",
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "hill",
+      "unitId": "ql-hill",
+      "objective": "Make the hill readable while keeping its value and selected boundary subordinate to the intended landing.",
+      "exercise": {
+        "action": "Place one connected hill using the safe surface option you tested. Record the observed condition and the relationship with the light sky.",
+        "variable": "Selected hill boundary treatment",
+        "constants": [
+          "Tested middle value",
+          "Simple mass and framing",
+          "The preserved light"
+        ],
+        "success": [
+          "The hill remains readable.",
+          "The selected handling does not rely on scrubbing the sky into submission."
+        ],
+        "transfer": "Use a tested boundary option for any supporting mass behind a clearer focal shape."
+      },
+      "artworkId": "landscape-hill-stage",
+      "artworkKind": "reconstructed-stage",
+      "imageObservation": "Add the quiet hill; keep the reserved lower light open and the house in place.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 10
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "bank",
+      "unitId": "ql-bank",
+      "objective": "Establish a coherent nearer group with one chosen clearer interval and a quieter supporting interval.",
+      "exercise": {
+        "action": "Paint one connected bank, inspect the relationship dry, and choose whether any texture is needed. Preserve one clearer and one quieter interval.",
+        "variable": "Near-mass relationship chosen from the plan",
+        "constants": [
+          "Original framing",
+          "The river light and hill",
+          "Limited tested palette"
+        ],
+        "success": [
+          "The bank reads before its small details.",
+          "Any added texture has a named visual job."
+        ],
+        "transfer": "Build a connected foliage, street-shadow or still-life mass before breaking it into small descriptions."
+      },
+      "artworkId": "landscape-bank-stage",
+      "artworkKind": "reconstructed-stage",
+      "imageObservation": "Connect the land masses before texture. The river and house wall remain light.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 12
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "finish",
+      "unitId": "ql-finish",
+      "objective": "Choose to stop or make one justified, tested adjustment without sacrificing relationships that already work.",
+      "exercise": {
+        "action": "Choose to stop or perform one tested adjustment. Record its intended job; a decision to stop is a complete response to this stage.",
+        "variable": "One conditional finishing adjustment",
+        "constants": [
+          "Main masses and framing",
+          "The stated intention",
+          "No automatic detail pass"
+        ],
+        "success": [
+          "The decision has a reason.",
+          "Effective light and middle relationships are preserved."
+        ],
+        "transfer": "Use the same test-before-mark habit on an urban, botanical or expressive study."
+      },
+      "artworkId": "quiet-landscape-finished",
+      "artworkKind": "generated-study",
+      "imageObservation": "Finished reference: open light, a quiet middle distance and one restrained landing.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 8
+      },
+      "noVideo": true,
+      "previews": []
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "reflect",
+      "unitId": "ql-reflect",
+      "objective": "Compare intention, plan and dry result, naming one useful relationship and one separate future test.",
+      "exercise": {
+        "action": "Complete the original reflection with an observed relationship, a condition to repeat and a separate future test.",
+        "variable": "One choice reserved for a new study",
+        "constants": [
+          "Comparable main design if testing a hill edge",
+          "A named intention"
+        ],
+        "success": [
+          "The reflection refers to visible evidence.",
+          "The next test identifies an action and an observation, not a claim of mastery."
+        ],
+        "transfer": "Carry the principle into your own landscape, boat, street or abstract arrangement."
+      },
+      "artworkId": "quiet-landscape-finished",
+      "artworkKind": "generated-study",
+      "imageObservation": "Finished reference: open light, a quiet middle distance and one restrained landing.",
+      "physicalProcessProved": false,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 6
+      },
+      "noVideo": true,
+      "previews": []
+    }
+  ]
+}

@@ -1,25 +1,26 @@
-import { useEffect, useRef, type ReactNode } from "react";
-import { Platform, Text, View } from "react-native";
+import { useRef, type ReactNode } from "react";
+import { Platform, Text, View, useWindowDimensions } from "react-native";
 import type { InstructionalUnit as Unit } from "../../learning/instructionTypes";
 import type { LearningProfile } from "../../learning/types";
-import { instructionVideoLinks, resolveInstructionVideo, waterDiagnostics } from "../../learning/instruction";
+import { contextualVideoLinks, instructionDiagnostics } from "../../learning/instruction";
 import { subjectLabels } from "../../learning/catalogue";
-import { previewWindowSummary } from "../../learning/videoLearning";
 import { Action, Copy, Disclosure, Heading, TextLink, learnStyles } from "./LearningUI";
-import PreviewVideoPlayer from "./PreviewVideoPlayer";
 import InstructionVisual from "./InstructionVisual";
+import ArtworkStudy from "./ArtworkStudy";
+import ContextualPreview from "./ContextualPreview";
+import LandscapeSequence from "./LandscapeSequence";
+import { artworkForUnit, supportingArtwork } from "../../learning/artwork";
 import { studio } from "./design";
 
-export function InstructionalUnitContent({ unit, group, onSelect, profile, activePreview, onPreview, practiceRecord }: {
+export function InstructionalUnitContent({ unit, group, onSelect, profile, activePreview, onPreview, practiceRecord, approvedMedia }: {
   unit: Unit; group: Unit[]; onSelect: (id:string)=>void; profile:LearningProfile|null;
-  activePreview:string|null; onPreview:(id:string|null)=>void; practiceRecord:ReactNode;
+  activePreview:string|null; onPreview:(id:string|null)=>void; practiceRecord:ReactNode; approvedMedia?:ReactNode;
 }) {
   const exercise=useRef<View>(null), video=useRef<View>(null), explanation=useRef<View>(null);
-  useEffect(() => {
-    if (activePreview && Platform.OS === "web") requestAnimationFrame(() => (video.current as unknown as HTMLElement | null)?.focus({preventScroll:true}));
-  }, [activePreview]);
+  const wide=useWindowDimensions().width>=studio.desktop;
   const n=group.findIndex(u=>u.id===unit.id), experienced=profile?.experience==="intermediate"||profile?.experience==="advanced";
-  const links=instructionVideoLinks.filter(l=>l.unitId===unit.id);
+  const links=contextualVideoLinks.filter(l=>l.unitId===unit.id);
+  function mediaPosition(){if(Platform.OS==="web"){const node=video.current as unknown as HTMLElement|null;node?.scrollIntoView({block:"start",behavior:"instant"});node?.focus({preventScroll:true});}}
   function returnToExplanation() {
     onPreview(null);
     if (Platform.OS === "web") {
@@ -45,29 +46,26 @@ export function InstructionalUnitContent({ unit, group, onSelect, profile, activ
       </>}
       <Copy>{unit.outcome}</Copy>
     </View>
-    <View testID="unit-concept" style={{gap:8}}>
-      <Copy>{unit.concept}</Copy>
-      {experienced ? <Disclosure title="Review the basic terms"><Copy>{unit.beginnerTerm}</Copy></Disclosure> : <Copy muted>{unit.beginnerTerm}</Copy>}
+    <View testID="concept-and-painting" style={{flexDirection:wide?"row":"column",alignItems:"flex-start",gap:wide?28:16}}>
+      <View testID="unit-concept" style={{gap:12,flex:wide?1:undefined,width:wide?undefined:"100%",minWidth:0}}>
+        <Copy>{unit.concept}</Copy>
+        {experienced ? <Disclosure title="Review the basic terms"><Copy>{unit.beginnerTerm}</Copy></Disclosure> : <Copy muted>{unit.beginnerTerm}</Copy>}
+        {Platform.OS==="web"&&(!!approvedMedia||!!links.length)&&<TextLink title="Go to the related demonstration" onPress={mediaPosition} />}
+      </View>
+      <View style={{flex:wide?1:undefined,width:wide?undefined:"100%",minWidth:0}}>
+        <ArtworkStudy key={unit.id} id={artworkForUnit[unit.id]} eager />
+        {supportingArtwork[unit.id]&&<Disclosure title="Compare the related study"><ArtworkStudy id={supportingArtwork[unit.id]} /></Disclosure>}
+        {unit.lessonId==="quiet-landscape"&&["intention","finish"].includes(unit.stepId)&&<Disclosure title="Compare the landscape sequence"><LandscapeSequence /></Disclosure>}
+      </View>
     </View>
+    <View style={{width:"100%",maxWidth:780,alignSelf:"center",gap:18}}>
     <View testID="unit-preparation"><Copy><Text style={{fontWeight:"600"}}>Prepare: </Text>{unit.setup}</Copy></View>
     <View testID="current-practical-action" style={{gap:10}}>
       <Heading level={3}>At the paper</Heading>
       {unit.actions.map((a,i)=><Copy key={a}>{i+1}. {a}</Copy>)}
     </View>
-    {!!links.length && <View style={{gap:10,paddingVertical:12,borderTopWidth:1,borderColor:studio.colors.rule}} testID="contextual-video">
-      <Copy muted>Related video preview — the exact demonstration is still being reviewed.</Copy>
-      {links.map(link=>{
-        const resolved=resolveInstructionVideo(link,unit);
-        if(!resolved)return <Copy key={link.id} muted>This preview reference is unavailable. Continue with the written exercise.</Copy>;
-        const {candidate}=resolved;
-        return <View key={link.id} testID={`inline-reference-${link.id}`} style={{gap:8}}>
-          <Copy>{candidate.creator}</Copy>
-          <Copy muted>{link.suggestedRelevance} {activePreview !== link.id ? previewWindowSummary(candidate,link.windowId) : ""}</Copy>
-          {activePreview !== link.id && <Action title={`Watch related preview: ${link.id}`} label={link.watchLabel} secondary onPress={()=>onPreview(link.id)} />}
-          {activePreview===link.id && <View ref={video} tabIndex={-1} accessibilityLabel="Related video preview"><PreviewVideoPlayer key={link.id} candidate={candidate} context={{lesson:unit.lessonId,step:unit.stepId}} initialWindowId={link.windowId} contextual initiallyRequested onWindowChange={()=>{}} onPractice={practise} /></View>}
-        </View>;
-      })}
-      {!activePreview && <Copy muted>Watch connects to YouTube under its privacy practices. Video is optional; allow extra viewing time.</Copy>}
+    {(!!approvedMedia||!!links.length)&&<View ref={video} tabIndex={-1} accessibilityLabel="Contextual demonstration" testID="contextual-video" style={{gap:14}}>
+      {approvedMedia?<View testID="approved-demonstration">{approvedMedia}</View>:links.map(link=><ContextualPreview key={link.id} unit={unit} link={link} active={activePreview===link.id} onWatch={()=>onPreview(link.id)} onPractice={practise} onStop={()=>onPreview(null)} />)}
     </View>}
     <View testID="studio-observation" style={{gap:6,borderLeftWidth:3,borderColor:studio.colors.clay,paddingLeft:14}}>
       <Text style={learnStyles.label}>Observe</Text><Copy>{unit.observe}</Copy>
@@ -86,6 +84,7 @@ export function InstructionalUnitContent({ unit, group, onSelect, profile, activ
       <Heading level={3}>{unit.topic === "diagnosis" ? "Diagnose a result" : "If the result differs"}</Heading>
       <TroubleshootingGuide ids={unit.diagnosticIds} />
     </View>}
+    <InstructionalUnitReference unit={unit} profile={profile} />
     <View testID="unit-practice-record" style={{gap:8}}>
       <Heading level={3}>Step practice record</Heading>
       <Copy muted>Tick the activities you have actually done across this step.</Copy>
@@ -103,21 +102,22 @@ export function InstructionalUnitContent({ unit, group, onSelect, profile, activ
       </Disclosure>}
       <Copy muted>{(profile?.minutes??15)<unit.minutes.reading+unit.minutes.practice ? "Pause and return rather than rushing a wet passage." : "One focus can be enough for a short visit."}</Copy>
     </View>
+    </View>
   </View>;
 }
 export function InstructionalUnitReference({unit,profile}:{unit:Unit;profile:LearningProfile|null}) {
   return <View style={{gap:16}}>
-    {unit.illustration&&<InstructionVisual kind={unit.illustration} />}
-    <Heading level={3}>Why this works</Heading><Copy>{unit.why}</Copy>
-    <Disclosure title="Instructor’s tip"><Copy>{unit.tip}</Copy></Disclosure>
-    {!(profile?.experience==="intermediate"||profile?.experience==="advanced")&&<Disclosure title="Explore a more deliberate variation"><Copy>{unit.advanced}</Copy></Disclosure>}
+    <Disclosure title="Why this works and instructor’s tip"><Copy>{unit.why}</Copy><Copy>{unit.tip}</Copy>
+      {!(profile?.experience==="intermediate"||profile?.experience==="advanced")&&<><Copy muted>Optional variation</Copy><Copy>{unit.advanced}</Copy></>}
+    </Disclosure>
+    {unit.illustration&&["variables","brush","wash","moisture","drawing"].includes(unit.illustration)&&<Disclosure title="Secondary technical aid"><InstructionVisual kind={unit.illustration} /></Disclosure>}
   </View>;
 }
 
 /** Optional per-symptom depth; the diagnosis focus exposes this directly. */
 function TroubleshootingGuide({ids}:{ids:readonly string[]}) {
   return <View style={{gap:8}}>{ids.map(id=>{
-    const d=waterDiagnostics.find(d=>d.id===id)!;
+    const d=instructionDiagnostics.find(d=>d.id===id)!;
     return <Disclosure key={id} title={d.symptom}>
       <Copy>Possible causes: {d.causes.join("; ")}.</Copy><Copy>Check: {d.check}</Copy>
       <Copy>Safest next action: {d.correction}</Copy><Copy>Stop and start fresh: {d.stop}</Copy><Copy muted>{d.normalVariation}</Copy>

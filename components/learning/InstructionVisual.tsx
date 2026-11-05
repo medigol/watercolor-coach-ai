@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { Text, View } from "react-native";
 import Svg, { Defs, LinearGradient, Stop, Rect, Path, Line, Text as Label } from "react-native-svg";
-import StudyVisual from "./StudyVisual";
+import StudyVisual, { PerspectiveConstruction } from "./StudyVisual";
 import type { LessonStep } from "../../learning/types";
 import { learnStyles } from "./LearningUI";
 import type { InstructionVisual as Kind } from "../../learning/instructionTypes";
@@ -13,6 +13,7 @@ const descriptions: Partial<Record<Kind,string>> = {
 };
 export default function InstructionVisual({kind}:{kind:Kind}) {
   const id=useId().replace(/:/g,"");
+  if(kind==="drawing") return <PerspectiveConstruction />;
   if (["water","values","edges","drawing","landscape"].includes(kind)) return <StudyVisual kind={kind as LessonStep["visual"]} />;
   return <View style={{gap:8}}>
     <View accessibilityRole="image" accessibilityLabel={descriptions[kind]} style={{width:"100%",aspectRatio:1.8,backgroundColor:"#F8F2E2",borderRadius:10,overflow:"hidden"}}>

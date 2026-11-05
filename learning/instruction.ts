@@ -3,8 +3,14 @@ import { previewCandidates } from "./videoPreviewCatalogue";
 import { previewCatalogueErrors } from "./videoPreview";
 import { waterInstruction, waterDiagnostics, instructionVideoLinks } from "./waterInstruction";
 import type { InstructionalUnit, InstructionVideoLink, TroubleshootingEntry } from "./instructionTypes";
+import { courseInstruction, courseDiagnostics, courseVideoLinks } from "./courseInstruction";
+import { projectInstruction, projectDiagnostics, projectVideoLinks } from "./projectInstruction";
 export { waterInstruction, waterDiagnostics, instructionVideoLinks };
-export const unitsForStep = (lesson: string, step: string) => waterInstruction.filter(u => u.lessonId === lesson && u.stepId === step);
+export const instructionUnits = [...waterInstruction, ...courseInstruction, ...projectInstruction];
+export const instructionDiagnostics = [...waterDiagnostics, ...courseDiagnostics, ...projectDiagnostics];
+export const contextualVideoLinks = [...instructionVideoLinks, ...courseVideoLinks, ...projectVideoLinks];
+export const unitsForStep = (lesson: string, step: string) => instructionUnits.filter(u => u.lessonId === lesson && u.stepId === step);
+export const allInstructionErrors = () => instructionErrors(instructionUnits, contextualVideoLinks, instructionDiagnostics);
 export function resolveInstructionVideo(link: InstructionVideoLink, unit: InstructionalUnit) {
   if (Object.keys(link).some(k => !["id","unitId","candidateId","windowId","suggestedRelevance","verify","scope","status","watchLabel"].includes(k))) return null;
   if (link.status !== "provisional-preview" || link.unitId !== unit.id || ["reflect", "intention"].includes(unit.stepId)) return null;
