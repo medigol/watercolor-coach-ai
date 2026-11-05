@@ -1,0 +1,645 @@
+{
+  "schema": "instruction-video-crosswalk/v1",
+  "generatedFrom": "learning/waterInstruction.ts + existing public preview catalogue",
+  "units": [
+    {
+      "lessonId": "water-brush",
+      "stepId": "look",
+      "unitId": "wb-three-decisions",
+      "learningObjective": "Explain a mark using mixture concentration, brush load and paper condition separately.",
+      "topic": "three-decisions",
+      "exercise": {
+        "action": "Make the two load-test strokes above. Beside them, name which control changed and which two you kept similar.",
+        "variable": "Liquid load in the brush",
+        "constants": [
+          "One premixed pigment concentration",
+          "Dry paper of the same type",
+          "Similar stroke size and contact"
+        ],
+        "success": [
+          "You can name the changed control without calling it dilution.",
+          "You can describe a visible difference or a useful inconclusive result."
+        ],
+        "transfer": "Before a sky, petal or architectural wash, name the palette, brush and surface conditions separately."
+      },
+      "illustration": "variables",
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 3
+      },
+      "waiting": "Compare the marks again when both are dry; this may be on a later visit.",
+      "noVideo": true,
+      "noVideoReason": "Written/physical comparison is complete; no exact matching demonstration is sufficiently evidenced. Reflection needs no video.",
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "unitId": "wb-materials",
+      "learningObjective": "Arrange a small, stable working area and enough mixture for an uninterrupted passage.",
+      "topic": "materials",
+      "exercise": {
+        "action": "Without touching paint to paper yet, rehearse moving from the puddle to the rectangle and back. Reduce the planned rectangle if the reach is awkward; leave the palette in place.",
+        "variable": "Working-area size",
+        "constants": [
+          "Your available brush",
+          "One palette arrangement"
+        ],
+        "success": [
+          "The sheet stays stable.",
+          "You can reach mixture, clean water and wiping material without crossing the painted passage."
+        ],
+        "transfer": "Prepare the largest connected wash of your next subject before beginning it."
+      },
+      "illustration": null,
+      "activeMinutes": {
+        "reading": 1,
+        "practice": 2
+      },
+      "waiting": "This preparation needs no drying wait.",
+      "noVideo": true,
+      "noVideoReason": "Written/physical comparison is complete; no exact matching demonstration is sufficiently evidenced. Reflection needs no video.",
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "unitId": "wb-load-round",
+      "learningObjective": "Repeat a loading action that produces a usable stroke without an uncontrolled final drop.",
+      "topic": "brush-loading",
+      "exercise": {
+        "action": "Make a row of three similar strokes, reloading before each. Keep the puddle unchanged and repeat the same unloading action.",
+        "variable": "Loading action during initial adjustment; then repeat it",
+        "constants": [
+          "Palette concentration",
+          "Dry paper",
+          "Similar mark length and movement"
+        ],
+        "success": [
+          "At least two strokes have comparable delivery.",
+          "You can identify whether any problem appears at the start, middle or end."
+        ],
+        "transfer": "Use a scrap stroke before laying a clean light passage in your painting."
+      },
+      "illustration": "brush",
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 3
+      },
+      "waiting": "Let the comparison strokes dry before judging their final value.",
+      "noVideo": false,
+      "noVideoReason": null,
+      "previews": [
+        {
+          "referenceId": "wb-loading-steve",
+          "candidateId": "steve-flat-wash",
+          "videoId": "alq0YqX86gs",
+          "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+          "windowId": "owner-proposal",
+          "startSeconds": 47,
+          "endSeconds": 702,
+          "provenance": "owner-proposal",
+          "scope": "long-proposal",
+          "believedTopic": "Broad brush/wash viewing proposal, not an isolated loading clip.",
+          "requiresDirectVerification": "Locate actual wetting, belly loading, unloading and result context within the owner’s longer proposal; those actions are not individually witnessed in this record.",
+          "appropriateAsProvisionalPreview": true,
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "unitId": "wb-contact",
+      "learningObjective": "Change mark width deliberately while separating contact pressure from liquid load.",
+      "topic": "brush-contact",
+      "exercise": {
+        "action": "Compare the two rows. Change only the amount of hair in contact with the paper; keep the colour and loading sequence unchanged.",
+        "variable": "Contact area / gentle pressure",
+        "constants": [
+          "Mixture and load",
+          "Similar speed and length",
+          "Dry paper"
+        ],
+        "success": [
+          "A narrow and a broader mark are distinguishable.",
+          "You can make both without flattening the hairs against the ferrule."
+        ],
+        "transfer": "Use tip contact for a selected stem or edge and broader contact for the supporting mass."
+      },
+      "illustration": "brush",
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 5
+      },
+      "waiting": "Inspect dry texture after both rows have dried.",
+      "noVideo": true,
+      "noVideoReason": "Written/physical comparison is complete; no exact matching demonstration is sufficiently evidenced. Reflection needs no video.",
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "dilution",
+      "unitId": "wb-flat-wash",
+      "learningObjective": "Connect successive passes and finish without dragging a puddle through a drying area.",
+      "topic": "flat-wash",
+      "exercise": {
+        "action": "Paint one small rectangle using connected passes from the same mixture. On fresh scrap, repeat after adjusting only the load if the first wash pooled.",
+        "variable": "Brush load, only between fresh attempts",
+        "constants": [
+          "One concentration and pigment",
+          "Dry starting surface",
+          "Similar rectangle and working pace"
+        ],
+        "success": [
+          "Most adjacent passes connect without a dry gap.",
+          "The final edge is left without an uncontrolled pool, or you can identify why you stopped."
+        ],
+        "transfer": "Use the wet-edge decision for a quiet sky or a single broad colour shape, without requiring every surface to be perfectly smooth."
+      },
+      "illustration": "wash",
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 5
+      },
+      "waiting": "Leave the patch alone until fully dry. Climate, sizing, sheet thickness and water load change the wait.",
+      "noVideo": false,
+      "noVideoReason": null,
+      "previews": [
+        {
+          "referenceId": "wb-wash-steve",
+          "candidateId": "steve-flat-wash",
+          "videoId": "alq0YqX86gs",
+          "url": "https://www.youtube.com/watch?v=alq0YqX86gs",
+          "windowId": "owner-proposal",
+          "startSeconds": 47,
+          "endSeconds": 702,
+          "provenance": "owner-proposal",
+          "scope": "long-proposal",
+          "believedTopic": "The same longer wash proposal, not a newly verified short wash segment.",
+          "requiresDirectVerification": "Confirm the actual pass sequence, wet bead and final result; no brush-action sub-boundaries have been supplied.",
+          "appropriateAsProvisionalPreview": true,
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "dilution",
+      "unitId": "wb-dilution-test",
+      "learningObjective": "Produce distinguishable dry values while keeping brush delivery reasonably comparable.",
+      "topic": "dilution",
+      "exercise": {
+        "action": "Complete both three-swatch rows. Label the three concentrations in order after they dry, and circle any pair that is too similar to judge confidently.",
+        "variable": "Palette pigment concentration",
+        "constants": [
+          "Pigment, brush and paper",
+          "Comparable liquid load",
+          "Swatch size and dry starting surface"
+        ],
+        "success": [
+          "Three dry value groups are recognisable, or a specific repeat test is planned.",
+          "Wet and dry swatches are not compared as if their conditions were equal."
+        ],
+        "transfer": "Select a tested light or middle mixture for a petal, building plane or landscape passage."
+      },
+      "illustration": "variables",
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 6
+      },
+      "waiting": "Pause after painting the rows and compare on return; no fixed drying time is prescribed.",
+      "noVideo": true,
+      "noVideoReason": "Written/physical comparison is complete; no exact matching demonstration is sufficiently evidenced. Reflection needs no video.",
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "unitId": "wb-read-moisture",
+      "learningObjective": "Describe moisture from visible conditions rather than elapsed seconds.",
+      "topic": "paper-moisture",
+      "exercise": {
+        "action": "Write down two surface states as the scrap dries and predict how a stroke might spread in each. Keep this patch untouched; use the next dry/damp comparison to test the prediction on fresh areas.",
+        "variable": "Observed paper moisture",
+        "constants": [
+          "Same sheet type",
+          "One room and viewing light"
+        ],
+        "success": [
+          "You distinguish standing water from an evenly damp surface.",
+          "You do not treat lost sheen as permission to scrub a partly drying wash."
+        ],
+        "transfer": "Read a sky or foliage passage before deciding whether to connect another shape or leave it alone."
+      },
+      "illustration": "moisture",
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 1
+      },
+      "waiting": "Observe over whatever interval your sheet needs; waiting is separate from active work.",
+      "noVideo": false,
+      "noVideoReason": null,
+      "previews": [
+        {
+          "referenceId": "wb-moisture-overview",
+          "candidateId": "louise-blend",
+          "videoId": "UeIHo83pVGc",
+          "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+          "windowId": "owner-start",
+          "startSeconds": 90,
+          "endSeconds": null,
+          "provenance": "owner-start-only",
+          "scope": "start-only",
+          "believedTopic": "Owner-screened blending topic, beginning at 1:30; the endpoint is unknown.",
+          "requiresDirectVerification": "Establish the complete moisture sequence and its endpoint without inferring dry or damp conditions from the title.",
+          "appropriateAsProvisionalPreview": true,
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "unitId": "wb-moisture-pair",
+      "learningObjective": "Connect an observed surface condition to a changed edge and spread.",
+      "topic": "paper-moisture",
+      "exercise": {
+        "action": "Complete the dry/damp pair. Describe one observed condition and its boundary, without calling every soft transition a lost edge.",
+        "variable": "Paper moisture",
+        "constants": [
+          "One concentration",
+          "Similar brush load and contact",
+          "Same paper and stroke size"
+        ],
+        "success": [
+          "Both conditions are recorded, including an inconclusive difference.",
+          "You distinguish a soft transition from a genuinely disappearing contour."
+        ],
+        "transfer": "Try the same comparison on a simple hill, leaf or abstract shape before using it in a painting."
+      },
+      "illustration": "moisture",
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 5
+      },
+      "waiting": "Compare both dry; leave time between active comparisons for drying.",
+      "noVideo": false,
+      "noVideoReason": null,
+      "previews": [
+        {
+          "referenceId": "wb-moisture-wet",
+          "candidateId": "louise-blend",
+          "videoId": "UeIHo83pVGc",
+          "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+          "windowId": "louise-blend-publisher-1",
+          "startSeconds": 109,
+          "endSeconds": 410,
+          "provenance": "publisher-hint",
+          "scope": "chapter-hint",
+          "believedTopic": "Publisher’s wet-on-wet chapter hint; suggested comparison context only.",
+          "requiresDirectVerification": "Inspect actual surface moisture, load, spread and result; published chapter boundaries are not certified instructional clips.",
+          "appropriateAsProvisionalPreview": true,
+          "independentlyInspected": false,
+          "productionApproved": false
+        },
+        {
+          "referenceId": "wb-moisture-dry",
+          "candidateId": "louise-blend",
+          "videoId": "UeIHo83pVGc",
+          "url": "https://www.youtube.com/watch?v=UeIHo83pVGc",
+          "windowId": "louise-blend-publisher-2",
+          "startSeconds": 515,
+          "endSeconds": 758,
+          "provenance": "publisher-hint",
+          "scope": "chapter-hint",
+          "believedTopic": "Publisher’s wet-on-dry chapter hint; compare with the separate wet-on-wet proposal.",
+          "requiresDirectVerification": "Inspect the actual dry-paper demonstration, setup and result. This is not evidence of a lost edge.",
+          "appropriateAsProvisionalPreview": true,
+          "independentlyInspected": false,
+          "productionApproved": false
+        }
+      ]
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "unitId": "wb-diagnose-repeat",
+      "learningObjective": "Use a visible symptom to select a plausible cause and a fresh controlled experiment.",
+      "topic": "diagnosis",
+      "exercise": {
+        "action": "Write a symptom, a plausible cause, the condition you checked and the single variable for a fresh repeat. Make the repeat only if the surface and materials are ready.",
+        "variable": "One selected cause at a time",
+        "constants": [
+          "All controls other than the selected one",
+          "Comparable viewing after drying"
+        ],
+        "success": [
+          "The proposed cause is conditional, not certain from appearance alone.",
+          "You can explain when to stop instead of disturbing the current passage."
+        ],
+        "transfer": "Use a margin or separate scrap to test a correction before applying it to an important painting."
+      },
+      "illustration": null,
+      "activeMinutes": {
+        "reading": 1,
+        "practice": 4
+      },
+      "waiting": "Let the repeat dry before deciding whether it supports your hypothesis.",
+      "noVideo": true,
+      "noVideoReason": "Written/physical comparison is complete; no exact matching demonstration is sufficiently evidenced. Reflection needs no video.",
+      "previews": []
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "reflect",
+      "unitId": "wb-transfer",
+      "learningObjective": "Name one observed relationship, one remaining uncertainty and a small real-painting application.",
+      "topic": "transfer",
+      "exercise": {
+        "action": "Use the existing reflection field to record a relationship, a condition to repeat, an uncertainty and a small application to your own subject.",
+        "variable": "Chosen handling in a new shape",
+        "constants": [
+          "The tested mixture or loading sequence where useful"
+        ],
+        "success": [
+          "The reflection refers to visible evidence, not a guessed hidden process.",
+          "The proposed transfer names a physical action and an observation."
+        ],
+        "transfer": "Use the chosen decision in the next guided landscape or your own subject; keep the other controls simple."
+      },
+      "illustration": null,
+      "activeMinutes": {
+        "reading": 2,
+        "practice": 3
+      },
+      "waiting": "Begin this comparison when the relevant swatches are dry.",
+      "noVideo": true,
+      "noVideoReason": "Written/physical comparison is complete; no exact matching demonstration is sufficiently evidenced. Reflection needs no video.",
+      "previews": []
+    }
+  ],
+  "rollout": [
+    {
+      "lessonId": "water-brush",
+      "stepId": "look",
+      "status": "supplementary-units-authored",
+      "unitIds": [
+        "wb-three-decisions"
+      ],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Owner technical/learner review of the implemented study.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "status": "supplementary-units-authored",
+      "unitIds": [
+        "wb-materials",
+        "wb-load-round",
+        "wb-contact"
+      ],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Owner technical/learner review of the implemented study.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "dilution",
+      "status": "supplementary-units-authored",
+      "unitIds": [
+        "wb-flat-wash",
+        "wb-dilution-test"
+      ],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Owner technical/learner review of the implemented study.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "status": "supplementary-units-authored",
+      "unitIds": [
+        "wb-read-moisture",
+        "wb-moisture-pair",
+        "wb-diagnose-repeat"
+      ],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Owner technical/learner review of the implemented study.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "water-brush",
+      "stepId": "reflect",
+      "status": "supplementary-units-authored",
+      "unitIds": [
+        "wb-transfer"
+      ],
+      "videoNeed": "unnecessary",
+      "nextEditorialTask": "Owner technical/learner review of the implemented study.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "look",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "See tone separately from hue: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "map",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Group before detail: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "first",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Make the first thumbnail: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "compare",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Change one dark relationship: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "three-values",
+      "stepId": "reflect",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "unnecessary",
+      "nextEditorialTask": "Take the principle to a painting: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "look",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Read boundaries, not labels: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "hard",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Establish a hard edge: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "soft",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Make a gradual transition: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "lost",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Lose an interval, keep the form: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "edge-families",
+      "stepId": "reflect",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "unnecessary",
+      "nextEditorialTask": "Choose edges deliberately: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "look",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Compare the envelope: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "first",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Record the first reading: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "compare",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Test one structural change: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "observed-structure",
+      "stepId": "reflect",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "unnecessary",
+      "nextEditorialTask": "Carry the check forward: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "intention",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "unnecessary",
+      "nextEditorialTask": "Choose a quiet intention: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "values",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Plan three major values: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "wash-plan",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Test the wash and boundary: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "sky",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Lay a light sky passage: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "hill",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Place the distant mass: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "bank",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Connect a near mass: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "finish",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "helpful",
+      "nextEditorialTask": "Make one finishing decision: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    },
+    {
+      "lessonId": "quiet-landscape",
+      "stepId": "reflect",
+      "status": "existing-lesson; supplementary-units-not-authored",
+      "unitIds": [],
+      "videoNeed": "unnecessary",
+      "nextEditorialTask": "Keep the lesson, not just the result: author a controlled experiment, conditional diagnosis and transfer; verify footage only if it contributes to this objective.",
+      "publicationGate": "Unchanged; no candidate is approved automatically."
+    }
+  ]
+}

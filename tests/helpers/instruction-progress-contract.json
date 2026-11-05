@@ -1,0 +1,229 @@
+[
+  {
+    "id": "water-brush",
+    "version": 1,
+    "steps": [
+      {
+        "id": "look",
+        "checklist": [
+          "I reviewed dilution, loading and surface moisture"
+        ]
+      },
+      {
+        "id": "set-up",
+        "checklist": [
+          "Paper and palette ready",
+          "A test stroke made without a large end puddle"
+        ]
+      },
+      {
+        "id": "dilution",
+        "checklist": [
+          "First dilution row painted",
+          "Repeat row painted",
+          "Dry values compared"
+        ]
+      },
+      {
+        "id": "moisture",
+        "checklist": [
+          "Dry-paper test made",
+          "Damp-paper test made",
+          "Surface condition and edge difference observed"
+        ]
+      },
+      {
+        "id": "reflect",
+        "checklist": [
+          "I compared the dry results",
+          "I chose a condition to repeat"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "three-values",
+    "version": 1,
+    "steps": [
+      {
+        "id": "look",
+        "checklist": [
+          "A simple subject chosen",
+          "Three value relationships identified"
+        ]
+      },
+      {
+        "id": "map",
+        "checklist": [
+          "Two matching frames drawn",
+          "Three working values chosen"
+        ]
+      },
+      {
+        "id": "first",
+        "checklist": [
+          "First thumbnail completed",
+          "Large-scale reading checked"
+        ]
+      },
+      {
+        "id": "compare",
+        "checklist": [
+          "Second thumbnail completed",
+          "The controlled difference identified",
+          "Both versions compared"
+        ]
+      },
+      {
+        "id": "reflect",
+        "checklist": [
+          "A comparison recorded",
+          "One relationship selected for transfer"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "edge-families",
+    "version": 1,
+    "steps": [
+      {
+        "id": "look",
+        "checklist": [
+          "A repeatable shape chosen",
+          "A visual intention stated"
+        ]
+      },
+      {
+        "id": "hard",
+        "checklist": [
+          "Baseline hard-edge shape painted",
+          "Boundary checked after drying"
+        ]
+      },
+      {
+        "id": "soft",
+        "checklist": [
+          "Soft-edge comparison made",
+          "Moisture condition noted",
+          "Dry transitions compared"
+        ]
+      },
+      {
+        "id": "lost",
+        "checklist": [
+          "One merging interval tested",
+          "A small application completed",
+          "The purpose of the sharper interval identified"
+        ]
+      },
+      {
+        "id": "reflect",
+        "checklist": [
+          "Dry studies compared",
+          "A transferable edge decision named"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "observed-structure",
+    "version": 1,
+    "steps": [
+      {
+        "id": "look",
+        "checklist": [
+          "Subject and fixed viewpoint selected",
+          "Overall width and height compared"
+        ]
+      },
+      {
+        "id": "first",
+        "checklist": [
+          "First simple line study made",
+          "One comparable edge pair identified"
+        ]
+      },
+      {
+        "id": "compare",
+        "checklist": [
+          "Second study completed",
+          "One changed relationship isolated",
+          "A structural or expressive choice explained"
+        ]
+      },
+      {
+        "id": "reflect",
+        "checklist": [
+          "An observation recorded",
+          "A next-use decision selected"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "quiet-landscape",
+    "version": 1,
+    "steps": [
+      {
+        "id": "intention",
+        "checklist": [
+          "Paper and materials ready",
+          "An intention chosen"
+        ]
+      },
+      {
+        "id": "values",
+        "checklist": [
+          "A three-mass thumbnail made",
+          "A light area reserved",
+          "Landing and quieter interval chosen"
+        ]
+      },
+      {
+        "id": "wash-plan",
+        "checklist": [
+          "Dry value tested",
+          "Moisture plan chosen"
+        ]
+      },
+      {
+        "id": "sky",
+        "checklist": [
+          "Light sky passage laid",
+          "Surface left to settle"
+        ]
+      },
+      {
+        "id": "hill",
+        "checklist": [
+          "Surface condition checked",
+          "Distant mass painted",
+          "An edge relationship observed"
+        ]
+      },
+      {
+        "id": "bank",
+        "checklist": [
+          "Near mass connected",
+          "One clearer boundary selected",
+          "A quieter interval retained"
+        ]
+      },
+      {
+        "id": "finish",
+        "checklist": [
+          "Dry painting reviewed",
+          "A deliberate stop or tested change chosen"
+        ]
+      },
+      {
+        "id": "reflect",
+        "checklist": [
+          "Plan and painting compared",
+          "One future controlled study identified"
+        ]
+      }
+    ]
+  }
+]

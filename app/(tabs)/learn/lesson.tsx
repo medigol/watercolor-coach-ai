@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import {
   Text,
   TextInput,
@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useLearning } from "../../../providers/LearningProvider";
+import { useAuth } from "../../../providers/AuthProvider";
 import { itemById } from "../../../learning/content";
 import {
   checklistId,
@@ -40,14 +41,30 @@ import ChecklistControl from "../../../components/learning/ChecklistControl";
 import { studio } from "../../../components/learning/design";
 import { previewCandidates } from "../../../learning/videoPreviewCatalogue";
 import { previewMatches } from "../../../learning/videoPreview";
+import { unitsForStep } from "../../../learning/instruction";
+import { InstructionalUnitContent, InstructionalUnitReference } from "../../../components/learning/InstructionalUnit";
+import { useTeachingFocus } from "../../../components/learning/useTeachingFocus";
 export default function LessonStudio() {
   const { id } = useLocalSearchParams<{ id?: string }>(),
     item = typeof id === "string" ? itemById(id) : undefined;
   const learning = useLearning(),
     { state, update } = learning,
     { width } = useWindowDimensions();
+  const { session } = useAuth();
+  const account = session?.user.id;
   const studioScroll = useRef<ScrollView>(null);
   const [demoKey, setDemoKey] = useState<string | null>(null);
+  const [previewIntent, setPreviewIntent] = useState<{scope:string; id:string} | null>(null);
+  const entry = item ? state.entries[item.id] : undefined;
+  const index = item ? resumeStep(item, entry) : 0;
+  const step = item?.steps[index];
+  const teaching = item && step ? unitsForStep(item.id, step.id) : [];
+  const { focus, select } = useTeachingFocus(account, item?.id ?? "", step?.id ?? "", teaching);
+  const previewScope = `${account}:${item?.id}:${step?.id}:${focus?.id}`;
+  const activePreview = previewIntent?.scope === previewScope ? previewIntent.id : null;
+  const setActivePreview = (id: string | null) => setPreviewIntent(id ? {scope:previewScope,id} : null);
+  useFocusEffect(useCallback(() => () => { setPreviewIntent(null); setDemoKey(null); }, []));
+  useEffect(() => { setActivePreview(null); setDemoKey(null); }, [account, id, step?.id, focus?.id]);
   const [guideKey, setGuideKey] = useState<string | null>(null);
   const [outline, setOutline] = useState(false),
     [review, setReview] = useState(false);
@@ -66,12 +83,21 @@ export default function LessonStudio() {
         />
       </LearnScreen>
     );
-  const entry = state.entries[item.id],
-    index = resumeStep(item, entry),
-    step = item.steps[index],
-    final = index === item.steps.length - 1,
+  if (!step) return null;
+  const final = index === item.steps.length - 1,
     isComplete = completed(item, entry),
     wide = width >= studio.desktop;
+  const selectFocus = (unitId: string) => {
+    setActivePreview(null); setDemoKey(null);
+    select(unitId);
+    requestAnimationFrame(() => {
+      if (typeof document !== "undefined") {
+        const target = document.getElementById("teaching-focus-start");
+        target?.scrollIntoView({block:"start",behavior:"instant"});
+        target?.focus({preventScroll:true});
+      } else studioScroll.current?.scrollTo({y:0,animated:false});
+    });
+  };
   const note = (key: string, value: string) =>
     update((s) =>
       editEntry(s, item, (e) => {
@@ -87,16 +113,40 @@ export default function LessonStudio() {
   const missingEarlier = item.steps
     .slice(0, index)
     .filter((s) => !entry?.completedSteps.includes(s.id));
+  const practiceRecord = (
+              <View style={{ gap: 8 }}>
+                {step.checklist.map((check, n) => {
+                  const key = checklistId(step.id, n),
+                    checked = entry?.checked[step.id]?.includes(key) ?? false;
+                  return (
+                    <ChecklistControl
+                      key={key}
+                      label={check}
+                      checked={checked}
+                      onToggle={() =>
+                        update((s) =>
+                          editEntry(s, item, (e) => {
+                            const list = e.checked[step.id] ?? [];
+                            e.checked[step.id] = checked
+                              ? list.filter((id) => id !== key)
+                              : [...list, key];
+                          }),
+                        )
+                      }
+                    />
+                  );
+                })}
+              </View>
+  );
   const demonstration = (
     <View testID="studio-media">
       <TextLink
         title="Optional demonstration"
         expanded={demoKey === `${item.id}:${step.id}`}
-        onPress={() =>
-          setDemoKey((v) =>
-            v === `${item.id}:${step.id}` ? null : `${item.id}:${step.id}`,
-          )
-        }
+        onPress={() => {
+          setActivePreview(null);
+          setDemoKey((v) => v === `${item.id}:${step.id}` ? null : `${item.id}:${step.id}`);
+        }}
       />
       {demoKey === `${item.id}:${step.id}` && (
         <View style={{ gap: 12 }}><LessonDemonstration
@@ -121,7 +171,7 @@ export default function LessonStudio() {
       )}
     </View>
   );
-  const reference = (
+  const reference = focus ? <InstructionalUnitReference unit={focus} profile={state.profile} /> : (
     <View style={{ gap: 16 }}>
       <StudyVisual kind={step.visual} />
       <Heading level={3}>Understand the decision</Heading>
@@ -208,6 +258,7 @@ export default function LessonStudio() {
             Recorded practice and reflection — self-reported, not a mastery
             score.
           </Copy>
+          {focus && <Copy muted>Your five-step practice record is preserved. The extended teaching is available for review; completion has not been reassessed.</Copy>}
           <Copy>Next experiment: {item.exercise.extension}</Copy>
           <Action
             title="Choose my next study"
@@ -276,6 +327,7 @@ export default function LessonStudio() {
                 gap: 18,
               }}
             >
+              {focus ? <InstructionalUnitContent key={focus.id} unit={focus} group={teaching} onSelect={selectFocus} profile={state.profile} practiceRecord={practiceRecord} activePreview={activePreview} onPreview={id => { setDemoKey(null); setActivePreview(id); }} /> : <>
               <View
                 testID="current-practical-action"
                 style={{ gap: 10, paddingVertical: 4 }}
@@ -311,6 +363,7 @@ export default function LessonStudio() {
                 <Text style={learnStyles.label}>Observe</Text>
                 <Copy>{step.observe}</Copy>
               </View>
+              </>}
               {!wide && (
                 <View>
                   <TextLink
@@ -327,29 +380,7 @@ export default function LessonStudio() {
                   {guideKey === `${item.id}:${step.id}` && reference}
                 </View>
               )}
-              <View style={{ gap: 8 }}>
-                {step.checklist.map((check, n) => {
-                  const key = checklistId(step.id, n),
-                    checked = entry.checked[step.id]?.includes(key) ?? false;
-                  return (
-                    <ChecklistControl
-                      key={key}
-                      label={check}
-                      checked={checked}
-                      onToggle={() =>
-                        update((s) =>
-                          editEntry(s, item, (e) => {
-                            const list = e.checked[step.id] ?? [];
-                            e.checked[step.id] = checked
-                              ? list.filter((id) => id !== key)
-                              : [...list, key];
-                          }),
-                        )
-                      }
-                    />
-                  );
-                })}
-              </View>
+              {!focus && practiceRecord}
               {final && (
                 <View style={{ gap: 14 }}>
                   <Heading level={3}>Reflect before completing</Heading>

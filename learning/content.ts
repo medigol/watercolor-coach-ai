@@ -67,9 +67,9 @@ const waterExercise: Exercise = {
     "An observed difference between dry and damp paper, even if a bloom occurs",
   ],
   recovery:
-    "If a puddle forms, unload the brush on the cloth and repeat one swatch. If an edge spreads unpredictably, wait for the sheen to diminish and test again. Record the condition rather than calling the result a failure.",
+    "If a puddle forms, reduce the load and repeat on fresh scrap. If spread is unintended, compare fresh dry and evenly damp patches without standing water. Leave partly drying passages alone; do not keep adding wet corrections. Record the condition and the result.",
   shortVersion:
-    "In 10–15 minutes, make one dilution row and one dry/damp pair. Let them dry before comparing; return later if necessary.",
+    "Use one 5–10 minute teaching focus per short visit, or the original short comparison: one dilution row, then a dry/damp pair on a later visit. The full guided studies take about 55 active minutes; watching and drying are additional.",
   extension:
     "Repeat with a different paper while keeping the pigment mixture and brush the same. Compare behaviour, not just appearance.",
 };
@@ -83,8 +83,8 @@ export const lessons: Lesson[] = [
     difficulty: "foundation",
     skillIds: ["water-control", "washes"],
     prerequisiteSkillIds: [],
-    instructionMinutes: 7,
-    practiceMinutes: 18,
+    instructionMinutes: 18,
+    practiceMinutes: 37,
     materials,
     objectives: [
       "Create three dry values by dilution",
@@ -101,7 +101,7 @@ export const lessons: Lesson[] = [
       step(
         "look",
         "Notice the three water decisions",
-        3,
+        5,
         "water",
         "Dilution changes pigment concentration. Brush loading changes the amount of liquid delivered. Paper moisture changes how far that liquid can move. A glossy wet surface, a damp surface with little sheen and dry paper behave differently; room conditions and paper sizing change the timing.",
         [
@@ -115,7 +115,7 @@ export const lessons: Lesson[] = [
       step(
         "set-up",
         "Prepare a repeatable brush load",
-        4,
+        15,
         "water",
         "Wet the brush, load the belly from a small colour puddle and touch it lightly to the palette edge. Make a stroke. If a bead gathers at the end, briefly touch the brush to the cloth before the next stroke. The aim is repeatability, not one universally correct water load.",
         [
@@ -133,7 +133,7 @@ export const lessons: Lesson[] = [
       step(
         "dilution",
         "Vary dilution, not everything",
-        7,
+        15,
         "water",
         "Put a little of the same mixture into three wells. Leave one as it is, add some water to the second and more to the third. Ratios are starting experiments, not reconstruction formulas. Swatch each with the same loading action. Repeat the row to see whether the relationship is reproducible.",
         [
@@ -152,7 +152,7 @@ export const lessons: Lesson[] = [
       step(
         "moisture",
         "Compare dry and damp paper",
-        7,
+        15,
         "edges",
         "Use one premixed colour for both tests. On one patch of dry paper, place a stroke. Wet a second patch evenly, wait until standing water is gone, then place the same stroke. Note the sheen and the spread. A later, wetter addition can push pigment into a drying area and produce a bloom; that can be useful deliberately.",
         [
@@ -171,7 +171,7 @@ export const lessons: Lesson[] = [
       step(
         "reflect",
         "Name a repeatable decision",
-        4,
+        5,
         "water",
         "An unexpected spread is useful information if you can describe the conditions. Completion records your practice, not objective mastery. Keep the swatches as a physical reference; no upload is needed.",
         [

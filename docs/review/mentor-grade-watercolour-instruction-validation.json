@@ -1,0 +1,736 @@
+{
+  "date": "2026-11-04T04:08:41.499459+00:00",
+  "baseline": "c2c5dd7468e3c0a25c9b6009ff035ca8cbe0f741",
+  "branch": "codex/mentor-grade-watercolour-instruction",
+  "readiness": "READY FOR OWNER REVIEW",
+  "implementation": {
+    "units": 10,
+    "diagnostics": 8,
+    "canonicalSteps": 5,
+    "totalCanonicalStepsPreserved": 27,
+    "readingMinutes": 18,
+    "practiceMinutes": 37,
+    "waitingAndWatchingAdditional": true,
+    "previewReferences": 5,
+    "distinctPreviewVideos": 2,
+    "originalLibraryCandidates": 17,
+    "originalTimingProposals": 18,
+    "approvedMediaResources": 0
+  },
+  "commands": [
+    {
+      "command": "node --test --test-concurrency=2 tests/*.test.cjs",
+      "status": "PASS",
+      "tests": 2066,
+      "passed": 2066,
+      "failed": 0,
+      "skipped": 0,
+      "scope": "Fresh final source run; 40 instructional contract/session/editorial tests included."
+    },
+    {
+      "command": "npm run typecheck",
+      "status": "PASS"
+    },
+    {
+      "command": "DENO_DIR=/tmp/mentor-watercolour/deno-cache DENO_TLS_CA_STORE=system PATH=/tmp/mentor-watercolour/bin:$PATH npm run typecheck:edge",
+      "status": "PASS"
+    },
+    {
+      "command": "EXPO_PUBLIC_SUPABASE_URL=https://watercolor-test.supabase.co EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_browser_test_only EXPO_WEB_BASE_PATH=/watercolor-coach-ai npm run build:web",
+      "status": "PASS",
+      "scope": "Clean production export. Synthetic public configuration for isolated browser fixtures; final reviewed text confirmed in bundle."
+    },
+    {
+      "command": "EXPO_PUBLIC_SUPABASE_URL= EXPO_PUBLIC_SUPABASE_ANON_KEY= EXPO_WEB_BASE_PATH=/watercolor-coach-ai npm run build:web",
+      "status": "PASS",
+      "scope": "Clean unconfigured export; sixteen guarded routes pass with zero external requests."
+    },
+    {
+      "command": "node scripts/validate-instruction.cjs --write",
+      "status": "PASS",
+      "scope": "10 units, 8 diagnostics, 5 unchanged provisional references; 27-step rollout regenerated."
+    },
+    {
+      "command": "node scripts/validate-video-preview.cjs",
+      "status": "PASS",
+      "scope": "17 candidates, 4 owner screenings and 18 proposals unchanged."
+    },
+    {
+      "command": "node scripts/validate-learning-media.cjs",
+      "status": "PASS",
+      "scope": "Publication/schema gate passes; zero approved resources."
+    },
+    {
+      "command": "node tests/browser/mentor-instruction.cjs http://127.0.0.1:8203/watercolor-coach-ai /tmp/mentor-watercolour/review-followup/mentor-accepted",
+      "status": "PASS",
+      "tests": 19,
+      "scope": "Actual exported app with synthetic auth/provider. All ten unit reading orders, 7 widths/landscape, enlarged text, keyboard next/previous, one-action video/replay/close, refresh/navigation, original checklist readiness, account isolation, stale/blocked session storage."
+    },
+    {
+      "command": "node tests/browser/learning.cjs http://127.0.0.1:8203/watercolor-coach-ai /tmp/mentor-watercolour/review-followup/learning",
+      "status": "PASS",
+      "responsiveCases": 35,
+      "firstViewportChecks": 8,
+      "scope": "Owner-requested concept-first order supersedes prior first-viewport action/checklist assertions. Existing geometry/contrast/touch thresholds retained; final checklist checked above fixed navigation."
+    },
+    {
+      "command": "node tests/browser/video-preview.cjs http://127.0.0.1:8203/watercolor-coach-ai /tmp/mentor-watercolour/review-followup/library",
+      "status": "PASS",
+      "tests": 22
+    },
+    {
+      "command": "node scripts/export-video-fixture.cjs /tmp/mentor-watercolour/review-followup/approved-dist; node tests/browser/learning-video.cjs http://127.0.0.1:8205/watercolor-coach-ai /tmp/mentor-watercolour/review-followup/approved-player",
+      "status": "PASS",
+      "scope": "Fresh isolated synthetic catalogue, never production. Seven widths, bounds/captions/replay/seek/errors; preview ↔ approved fixture transition retains one instance and unchanged progress.",
+      "approvedPreviewSwitch": true
+    },
+    {
+      "command": "node tests/browser/professional-workspace.cjs http://127.0.0.1:8203/watercolor-coach-ai /tmp/mentor-watercolour/review-followup/assessment",
+      "status": "PASS",
+      "cases": 177,
+      "scope": "Fresh saved-artwork/auth/readonly regression on synthetic records; no production service calls."
+    },
+    {
+      "command": "node tests/browser/artwork-preparation.cjs http://127.0.0.1:8203/watercolor-coach-ai /tmp/mentor-watercolour/review-followup/images",
+      "status": "PASS",
+      "checks": 40
+    },
+    {
+      "command": "node tests/browser/unconfigured-pages.cjs http://127.0.0.1:8204/watercolor-coach-ai",
+      "status": "PASS",
+      "routes": 16
+    },
+    {
+      "command": "node scripts/test-local-database.cjs",
+      "status": "PASS",
+      "scope": "Real isolated PostgreSQL16 with no network: RLS/storage ownership, server-only RPCs, quota/idempotency/rollback and simultaneous claims. No production data contacted."
+    },
+    {
+      "command": "node -e 'const p=require(\"./scripts/benchmark/production.cjs\");p.verifyProductionFiles(p.lockedProduction().identity);'",
+      "status": "PASS",
+      "scope": "Locked production contracts unchanged. Progress provider/schema, auth, assessment, video evidence, packages and release infrastructure preserved."
+    },
+    {
+      "command": "node scripts/audit-instruction-bundle.cjs /tmp/mentor-watercolour/review-followup/accepted-configured",
+      "status": "PASS",
+      "scope": "All 17 video IDs present; private owner records and synthetic approved media absent."
+    }
+  ],
+  "browserEvidence": {
+    "mentor": [
+      {
+        "name": "A first-time learner can open and begin the canonical lesson without a saved entry",
+        "status": "PASS"
+      },
+      {
+        "name": "Essential three-control teaching is visible in canonical lesson without media or disclosures",
+        "status": "PASS"
+      },
+      {
+        "name": "Seven widths plus landscape keep essential teaching visible, touch targets and no horizontal overflow",
+        "status": "PASS"
+      },
+      {
+        "name": "Ten authored focuses have essential actions, controlled variables and visible outcomes without changing progress",
+        "status": "PASS"
+      },
+      {
+        "name": "Keyboard next/previous focus lands at the new explanation; back from experiment keeps the same focus",
+        "status": "PASS"
+      },
+      {
+        "name": "Steve broad proposal loads inline in one gesture and retains absolute 47–702 boundaries",
+        "status": "PASS"
+      },
+      {
+        "name": "Returning to practice closes video and focuses the same unit exercise without writes",
+        "status": "PASS"
+      },
+      {
+        "name": "Switching canonical step cleans up; the repeated Steve proposal is not relabelled a short clip",
+        "status": "PASS"
+      },
+      {
+        "name": "Louise start-only reference remains 90s onwards without a fabricated endpoint",
+        "status": "PASS"
+      },
+      {
+        "name": "Two independently referenced Louise chapter hints maintain one active official player",
+        "status": "PASS"
+      },
+      {
+        "name": "Restricted embedding keeps current written exercise, original link and unchanged checklist",
+        "status": "PASS"
+      },
+      {
+        "name": "Expert tip and symptom→cause→check→safe action→stop guide are accessible on mobile",
+        "status": "PASS"
+      },
+      {
+        "name": "Reading and experienced presentation share the complete teaching without inferring competence",
+        "status": "PASS"
+      },
+      {
+        "name": "Leaving lesson disposes playback; refresh and navigation restore the reading focus without altering checks or notes",
+        "status": "PASS"
+      },
+      {
+        "name": "Historical complete record stays complete and preserves its reflection",
+        "status": "PASS"
+      },
+      {
+        "name": "No reflection video or owner QA tools; enlarged text and controls remain reachable",
+        "status": "PASS"
+      },
+      {
+        "name": "A stale saved focus is ignored, and the final practice checklist follows the experiment without a micro-unit gate",
+        "status": "PASS"
+      },
+      {
+        "name": "Another signed-in account never inherits the reading focus or playback intent",
+        "status": "PASS"
+      },
+      {
+        "name": "Blocked session storage preserves in-memory navigation and never blocks the lesson or writes progress",
+        "status": "PASS"
+      }
+    ],
+    "mentorErrors": [],
+    "mentorUnexpectedRequests": [],
+    "libraryPass": 22,
+    "learningFirstViewport": [
+      {
+        "width": 320,
+        "height": 800,
+        "goalBottom": 369,
+        "navigationHeight": 44
+      },
+      {
+        "width": 375,
+        "height": 900,
+        "goalBottom": 344,
+        "navigationHeight": 44
+      },
+      {
+        "width": 390,
+        "height": 900,
+        "goalBottom": 344,
+        "navigationHeight": 44
+      },
+      {
+        "width": 430,
+        "height": 900,
+        "goalBottom": 344,
+        "navigationHeight": 44
+      },
+      {
+        "width": 375,
+        "height": 600,
+        "goalBottom": 344,
+        "navigationHeight": 44
+      },
+      {
+        "width": 768,
+        "height": 480,
+        "goalBottom": 319,
+        "navigationHeight": 44
+      },
+      {
+        "width": 1024,
+        "height": 768,
+        "goalBottom": 423,
+        "navigationHeight": 44
+      },
+      {
+        "width": 1440,
+        "height": 1000,
+        "goalBottom": 423,
+        "navigationHeight": 44
+      }
+    ],
+    "contrastRatios": [
+      10.57,
+      10.57,
+      5.78
+    ],
+    "source": "Actual Expo exports; every video provider frame/event is simulated, not live playback."
+  },
+  "bundleAudit": {
+    "all17IdsPresent": true,
+    "rawOwnerAndSyntheticCatalogueAbsent": true,
+    "finalInlineDiagnosisPresent": true,
+    "configuredWithSyntheticPublicEndpointForTests": true,
+    "entrySha256": "f3e92984139e8028098849cfddaebe2d2b06b2f3eba769a160c7ad877ebab6eb",
+    "screenshots": {
+      "after-desktop.png": {
+        "width": 1440,
+        "height": 1000,
+        "sha256": "8fa857671bf6087a81209641daa3ddd6b66cf51fd13812a7b31b228050b4ce69"
+      },
+      "after-mobile.png": {
+        "width": 390,
+        "height": 900,
+        "sha256": "fe98a59bd060d470eced1f055cdd331bfaca1c89d780922fcd3a91516407d159"
+      },
+      "before-desktop.png": {
+        "width": 1440,
+        "height": 1000,
+        "sha256": "2845b90e13000344870ec38f95b000a26758fda42ae59a6c371abb1e60ae1b03"
+      },
+      "before-final-review-desktop.png": {
+        "width": 1440,
+        "height": 1000,
+        "sha256": "31f725fb2d16cc3b5fda85181d492fc4493d9a1405cfca479b022a27bc3bfc81"
+      },
+      "before-final-review-mobile.png": {
+        "width": 390,
+        "height": 900,
+        "sha256": "3b1e5b3c6d0a339845d9bb97924cb029561bef5b6ef985412e94e8f7583c718b"
+      },
+      "before-mobile.png": {
+        "width": 375,
+        "height": 900,
+        "sha256": "f99ec63035f0b3f111920227bb7de1b395d8300f70fb5cfe902f02cd1fec27a4"
+      },
+      "brush-physical-sequence.png": {
+        "width": 390,
+        "height": 900,
+        "sha256": "ef5bcbf13f9798334a3f0732139b41ca614fbb940fe0c8700e05054dd21af71a"
+      },
+      "diagnosis.png": {
+        "width": 390,
+        "height": 900,
+        "sha256": "cca9aeb1f78d132b81c315b9860ce489af6747182b0bd7c2855184fbbdd765da"
+      },
+      "experiment-feedback.png": {
+        "width": 375,
+        "height": 600,
+        "sha256": "1d99b556e9b96667d58148b4da2a27091992fe24628eb71c86db4fc0ccc6246e"
+      },
+      "final-practice-checklist.png": {
+        "width": 375,
+        "height": 600,
+        "sha256": "8c5c19ae07acfce4c0cd81e34c2fa0f3f3e9d062911e0de93d7331b8cd7af084"
+      },
+      "inline-before.png": {
+        "width": 390,
+        "height": 900,
+        "sha256": "f2a263a8967cd14c69cbcd9c9afe55a82fb8aca37ea2572cc13b2a0ae28498b2"
+      },
+      "inline-synthetic.png": {
+        "width": 390,
+        "height": 900,
+        "sha256": "c316536cc3e8df99c0ec4aa892c14e828cdf92810aa615ec72f15c75b1480cf4"
+      },
+      "instructor-tip.png": {
+        "width": 390,
+        "height": 900,
+        "sha256": "b5c654ae3e47cc98ed0497d4517d1b774c928be5b7bdd810d91c0371808e3c46"
+      },
+      "physical-instructions.png": {
+        "width": 375,
+        "height": 600,
+        "sha256": "86097da019818b8f0cf7b8ff1a8a8bd0963a3b26a9e274f2f21319932d3e9fa9"
+      },
+      "practice.png": {
+        "width": 390,
+        "height": 900,
+        "sha256": "046ada72067eb6fede4c8dbc291a21dbfe7b88cd9a4e1e3d6d7955bc473f29c1"
+      },
+      "reading-order.png": {
+        "width": 375,
+        "height": 600,
+        "sha256": "4956c2564c160cf35b6e45edeef6c800b62c7045d5b34f55d77e849bd528a8e3"
+      }
+    }
+  },
+  "supportingSources": [
+    {
+      "url": "https://developers.google.com/youtube/iframe_api_reference",
+      "http": 200,
+      "title": "YouTube Player API Reference for iframe Embeds &nbsp;|&nbsp; YouTube IFrame Player API &nbsp;|&nbsp; Google for Developers",
+      "inspected": true,
+      "scope": "Documentation text, not YouTube video footage."
+    },
+    {
+      "url": "https://developers.google.com/youtube/player_parameters",
+      "http": 200,
+      "title": "YouTube Embedded Players and Player Parameters &nbsp;|&nbsp; YouTube IFrame Player API &nbsp;|&nbsp; Google for Developers",
+      "inspected": true,
+      "scope": "Documentation text, not YouTube video footage."
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/api-services-terms-of-service",
+      "http": 200,
+      "title": "YouTube API Services Terms of Service &nbsp;|&nbsp; Google for Developers",
+      "inspected": true,
+      "scope": "Documentation text, not YouTube video footage."
+    },
+    {
+      "url": "https://danielsmith.com/tutorials/extra-fine-watercolors/four-basic-watercolor-washes/",
+      "http": 200,
+      "title": "Four basic watercolor washes - DANIEL SMITH Artists’ Materials",
+      "inspected": true,
+      "scope": "Documentation text, not YouTube video footage."
+    },
+    {
+      "url": "https://danielsmith.com/tutorials/watercolor-for-beginners/",
+      "http": 200,
+      "title": "Watercolor for beginners - DANIEL SMITH Artists’ Materials",
+      "inspected": true,
+      "scope": "Documentation text, not YouTube video footage."
+    }
+  ],
+  "editorial": {
+    "reviewer": "Codex author/self-review, not independent instructor",
+    "unitReviews": [
+      {
+        "unitId": "wb-three-decisions",
+        "lessonId": "water-brush",
+        "stepId": "look",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Check that a beginner distinguishes delivered pigment amount from palette concentration when loads differ."
+      },
+      {
+        "unitId": "wb-materials",
+        "lessonId": "water-brush",
+        "stepId": "set-up",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Review workable area/brush capacity choices with inexpensive available materials."
+      },
+      {
+        "unitId": "wb-load-round",
+        "lessonId": "water-brush",
+        "stepId": "set-up",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Test the wet-through, loading and light-unloading sequence with different brush reservoirs."
+      },
+      {
+        "unitId": "wb-contact",
+        "lessonId": "water-brush",
+        "stepId": "set-up",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Check that contact/pressure comparison does not suggest one fixed hand angle or a harshly deformed brush."
+      },
+      {
+        "unitId": "wb-flat-wash",
+        "lessonId": "water-brush",
+        "stepId": "dilution",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Review the conditional wet-bead handling and the stopping decision as the wash sets."
+      },
+      {
+        "unitId": "wb-dilution-test",
+        "lessonId": "water-brush",
+        "stepId": "dilution",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Test comparable delivery and dry-value comparison with differing pigment granulation/tinting strength."
+      },
+      {
+        "unitId": "wb-read-moisture",
+        "lessonId": "water-brush",
+        "stepId": "moisture",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Check that lost surface sheen is not mistaken for complete internal dryness."
+      },
+      {
+        "unitId": "wb-moisture-pair",
+        "lessonId": "water-brush",
+        "stepId": "moisture",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Confirm the difference between a soft boundary and a genuinely lost contour remains clear."
+      },
+      {
+        "unitId": "wb-diagnose-repeat",
+        "lessonId": "water-brush",
+        "stepId": "moisture",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Test the flooding and late-water/backrun cases; safe stopping is more important than guaranteed repair."
+      },
+      {
+        "unitId": "wb-transfer",
+        "lessonId": "water-brush",
+        "stepId": "reflect",
+        "categories": {
+          "technicalAccuracy": "NEEDS HUMAN REVIEW",
+          "physicalSpecificity": "PASS based on inspected evidence",
+          "causalExplanation": "PASS based on inspected evidence",
+          "learnerLevel": "NEEDS HUMAN REVIEW",
+          "continuity": "PASS based on inspected evidence",
+          "practicalReproducibility": "NEEDS HUMAN REVIEW",
+          "diagnosticCorrectness": "NEEDS HUMAN REVIEW",
+          "materialVariation": "PASS based on inspected evidence",
+          "accessiblePresentation": "PASS based on inspected evidence",
+          "videoEvidenceAlignment": "PASS based on inspected evidence"
+        },
+        "unitSpecificOwnerConcern": "Review whether the reflection produces a usable small transfer without implying measured mastery."
+      }
+    ],
+    "physicalFailureScenarioTrials": false,
+    "independentArtisticSignoff": false,
+    "criteriaDefinitions": {
+      "technicalAccuracy": {
+        "status": "NEEDS HUMAN REVIEW",
+        "basis": "Inspected manufacturer principles and material caveats; no independent instructor or physical trials."
+      },
+      "physicalSpecificity": {
+        "status": "PASS based on inspected evidence",
+        "basis": "Authored setup/actions explicitly describe handling, surface and observation."
+      },
+      "causalExplanation": {
+        "status": "PASS based on inspected evidence",
+        "basis": "Concept, why and one-variable comparison were read together; causal hypotheses remain conditional."
+      },
+      "learnerLevel": {
+        "status": "NEEDS HUMAN REVIEW",
+        "basis": "Basic terms and experienced variations exist; real learner comprehension has not been studied."
+      },
+      "continuity": {
+        "status": "PASS based on inspected evidence",
+        "basis": "Inspected transitions and canonical ordering; validator rejects reordered/missing references."
+      },
+      "practicalReproducibility": {
+        "status": "NEEDS HUMAN REVIEW",
+        "basis": "Explicit variable/constants and observable outcomes; no physical painting trials were performed."
+      },
+      "diagnosticCorrectness": {
+        "status": "NEEDS HUMAN REVIEW",
+        "basis": "Eight conditional diagnostic paths and stop decisions inspected; actual material responses require owner review."
+      },
+      "materialVariation": {
+        "status": "PASS based on inspected evidence",
+        "basis": "Paper, load, pigment, sheen/dry comparisons and intentional texture are distinguished in the lesson/associated diagnostics."
+      },
+      "accessiblePresentation": {
+        "status": "PASS based on inspected evidence",
+        "basis": "Real export: keyboard, label targets, 7 widths + landscape, enlarged text, visible essential instructions and 8 existing first-viewport checks. Not a full WCAG certification."
+      },
+      "videoEvidenceAlignment": {
+        "status": "PASS based on inspected evidence",
+        "basis": "Existing windows only; no exact-action claim, no video needed for completion, owner approval remains false/absent."
+      }
+    }
+  },
+  "progressCompatibility": {
+    "versionUnchanged": 1,
+    "storageSchemaUnchanged": 1,
+    "storageKeyUnchanged": true,
+    "allItemAndChecklistIdentitiesSnapshotMatched": true,
+    "notesAndReflectionsPreserved": true,
+    "completionUnchanged": true,
+    "viewingNeverCompletesPractice": true,
+    "focusPosition": "Optional account/lesson/step scoped tab-session reading position; only validated unit ID, never progress or media intent. Refresh/navigation restore it without loading YouTube; stale/blocked storage falls back safely. Native selection remains in memory.",
+    "newMandatoryUnitCompletionGates": false
+  },
+  "resolvedIntegrationDefects": [
+    {
+      "issue": "Checklist extraction evaluated an absent saved entry during initial render.",
+      "fix": "Optional entry read; new real-browser first-time learner case passes."
+    },
+    {
+      "issue": "Diagnosis focus initially hid symptoms in the optional reference guide.",
+      "fix": "Symptom selectors now visible directly in the diagnosis focus; one keyboard-accessible disclosure per symptom."
+    },
+    {
+      "issue": "Initial PR put first action/checklist ahead of necessary concept/setup.",
+      "fix": "Goal/concept/preparation now precede all actions; original checklist follows experiment and direct single-level symptom guides."
+    },
+    {
+      "issue": "Focus changes did not focus the new explanation; refresh lost the selected focus.",
+      "fix": "Local keyboard/scroll destination plus safe tab-session reading-position helper. Account separation, failure fallback and no media resurrection tested."
+    },
+    {
+      "issue": "Physical instructions omitted several rinse-water, contact, wet-join and comparison details.",
+      "fix": "All ten units/eight guides reviewed and corrected, with per-item decisions and human-review limits in editorial followup."
+    }
+  ],
+  "limits": {
+    "realYouTubePlaybackVerified": false,
+    "newVideoFootageInspected": false,
+    "exactClipApproval": false,
+    "captionTracksVerified": false,
+    "physicalAndroidTested": false,
+    "physicalPaintingTrials": false,
+    "humanUsabilityTested": false,
+    "fullWcagConformanceClaim": false
+  },
+  "productionEffects": {
+    "paidAICalls": 0,
+    "newCredentials": 0,
+    "newDependencies": 0,
+    "databaseMigrations": 0,
+    "productionDataWrites": 0,
+    "productionSettingsChanges": 0,
+    "merge": false,
+    "deploy": false
+  },
+  "changedFiles": [
+    "README.md",
+    "app/(tabs)/learn/lesson.tsx",
+    "components/learning/InstructionVisual.tsx",
+    "components/learning/InstructionalUnit.tsx",
+    "components/learning/PreviewVideoPlayer.tsx",
+    "components/learning/useTeachingFocus.ts",
+    "docs/review/mentor-grade-watercolour-crosswalk.json",
+    "docs/review/mentor-grade-watercolour-editorial-followup.json",
+    "docs/review/mentor-grade-watercolour-instruction-validation.json",
+    "docs/review/mentor-grade-watercolour-instruction.md",
+    "docs/review/screenshots/mentor-instruction/after-desktop.png",
+    "docs/review/screenshots/mentor-instruction/after-mobile.png",
+    "docs/review/screenshots/mentor-instruction/before-desktop.png",
+    "docs/review/screenshots/mentor-instruction/before-final-review-desktop.png",
+    "docs/review/screenshots/mentor-instruction/before-final-review-mobile.png",
+    "docs/review/screenshots/mentor-instruction/before-mobile.png",
+    "docs/review/screenshots/mentor-instruction/brush-physical-sequence.png",
+    "docs/review/screenshots/mentor-instruction/diagnosis.png",
+    "docs/review/screenshots/mentor-instruction/experiment-feedback.png",
+    "docs/review/screenshots/mentor-instruction/final-practice-checklist.png",
+    "docs/review/screenshots/mentor-instruction/inline-before.png",
+    "docs/review/screenshots/mentor-instruction/inline-synthetic.png",
+    "docs/review/screenshots/mentor-instruction/instructor-tip.png",
+    "docs/review/screenshots/mentor-instruction/physical-instructions.png",
+    "docs/review/screenshots/mentor-instruction/practice.png",
+    "docs/review/screenshots/mentor-instruction/reading-order.png",
+    "learning/content.ts",
+    "learning/instruction.ts",
+    "learning/instructionTypes.ts",
+    "learning/teachingFocus.ts",
+    "learning/waterInstruction.ts",
+    "scripts/audit-instruction-bundle.cjs",
+    "scripts/validate-instruction.cjs",
+    "tests/browser/learning-video.cjs",
+    "tests/browser/learning.cjs",
+    "tests/browser/mentor-instruction.cjs",
+    "tests/helpers/instruction-progress-contract.json",
+    "tests/instruction.test.cjs"
+  ],
+  "reviewBaselineHead": "98452f184794c2d2a3b2fa605bc56c66707ba537",
+  "editorialFollowup": "mentor-grade-watercolour-editorial-followup.json",
+  "followupChangedFiles": [
+    "app/(tabs)/learn/lesson.tsx",
+    "components/learning/InstructionalUnit.tsx",
+    "components/learning/useTeachingFocus.ts",
+    "docs/review/mentor-grade-watercolour-crosswalk.json",
+    "docs/review/mentor-grade-watercolour-editorial-followup.json",
+    "docs/review/mentor-grade-watercolour-instruction-validation.json",
+    "docs/review/mentor-grade-watercolour-instruction.md",
+    "docs/review/screenshots/mentor-instruction/after-desktop.png",
+    "docs/review/screenshots/mentor-instruction/after-mobile.png",
+    "docs/review/screenshots/mentor-instruction/before-final-review-desktop.png",
+    "docs/review/screenshots/mentor-instruction/before-final-review-mobile.png",
+    "docs/review/screenshots/mentor-instruction/brush-physical-sequence.png",
+    "docs/review/screenshots/mentor-instruction/diagnosis.png",
+    "docs/review/screenshots/mentor-instruction/experiment-feedback.png",
+    "docs/review/screenshots/mentor-instruction/final-practice-checklist.png",
+    "docs/review/screenshots/mentor-instruction/inline-before.png",
+    "docs/review/screenshots/mentor-instruction/inline-synthetic.png",
+    "docs/review/screenshots/mentor-instruction/instructor-tip.png",
+    "docs/review/screenshots/mentor-instruction/physical-instructions.png",
+    "docs/review/screenshots/mentor-instruction/practice.png",
+    "docs/review/screenshots/mentor-instruction/reading-order.png",
+    "learning/teachingFocus.ts",
+    "learning/waterInstruction.ts",
+    "tests/browser/learning.cjs",
+    "tests/browser/mentor-instruction.cjs",
+    "tests/instruction.test.cjs"
+  ]
+}
