@@ -137,7 +137,7 @@ let responseUser = user;
   await scenario('Switching canonical step cleans up; the repeated Steve proposal is not relabelled a short clip',async()=>{
     await loadInline('wb-loading-steve');
     await click('Show lesson outline');await click('3. Vary dilution, not everything');await h('Join a small wash while its edge is wet').waitFor();assert.equal(await page.locator('iframe').count(),0);
-    await page.getByText('This is the same broader overview referenced elsewhere, not a separately verified demonstration of this project.',{exact:false}).waitFor();
+    await click('Video details and privacy');await page.getByText('This is an owner-proposed longer viewing window, not a newly verified short clip.',{exact:false}).waitFor();
     await loadInline('wb-wash-steve');assert.equal((await cue()).startSeconds,47);assert.equal((await cue()).endSeconds,702);
     await click('Go to this experiment');assert.equal(await page.locator('iframe').count(),0);assert(await page.getByTestId('unit-exercise').evaluate(e=>e===document.activeElement));assert.equal(await b('Optional demonstration').count(),0);
   });

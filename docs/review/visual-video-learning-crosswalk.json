@@ -21,6 +21,9 @@
         "transfer": "Before a sky, petal or architectural wash, name the palette, brush and surface conditions separately."
       },
       "artworkId": "brush-loading",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: tapered ends. Right: fuller end deposits. Your load test explores possible causes.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 3
@@ -47,6 +50,9 @@
         "transfer": "Prepare the largest connected wash of your next subject before beginning it."
       },
       "artworkId": "flat-wash",
+      "artworkKind": "generated-study",
+      "imageObservation": "A connected wash can retain material variation without becoming a set of separate bands.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 1,
         "practice": 2
@@ -74,6 +80,9 @@
         "transfer": "Use a scrap stroke before laying a clean light passage in your painting."
       },
       "artworkId": "brush-loading",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: tapered ends. Right: fuller end deposits. Your load test explores possible causes.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 3
@@ -117,6 +126,9 @@
         "transfer": "Use tip contact for a selected stem or edge and broader contact for the supporting mass."
       },
       "artworkId": "brush-contact",
+      "artworkKind": "generated-study",
+      "imageObservation": "Narrow contact, broad contact, and intentionally broken contact with paper tooth.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 5
@@ -144,6 +156,9 @@
         "transfer": "Use the wet-edge decision for a quiet sky or a single broad colour shape, without requiring every surface to be perfectly smooth."
       },
       "artworkId": "wet-edge",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: quiet interior. Right: two darker joins. Follow the pass sequence below.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 5
@@ -187,6 +202,9 @@
         "transfer": "Select a tested light or middle mixture for a petal, building plane or landscape passage."
       },
       "artworkId": "dilution",
+      "artworkKind": "generated-study",
+      "imageObservation": "Compare the value relationships across a row, then look for their repetition below.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 6
@@ -213,6 +231,9 @@
         "transfer": "Read a sky or foliage passage before deciding whether to connect another shape or leave it alone."
       },
       "artworkId": "dry-damp",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: definite boundary. Right: broader spread. Compare with your own surface tests.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 1
@@ -256,6 +277,9 @@
         "transfer": "Try the same comparison on a simple hill, leaf or abstract shape before using it in a painting."
       },
       "artworkId": "dry-damp",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: definite boundary. Right: broader spread. Compare with your own surface tests.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 5
@@ -313,6 +337,9 @@
         "transfer": "Use a margin or separate scrap to test a correction before applying it to an important painting."
       },
       "artworkId": "pool-backrun",
+      "artworkKind": "generated-study",
+      "imageObservation": "An end pool and a backrun have different shapes and different questions to check.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 1,
         "practice": 4
@@ -338,6 +365,9 @@
         "transfer": "Use the chosen decision in the next guided landscape or your own subject; keep the other controls simple."
       },
       "artworkId": "intentional-texture",
+      "artworkKind": "generated-study",
+      "imageObservation": "Texture can have a deliberate visual job. It does not automatically require repair.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 3
@@ -365,6 +395,9 @@
         "transfer": "Use the same comparison before choosing the first mixture for another subject."
       },
       "artworkId": "value-subject",
+      "artworkKind": "generated-study",
+      "imageObservation": "Use the jug, fruit, tabletop and background as large masses before naming small details.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 4
@@ -408,6 +441,9 @@
         "transfer": "Use a light-shape map to protect paper white in a sky, petal or building."
       },
       "artworkId": "value-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "The three families remain readable without relying on colour names.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 6
@@ -435,6 +471,9 @@
         "transfer": "Protect those broad relationships when you make a colour study."
       },
       "artworkId": "value-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "The three families remain readable without relying on colour names.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 8
@@ -462,6 +501,9 @@
         "transfer": "Try an alternative emphasis cheaply before committing dark paint to a larger study."
       },
       "artworkId": "value-alternative",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Compare the changed emphasis with the first plan. There is no universal winning arrangement.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 8
@@ -488,6 +530,9 @@
         "transfer": "Apply the plan to a landscape, urban mass or a single observed leaf."
       },
       "artworkId": "value-alternative",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Compare the changed emphasis with the first plan. There is no universal winning arrangement.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 4
@@ -514,6 +559,9 @@
         "transfer": "Use the same reading when deciding which contour matters in a sky, petal or street."
       },
       "artworkId": "edge-boundaries",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: hard. Middle: soft. In the right pair, the shared middle contour disappears.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 4
@@ -541,6 +589,9 @@
         "transfer": "Use a dry-paper boundary for a selected roof, leaf tip or near mass when it serves the intention."
       },
       "artworkId": "edge-boundaries",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: hard. Middle: soft. In the right pair, the shared middle contour disappears.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 6
@@ -584,6 +635,9 @@
         "transfer": "Try the same relationship on a supporting hill or leaf passage before applying it to a larger painting."
       },
       "artworkId": "dry-damp",
+      "artworkKind": "generated-study",
+      "imageObservation": "Left: definite boundary. Right: broader spread. Compare with your own surface tests.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 8
@@ -627,6 +681,9 @@
         "transfer": "Use the relationship where neighbouring foliage, petals or land masses can share a value."
       },
       "artworkId": "edge-leaves",
+      "artworkKind": "generated-study",
+      "imageObservation": "Follow the upright leaf’s right edge: find it, lose it through the middle join, then find it again.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 11
@@ -653,6 +710,9 @@
         "transfer": "Use that pairing in the landscape project or a subject you have observed."
       },
       "artworkId": "edge-leaves",
+      "artworkKind": "generated-study",
+      "imageObservation": "Follow the upright leaf’s right edge: find it, lose it through the middle join, then find it again.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 4
@@ -680,6 +740,9 @@
         "transfer": "Use the same check before painting a street mass, boat or botanical silhouette."
       },
       "artworkId": "structure-painted",
+      "artworkKind": "generated-study",
+      "imageObservation": "Read the envelope and the major planes before following small windows or brush details.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 4
@@ -707,6 +770,9 @@
         "transfer": "Use the group check before adding selective structural lines in an urban wash."
       },
       "artworkId": "structure-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Compare related edges within each direction rather than forcing every diagonal to one point.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 8
@@ -750,6 +816,9 @@
         "transfer": "Carry only the necessary structure into a small urban colour study."
       },
       "artworkId": "structure-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Compare related edges within each direction rather than forcing every diagonal to one point.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 10
@@ -776,6 +845,9 @@
         "transfer": "Use the check before the next landscape structure, street corner or still life."
       },
       "artworkId": "structure-painted",
+      "artworkKind": "generated-study",
+      "imageObservation": "Read the envelope and the major planes before following small windows or brush details.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 4
@@ -803,6 +875,9 @@
         "transfer": "Use the same intention-led start for a boat, street mass or abstract landscape."
       },
       "artworkId": "quiet-landscape-finished",
+      "artworkKind": "generated-study",
+      "imageObservation": "Finished reference: open light, a quiet middle distance and one restrained landing.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 4
@@ -830,6 +905,9 @@
         "transfer": "Keep the plan beside the painting as a decision aid, while still responding to actual dry results."
       },
       "artworkId": "landscape-value-plan",
+      "artworkKind": "planning-interpretation",
+      "imageObservation": "Keep the river light open while grouping the hill and near bank into larger families.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 8
@@ -872,7 +950,10 @@
         ],
         "transfer": "Use the same preparation before a large connected colour shape in another subject."
       },
-      "artworkId": "landscape-palette",
+      "artworkId": "landscape-preparation",
+      "artworkKind": "reconstructed-stage",
+      "imageObservation": "Reserve the river opening and house wall before colour. Keep the pencil plan light.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 6
@@ -915,7 +996,10 @@
         ],
         "transfer": "Use the same stopping judgement in a light background or pale petal wash."
       },
-      "artworkId": "landscape-sky-detail",
+      "artworkId": "landscape-sky-stage",
+      "artworkKind": "reconstructed-stage",
+      "imageObservation": "Sky first: compare the broad light wash with the untouched land and river shapes.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 10
@@ -958,7 +1042,10 @@
         ],
         "transfer": "Use a tested boundary option for any supporting mass behind a clearer focal shape."
       },
-      "artworkId": "landscape-hill-detail",
+      "artworkId": "landscape-hill-stage",
+      "artworkKind": "reconstructed-stage",
+      "imageObservation": "Add the quiet hill; keep the reserved lower light open and the house in place.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 10
@@ -985,7 +1072,10 @@
         ],
         "transfer": "Build a connected foliage, street-shadow or still-life mass before breaking it into small descriptions."
       },
-      "artworkId": "landscape-bank-detail",
+      "artworkId": "landscape-bank-stage",
+      "artworkKind": "reconstructed-stage",
+      "imageObservation": "Connect the land masses before texture. The river and house wall remain light.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 12
@@ -1013,6 +1103,9 @@
         "transfer": "Use the same test-before-mark habit on an urban, botanical or expressive study."
       },
       "artworkId": "quiet-landscape-finished",
+      "artworkKind": "generated-study",
+      "imageObservation": "Finished reference: open light, a quiet middle distance and one restrained landing.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 8
@@ -1039,6 +1132,9 @@
         "transfer": "Carry the principle into your own landscape, boat, street or abstract arrangement."
       },
       "artworkId": "quiet-landscape-finished",
+      "artworkKind": "generated-study",
+      "imageObservation": "Finished reference: open light, a quiet middle distance and one restrained landing.",
+      "physicalProcessProved": false,
       "activeMinutes": {
         "reading": 2,
         "practice": 6

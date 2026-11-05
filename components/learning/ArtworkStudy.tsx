@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Image, PixelRatio, Platform, Text, View } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { paintedStudies, type ArtworkId, type ArtworkSourceId, type PaintedStudy } from "../../learning/artwork";
-import { Action, learnStyles } from "./LearningUI";
+import { Action, Copy, Disclosure, learnStyles } from "./LearningUI";
 
 /** Literal requires keep Metro/native asset packaging and Pages base paths intact. */
 const sources: Record<ArtworkSourceId, [ImageSourcePropType, ImageSourcePropType]> = {
@@ -24,6 +24,10 @@ const sources: Record<ArtworkSourceId, [ImageSourcePropType, ImageSourcePropType
   "quiet-landscape-finished":[require("../../assets/learning/quiet-landscape-finished-720.webp"),require("../../assets/learning/quiet-landscape-finished-1440.webp")],
   "landscape-value-plan":[require("../../assets/learning/landscape-value-plan-720.webp"),require("../../assets/learning/landscape-value-plan-1440.webp")],
   "landscape-palette":[require("../../assets/learning/landscape-palette-720.webp"),require("../../assets/learning/landscape-palette-1440.webp")],
+  "landscape-preparation":[require("../../assets/learning/landscape-preparation-720.webp"),require("../../assets/learning/landscape-preparation-1440.webp")],
+  "landscape-sky-stage":[require("../../assets/learning/landscape-sky-stage-720.webp"),require("../../assets/learning/landscape-sky-stage-1440.webp")],
+  "landscape-hill-stage":[require("../../assets/learning/landscape-hill-stage-720.webp"),require("../../assets/learning/landscape-hill-stage-1440.webp")],
+  "landscape-bank-stage":[require("../../assets/learning/landscape-bank-stage-720.webp"),require("../../assets/learning/landscape-bank-stage-1440.webp")],
   "style-atmospheric":[require("../../assets/learning/style-atmospheric-720.webp"),require("../../assets/learning/style-atmospheric-1440.webp")],
   "style-urban":[require("../../assets/learning/style-urban-720.webp"),require("../../assets/learning/style-urban-1440.webp")],
   "style-botanical":[require("../../assets/learning/style-botanical-720.webp"),require("../../assets/learning/style-botanical-1440.webp")],
@@ -56,8 +60,12 @@ export default function ArtworkStudy({ id, caption = true, eager = false }: {id:
         style={{position:"absolute",width:`${100/crop.width}%`,height:`${100/crop.height}%`,left:`${-100*crop.x/crop.width}%`,top:`${-100*crop.y/crop.height}%`}} />}
     </View>
     {caption&&<>
-      <Text style={learnStyles.label}>{study.crop?"Detail of the generated finished study":"Original generated watercolour study"}</Text>
       <Text style={learnStyles.muted}>{study.caption}</Text>
+      <Text style={learnStyles.label}>{study.kind==="reconstructed-stage"?"Reconstructed stage · generated":study.crop?"Finished-study detail · generated":"Generated watercolour study"}</Text>
+      <Disclosure title="About this study image">
+        <Copy muted>{study.kind==="reconstructed-stage"?"This is an illustrative reconstructed stage of the generated reference, not a photograph of a physical painting process.":"This is an original generated watercolour study, not a scan of a physical painting or a video frame."}</Copy>
+        <Copy muted>{study.teaches}</Copy>
+      </Disclosure>
     </>}
   </View>;
 }

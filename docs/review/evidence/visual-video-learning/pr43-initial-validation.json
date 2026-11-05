@@ -1,0 +1,2118 @@
+{
+  "schema": "visual-video-learning-validation/v1",
+  "executedAt": "2026-11-05T06:25:30.546Z",
+  "baseline": "f2a4631eea09ac667a84c92e9ff9892acb2edcde",
+  "branch": "codex/visual-video-learning-upgrade",
+  "verdict": "CONDITIONALLY READY FOR OWNER REVIEW",
+  "gates": {
+    "functionality": "PASS — synthetic provider mechanics and actual app routes",
+    "genuineArtwork": "CONDITIONAL — 22 genuine generated originals exist and were visually inspected; synthetic technique/geometry and artistic acceptance need owner review",
+    "educationalCoherence": "CONDITIONAL — all five items authored/integrated and self-reviewed; physical learning outcomes not measured",
+    "safety": "PASS — protected contracts/source/publication gates unchanged",
+    "validation": "PASS for executed engineering checks; real playback and physical Android/painting remain unverified"
+  },
+  "checks": [
+    {
+      "command": "node --test --test-concurrency=2 tests/*.test.cjs",
+      "status": "PASS",
+      "scope": "All established unit/integration suites, including new course/raster tests; progress/auth/critique/saved artwork/image preparation/security/publication contracts.",
+      "logSha256": "f6d7bca40a096917e1c36d067cb9cde7fe96677bc2d8931ac2d6fc86b8de3025",
+      "tests": 2077,
+      "pass": 2077,
+      "fail": 0,
+      "skipped": 0
+    },
+    {
+      "command": "node --test tests/visual-video-learning.test.cjs",
+      "status": "PASS",
+      "scope": "Final manifest and composite validation; adversarial approval/reference cases; all canonical identities.",
+      "logSha256": "e2663a2bc9931cb5358eb29832d2a95510754dda09f73079e71e3870bf8fbcd6",
+      "tests": 11,
+      "pass": 11
+    },
+    {
+      "command": "npm run typecheck",
+      "status": "PASS",
+      "scope": "Frontend TypeScript, no emit",
+      "logSha256": "cf211dd2ce0ed67a9c222bccc6e4c7af5133e7bebb81b6b15e071394bc782ffe"
+    },
+    {
+      "command": "DENO_DIR=/tmp/visual-video-upgrade/deno-cache DENO_TLS_CA_STORE=system /tmp/visual-video-upgrade/bin/deno check --config supabase/functions/generate-feedback/deno.json supabase/functions/generate-feedback/index.ts",
+      "status": "PASS",
+      "scope": "Strict Edge TypeScript. Deno 2.5.6 official archive verified with publisher SHA256. System trust store and writable temporary cache; certificate checking remains enabled.",
+      "logSha256": "38f0a1819271ae009b3b620eb550ffcc039ae36915bf550b5c609513932e32c3"
+    },
+    {
+      "command": "EXPO_PUBLIC_SUPABASE_URL=https://watercolor-test.supabase.co EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_browser_test_only EXPO_WEB_BASE_PATH=/watercolor-coach-ai npm run build:web",
+      "status": "PASS",
+      "scope": "Configured production export, synthetic public configuration only; 16 routes",
+      "logSha256": "5be8ba523b5659c9a833e65c07a03c7f71f45bb6ef497091455fdce18b98d17f"
+    },
+    {
+      "command": "env -u EXPO_PUBLIC_SUPABASE_URL -u EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_WEB_BASE_PATH=/watercolor-coach-ai npm run build:web",
+      "status": "PASS",
+      "scope": "Unconfigured production export, 16 safe setup routes",
+      "logSha256": "e9601defb1b438cceab6089d74d162171939e20a850de7214e68c72a18e3da4f"
+    },
+    {
+      "command": "node tests/browser/unconfigured-pages.cjs http://127.0.0.1:8217/watercolor-coach-ai",
+      "status": "PASS",
+      "scope": "16 actual unconfigured exported routes, zero external requests/runtime errors",
+      "logSha256": "86f23fe7bcd4421004f26cc190f4e4e3474521d7b355b387e29a9d43ba75d192"
+    },
+    {
+      "command": "node tests/browser/learning.cjs http://127.0.0.1:8213/watercolor-coach-ai /tmp/visual-video-upgrade/browser-learning",
+      "status": "PASS",
+      "scope": "35 responsive route cases, eight first-viewport cases, text contrast/enlargement, keyboard/touch, preferences, completion/resume, account/local persistence and save failure recovery.",
+      "logSha256": "680d02cd5ee4d5ec791beebf4fcd00cca77c96407f83cfff61a7702a9b1557a0",
+      "responsiveCases": 35,
+      "firstViewportCases": 8,
+      "physicalAndroid": false
+    },
+    {
+      "command": "node tests/browser/mentor-instruction.cjs http://127.0.0.1:8216/watercolor-coach-ai /tmp/visual-video-upgrade/browser-mentor",
+      "status": "PASS",
+      "scope": "19 canonical pilot scenarios, exact DOM order, replay/seek/end/cleanup, unchanged notes/checklists, account-scoped refresh focus and blocked session storage.",
+      "logSha256": "cdc57dd9cdb7cfa030913ee8598428a55453741effbbd741557cdefc7ee363a3",
+      "tests": 19,
+      "pass": 19
+    },
+    {
+      "command": "node tests/browser/video-preview.cjs http://127.0.0.1:8213/watercolor-coach-ai /tmp/visual-video-upgrade/browser-library",
+      "status": "PASS",
+      "scope": "All 17 candidates, 22 library/owner-mode/default-window/caption/error/lifecycle scenarios.",
+      "logSha256": "b1bb7ae5db15ea1c6a8db74f68c613ed1553ade40d28a80de35b145da92e4b45",
+      "tests": 22,
+      "pass": 22
+    },
+    {
+      "command": "node tests/browser/visual-video-learning.cjs http://127.0.0.1:8216/watercolor-coach-ai /tmp/visual-video-upgrade/browser-upgrade",
+      "status": "PASS",
+      "scope": "All 32 units/26 decoded raster views, five introductions, home project and 17 poster placements; 12 exact existing preview cues, one Watch, written fallback, image retry, original checklists, seven widths, high density, enlarged text.",
+      "logSha256": "9c0b01a8a9bc0c5b69555a96e330e7bdb9fa6ce12f728410bf5685261ed70ee7",
+      "scenarios": 7,
+      "units": 32,
+      "decodedViews": 26,
+      "previewReferences": 12
+    },
+    {
+      "command": "node scripts/export-video-fixture.cjs /tmp/visual-video-upgrade/approved-dist",
+      "status": "PASS",
+      "scope": "Isolated synthetic approved-media export; QA exception exists only in temporary copied workspace, never the ordinary production catalogue.",
+      "logSha256": "646e36d69a3f41f5026f3c4d8c3cca159b632a26873f47f2f7be713ca34dbca5"
+    },
+    {
+      "command": "node tests/browser/learning-video.cjs http://127.0.0.1:8215/watercolor-coach-ai /tmp/visual-video-upgrade/browser-approved",
+      "status": "PASS",
+      "scope": "Original official controller contract: seven widths and minimum 200x200, captions, approved segments, absolute boundaries, replay/end/seek, original link, return, restrictions, failure/retry and route cleanup. Also tests approved-step priority and transition to a provisional-only step.",
+      "logSha256": "99ea22c92fb2aa254a79757df8a75ca10bb9820f5a5795233136cf3dc7f948a0",
+      "realPlayback": false
+    },
+    {
+      "command": "node tests/browser/professional-workspace.cjs http://127.0.0.1:8213/watercolor-coach-ai /tmp/visual-video-upgrade/browser-assessment",
+      "status": "PASS",
+      "scope": "Existing assessment/auth/saved artwork/read-only geometry, preparation, upload/error/retry and depth/freeze/semantic regression matrices. Synthetic server responses; no paid model.",
+      "logSha256": "b6a764ac3487aa63c53c8aabb53b423bd72cd92db24ae95fb425ef70328c28a5"
+    },
+    {
+      "command": "node tests/browser/artwork-preparation.cjs http://127.0.0.1:8213/watercolor-coach-ai /tmp/visual-video-upgrade/browser-artwork",
+      "status": "PASS",
+      "scope": "40 established image preparation browser checks; native physical device unverified.",
+      "logSha256": "865f1190cdd326efd699928d83669849c0a768b0ac75aa4b938387f82c842ec1",
+      "cases": 40
+    },
+    {
+      "command": "node scripts/test-local-database.cjs",
+      "status": "PASS",
+      "scope": "Real isolated cached PostgreSQL16, network none. Schema rerun, RLS/storage ownership, server RPCs, quota/idempotency/rollback and concurrent claims. No production DB.",
+      "logSha256": "4605a17113dfa80e4e13f60616ef4b96b03f4d2d9181bbbfe346820094a9cf02"
+    },
+    {
+      "command": "node scripts/validate-learning-media.cjs",
+      "status": "PASS",
+      "scope": "Approved media publication validator; zero approved resources; editorial completeness correctly BLOCKED_NO_VERIFIED_CONTENT",
+      "logSha256": "387801b464c8afac16602b146505b1293fdbb43544dc389b3bb08c57723b6fd0"
+    },
+    {
+      "command": "node scripts/validate-video-preview.cjs",
+      "status": "PASS",
+      "scope": "17 candidates, four owner screenings, 18 timing proposals; no publication approval",
+      "logSha256": "d284fe18e12587e0a5605964d76e439d90cd50152dba5a338478fb5b73b2b4b4"
+    },
+    {
+      "command": "node scripts/validate-instruction.cjs",
+      "status": "PASS",
+      "scope": "Original pilot contract remains 10 units/8 diagnoses/5 references",
+      "logSha256": "c926f1624749b3748c22e29b6f23840169bc97bef496dfd39bfcad50ac5c48e3"
+    },
+    {
+      "command": "node scripts/validate-learning-upgrade.cjs --write",
+      "status": "PASS",
+      "scope": "Composite course/asset validator, 32 units/27 steps/17 diagnostics/12 references/22 sources/26 views",
+      "logSha256": "0f19d19f0bd6fc613faa8a9e1857472db7e14bcea4578e1359034a9a568ca834"
+    },
+    {
+      "command": "node scripts/audit-instruction-bundle.cjs /tmp/visual-video-upgrade/final-dist",
+      "status": "PASS",
+      "scope": "17 video IDs present; private/raw screening and synthetic approval fixture markers absent from ordinary export",
+      "logSha256": "c0140a29e17dffdc43fee3a65e15df3785f393f00e67e4e0fd3a8f8edeeb1282"
+    },
+    {
+      "command": "node -e 'const p=require(\"./scripts/benchmark/production.cjs\");p.verifyProductionFiles(p.lockedProduction().identity)'",
+      "status": "PASS",
+      "scope": "Locked production provider/source contract unchanged",
+      "logSha256": "afa1c71d0f98c78e065d6823097b4ce1d99eef634e6663f65ed808fe893f6738"
+    },
+    {
+      "command": "git diff --exit-code origin/main -- learning/progress.ts learning/types.ts providers lib shared supabase learning/media.ts learning/videoPreviewCatalogue.ts learning/videoLearning.ts docs/video package.json package-lock.json .github",
+      "status": "PASS",
+      "scope": "No changes to progress/auth/assessment/backend/public media evidence/dependencies/release workflows",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "node tests/browser/capture-visual-video-learning.cjs http://127.0.0.1:8216/watercolor-coach-ai /tmp/visual-video-upgrade/after",
+      "status": "PASS",
+      "scope": "58 actual exported-app viewport captures at 390 and 1440, synthetic player labelled; zero runtime errors/unexpected requests.",
+      "logSha256": "83ce95c6ed9cd3906b75a51e052acad4a25778308b64f8ca9920bec022c70ff0",
+      "captures": 58
+    }
+  ],
+  "artwork": {
+    "originalSources": 22,
+    "responsiveFiles": 44,
+    "views": 26,
+    "primaryPlacements": 59,
+    "replacedPlacements": 52,
+    "addedPlacements": 7,
+    "retainedTechnicalAids": 5,
+    "totalLogicalPlacementsAudited": 64,
+    "definition": "Counts are distinct teaching-unit, introduction, style-family, project-home and selected-video poster placements; not page render counts or unique PNGs.",
+    "webpBytes": 5226328,
+    "method": "image_gen.imagegen; own generated references only; Pillow resize/WebP compression only",
+    "sourceVisualInspection": true,
+    "physicalPaintings": false,
+    "artistApproval": false
+  },
+  "video": {
+    "references": 12,
+    "distinctSources": 5,
+    "researchCandidates": 17,
+    "approvedResources": 0,
+    "newFootageInspected": 0,
+    "realPlaybackAccepted": false,
+    "captionTracksNewlyVerified": 0
+  },
+  "progress": {
+    "schemaChanged": false,
+    "keysChanged": false,
+    "itemVersionsChanged": false,
+    "checklistIdentitiesOrWordingChanged": false,
+    "mandatoryUnitGatesAdded": false,
+    "watchingCompletesPractice": false,
+    "protectedDiffEmpty": true,
+    "explicitStepNavigation": "Keeps existing updatedAt semantics; media/focus interactions alone preserve raw progress."
+  },
+  "browserEvidence": {
+    "learning": {
+      "status": "PASS",
+      "responsiveCases": 35,
+      "firstViewportCases": [
+        {
+          "width": 320,
+          "height": 800,
+          "goalBottom": 439,
+          "navigationHeight": 44
+        },
+        {
+          "width": 375,
+          "height": 900,
+          "goalBottom": 414,
+          "navigationHeight": 44
+        },
+        {
+          "width": 390,
+          "height": 900,
+          "goalBottom": 414,
+          "navigationHeight": 44
+        },
+        {
+          "width": 430,
+          "height": 900,
+          "goalBottom": 394,
+          "navigationHeight": 44
+        },
+        {
+          "width": 375,
+          "height": 600,
+          "goalBottom": 414,
+          "navigationHeight": 44
+        },
+        {
+          "width": 768,
+          "height": 480,
+          "goalBottom": 369,
+          "navigationHeight": 44
+        },
+        {
+          "width": 1024,
+          "height": 768,
+          "goalBottom": 448,
+          "navigationHeight": 44
+        },
+        {
+          "width": 1440,
+          "height": 1000,
+          "goalBottom": 448,
+          "navigationHeight": 44
+        }
+      ],
+      "baselineProgressReplay": true,
+      "textContrastRatios": [
+        10.57,
+        10.57,
+        5.78
+      ],
+      "textEnlargement": "200% user stylesheet; no clipping; controls reachable",
+      "keyboardViewportEmulation": {
+        "width": 390,
+        "height": 480,
+        "physicalKeyboard": false
+      },
+      "matrix": [
+        {
+          "width": 320,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 320,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 320,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 320,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 320,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 375,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 390,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 430,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 768,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1024,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn/styles",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn/path",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn/lesson?id=water-brush",
+          "noOverflow": true,
+          "touchTargets": true
+        },
+        {
+          "width": 1440,
+          "route": "/learn/progress",
+          "noOverflow": true,
+          "touchTargets": true
+        }
+      ],
+      "runtimeErrors": [],
+      "unexpectedNetwork": [],
+      "providerCalls": 0,
+      "uploads": 0,
+      "artworkWrites": 0,
+      "localPersistence": true,
+      "resumeLesson": true,
+      "resumeProject": true,
+      "completionPreserved": true,
+      "storageFailureAndRecovery": true,
+      "keyboardFocus": true,
+      "landscapeViewport": {
+        "width": 768,
+        "height": 390,
+        "status": "PASS"
+      },
+      "highDensityReflowEmulation": {
+        "cssWidth": 720,
+        "cssHeight": 500,
+        "deviceScaleFactor": 2,
+        "status": "PASS",
+        "physicalBrowserZoom": false
+      },
+      "verifiedVideos": 0,
+      "scope": "Synthetic browser interactions, not physical painting or learning-outcome proof",
+      "physicalDevice": false
+    },
+    "mentor": {
+      "source": "actual exported canonical lesson with synthetic auth/API only",
+      "tests": 19,
+      "pass": 19,
+      "matrix": [
+        {
+          "name": "A first-time learner can open and begin the canonical lesson without a saved entry",
+          "status": "PASS"
+        },
+        {
+          "name": "Essential three-control teaching is visible in canonical lesson without media or disclosures",
+          "status": "PASS"
+        },
+        {
+          "name": "Seven widths plus landscape keep essential teaching visible, touch targets and no horizontal overflow",
+          "status": "PASS"
+        },
+        {
+          "name": "Ten authored focuses have essential actions, controlled variables and visible outcomes without changing progress",
+          "status": "PASS"
+        },
+        {
+          "name": "Keyboard next/previous focus lands at the new explanation; back from experiment keeps the same focus",
+          "status": "PASS"
+        },
+        {
+          "name": "Steve broad proposal loads inline in one gesture and retains absolute 47–702 boundaries",
+          "status": "PASS"
+        },
+        {
+          "name": "Returning to practice closes video and focuses the same unit exercise without writes",
+          "status": "PASS"
+        },
+        {
+          "name": "Switching canonical step cleans up; the repeated Steve proposal is not relabelled a short clip",
+          "status": "PASS"
+        },
+        {
+          "name": "Louise start-only reference remains 90s onwards without a fabricated endpoint",
+          "status": "PASS"
+        },
+        {
+          "name": "Two independently referenced Louise chapter hints maintain one active official player",
+          "status": "PASS"
+        },
+        {
+          "name": "Restricted embedding keeps current written exercise, original link and unchanged checklist",
+          "status": "PASS"
+        },
+        {
+          "name": "Expert tip and symptom→cause→check→safe action→stop guide are accessible on mobile",
+          "status": "PASS"
+        },
+        {
+          "name": "Reading and experienced presentation share the complete teaching without inferring competence",
+          "status": "PASS"
+        },
+        {
+          "name": "Leaving lesson disposes playback; refresh and navigation restore the reading focus without altering checks or notes",
+          "status": "PASS"
+        },
+        {
+          "name": "Historical complete record stays complete and preserves its reflection",
+          "status": "PASS"
+        },
+        {
+          "name": "No reflection video or owner QA tools; enlarged text and controls remain reachable",
+          "status": "PASS"
+        },
+        {
+          "name": "A stale saved focus is ignored, and the final practice checklist follows the experiment without a micro-unit gate",
+          "status": "PASS"
+        },
+        {
+          "name": "Another signed-in account never inherits the reading focus or playback intent",
+          "status": "PASS"
+        },
+        {
+          "name": "Blocked session storage preserves in-memory navigation and never blocks the lesson or writes progress",
+          "status": "PASS"
+        }
+      ],
+      "errors": [],
+      "unexpected": [],
+      "realPlayback": false,
+      "newVideoContentInspected": false,
+      "physicalAndroidTested": false
+    },
+    "library": {
+      "source": "Actual configured Expo export, synthetic account/provider only",
+      "date": "2026-11-05T06:11:14.040Z",
+      "tests": 22,
+      "pass": 22,
+      "errors": [],
+      "unexpectedRequests": [],
+      "matrix": [
+        {
+          "name": "All 17 candidates and all three Javid videos remain available with learning titles and levels",
+          "status": "PASS"
+        },
+        {
+          "name": "Library works at seven widths with keyboard-reachable 44px Watch actions and no overflow",
+          "status": "PASS"
+        },
+        {
+          "name": "A single library Watch action loads the selected default, without a redundant Load action",
+          "status": "PASS"
+        },
+        {
+          "name": "Replay and endpoint enforcement use absolute proposed boundaries, never lesson completion",
+          "status": "PASS"
+        },
+        {
+          "name": "Return to practice pauses, removes the frame and focuses the visible physical exercise",
+          "status": "PASS"
+        },
+        {
+          "name": "Deep link, reload and URL watch hints never auto-load; every candidate Watch uses its evidence-based default",
+          "status": "PASS"
+        },
+        {
+          "name": "Watch and owner-mode navigation work by keyboard with accurate disclosure state",
+          "status": "PASS"
+        },
+        {
+          "name": "Mapped lesson step chooses Louise’s relevant chapter rather than unrelated introduction",
+          "status": "PASS"
+        },
+        {
+          "name": "Chapter switching, outside-window seeking and replay restore correct bounds on the same player",
+          "status": "PASS"
+        },
+        {
+          "name": "Owner review is a separate explicit mode; learner view contains no timestamps form, export or caption settings",
+          "status": "PASS"
+        },
+        {
+          "name": "Caption preference requests remain in owner mode and preserve selected boundaries",
+          "status": "PASS"
+        },
+        {
+          "name": "Private review saves and exports explicit observations; never grants approval or leaks account identity",
+          "status": "PASS"
+        },
+        {
+          "name": "Seven responsive player widths meet 200×200, and mobile first viewport exposes Watch with no technical form",
+          "status": "PASS"
+        },
+        {
+          "name": "Short viewport, keyboard focus and enlarged-text reflow retain reachable practice and player actions",
+          "status": "PASS"
+        },
+        {
+          "name": "Topic and experience filters retain all candidates and avoid unrelated step claims",
+          "status": "PASS"
+        },
+        {
+          "name": "Café conflict and Louise start-only stay unverified; unseen content is labelled suggested focus",
+          "status": "PASS"
+        },
+        {
+          "name": "Provider restriction and failed API connection preserve written practice and offer retry or original",
+          "status": "PASS"
+        },
+        {
+          "name": "Continue lesson resumes existing step and checklist, with no learning writes from video playback",
+          "status": "PASS"
+        },
+        {
+          "name": "Route cleanup pauses/destroys the player, and returning to Learn does not start background playback",
+          "status": "PASS"
+        },
+        {
+          "name": "Unknown candidate is not silently substituted and never loads a player",
+          "status": "PASS"
+        },
+        {
+          "name": "Invalid private review data remains untouched outside owner mode; explicit recovery keeps learning",
+          "status": "PASS"
+        },
+        {
+          "name": "Failed owner save is truthful and exportable, with learner progress unchanged",
+          "status": "PASS"
+        }
+      ],
+      "liveYouTubeVerified": false,
+      "physicalDeviceTested": false
+    },
+    "course": {
+      "status": "PASS",
+      "matrix": [
+        {
+          "name": "All 32 units render the correct decoded raster, logical teaching order and original checklist without progress writes",
+          "status": "PASS"
+        },
+        {
+          "name": "Seven widths, landscape and enlarged text reflow around the actual artwork and physical instructions",
+          "status": "PASS"
+        },
+        {
+          "name": "The first concept honestly has no clip but its preview shortcut preserves the canonical route and does not load YouTube",
+          "status": "PASS"
+        },
+        {
+          "name": "All 12 inline proposals cue existing absolute bounds in one Watch; replay and return preserve practice",
+          "status": "PASS"
+        },
+        {
+          "name": "Image failure has a readable retry and complete written fallback; successful retry restores the same study",
+          "status": "PASS"
+        },
+        {
+          "name": "Four independently generated style studies decode and every one of the 26 views is reachable",
+          "status": "PASS"
+        },
+        {
+          "name": "All five introductions, the project home image and all 17 discovery posters render their mapped local studies without loading YouTube",
+          "status": "PASS"
+        }
+      ],
+      "units": 32,
+      "widths": [
+        320,
+        375,
+        390,
+        430,
+        768,
+        1024,
+        1440
+      ],
+      "landscape": [
+        844,
+        390
+      ],
+      "deviceScaleFactor": 3,
+      "enlargedText": "200% user stylesheet",
+      "renderedViews": [
+        "brush-loading",
+        "flat-wash",
+        "brush-contact",
+        "wet-edge",
+        "dilution",
+        "dry-damp",
+        "pool-backrun",
+        "intentional-texture",
+        "value-subject",
+        "value-plan",
+        "value-alternative",
+        "edge-boundaries",
+        "edge-leaves",
+        "structure-painted",
+        "structure-plan",
+        "quiet-landscape-finished",
+        "landscape-value-plan",
+        "landscape-palette",
+        "landscape-sky-detail",
+        "landscape-hill-detail",
+        "landscape-bank-detail",
+        "landscape-edge-detail",
+        "style-atmospheric",
+        "style-urban",
+        "style-botanical",
+        "style-expressive"
+      ],
+      "provisionalReferencesTested": 12,
+      "requests": 24,
+      "errors": [],
+      "unexpected": [],
+      "realYouTubePlayback": false,
+      "physicalAndroidDevice": false,
+      "artisticApproval": false
+    },
+    "approved": {
+      "status": "PASS",
+      "mode": "SYNTHETIC CATALOGUE + MOCKED OFFICIAL API, not live YouTube verification",
+      "matrix": [
+        {
+          "width": 320,
+          "playerWidth": 292,
+          "playerHeight": 200
+        },
+        {
+          "width": 375,
+          "playerWidth": 335,
+          "playerHeight": 200
+        },
+        {
+          "width": 390,
+          "playerWidth": 350,
+          "playerHeight": 200
+        },
+        {
+          "width": 430,
+          "playerWidth": 390,
+          "playerHeight": 219
+        },
+        {
+          "width": 768,
+          "playerWidth": 728,
+          "playerHeight": 410
+        },
+        {
+          "width": 1024,
+          "playerWidth": 780,
+          "playerHeight": 439
+        },
+        {
+          "width": 1440,
+          "playerWidth": 780,
+          "playerHeight": 439
+        }
+      ],
+      "reflow": [
+        {
+          "width": 375,
+          "height": 600,
+          "replayReachable": true
+        },
+        {
+          "width": 844,
+          "height": 390,
+          "replayReachable": true
+        },
+        {
+          "width": 1024,
+          "height": 600,
+          "replayReachable": true
+        },
+        {
+          "width": 390,
+          "height": 480,
+          "replayReachable": true
+        }
+      ],
+      "textEnlargement": "200% user stylesheet; no clipping",
+      "zeroPreConsentRequests": true,
+      "absoluteSegmentBounds": true,
+      "replayRestoresEnd": true,
+      "samePlayerForSegments": true,
+      "previewApprovedSwitchCleanup": true,
+      "defaultCaptionsNotForced": true,
+      "progressUnchanged": true,
+      "cleanup": true,
+      "errors": [],
+      "unexpected": [],
+      "requests": [
+        {
+          "url": "https://www.youtube.com/iframe_api",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8215&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8215&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8215&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8215&cc_load_policy=1&cc_lang_pref=fa",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8215",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8215",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=180&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=300&origin=http%3A%2F%2F127.0.0.1%3A8215",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/alq0YqX86gs?start=47&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=702&origin=http%3A%2F%2F127.0.0.1%3A8215",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8215",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube-nocookie.com/embed/abcDEF123_-?start=30&controls=1&playsinline=1&autoplay=0&enablejsapi=1&hl=en&end=150&origin=http%3A%2F%2F127.0.0.1%3A8215",
+          "method": "GET"
+        },
+        {
+          "url": "https://www.youtube.com/iframe_api",
+          "method": "GET"
+        }
+      ],
+      "realVideosReviewed": 0,
+      "realPlayback": false,
+      "physicalDevice": false
+    }
+  },
+  "unitEditorialReview": [
+    {
+      "unitId": "wb-three-decisions",
+      "lessonId": "water-brush",
+      "stepId": "look",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Make the two load-test strokes above. Beside them, name which control changed and which two you kept similar.",
+      "diagnostics": [
+        "pooling"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "wb-materials",
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Without touching paint to paper yet, rehearse moving from the puddle to the rectangle and back. Reduce the planned rectangle if the reach is awkward; leave the palette in place.",
+      "diagnostics": [
+        "dry-brush"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "wb-load-round",
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Make a row of three similar strokes, reloading before each. Keep the puddle unchanged and repeat the same unloading action.",
+      "diagnostics": [
+        "pooling",
+        "dry-brush",
+        "broken-mark"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "wb-contact",
+      "lessonId": "water-brush",
+      "stepId": "set-up",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Compare the two rows. Change only the amount of hair in contact with the paper; keep the colour and loading sequence unchanged.",
+      "diagnostics": [
+        "broken-mark",
+        "overworked"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "wb-flat-wash",
+      "lessonId": "water-brush",
+      "stepId": "dilution",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Paint one small rectangle using connected passes from the same mixture. On fresh scrap, repeat after adjusting only the load if the first wash pooled.",
+      "diagnostics": [
+        "join-line",
+        "pooling",
+        "backrun",
+        "overworked"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "wb-dilution-test",
+      "lessonId": "water-brush",
+      "stepId": "dilution",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Complete both three-swatch rows. Label the three concentrations in order after they dry, and circle any pair that is too similar to judge confidently.",
+      "diagnostics": [
+        "dry-value",
+        "pooling"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "wb-read-moisture",
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Write down two surface states as the scrap dries and predict how a stroke might spread in each. Keep this patch untouched; use the next dry/damp comparison to test the prediction on fresh areas.",
+      "diagnostics": [
+        "spread",
+        "backrun"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "wb-moisture-pair",
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Complete the dry/damp pair. Describe one observed condition and its boundary, without calling every soft transition a lost edge.",
+      "diagnostics": [
+        "spread",
+        "backrun",
+        "broken-mark"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "wb-diagnose-repeat",
+      "lessonId": "water-brush",
+      "stepId": "moisture",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Write a symptom, a plausible cause, the condition you checked and the single variable for a fresh repeat. Make the repeat only if the surface and materials are ready.",
+      "diagnostics": [
+        "pooling",
+        "dry-brush",
+        "join-line",
+        "spread",
+        "backrun",
+        "overworked",
+        "dry-value",
+        "broken-mark"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "wb-transfer",
+      "lessonId": "water-brush",
+      "stepId": "reflect",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Use the existing reflection field to record a relationship, a condition to repeat, an uncertainty and a small application to your own subject.",
+      "diagnostics": [],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "tv-observe",
+      "lessonId": "three-values",
+      "stepId": "look",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Make three small pencil patches beside your sketch and assign one visible mass to each. Check the order against your subject.",
+      "diagnostics": [
+        "value-hue"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "tv-map",
+      "lessonId": "three-values",
+      "stepId": "map",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Prepare both frames and a three-value key. Compare their major silhouettes before filling either frame.",
+      "diagnostics": [
+        "value-fragmentation"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "tv-first",
+      "lessonId": "three-values",
+      "stepId": "first",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Finish the first three-family plan. Point to its main light, middle and dark at arm's length and name the first point of attention.",
+      "diagnostics": [
+        "value-fragmentation",
+        "value-dark-area"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "tv-compare",
+      "lessonId": "three-values",
+      "stepId": "compare",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Complete the alternative plan and write one sentence connecting the moved accent with an observed change in attention.",
+      "diagnostics": [
+        "value-dark-area"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "tv-transfer",
+      "lessonId": "three-values",
+      "stepId": "reflect",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Use the original reflection controls to name the changed relationship, its effect and one colour application. No video is required for this decision.",
+      "diagnostics": [],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ef-read",
+      "lessonId": "edge-families",
+      "stepId": "look",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Name three intervals in the comparison and choose one edge relationship for your own small shape.",
+      "diagnostics": [
+        "edge-still-visible"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ef-hard",
+      "lessonId": "edge-families",
+      "stepId": "hard",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Paint and leave the baseline shape. Describe one dry boundary interval without claiming every material makes the same edge.",
+      "diagnostics": [
+        "pooling",
+        "broken-mark"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ef-soft",
+      "lessonId": "edge-families",
+      "stepId": "soft",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Compare the dry hard/soft pair and record the actual surface condition you observed. Keep an inconclusive comparison as evidence too.",
+      "diagnostics": [
+        "spread",
+        "backrun"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ef-lost",
+      "lessonId": "edge-families",
+      "stepId": "lost",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Complete a merging pair and a small application. Name the interval that disappeared and the found edge that keeps the form readable.",
+      "diagnostics": [
+        "edge-still-visible",
+        "backrun"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ef-transfer",
+      "lessonId": "edge-families",
+      "stepId": "reflect",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Record one deliberate pairing of found and quieter edges and a physical next-use plan. No video is needed to complete this reflection.",
+      "diagnostics": [],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "os-envelope",
+      "lessonId": "observed-structure",
+      "stepId": "look",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Draw one small outer envelope and mark its main corner. Check one width/height relationship against your subject.",
+      "diagnostics": [
+        "structure-viewpoint"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "os-directions",
+      "lessonId": "observed-structure",
+      "stepId": "first",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Complete the first few-line study and mark one truly related receding pair for the next comparison.",
+      "diagnostics": [
+        "structure-directions"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "os-compare",
+      "lessonId": "observed-structure",
+      "stepId": "compare",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Complete the second study, identify the changed pair and explain one observed or expressive consequence.",
+      "diagnostics": [
+        "structure-viewpoint",
+        "structure-directions"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "os-transfer",
+      "lessonId": "observed-structure",
+      "stepId": "reflect",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Record one changed relationship, one deliberate choice and one next-use check. No video is needed for this reflection.",
+      "diagnostics": [],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ql-intention",
+      "lessonId": "quiet-landscape",
+      "stepId": "intention",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Prepare the small sheet and choose one sentence of intention, one open light and one restrained landing.",
+      "diagnostics": [],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ql-values",
+      "lessonId": "quiet-landscape",
+      "stepId": "values",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Complete the small three-family plan and identify one light shape that the painting must preserve.",
+      "diagnostics": [
+        "value-fragmentation",
+        "value-dark-area"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ql-wash-plan",
+      "lessonId": "quiet-landscape",
+      "stepId": "wash-plan",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Dry-test the pale and middle relationships and rehearse one connected sky pass. Mark the intended drying pause on the plan.",
+      "diagnostics": [
+        "pooling",
+        "dry-brush",
+        "dry-value"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ql-sky",
+      "lessonId": "quiet-landscape",
+      "stepId": "sky",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Paint the small light sky passage and pause. Note the surface condition and whether the planned light remains open.",
+      "diagnostics": [
+        "pooling",
+        "join-line",
+        "backrun",
+        "project-light"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ql-hill",
+      "lessonId": "quiet-landscape",
+      "stepId": "hill",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Place one connected hill using the safe surface option you tested. Record the observed condition and the relationship with the light sky.",
+      "diagnostics": [
+        "project-depth",
+        "overworked",
+        "backrun"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ql-bank",
+      "lessonId": "quiet-landscape",
+      "stepId": "bank",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Paint one connected bank, inspect the relationship dry, and choose whether any texture is needed. Preserve one clearer and one quieter interval.",
+      "diagnostics": [
+        "project-depth",
+        "value-fragmentation",
+        "broken-mark",
+        "project-light"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ql-finish",
+      "lessonId": "quiet-landscape",
+      "stepId": "finish",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Choose to stop or perform one tested adjustment. Record its intended job; a decision to stop is a complete response to this stage.",
+      "diagnostics": [
+        "project-finish",
+        "overworked"
+      ],
+      "editorialApproval": false
+    },
+    {
+      "unitId": "ql-reflect",
+      "lessonId": "quiet-landscape",
+      "stepId": "reflect",
+      "reviewer": "Implementation/editorial self-review; no independent artist approval",
+      "categories": {
+        "technicalAccuracy": "NEEDS HUMAN REVIEW — conditional methods inspected; no physical material test",
+        "physicalSpecificity": "PASS — setup, ordered hand/brush actions and stopping options inspected",
+        "causalExplanation": "PASS — concept/why linked to observable comparison, not a guaranteed outcome",
+        "levelSuitability": "NEEDS HUMAN REVIEW — beginner terms and advanced variation implemented; real learner acceptance pending",
+        "sequence": "PASS — canonical progression and transition inspected",
+        "reproducibility": "NEEDS HUMAN REVIEW — meaningful controls/outcomes present; actual paper/pigment not tested",
+        "diagnosticSafety": "PASS — conditional causes, checks, correction and stop guidance inspected",
+        "materialVariation": "PASS — material caveats and no universal timing/ratios",
+        "accessiblePresentation": "PASS — visible essentials and exported-app keyboard/reflow tested; full assistive-technology acceptance unverified",
+        "videoAlignment": "PASS — original evidence-bound proposals only; exact unseen footage matching remains unverified"
+      },
+      "experiment": "Complete the original reflection with an observed relationship, a condition to repeat and a separate future test.",
+      "diagnostics": [],
+      "editorialApproval": false
+    }
+  ],
+  "diagnosticReview": [
+    {
+      "id": "pooling",
+      "symptom": "A large mobile puddle collects at a stroke’s end",
+      "conditionalCauses": [
+        "More liquid delivered than the small area can hold",
+        "A steep incline or overly wet starting surface"
+      ],
+      "check": "Did a drop hang from the loaded brush? Was there already standing water, or did gravity carry the wash downhill?",
+      "correction": "If everything is still wet and freely flowing, rinse and blot a brush until damp, then touch only the excess pool and lift away. Blot again before repeating. On the next fresh patch, reduce load or inclination, choosing just one change and keeping concentration steady.",
+      "stop": "If the surrounding wash is losing sheen or resisting flow, stop. Let it dry and repeat on fresh scrap instead of dragging the pool through it.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "dry-brush",
+      "symptom": "The brush runs dry before the stroke ends",
+      "conditionalCauses": [
+        "Only the tip was loaded, or the brush reservoir is too small for the area",
+        "Absorbent paper, a sticky mixture or a stroke longer than the current load can supply"
+      ],
+      "check": "Was the belly wetted and loaded, or only the point dipped in paint? Did a continuous beginning become depleted, or did gaps occur from the start?",
+      "correction": "On fresh scrap, first test a properly wetted and loaded belly over the same stroke length. If it still runs out, make a separate shorter-stroke test. A larger suitable brush is another option to test separately.",
+      "stop": "Do not press harder or scrub a drying mark to stretch it. Leave it and restart the comparison.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "join-line",
+      "symptom": "A hard line separates successive wash passes",
+      "conditionalCauses": [
+        "The previous edge dried before the join",
+        "A gap between passes, inconsistent delivery or a change in mixture concentration"
+      ],
+      "check": "Was the advancing edge still freely wet at the join? Did you pause to remix, leave a gap or reload from a different concentration?",
+      "correction": "If a pause let the edge dry, premix enough colour and repeat on a fresh rectangle of the same size. If you still cannot maintain the join, try a smaller area in a separate attempt. Overlap the workable wet edge rather than brushing a drying line.",
+      "stop": "Once the line is setting, let it dry. Repeatedly brushing it may worsen the join or disturb the paper.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "spread",
+      "symptom": "Colour spreads farther than intended",
+      "conditionalCauses": [
+        "Standing surface water or a wetter brush load than expected",
+        "Paper sizing and absorption differ from the comparison sheet"
+      ],
+      "check": "Look across the surface: was it evenly damp or carrying a reflective pool? Was the second load comparable?",
+      "correction": "Leave the current mark. If you observed standing water, compare a fresh evenly damp patch without a pool, using the same mixture and load. If the surface was already evenly damp, test a smaller load separately. Observe the result; spread is material-dependent.",
+      "stop": "Do not chase the spreading pigment with repeated wet strokes. Start a fresh comparison if the surface becomes unevenly dry.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "backrun",
+      "symptom": "A lighter irregular bloom with a darker rim forms in a wash",
+      "conditionalCauses": [
+        "A comparatively wetter addition displaced pigment in a partly drying passage",
+        "A wet edge or nearby pool fed back into it"
+      ],
+      "check": "Was the wash losing sheen before the addition? Was there a wetter pool at the tape or edge?",
+      "correction": "Leave the forming bloom alone. On fresh scrap, repeat with the second mark earlier in a workable wash or with more comparable liquid loads; choose one change per test.",
+      "stop": "Do not scrub or keep adding water to make the bloom disappear. Let the passage dry and judge whether its texture can remain.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "overworked",
+      "symptom": "A passage looks dirty, streaked or physically disturbed",
+      "conditionalCauses": [
+        "Repeated brushing into a setting wash",
+        "Dirty rinse water, many pigment additions or damaged sizing"
+      ],
+      "check": "Was the colour already mixed on the palette, or repeatedly altered on paper? Are fibres lifting or the surface roughening? Is the colour merely neutral, or is the surface physically disturbed?",
+      "correction": "Stop touching the area. Test a clean premixed colour with clean water and fewer passes on fresh paper before deciding on any later painting adjustment.",
+      "stop": "Stop immediately if the sheet abrades or resists the brush. Drying is not a promise that an opaque, stained or damaged passage can be restored.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "dry-value",
+      "symptom": "The dry swatch is unexpectedly lighter or darker",
+      "conditionalCauses": [
+        "Wet and dry appearances were compared",
+        "Concentration, liquid deposit, pigment properties or paper absorption varied"
+      ],
+      "check": "Are both samples dry under similar light? Did you change concentration and load together, or carry extra rinse water into a puddle?",
+      "correction": "Make a labelled fresh pair using the same pigment and comparable loading. Change concentration only; compare after drying before choosing a painting mixture.",
+      "stop": "Do not keep adding colour to a partly drying swatch to chase its expected value. Let it dry and make a new test.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "broken-mark",
+      "symptom": "Unintended gaps interrupt a stroke",
+      "conditionalCauses": [
+        "Textured paper catches only part of the contact",
+        "Insufficient load, fast movement or uneven brush contact"
+      ],
+      "check": "Do gaps follow the paper’s peaks? Is the beginning continuous but the end depleted? Compare a repeat using the same load and a steadier contact on fresh paper of the same type.",
+      "correction": "On fresh scrap adjust one of load, contact or speed. If a smoother passage is needed, reduce the area or test a suitable smoother paper separately.",
+      "stop": "Do not grind the brush into the sheet to fill every gap. Stop if the surface is abrading or the wash is setting.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "value-hue",
+      "symptom": "A colourful object was assigned the darkest family without a tonal comparison",
+      "conditionalCauses": [
+        "Hue intensity was used as a substitute for relative lightness",
+        "The surrounding light changed"
+      ],
+      "check": "Compare the object with its immediate neighbours under the same light. Is it darker, or mainly more saturated?",
+      "correction": "On a fresh tiny plan assign families using neighbouring lightness comparisons, keeping the crop unchanged.",
+      "stop": "Do not darken the physical painting just to make a colour label fit. Re-observe or record uncertainty.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "value-fragmentation",
+      "symptom": "The thumbnail breaks into many unrelated spots",
+      "conditionalCauses": [
+        "Small details were mapped before large groups",
+        "Too many small variations were assigned separate families"
+      ],
+      "check": "At arm's length, can you still point to a main light and a connected middle group?",
+      "correction": "Make a fresh smaller plan with fewer boundaries. Group close variations before restoring any accent.",
+      "stop": "Do not thicken every outline or fill every light gap to rescue the current drawing.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "value-dark-area",
+      "symptom": "The dark group dominates a plan intended to be quiet",
+      "conditionalCauses": [
+        "Dark area expanded while details were added",
+        "Its contrast or isolation is stronger than intended"
+      ],
+      "check": "Did both versions retain comparable dark area and the same crop?",
+      "correction": "If the position test is complete, try a separate smaller-dark-area plan and name that new variable.",
+      "stop": "Do not change area, value and subject position together and attribute the result to one cause.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "edge-still-visible",
+      "symptom": "The supposedly lost contour is still a clear line or pale gap",
+      "conditionalCauses": [
+        "Neighbouring dry values differ",
+        "A white gap or darker setting seam separates the passages"
+      ],
+      "check": "After drying, is there an abrupt or gradual visible transition at the interval you intended to lose?",
+      "correction": "Match values on fresh scrap first, then make a new small pair that meets along one workable interval without a gap.",
+      "stop": "Leave a setting seam alone. Repeated rubbing or late wet additions can damage the surface or create a backrun.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "structure-viewpoint",
+      "symptom": "Proportions disagree each time the subject is checked",
+      "conditionalCauses": [
+        "Head position, reach or reference crop changed",
+        "Different comparison methods were mixed"
+      ],
+      "check": "Are you looking from the same place with the pencil held at a comparable reach? Did the reference crop move?",
+      "correction": "Stabilise the viewpoint and recheck one width/height relationship on fresh light lines.",
+      "stop": "Do not keep stretching the drawing to fit observations from different viewpoints.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "structure-directions",
+      "symptom": "Every diagonal converges convincingly but the building reads oddly",
+      "conditionalCauses": [
+        "Edges from different spatial directions were grouped together",
+        "An assumed horizon or stock box replaced observation"
+      ],
+      "check": "Does each chosen pair really run in the same direction on the subject? A roof slope may not belong with a wall's eave/sill pair.",
+      "correction": "On a fresh few-line study separate the direction groups and re-observe one pair at a time.",
+      "stop": "Do not add windows or force stronger convergence to hide an uncertain main plane.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "project-light",
+      "symptom": "The intended river or sky light has been filled unintentionally",
+      "conditionalCauses": [
+        "Reserved shapes were not planned before the wash",
+        "Small corrective marks gradually consumed the light"
+      ],
+      "check": "Is the passage actually dry, and does the remaining light still serve the intention? Does your pigment lift safely on a separate dry sample?",
+      "correction": "First consider accepting the changed design. If a lifting test on spare paper is safe, treat it as a separate possible method, not a guaranteed restoration of clean paper.",
+      "stop": "Do not scrub a fragile passage to force paper white back. Start a new small study if that light is essential.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "project-depth",
+      "symptom": "Hill and near bank compete without a clear intended relationship",
+      "conditionalCauses": [
+        "Values, edges and saturation were increased together",
+        "Small dark details fragmented the nearer group"
+      ],
+      "check": "Compare the dry masses at arm's length. Which contrast attracts attention, and is that what the plan intended?",
+      "correction": "Make a fresh tiny plan changing only one value or edge relationship. Test any later painting adjustment on scrap before applying it.",
+      "stop": "Do not darken every near edge or wash over the hill while it is setting to enforce a distance formula.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    },
+    {
+      "id": "project-finish",
+      "symptom": "Each finishing mark creates another area that seems to need detail",
+      "conditionalCauses": [
+        "No visual job was assigned to the next mark",
+        "Local inspection replaced the whole-painting intention"
+      ],
+      "check": "Step back: does the landing already read, and are new marks competing with it?",
+      "correction": "Stop the detail pass. On a separate thumbnail test one proposed accent or choose no further mark.",
+      "stop": "Do not add a general dark outline or scrape wet paint to force a resolved appearance.",
+      "review": "PASS for inspected conditional structure/safe next test; physical reproduction NEEDS HUMAN REVIEW"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://developers.google.com/youtube/iframe_api_reference",
+      "http": 200,
+      "bytes": 275841
+    },
+    {
+      "url": "https://developers.google.com/youtube/player_parameters",
+      "http": 200,
+      "bytes": 170788
+    },
+    {
+      "url": "https://developers.google.com/youtube/terms/api-services-terms-of-service",
+      "http": 200,
+      "bytes": 155811
+    },
+    {
+      "url": "https://danielsmith.com/tutorials/extra-fine-watercolors/four-basic-watercolor-washes/",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "url": "https://danielsmith.com/tutorials/watercolor-for-beginners/",
+      "error": "HTTP Error 403: Forbidden"
+    }
+  ],
+  "screenshots": {
+    "before": 44,
+    "after": 58,
+    "index": "docs/review/screenshots/visual-video-learning/README.md",
+    "realVideoFrames": false,
+    "inspection": "Original generated files visually inspected; selected actual exported-app mobile/desktop screenshots inspected for layout, teaching alignment and texture. Every one of 26 views and all 59 primary logical placements rendered/decoded in browser tests. Not independent artist approval."
+  },
+  "limitations": [
+    "No newly inspected YouTube footage or live playback; network diagnostics deliberately not repeated.",
+    "No physical Android, screen-reader or painting/material acceptance; automated accessibility checks are not full WCAG conformance.",
+    "Generated studies illustrate plausible outcomes, not measured causes or real scans; owner artistic signoff remains open.",
+    "Landscape details show the same finished master, not a documented physical progressive sequence.",
+    "Supplied manufacturer pages returned 403 this execution; historical pilot source inspection is distinguished from new retrieval."
+  ],
+  "resolvedValidationIssues": [
+    "Old sidebar-specific layout assertions updated to the intended concept/painting/inline-flow hierarchy, retaining ordering/overlap checks.",
+    "Chapter-switch browser assertion now waits for the new absolute cue and settles scrolling before clicking; unchanged single-player and disposal assertions.",
+    "Original-link assertions scoped to the active chapter because multiple legitimate chapter cards have source links.",
+    "Approved fixture preserves its selected segment without the removed panel remount; tests target the current card and current experiment.",
+    "Explicit canonical step navigation legitimately updates existing timestamps; all other progress fields compare exactly and video-only interactions compare raw records.",
+    "Deno default CA/cache errors resolved with system certificate trust and a writable temporary cache, never by disabling TLS."
+  ],
+  "release": {
+    "merged": false,
+    "deployed": false,
+    "requiresOwnerApproval": true
+  },
+  "changedFileInventory": [
+    "app/(tabs)/learn/index.tsx",
+    "app/(tabs)/learn/lesson.tsx",
+    "assets/learning/brush-contact-1440.webp",
+    "assets/learning/brush-contact-720.webp",
+    "assets/learning/brush-loading-1440.webp",
+    "assets/learning/brush-loading-720.webp",
+    "assets/learning/dilution-1440.webp",
+    "assets/learning/dilution-720.webp",
+    "assets/learning/dry-damp-1440.webp",
+    "assets/learning/dry-damp-720.webp",
+    "assets/learning/edge-boundaries-1440.webp",
+    "assets/learning/edge-boundaries-720.webp",
+    "assets/learning/edge-leaves-1440.webp",
+    "assets/learning/edge-leaves-720.webp",
+    "assets/learning/flat-wash-1440.webp",
+    "assets/learning/flat-wash-720.webp",
+    "assets/learning/intentional-texture-1440.webp",
+    "assets/learning/intentional-texture-720.webp",
+    "assets/learning/landscape-palette-1440.webp",
+    "assets/learning/landscape-palette-720.webp",
+    "assets/learning/landscape-value-plan-1440.webp",
+    "assets/learning/landscape-value-plan-720.webp",
+    "assets/learning/pool-backrun-1440.webp",
+    "assets/learning/pool-backrun-720.webp",
+    "assets/learning/quiet-landscape-finished-1440.webp",
+    "assets/learning/quiet-landscape-finished-720.webp",
+    "assets/learning/structure-painted-1440.webp",
+    "assets/learning/structure-painted-720.webp",
+    "assets/learning/structure-plan-1440.webp",
+    "assets/learning/structure-plan-720.webp",
+    "assets/learning/style-atmospheric-1440.webp",
+    "assets/learning/style-atmospheric-720.webp",
+    "assets/learning/style-botanical-1440.webp",
+    "assets/learning/style-botanical-720.webp",
+    "assets/learning/style-expressive-1440.webp",
+    "assets/learning/style-expressive-720.webp",
+    "assets/learning/style-urban-1440.webp",
+    "assets/learning/style-urban-720.webp",
+    "assets/learning/value-alternative-1440.webp",
+    "assets/learning/value-alternative-720.webp",
+    "assets/learning/value-plan-1440.webp",
+    "assets/learning/value-plan-720.webp",
+    "assets/learning/value-subject-1440.webp",
+    "assets/learning/value-subject-720.webp",
+    "assets/learning/wet-edge-1440.webp",
+    "assets/learning/wet-edge-720.webp",
+    "components/learning/ArtworkStudy.tsx",
+    "components/learning/ContextualPreview.tsx",
+    "components/learning/InstructionVisual.tsx",
+    "components/learning/InstructionalUnit.tsx",
+    "components/learning/LessonDemonstration.tsx",
+    "components/learning/PreviewVideoPlayer.tsx",
+    "components/learning/StudyVisual.tsx",
+    "components/learning/StyleArtwork.tsx",
+    "components/learning/StylePicker.tsx",
+    "components/learning/VideoPlayPoster.tsx",
+    "components/learning/YouTubeResource.tsx",
+    "docs/review/screenshots/visual-video-learning/README.md",
+    "docs/review/screenshots/visual-video-learning/after/1440-00-learn-home.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-01-curriculum.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-02-water-concept.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-03-brush-loading.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-04-brush-contact.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-05-flat-wash.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-06-moisture.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-07-inline-card.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-08-synthetic-player.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-09-three-values.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-10-edges.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-11-structure.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-12-project-introduction.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-13-landscape-values.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-14-landscape-sky.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-15-landscape-hill.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-16-landscape-bank.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-17-landscape-finish.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-18-troubleshooting.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-19-styles.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-20-botanical.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-21-expressive.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-22-physical-actions.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-23-experiment.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-24-practice-record.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-25-painted-value-subject.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-26-value-alternative.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-27-expert-tip.png",
+    "docs/review/screenshots/visual-video-learning/after/1440-28-edge-comparison.png",
+    "docs/review/screenshots/visual-video-learning/after/390-00-learn-home.png",
+    "docs/review/screenshots/visual-video-learning/after/390-01-curriculum.png",
+    "docs/review/screenshots/visual-video-learning/after/390-02-water-concept.png",
+    "docs/review/screenshots/visual-video-learning/after/390-03-brush-loading.png",
+    "docs/review/screenshots/visual-video-learning/after/390-04-brush-contact.png",
+    "docs/review/screenshots/visual-video-learning/after/390-05-flat-wash.png",
+    "docs/review/screenshots/visual-video-learning/after/390-06-moisture.png",
+    "docs/review/screenshots/visual-video-learning/after/390-07-inline-card.png",
+    "docs/review/screenshots/visual-video-learning/after/390-08-synthetic-player.png",
+    "docs/review/screenshots/visual-video-learning/after/390-09-three-values.png",
+    "docs/review/screenshots/visual-video-learning/after/390-10-edges.png",
+    "docs/review/screenshots/visual-video-learning/after/390-11-structure.png",
+    "docs/review/screenshots/visual-video-learning/after/390-12-project-introduction.png",
+    "docs/review/screenshots/visual-video-learning/after/390-13-landscape-values.png",
+    "docs/review/screenshots/visual-video-learning/after/390-14-landscape-sky.png",
+    "docs/review/screenshots/visual-video-learning/after/390-15-landscape-hill.png",
+    "docs/review/screenshots/visual-video-learning/after/390-16-landscape-bank.png",
+    "docs/review/screenshots/visual-video-learning/after/390-17-landscape-finish.png",
+    "docs/review/screenshots/visual-video-learning/after/390-18-troubleshooting.png",
+    "docs/review/screenshots/visual-video-learning/after/390-19-styles.png",
+    "docs/review/screenshots/visual-video-learning/after/390-20-botanical.png",
+    "docs/review/screenshots/visual-video-learning/after/390-21-expressive.png",
+    "docs/review/screenshots/visual-video-learning/after/390-22-physical-actions.png",
+    "docs/review/screenshots/visual-video-learning/after/390-23-experiment.png",
+    "docs/review/screenshots/visual-video-learning/after/390-24-practice-record.png",
+    "docs/review/screenshots/visual-video-learning/after/390-25-painted-value-subject.png",
+    "docs/review/screenshots/visual-video-learning/after/390-26-value-alternative.png",
+    "docs/review/screenshots/visual-video-learning/after/390-27-expert-tip.png",
+    "docs/review/screenshots/visual-video-learning/after/390-28-edge-comparison.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-00-learn-home.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-01-curriculum.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-02-water-concept.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-03-brush-loading.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-04-brush-contact.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-05-flat-wash.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-06-moisture.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-07-inline-card.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-08-synthetic-player.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-09-three-values.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-10-edges.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-11-structure.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-12-project-introduction.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-13-landscape-values.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-14-landscape-sky.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-15-landscape-hill.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-16-landscape-bank.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-17-landscape-finish.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-18-troubleshooting.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-19-styles.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-20-botanical.png",
+    "docs/review/screenshots/visual-video-learning/before/1440-21-expressive.png",
+    "docs/review/screenshots/visual-video-learning/before/390-00-learn-home.png",
+    "docs/review/screenshots/visual-video-learning/before/390-01-curriculum.png",
+    "docs/review/screenshots/visual-video-learning/before/390-02-water-concept.png",
+    "docs/review/screenshots/visual-video-learning/before/390-03-brush-loading.png",
+    "docs/review/screenshots/visual-video-learning/before/390-04-brush-contact.png",
+    "docs/review/screenshots/visual-video-learning/before/390-05-flat-wash.png",
+    "docs/review/screenshots/visual-video-learning/before/390-06-moisture.png",
+    "docs/review/screenshots/visual-video-learning/before/390-07-inline-card.png",
+    "docs/review/screenshots/visual-video-learning/before/390-08-synthetic-player.png",
+    "docs/review/screenshots/visual-video-learning/before/390-09-three-values.png",
+    "docs/review/screenshots/visual-video-learning/before/390-10-edges.png",
+    "docs/review/screenshots/visual-video-learning/before/390-11-structure.png",
+    "docs/review/screenshots/visual-video-learning/before/390-12-project-introduction.png",
+    "docs/review/screenshots/visual-video-learning/before/390-13-landscape-values.png",
+    "docs/review/screenshots/visual-video-learning/before/390-14-landscape-sky.png",
+    "docs/review/screenshots/visual-video-learning/before/390-15-landscape-hill.png",
+    "docs/review/screenshots/visual-video-learning/before/390-16-landscape-bank.png",
+    "docs/review/screenshots/visual-video-learning/before/390-17-landscape-finish.png",
+    "docs/review/screenshots/visual-video-learning/before/390-18-troubleshooting.png",
+    "docs/review/screenshots/visual-video-learning/before/390-19-styles.png",
+    "docs/review/screenshots/visual-video-learning/before/390-20-botanical.png",
+    "docs/review/screenshots/visual-video-learning/before/390-21-expressive.png",
+    "docs/review/visual-video-learning-crosswalk.json",
+    "docs/review/visual-video-learning-upgrade.md",
+    "docs/review/visual-video-learning-validation.json",
+    "docs/review/watercolour-visual-assets.json",
+    "learning/artwork.ts",
+    "learning/content.ts",
+    "learning/courseInstruction.ts",
+    "learning/instruction.ts",
+    "learning/projectInstruction.ts",
+    "learning/visualGuides.ts",
+    "scripts/validate-learning-upgrade.cjs",
+    "tests/browser/capture-visual-video-learning.cjs",
+    "tests/browser/learning-video.cjs",
+    "tests/browser/learning.cjs",
+    "tests/browser/mentor-instruction.cjs",
+    "tests/browser/visual-video-learning.cjs",
+    "tests/learning.test.cjs",
+    "tests/visual-video-learning.test.cjs"
+  ]
+}

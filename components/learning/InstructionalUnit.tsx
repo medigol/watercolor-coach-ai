@@ -8,6 +8,7 @@ import { Action, Copy, Disclosure, Heading, TextLink, learnStyles } from "./Lear
 import InstructionVisual from "./InstructionVisual";
 import ArtworkStudy from "./ArtworkStudy";
 import ContextualPreview from "./ContextualPreview";
+import LandscapeSequence from "./LandscapeSequence";
 import { artworkForUnit, supportingArtwork } from "../../learning/artwork";
 import { studio } from "./design";
 
@@ -54,6 +55,7 @@ export function InstructionalUnitContent({ unit, group, onSelect, profile, activ
       <View style={{flex:wide?1:undefined,width:wide?undefined:"100%",minWidth:0}}>
         <ArtworkStudy key={unit.id} id={artworkForUnit[unit.id]} eager />
         {supportingArtwork[unit.id]&&<Disclosure title="Compare the related study"><ArtworkStudy id={supportingArtwork[unit.id]} /></Disclosure>}
+        {unit.lessonId==="quiet-landscape"&&["intention","finish"].includes(unit.stepId)&&<Disclosure title="Compare the landscape sequence"><LandscapeSequence /></Disclosure>}
       </View>
     </View>
     <View style={{width:"100%",maxWidth:780,alignSelf:"center",gap:18}}>
