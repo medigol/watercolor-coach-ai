@@ -215,6 +215,7 @@ test("opening the gallery and selecting an existing artwork only reads storage/d
     "react-native": { Text: "Text", ActivityIndicator: "ActivityIndicator" },
     "expo-router": { useFocusEffect(callback) { focusEffect = callback; }, router: { push(route) { routes.push(route); } } },
     "../../components/ArtworkCard": { __esModule: true, default: "ArtworkCard" },
+    "../../components/SavedReferences": { __esModule: true, default: "SavedReferences" },
     "../../components/ui": { Button: "Button", Screen: "Screen", styles: {}, colors: {} },
     "../../lib/supabase": { requireSupabase: () => client },
     "../../lib/artworks": artifacts,

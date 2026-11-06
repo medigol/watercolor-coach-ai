@@ -1,0 +1,304 @@
+{
+  "status": "PASS",
+  "responsiveCases": 35,
+  "firstViewportCases": [
+    {
+      "width": 320,
+      "height": 800,
+      "goalBottom": 439,
+      "navigationHeight": 44
+    },
+    {
+      "width": 375,
+      "height": 900,
+      "goalBottom": 414,
+      "navigationHeight": 44
+    },
+    {
+      "width": 390,
+      "height": 900,
+      "goalBottom": 414,
+      "navigationHeight": 44
+    },
+    {
+      "width": 430,
+      "height": 900,
+      "goalBottom": 394,
+      "navigationHeight": 44
+    },
+    {
+      "width": 375,
+      "height": 600,
+      "goalBottom": 414,
+      "navigationHeight": 44
+    },
+    {
+      "width": 768,
+      "height": 480,
+      "goalBottom": 369,
+      "navigationHeight": 44
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "goalBottom": 448,
+      "navigationHeight": 44
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "goalBottom": 448,
+      "navigationHeight": 44
+    }
+  ],
+  "baselineProgressReplay": true,
+  "textContrastRatios": [
+    10.57,
+    10.57,
+    5.78
+  ],
+  "textEnlargement": "200% user stylesheet; no clipping; controls reachable",
+  "keyboardViewportEmulation": {
+    "width": 390,
+    "height": 480,
+    "physicalKeyboard": false
+  },
+  "matrix": [
+    {
+      "width": 320,
+      "route": "/learn",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 320,
+      "route": "/learn/styles",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 320,
+      "route": "/learn/path",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 320,
+      "route": "/learn/lesson?id=water-brush",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 320,
+      "route": "/learn/progress",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 375,
+      "route": "/learn",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 375,
+      "route": "/learn/styles",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 375,
+      "route": "/learn/path",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 375,
+      "route": "/learn/lesson?id=water-brush",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 375,
+      "route": "/learn/progress",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 390,
+      "route": "/learn",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 390,
+      "route": "/learn/styles",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 390,
+      "route": "/learn/path",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 390,
+      "route": "/learn/lesson?id=water-brush",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 390,
+      "route": "/learn/progress",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 430,
+      "route": "/learn",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 430,
+      "route": "/learn/styles",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 430,
+      "route": "/learn/path",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 430,
+      "route": "/learn/lesson?id=water-brush",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 430,
+      "route": "/learn/progress",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 768,
+      "route": "/learn",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 768,
+      "route": "/learn/styles",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 768,
+      "route": "/learn/path",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 768,
+      "route": "/learn/lesson?id=water-brush",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 768,
+      "route": "/learn/progress",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1024,
+      "route": "/learn",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1024,
+      "route": "/learn/styles",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1024,
+      "route": "/learn/path",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1024,
+      "route": "/learn/lesson?id=water-brush",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1024,
+      "route": "/learn/progress",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1440,
+      "route": "/learn",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1440,
+      "route": "/learn/styles",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1440,
+      "route": "/learn/path",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1440,
+      "route": "/learn/lesson?id=water-brush",
+      "noOverflow": true,
+      "touchTargets": true
+    },
+    {
+      "width": 1440,
+      "route": "/learn/progress",
+      "noOverflow": true,
+      "touchTargets": true
+    }
+  ],
+  "runtimeErrors": [],
+  "unexpectedNetwork": [],
+  "providerCalls": 0,
+  "uploads": 0,
+  "artworkWrites": 0,
+  "localPersistence": true,
+  "resumeLesson": true,
+  "resumeProject": true,
+  "completionPreserved": true,
+  "storageFailureAndRecovery": true,
+  "keyboardFocus": true,
+  "landscapeViewport": {
+    "width": 768,
+    "height": 390,
+    "status": "PASS"
+  },
+  "highDensityReflowEmulation": {
+    "cssWidth": 720,
+    "cssHeight": 500,
+    "deviceScaleFactor": 2,
+    "status": "PASS",
+    "physicalBrowserZoom": false
+  },
+  "verifiedVideos": 0,
+  "scope": "Synthetic browser interactions, not physical painting or learning-outcome proof",
+  "physicalDevice": false
+}

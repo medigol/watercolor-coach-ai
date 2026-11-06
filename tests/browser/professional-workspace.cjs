@@ -409,6 +409,7 @@ let signalFeedbackHeld;
     if (path.endsWith("/user")) return reply(user);
     if (path.endsWith("/logout")) return route.fulfill({ status: 204 });
     if (path.endsWith("/profiles")) return reply({ display_name: "Learner" });
+    if (path.endsWith("/reference_generations")) return reply([]);
     if (path.endsWith("/functions/v1/generate-feedback")) {
       edgeCalls++;
       requests.push(body);
@@ -2122,7 +2123,8 @@ let signalFeedbackHeld;
   assert.equal(used, 2);
   assert.equal(rows.length, 2);
   assert.equal(rpcCalls, 0);
-  await page.goto(base + "/upload/create-reference");
+  // Legacy text-plan contract remains available beside the additive studio.
+  await page.goto(base + "/upload/create-reference?legacy=1");
   const photoChooser = page.waitForEvent("filechooser");
   await button("Choose photo").click();
   await (await photoChooser).setFiles(artifactDir + "/technical-scene.png");

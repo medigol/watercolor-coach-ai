@@ -6,6 +6,7 @@ import { Button, Screen, styles, colors } from "../../components/ui";
 import { requireSupabase } from "../../lib/supabase";
 import { imageUrl, validArtwork, type SavedArtwork } from "../../lib/artworks";
 import { useAuth } from "../../providers/AuthProvider";
+import SavedReferences from '../../components/SavedReferences';
 export default function Artworks() {
   const { session } = useAuth();
   const userId = session?.user.id;
@@ -102,6 +103,7 @@ export default function Artworks() {
           />
         ))
       )}
+      <SavedReferences/>
     </Screen>
   );
 }

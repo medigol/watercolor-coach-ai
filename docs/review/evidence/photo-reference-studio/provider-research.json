@@ -1,0 +1,38 @@
+{
+  "research": [
+    {
+      "url": "https://developers.openai.com/api/docs/guides/image-generation",
+      "responseSha256": "2cd8cfdbead538eae06698164c940cd015632541ffc2df05198b20eb7ebc4a76",
+      "inspected": true,
+      "retrievalDate": "2026-11-06"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/models/gpt-image-2",
+      "responseSha256": "72814f6d2bfc391cbf870dd3ef61ba601caceb952b9c423bd5903c4744079df8",
+      "inspected": true,
+      "retrievalDate": "2026-11-06"
+    },
+    {
+      "url": "https://developers.openai.com/api/reference/resources/images/methods/edit",
+      "responseSha256": "788e4087baa61f260cf47e9daa6f2c54b240151414cb678791c6ff08d90580ce",
+      "inspected": true,
+      "retrievalDate": "2026-11-06"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/pricing",
+      "responseSha256": "effae8ab36594a967a7ffa4aa12120449f08775ab7d6f5fcd3d43d446c6ba6bf",
+      "inspected": true,
+      "retrievalDate": "2026-11-06"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/your-data",
+      "responseSha256": "d764c8350b7147889f7d86701fb967bf35267ae7ad5cfa943aa620f07531e241",
+      "inspected": true,
+      "retrievalDate": "2026-11-06"
+    }
+  ],
+  "model": "gpt-image-2-2026-04-21",
+  "officialCapabilitiesInspected": true,
+  "realGenerationTested": false,
+  "standardPricingUnverified": true
+}

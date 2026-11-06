@@ -243,6 +243,7 @@ function render(
       },
     ).outputText;
     new Function("exports", "require", code)(exports, (name) => {
+      if (name === "expo-router") return { useLocalSearchParams: () => ({}) };
       if (name === "@expo/vector-icons") return { Ionicons: () => null };
       if (
         name === "react" &&
