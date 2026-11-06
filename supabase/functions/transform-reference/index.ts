@@ -15,8 +15,16 @@ import {
 const url = Deno.env.get("SUPABASE_URL"),
   anon = Deno.env.get("SUPABASE_ANON_KEY"),
   service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
-  key = Deno.env.get("REFERENCE_STUDIO_OPENAI_API_KEY");
+  key = Deno.env.get("REFERENCE_STUDIO_OPENAI_API_KEY"),
+  configurationPin = Deno.env.get("REFERENCE_STUDIO_APPROVED_CONFIG_SHA256"),
+  approvedConfigurationSha256 = /^[a-f0-9]{64}$/.test(configurationPin ?? "")
+    ? configurationPin
+    : null,
+  releaseValue = Deno.env.get("REFERENCE_STUDIO_RELEASE_SHA"),
+  release = /^[a-f0-9]{40}$/.test(releaseValue ?? "") ? releaseValue : null;
 const enabled = !!(url && anon && service && key &&
+  release &&
+  /^[a-f0-9]{64}$/.test(approvedConfigurationSha256 ?? "") &&
   Deno.env.get("REFERENCE_STUDIO_ENABLED") === "true" &&
   Deno.env.get("REFERENCE_STUDIO_BUDGET_ACK") === "image-edits-v1");
 const options = {
@@ -67,6 +75,22 @@ async function rpc(
 }
 Deno.serve(studioHandler({
   enabled,
+  environmentPresence: Object.fromEntries([
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "REFERENCE_STUDIO_OPENAI_API_KEY",
+    "REFERENCE_STUDIO_ENABLED",
+    "REFERENCE_STUDIO_BUDGET_ACK",
+    "REFERENCE_STUDIO_APPROVED_CONFIG_SHA256",
+    "REFERENCE_STUDIO_RELEASE_SHA",
+  ].map((name) => [name, !!Deno.env.get(name)])),
+  approvedConfigurationSha256,
+  featureFlagEnabled: Deno.env.get("REFERENCE_STUDIO_ENABLED") === "true",
+  budgetAcknowledged:
+    Deno.env.get("REFERENCE_STUDIO_BUDGET_ACK") === "image-edits-v1",
+  // Public deployment identity, not a credential or model-access claim.
+  release,
   async verify(token) {
     if (!url || !anon) return null;
     const { data, error } = await createClient(url, anon, options).auth.getUser(

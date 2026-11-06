@@ -249,6 +249,50 @@ test("capabilities and status never generate, even with provider configured", as
   assert.equal((await post(h, { action: "status", id })).status, 200);
   assert.equal(h.calls.generate, 0);
 });
+test("capability contract reports a pinned single-image release without claiming provider access", async () => {
+  const h = harness({
+    release: "a".repeat(40),
+    approvedConfigurationSha256: "b".repeat(64),
+  });
+  const r = await (await post(h, { action: "capabilities" })).json();
+  assert.equal(r.ownerId, owner);
+  assert.equal(r.runtime.model, s.referenceModel);
+  assert.equal(r.runtime.images, 1);
+  assert.equal(r.runtime.automaticRetries, false);
+  assert.equal(r.runtime.release, "a".repeat(40));
+  assert.equal(h.calls.claim + h.calls.generate, 0);
+});
+test("approval export is metadata only and configuration drift is rejected before storage or paid calls", async () => {
+  const plan = s.referenceTestPlan(valid);
+  assert.equal(plan.schema, "reference-test-plan/v1");
+  assert(!JSON.stringify(plan).includes("paidConsent"));
+  assert(!JSON.stringify(plan).includes("/source.png"));
+  const approved = await image.imageHash(
+    new TextEncoder().encode(s.canonicalReferenceJson(plan.configuration)),
+  );
+  const h = harness({ approvedConfigurationSha256: approved });
+  const changed = structuredClone(valid);
+  changed.direction.strength = "creative";
+  assert.equal((await post(h, changed)).status, 403);
+  assert.equal(h.calls.download + h.calls.generate, 0);
+  assert.equal((await post(h)).status, 200);
+  assert.equal(h.calls.generate, 1);
+});
+test("submission advice exposes only known safe failure messages", () => {
+  assert.match(
+    s.referenceSubmissionAdvice("preparation_unavailable"),
+    /smaller JPEG or PNG/,
+  );
+  assert.match(
+    s.referenceSubmissionAdvice("configuration_not_approved"),
+    /approved test/,
+  );
+  assert(
+    !s.referenceSubmissionAdvice("private SQL secret token").includes(
+      "private SQL",
+    ),
+  );
+});
 test("oversized request is rejected without parsing or paid calls", async () => {
   const h = harness();
   assert.equal(

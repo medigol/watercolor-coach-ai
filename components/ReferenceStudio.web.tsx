@@ -9,6 +9,7 @@ import {
   intentions,
   isId,
   type PixelSettings,
+  referenceTestPlan,
   referenceVersion,
   type StudioRequest,
   validDirection,
@@ -187,6 +188,32 @@ export default function ReferenceStudio() {
       pathname: "/result/create-reference",
       params: { generation: id },
     });
+  async function prepareSeparateAttempt() {
+    if (!owner || !receipt || busy || running.current) return;
+    const currentReceipt = receipt;
+    setMessage("Checking the previous request before a separate attempt…");
+    try {
+      const previous = await referenceRecord(owner, currentReceipt);
+      if (!alive.current || !focused.current) return;
+      if (previous.status === "pending" || previous.status === "uncertain") {
+        setMessage(
+          "This request is still unresolved. Keep its receipt and check its status. An operator must reconcile it before another image edit.",
+        );
+        return;
+      }
+      setReceipt(undefined);
+      setConsent(false);
+      setMessage(
+        "A separate edit needs a new allowance and fresh paid consent.",
+      );
+    } catch {
+      if (alive.current) {
+        setMessage(
+          "The previous request could not be checked. Its receipt is kept. Check your connection or ask the owner to reconcile it before another edit.",
+        );
+      }
+    }
+  }
   async function generate() {
     if (
       !owner || !photo || !prepared || !consent || !cap.enabled || !storageOK ||
@@ -339,6 +366,46 @@ export default function ReferenceStudio() {
                         downloadBlob(prepared.blob, "prepared-reference.png")}
                     >
                       Export prepared PNG
+                    </button>
+                    <button
+                      disabled={busy}
+                      onClick={async () => {
+                        const identity = (
+                          sha256: string,
+                          width: number,
+                          height: number,
+                          bytes: number,
+                        ) => ({ path: "", sha256, width, height, bytes });
+                        const bytes = new Uint8Array(
+                          await prepared.blob.arrayBuffer(),
+                        );
+                        const plan = referenceTestPlan({
+                          ownerId: owner!,
+                          parentId: parent,
+                          source: identity(
+                            await imageHash(photo.bytes),
+                            photo.header.width,
+                            photo.header.height,
+                            photo.bytes.length,
+                          ),
+                          input: identity(
+                            await imageHash(bytes),
+                            prepared.width,
+                            prepared.height,
+                            bytes.length,
+                          ),
+                          direction,
+                          pixels,
+                        });
+                        downloadBlob(
+                          new Blob([JSON.stringify(plan, null, 2)], {
+                            type: "application/json",
+                          }),
+                          "reference-test-plan.json",
+                        );
+                      }}
+                    >
+                      Export request details for approval
                     </button>
                   </>
                 )
@@ -598,6 +665,14 @@ export default function ReferenceStudio() {
                 must configure the backend and a separate image-edit allowance.
               </p>
             )
+            : cap.remaining === 0
+            ? (
+              <p className="rs-status">
+                No image-edit attempts are available for this account. Local
+                preparation, PNG exports and the text-only plan remain
+                available. Reloading this page will not grant an allowance.
+              </p>
+            )
             : (
               <p>
                 Image-edit attempts available:{" "}
@@ -653,13 +728,7 @@ export default function ReferenceStudio() {
               </button>
               <button
                 disabled={busy}
-                onClick={() => {
-                  setReceipt(undefined);
-                  setConsent(false);
-                  setMessage(
-                    "A new edit uses a new allowance. Unresolved provider requests must be reconciled first.",
-                  );
-                }}
+                onClick={() => void prepareSeparateAttempt()}
               >
                 Prepare a separate attempt
               </button>

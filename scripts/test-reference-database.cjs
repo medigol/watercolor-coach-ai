@@ -120,6 +120,39 @@ function parallel(text) {
       );
     }
     operations.upgrade(sql, legacy);
+    // Execute the exact future staging READ ONLY query against this disposable
+    // database. No hosted identities/credentials or Storage service involved.
+    sql(
+      "alter table auth.users add column is_anonymous boolean default false;",
+    );
+    const snapshotSql = fs.readFileSync(
+      "scripts/reference-staging-snapshot.sql",
+      "utf8",
+    ).replaceAll("__TEST_OWNER__", owner).replaceAll(
+      "__STAGING_REF__",
+      "isolated-fixture-only",
+    );
+    const snapshot = JSON.parse(sql(snapshotSql).stdout);
+    assert.equal(snapshot.operationsVersion, "reference-operations/v1");
+    assert.equal(snapshot.serviceOnlyRPCs, true);
+    assert.equal(snapshot.rlsEnabled, true);
+    assert.equal(snapshot.clientTablesReadOnly, true);
+    assert.equal(snapshot.auditPrivate, true);
+    assert.equal(snapshot.testUserExists, true);
+    const contract = "config/reference-staging-database-contract.json";
+    if (process.env.REFERENCE_TEST_CONTRACT_OUTPUT) {
+      fs.writeFileSync(
+        process.env.REFERENCE_TEST_CONTRACT_OUTPUT,
+        JSON.stringify(snapshot.definitionHashes, null, 2) + "\n",
+      );
+    }
+    if (fs.existsSync(contract)) {
+      assert.deepEqual(
+        snapshot.definitionHashes,
+        JSON.parse(fs.readFileSync(contract)),
+        "Exact migration/RLS definitions match reviewed staging contract",
+      );
+    }
     const result = await Promise.all([
       parallel(claim(r1)),
       parallel(claim(r2)),

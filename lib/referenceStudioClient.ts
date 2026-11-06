@@ -1,6 +1,7 @@
 import { requireSupabase } from "./supabase";
 import {
   type ReferenceRecord,
+  referenceSubmissionAdvice,
   type StudioRequest,
   validReferenceRecord,
   validStudioRequest,
@@ -73,10 +74,32 @@ export async function submitReference(
     data.record.id === r.id
   ) return data.record;
   if (!error && data?.code === "completion_uncertain") return undefined;
+  let publicCode = data?.code;
+  try {
+    if (!publicCode && error?.context instanceof Response) {
+      const reader = error.context.clone().body?.getReader();
+      if (reader) {
+        let text = "", size = 0;
+        try {
+          const decoder = new TextDecoder();
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            size += value.length;
+            if (size > 2048) throw Error();
+            text += decoder.decode(value, { stream: true });
+          }
+          publicCode = JSON.parse(text + decoder.decode()).code;
+        } catch {
+          /* Unknown gateway/provider text is never shown to the learner. */
+        } finally {
+          await reader.cancel().catch(() => {});
+        }
+      }
+    }
+  } catch { /* An unreadable response remains unconfirmed, never retried. */ }
   // Never resubmit on an HTTP error: provider dispatch may already have happened.
-  throw Error(
-    "Generation was not confirmed. Check this request; do not submit another paid edit.",
-  );
+  throw Error(referenceSubmissionAdvice(publicCode));
 }
 export async function referenceRecord(
   owner: string,

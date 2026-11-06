@@ -16,6 +16,8 @@ const model = "gpt-image-2-2026-04-21",
   errors = [],
   matrix = [];
 let enabled = false,
+  remaining = 4,
+  rejectedCode,
   uncertain = false,
   uploadFail = false,
   dispatches = 0,
@@ -105,11 +107,12 @@ const token = (u) =>
       if (p.endsWith("/transform-reference")) {
         const r = req.postDataJSON();
         if (r.action === "capabilities") {
-          return reply({ enabled, remaining: enabled ? 4 : 0 });
+          return reply({ enabled, remaining: enabled ? remaining : 0 });
         }
         assert.equal(r.ownerId, user.id);
         assert.equal(r.paidConsent, true);
         assert(!records.has(r.id));
+        if (rejectedCode) return reply({ code: rejectedCode }, 422);
         dispatches++;
         const record = {
           id: r.id,
@@ -374,6 +377,20 @@ const token = (u) =>
         assert.equal(dispatches, 0);
         assert.equal(objects.size, 0);
         await shot("03-value-study-mobile", 390, "Plan the large values");
+        const planDownload = page.waitForEvent("download");
+        await b("Export request details for approval").click();
+        const plan = JSON.parse(
+          fs.readFileSync(await (await planDownload).path()),
+        );
+        assert.equal(plan.schema, "reference-test-plan/v1");
+        assert.equal(plan.configuration.ownerId, owner);
+        assert.equal(plan.configuration.source.sha256, hash(png(320, 240)));
+        assert.equal(plan.configuration.model, model);
+        assert.equal(plan.configuration.images, 1);
+        assert(!JSON.stringify(plan).includes("paidConsent"));
+        assert.equal(dispatches, 0);
+        await shot("17-request-approval-mobile", 390, "Prepared input");
+        await shot("18-request-approval-desktop", 1440, "Prepared input");
       },
     );
     await scenario(
@@ -502,6 +519,25 @@ const token = (u) =>
         }).waitFor();
         assert.equal(dispatches, 2);
         await shot("10-uncertain-request-mobile");
+        await page.goto(base + "/upload/create-reference");
+        await b("Prepare a separate attempt").click();
+        await page.getByRole("alert").filter({
+          hasText: "This request is still unresolved",
+        }).waitFor();
+        assert.equal(await b("Check saved request").count(), 1);
+        assert.equal(
+          await page.evaluate(
+            (k) => JSON.parse(sessionStorage.getItem(k)).receipt,
+            "watercolor:reference-studio:v1:" + owner,
+          ),
+          r.id,
+        );
+        assert.equal(dispatches, 2);
+        await shot(
+          "14-receipt-retained-mobile",
+          390,
+          "3. Generate one reference",
+        );
       },
     );
     await scenario(
@@ -558,6 +594,63 @@ const token = (u) =>
           ),
         );
         await shot("12-enlarged-text-mobile");
+      },
+    );
+    await scenario(
+      "Zero allowance is explicit and local preparation/export remains available",
+      async () => {
+        remaining = 0;
+        await page.reload();
+        await upload();
+        await page.getByText(
+          "No image-edit attempts are available for this account.",
+          { exact: false },
+        ).waitFor();
+        assert(await b("Generate improved reference").isDisabled());
+        assert(await b("Export prepared PNG").isEnabled());
+        await shot("15-no-allowance-mobile", 390, "3. Generate one reference");
+        assert.equal(dispatches, 2);
+        remaining = 4;
+      },
+    );
+    await scenario(
+      "Preparation rejection is actionable and retains a non-retrying request receipt",
+      async () => {
+        // An explicitly terminal SYNTHETIC record lets this fixture prepare a new
+        // attempt; this is not a hosted reconciliation or a real provider result.
+        const unresolved = [...records.values()][1];
+        unresolved.status = "failed";
+        await page.reload();
+        await upload();
+        await b("Prepare a separate attempt").click();
+        await page.getByRole("checkbox", { name: /I authorise one image-edit/ })
+          .check();
+        rejectedCode = "preparation_unavailable";
+        await b("Generate improved reference").click();
+        await page.getByRole("alert").filter({
+          hasText: "A smaller JPEG or PNG may be needed",
+        }).waitFor();
+        const receipt = await page.evaluate(
+          (k) => JSON.parse(sessionStorage.getItem(k)).receipt,
+          "watercolor:reference-studio:v1:" + owner,
+        );
+        assert(receipt && !records.has(receipt));
+        assert.equal(dispatches, 2);
+        await shot(
+          "16a-smaller-photo-advice-mobile",
+          390,
+          "3. Generate one reference",
+        );
+        await b("Prepare a separate attempt").click();
+        await page.getByRole("alert").filter({ hasText: "Its receipt is kept" })
+          .waitFor();
+        assert.equal(await b("Check saved request").count(), 1);
+        await shot(
+          "16-preparation-rejection-mobile",
+          390,
+          "3. Generate one reference",
+        );
+        rejectedCode = undefined;
       },
     );
     await scenario(

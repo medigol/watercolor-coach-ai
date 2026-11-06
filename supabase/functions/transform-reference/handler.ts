@@ -1,7 +1,10 @@
 import {
+  canonicalReferenceJson,
   isId,
   outputSize,
+  referenceModel,
   type ReferenceRecord,
+  referenceTestPlan,
   sameReferenceRequest,
   type StudioRequest,
   validStudioRequest,
@@ -14,6 +17,11 @@ export type Claim = {
 };
 export interface StudioDependencies {
   enabled: boolean;
+  release?: string | null;
+  approvedConfigurationSha256?: string | null;
+  featureFlagEnabled?: boolean;
+  budgetAcknowledged?: boolean;
+  environmentPresence?: Record<string, boolean>;
   verify(token: string): Promise<StudioUser | null>;
   access(u: StudioUser): Promise<{ enabled: boolean; remaining: number }>;
   existing(u: StudioUser, id: string): Promise<ReferenceRecord | null>;
@@ -94,6 +102,21 @@ export function studioHandler(d: StudioDependencies) {
         return reply({
           enabled: d.enabled && a.enabled,
           remaining: a.remaining,
+          ownerId: u.id,
+          runtime: {
+            contract: "reference-studio/staging-v1",
+            release: d.release ?? null,
+            model: referenceModel,
+            images: 1,
+            quality: "medium",
+            format: "png",
+            configured: d.enabled,
+            featureFlagEnabled: d.featureFlagEnabled ?? false,
+            budgetAcknowledged: d.budgetAcknowledged ?? false,
+            environmentPresence: d.environmentPresence ?? {},
+            automaticRetries: false,
+            approvedConfigurationSha256: d.approvedConfigurationSha256 ?? null,
+          },
           policy:
             "One explicitly requested image; separate attempt allowance. Uncertain attempts remain reserved. No automatic retries.",
         });
@@ -126,6 +149,16 @@ export function studioHandler(d: StudioDependencies) {
           return reply({ code: "request_conflict" }, 409);
         }
         return reply({ record: existing });
+      }
+      if (
+        d.approvedConfigurationSha256 &&
+        await imageHash(
+            new TextEncoder().encode(
+              canonicalReferenceJson(referenceTestPlan(r).configuration),
+            ),
+          ) !== d.approvedConfigurationSha256
+      ) {
+        return reply({ code: "configuration_not_approved" }, 403);
       }
       const access = await d.access(u);
       if (!access.enabled || access.remaining < 1) {

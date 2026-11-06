@@ -1,10 +1,12 @@
 # Photo-to-painting Reference Studio
 
-Verdict: **BLOCKED FOR LIVE GENERATION**. The image-editing integration and application workflow are implemented, but no paid provider request, actual-photo output-fidelity evaluation, staging deployment or production migration was authorised/performed. This is a reviewable engineering implementation, not a validated AI image-generation release. Do not merge or deploy this Draft PR as an enabled generation service.
+Verdict: **CONDITIONALLY READY FOR STAGING TEST**, with live generation still disabled/unapproved. The image-editing integration and application workflow are implemented, but no paid provider request, actual-photo output-fidelity evaluation, staging deployment or production migration was authorised/performed. This is a reviewable engineering implementation, not a validated AI image-generation release. Do not merge or deploy this Draft PR as an enabled generation service.
 
 Baseline fetched from remote main: `5732b2ab8e9b4f5cda06d851791b4349d935400f`. Branch: `codex/photo-to-painting-reference-studio`. Production remains unchanged.
 
-This report now includes the final operational-readiness pass. The original implementation validation remains historical evidence; see [current operations/reconciliation checklist](photo-reference-studio-operations.md), [current validation](photo-reference-studio-operations-validation.json) and [exact four-photo acceptance set](photo-reference-studio-acceptance-set.json).
+This report now includes the final staging-readiness pass from verified head `5f91a56acb5acff0c36b23c931d1d51fc8a9e903`. The staging preflight/artifact tool, approval-only configuration export, server configuration hash binding, clear zero-allowance/decoder advice and unresolved-receipt retention are implemented. A separate real CC0 colour landscape and five independent unfilled review worksheets distinguish Test A (faithful monochrome smoke) from Test B (actual colour/value/product utility). None has run against a real provider.
+
+This report includes the earlier operational-readiness pass. The original implementation validation remains historical evidence; see [current operations/reconciliation checklist](photo-reference-studio-operations.md), [current validation](photo-reference-studio-operations-validation.json) and [exact four-photo acceptance set](photo-reference-studio-acceptance-set.json).
 
 ## Audit and resulting architecture
 
@@ -57,6 +59,7 @@ Server-only requirements:
 | --- | --- |
 | Supabase URL, anon and service role | Existing Edge environment; never frontend service-role access |
 | `REFERENCE_STUDIO_OPENAI_API_KEY` | Dedicated server secret, **no fallback to the critique key**; use an owner-reviewed project/budget |
+| `REFERENCE_STUDIO_RELEASE_SHA` / `REFERENCE_STUDIO_APPROVED_CONFIG_SHA256` | Reviewed deployment commit / exact owner-approved one-image configuration hash; both required before live enablement |
 | `REFERENCE_STUDIO_ENABLED=true` | Explicit feature enablement, default off |
 | `REFERENCE_STUDIO_BUDGET_ACK=image-edits-v1` | Owner/operator acknowledgement of reviewed pricing, funding, retention and the separate attempt policy |
 | `reference_generation_accounts` | Default absent/disabled, limit zero; owner must grant a bounded allowance through privileged administration |

@@ -1,8 +1,8 @@
 # Reference Studio: staging operations and first paid test
 
-Verdict: **BLOCKED FOR LIVE GENERATION**. Operational safeguards and local recovery drills are implemented. Organisation access, current project pricing, a staging destination, transmission permission and a paid budget are still unverified or unauthorised. No hosted migration/deployment, credential configuration or image-generation request was performed in this pass. This document is a future checklist, not deployment authorisation.
+Verdict: **CONDITIONALLY READY FOR STAGING TEST**. Engineering preparation is implemented; actual staging preflight remains **BLOCKED** until the owner supplies the named environment, deployment/read permissions and first-test approvals. No artistic output quality has been verified. Operational safeguards and local recovery drills are implemented. Organisation access, current project pricing, a staging destination, transmission permission and a paid budget are still unverified or unauthorised. No hosted migration/deployment, credential configuration or image-generation request was performed in this pass. This document is a future checklist, not deployment authorisation.
 
-Reviewed starting head: `2c056f3a46249c1011ca41331dc6aa75e0b238b2`, existing Draft [PR #44](https://github.com/medigol/watercolor-coach-ai/pull/44). Production/main: `5732b2ab8e9b4f5cda06d851791b4349d935400f`. The [original implementation report](photo-reference-studio.md), [new validation record](photo-reference-studio-operations-validation.json) and [four-photo acceptance manifest](photo-reference-studio-acceptance-set.json) have separate scopes.
+Initial operational review started at `2c056f3a46249c1011ca41331dc6aa75e0b238b2`; this final staging pass fetched and verified `5f91a56acb5acff0c36b23c931d1d51fc8a9e903`, existing Draft [PR #44](https://github.com/medigol/watercolor-coach-ai/pull/44). Production/main: `5732b2ab8e9b4f5cda06d851791b4349d935400f`. The [original implementation report](photo-reference-studio.md), [new validation record](photo-reference-studio-operations-validation.json) and [four-photo acceptance manifest](photo-reference-studio-acceptance-set.json) have separate scopes.
 
 ## Official pricing recheck, 6 November 2026
 
@@ -98,9 +98,9 @@ Recovery drills in this pass use synthetic storage metadata and generated test P
 - Grant at most **one additional attempted request** to the named staging account, without resetting `attempts_reserved`. For a fresh account this is limit 1. A previously used account requires `attempt_limit = attempts_reserved + 1` (within the schema limit) and fresh approval. No automatic allowance rollover to the other three photos.
 - Rollback: disable feature and account entitlement, drain workers, reconcile/retain unresolved requests, preserve private output/read/export access and audit/counters. Do not drop tables/bucket, delete rows, decrement counters or revert to a pre-gate worker. Any later destructive removal needs separate archival/retention authorisation. No hosted rollback was executed here.
 
-## Exact four-photo artistic acceptance set
+## Photo acceptance set: separate smoke and product-value tests
 
-The [manifest](photo-reference-studio-acceptance-set.json) specifies real public photographs, exact source pages/download derivatives, byte lengths/SHA-256, copyright basis, controls, direction hashes, protected elements, requested edits, unacceptable changes and nine qualitative review questions. The source JPEGs were downloaded only to a temporary local directory, visually inspected and fully decoded with the actual server decoder. **No photo bytes were committed, uploaded to Supabase or sent for generation.** Copyright clearance is documented; owner transmission permission and all paid budgets remain false/null. People need an additional likeness/endorsement review; no model release was obtained.
+The [manifest](photo-reference-studio-acceptance-set.json) preserves the original four real public photographs and adds a separate CC0 colour landscape. It specifies exact source pages/download derivatives, byte lengths/SHA-256, copyright basis, controls, direction hashes, protected elements, requested edits, unacceptable changes and nine qualitative review questions. All five selected JPEGs were downloaded only to a temporary local directory, visually inspected and fully decoded with the actual server decoder. **No photo bytes were committed, uploaded to Supabase or sent for generation.** Copyright clearance is documented; owner transmission permission and all paid budgets remain false/null. People need an additional likeness/endorsement review; no model release was obtained.
 
 | Case | Source and selected input | Protect / request | Unacceptable |
 | --- | --- | --- | --- |
@@ -111,7 +111,7 @@ The [manifest](photo-reference-studio-acceptance-set.json) specifies real public
 
 The landscape already has a strong composition: preserving the original or finding no useful improvement is a valid outcome. These two monochrome cases do not test colour harmony; botanical/people supply colour coverage later. The HABS archival TIFF is not the upload candidate; use the pinned JPEG derivative. A full-resolution landscape JPEG (7.2 MP) passed header bounds but exceeded the 100 MB JPEG decoder budget; the smaller selected copy passed. An earlier rose candidate contained visible artificial ripple distortion and was rejected. These are input findings, **not output-quality findings**.
 
-To reproduce the input preflight after downloading the exact four approved candidates as `landscape.jpg`, `architecture.jpg`, `botanical.jpg`, `people.jpg` outside the repo:
+To reproduce the input preflight after downloading the five proposed candidates as `landscape.jpg`, `architecture.jpg`, `botanical.jpg`, `people.jpg`, `colour-landscape.jpg` outside the repo:
 
 ```sh
 deno run --cached-only --allow-read \
@@ -121,13 +121,13 @@ deno run --cached-only --allow-read \
 
 A changed hash/direction/photo requires renewed owner approval; do not silently substitute a private photo or a different Commons derivative. Source pages and rights should be rechecked before any publication; this set is intended for private educational staging evaluation.
 
-## First one-image sequence and stop conditions
+## First one-image sequence and stop conditions (Test A only)
 
 1. Owner approves only `reference-landscape-01`, its exact JPEG SHA and direction SHA from the manifest, `subtle/simplify`, no crop/rotation/pixel adjustments, one `n=1/medium` edit, an explicit maximum USD budget and transmission to the named OpenAI staging project. A numeric budget has **not** been supplied. Resolve pricing/access before this approval is acted upon.
 2. In the staging preview, sign in as the named account; verify original, prepared input/settings, about 1 MP output (1152 × 912), allowance and explicit paid consent. Select **Generate improved reference once**. Record its UUID privately. No other tab/account/queued category may generate. No automatic retry, variation, second model or fallback is allowed.
 3. If pending/uncertain, stop and follow reconciliation above. A browser error is not permission to click a new attempt. If completed, inspect actual PNG bytes/hash/dimensions, source association, provider request trace and any usage counts, private saved record, read/export/reload and second-account denial. Check the actual provider billing/usage record when available; if attribution is delayed or ambiguous, keep the next test on hold. Do not claim a hypothetical calculator figure is the charge.
 4. Perform the manifest's qualitative review against source and prepared input: fidelity, composition, lights/values, colour, detail/focal hierarchy, geometry/anatomy, unrequested edits, paintability and actual changes. Mark observed evidence and reviewer. Outcome may be useful, preserve-original/no-benefit, reject or hold. Generated does not mean artistically approved. Do not publish source/output or call them real outputs in docs before permission.
-5. Stop after this one request regardless of success. Report actual charge/uncertainty, saved-output recovery and artistic findings. Only then may the owner approve **one** architecture case with its own transmission scope/budget; then botanical independently; then people after likeness review or an explicitly re-approved consented replacement. This is not an automatic four-image test plan.
+5. Stop after this one request regardless of success. Report actual charge/uncertainty, saved-output recovery and artistic findings. Only then may the owner approve **one separate Test B** colour case, with its own transmission scope, configuration hash, budget and window. Architecture/botanical/people remain independent optional tests; people require likeness review or an explicitly re-approved consented replacement. This is not an automatic four-image test plan.
 
 The first-test approval must record these concrete values, rather than merely saying "enable AI": staging Supabase ref and preview URL; test account UUID; OpenAI organisation/project; approved commit; case `reference-landscape-01`; source SHA `da9e2f054a9b2907971245d3d6152366fc6dc4e4b97753fa47ffb19e41956f9d`; direction SHA from the manifest; `gpt-image-2-2026-04-21`, one medium image; resolved pricing basis; maximum USD budget; source-transmission/retention permission; named operator; and the authorisation's time window. If dimensions, bytes, direction or pin change, stop for re-approval. A one-attempt allowance is not a provider-enforced dollar cap.
 
@@ -140,3 +140,94 @@ Output is near 1 MP in 16px increments, not a high-resolution print master or ex
 Physical Android Chrome, actual provider rendering/access/billing, hosted Edge/Storage/RLS and practical watercolour usefulness remain untested. Browser Chromium fixtures verify software mechanics only. Independent artistic signoff remains open.
 
 **Exact remaining owner actions for the first authorised staging edit:** confirm the applicable project price and model/edit access; name/authorise staging infrastructure and the test account; authorise the staged migration/function/preview and dedicated-key configuration (separately from this read-only/local pass); approve the pinned first photo/direction and provider transmission/retention; specify a one-request USD budget and operator; then authorise that single deliberate edit. No production change, additional photo or retry is implied.
+
+
+## Reproducible staging artifacts and preflight
+
+The committed [profile template](../../config/reference-staging.example.json), [preflight tool](../../scripts/reference-staging-preflight.cjs), [read-only SQL](../../scripts/reference-staging-snapshot.sql) and [reviewed database definition fingerprints](../../config/reference-staging-database-contract.json) are the deployment preparation. The default profile contains **null identifiers, false permissions and no budget**. No project/account has been invented or provisioned. Do not put real tokens, passwords or photographs in these tracked files.
+
+`node scripts/reference-staging-preflight.cjs` is offline/read-only by default. It checks the working branch, exact expected commit, clean tree, profile separation, fresh evidence, migration/guard definitions, service-only grants, RLS/private bucket, dedicated Auth user, allowances/global hold, function release/model/configuration and operator approval. Missing evidence is BLOCKED, not a simulated success. Exit 2 means blocked; exit 0 means the supplied evidence passed its stated phase, not that the tool generated anything.
+
+The optional `--collect-read-only <private-output.json>` mode must be explicitly selected and requires a complete owner profile with `stagingReadAuthorised=true`. It uses only `REFERENCE_PREFLIGHT_STAGING_ANON_KEY` and `REFERENCE_PREFLIGHT_STAGING_USER_JWT`, from environment variables. It reads the exact staging `/auth/v1/user`, verifies the named non-anonymous owner, then posts **only** `{action:"capabilities"}` to the exact staging `transform-reference` endpoint. It refuses the production ref, redirects, mismatched accounts and missing permission; it does not retry. It cannot upload photos, invoke generation, read OpenAI, configure secrets or execute SQL. Reports expose environment presence as booleans, never credential values, raw Auth records or provider payloads.
+
+Capabilities now report the pinned runtime contract, public release SHA, one/medium/PNG settings, automatic-retry=false, feature/budget flags and environment **presence**. A release SHA is an operator deployment attestation, not cryptographic proof of a hosted bundle or OpenAI access. Match it with the independently reviewed artifact hashes and platform deployment record. Database fingerprints detect changes to the eight guarded functions, relevant policies and completed-row constraints; they are drift checks, not independent certification. SQL exports are private operator-supplied evidence: verify the actual staging project selection when exporting them. Different PostgreSQL formatting/versions can cause a safe hash mismatch; stop and review the definitions rather than replacing expected hashes automatically.
+
+### Exact future setup, after separate staging authorisation
+
+1. Copy the profile outside the repository. Fill the reviewed PR commit, actual **different** production/staging Supabase refs, HTTPS staging frontend URL on a different host from production Pages, named test-user UUID and isolated OpenAI project/budget declaration. Keep `phase=disabled`, all paid approval fields false/null. Record the owner authorisation for staging deployment and reads. These values are currently missing.
+2. Fetch the existing PR branch and verify that exact clean commit. Prepare a new empty directory outside the repo:
+
+   ```sh
+   node scripts/reference-staging-preflight.cjs --profile /private/staging-profile.json --prepare /private/reference-staging-artifact
+   ```
+
+   The artifact contains only the new function's runtime dependency tree, pinned Deno configuration/lock, migrations 001/002, a **transform-reference-only** Supabase config, source SHA-256 manifest and bound read-only SQL. It contains no image/key/user data and performs no deployment. Missing identifiers or a dirty tree mark the artifact review-only; do not deploy it. The normal production repo's `generate-feedback` source is not included. Do not invoke either production GitHub workflow.
+3. In the explicitly named empty non-production Supabase project, review/setup the baseline schema (no production data copy), then apply artifact migrations **001 followed by 002**. Record their hashes and successful transactions. Do not run an unscoped migration command against a linked production project. Create the named ordinary test user; leave its reference allowance absent or disabled with zero limit/reservations. Do not deploy critique. SQL/RLS preflight is not a hosted Storage HTTP test.
+4. Deploy **only** `transform-reference` from the artifact with an explicit staging ref. Verify Auth gateway/handler behaviour, platform secrets and Edge CPU/memory/wall-clock limits. Configure the non-secret `REFERENCE_STUDIO_RELEASE_SHA` to the reviewed commit. Keep `REFERENCE_STUDIO_ENABLED=false`, budget acknowledgement absent, approved-configuration hash absent and image-generation key absent. The Supabase URL/anon/service-role environment belongs only to this staging function. No paid credentials are needed for this disabled stage.
+5. Build the frontend from the same commit with only the staging public Supabase URL/publishable key and its correct base path; run existing production bundle audits. Publish to the separately approved staging frontend host. Do not use production Pages or production public configuration. Verify the host/configuration manually in the deployed network panel.
+6. In the staging project SQL editor or a verified staging connection, execute the artifact's bound `read-only-snapshot.sql`. It starts a read-only transaction, selects safe schema/permission/account metadata and rolls back. Export the JSON privately; it does not change migrations or allowances. Confirm the selected project really is staging; the embedded ref is a binding assertion, not a remote-connection oracle.
+7. After explicit staging-read authorisation, collect Auth/function evidence and verify disabled preflight:
+
+   ```sh
+   node scripts/reference-staging-preflight.cjs --profile /private/staging-profile.json --collect-read-only /private/function.json
+   node scripts/reference-staging-preflight.cjs --profile /private/staging-profile.json --database /private/database.json --function /private/function.json
+   ```
+
+   Evidence expires after 15 minutes. Expected result is `STAGING DISABLED PREFLIGHT PASS`: private Storage/RLS, migration 002 version/exact definitions, correct Auth owner/release/model, no global hold, flags off and **zero enabled/nonzero allowances**. This does not authorise a paid call or prove organisation access.
+
+### Bind the one approved configuration before enabling anything
+
+The workspace adds **Export request details for approval** beside Export prepared PNG. It writes a real JSON metadata file, without image bytes, credentials, storage paths or paid consent. It records owner, source/prepared identities, parent, exact artistic controls, local pixel settings, pinned model/size/quality/format and `images=1`. Exporting never calls the provider.
+
+Prepare Test A in the staging UI using the manifest's exact direction and pixel settings. Export its prepared PNG and request details, inspect them, and keep them private. Compute the configuration SHA-256 using the tool's canonical JSON algorithm:
+
+```sh
+node -e 'const fs=require("node:fs"),p=JSON.parse(fs.readFileSync(process.argv[1]));console.log(require("./scripts/reference-staging-preflight.cjs").sha(p.configuration))' /private/reference-test-plan.json
+```
+
+The owner must approve that configuration hash **and** its prepared-input hash, source hash, actual project/rate basis, one-attempt USD budget, transmission/retention, operator and window. This approval is not populated from a prompt or inferred from a checkbox. Set `phase=one-test` in the private profile only after those approvals. The model-access confirmation is an owner attestation from the actual project; docs and this preflight cannot prove it. No real model-access request is needed during preparation.
+
+Only after separate authorisation to configure the paid staging service may the operator set the dedicated `REFERENCE_STUDIO_OPENAI_API_KEY`, the approved `REFERENCE_STUDIO_APPROVED_CONFIG_SHA256`, release SHA, feature flag and budget acknowledgement. Grant exactly one additional remaining attempt to the dedicated test account without resetting its consumed counter; keep every other account disabled. Refresh the SQL and capability snapshots and run:
+
+```sh
+node scripts/reference-staging-preflight.cjs --profile /private/staging-profile.json --database /private/database.json --function /private/function.json --plan /private/reference-test-plan.json
+```
+
+The tool checks the approval window/budget/consent/operator, exact proposed photo/direction/configuration, correct runtime configuration pin, one remaining slot and no unresolved hold. Even a PASS **does not dispatch**. The server independently binds the paid request to the canonical configuration hash before any image download/reservation/provider call; changed source/input/owner/settings/model/size cannot silently pass. Request UUID and immutable storage paths remain separate: the browser records a fresh UUID before the single deliberate submit, and the DB enforces its one-use dispatch. Hash binding is not a dollar cap, an upstream idempotency key or a guarantee of fidelity.
+
+Then follow the earlier one-image sequence: explicit paid consent, click once, inspect actual output and private association/export/reload/second-account denial, inspect actual bill when attributable, complete the worksheet, and stop. Do not deliberately break a paid request to test recovery; local fixtures cover that failure drill. Any failure/uncertainty preserves ID, hold and consumed allowance. Disable further generation after the test while reviewing it. Only a new independent approval may enable Test B.
+
+## Test A versus Test B and artistic worksheet
+
+**Test A** remains `reference-landscape-01` with its original SHA, controls and composition. It tests faithful recognition, the API/storage contract and saved recovery. Its monochrome result cannot support a colour-improvement claim.
+
+**Test B**, `reference-colour-landscape-01`, is KoheiU's real CC0 photograph of the river seen from Khe Ran bridge, Vietnam (1477 × 1108; exact source page/bytes/hash in the manifest). The selected source has blue-grey water/sky, green canopy, warmer gravel, receding ridges and fragmented bank/foliage detail. One small red item on lower-left gravel is the only requested object removal; its material is not inferred. The proposal explicitly trims the upper 12% of sky locally, then asks AI to group bank/foliage marks, restrain competing colour, distinguish warmer gravel from cooler water, quiet distant relationships and remove that item while retaining river/skyline/tree geometry and overcast light. The local crop must not be credited as AI work. No thirds, sunset, invented buildings/boats or uniform blur is requested. It may be rejected if the original remains the better reference.
+
+Test B's planned prepared size is 1477 × 975; output 1264 × 832. Its estimated medium output is 1,172 tokens: **$0.03516 output-only** at retrieved $30/M Standard (or $0.01758 at the unconfirmed lower output rate), plus unknown actual input cost. The source metadata states own work/CC0 and no additional restrictions; permission for model transmission remains false. The earlier four case hashes/directions/pixel settings remain unchanged. All five files passed actual local decoding; no image bytes are committed or sent for generation.
+
+Each case now has its own unfilled worksheet with source-specific preservation/request lists and six sections: fidelity; composition; colour; values; paintability; requested-versus-observed. A reviewer must record actual image-region evidence, not copy the request into findings. Every requested edit can be marked CONFIRMED, PARTIALLY_ACHIEVED, UNACHIEVED, UNREQUESTED or UNCERTAIN only after seeing output. Final outcomes include accept-useful, prefer-original/no-benefit, reject-artistic-unsuitability and hold. No composite artistic score or automatic signoff is used.
+
+## Failure-state UX recheck
+
+Unavailable generation and zero allowance explain that local preparation/exports and the old text plan remain usable. File/decoder limits remain bounded; the server-preparation message now explains that a smaller JPEG/PNG may be needed even inside header limits. Only allowlisted public error codes produce specific copy; raw gateway/SQL/provider content is never shown. Pending/uncertain states keep their original receipt and do not resubmit on reload. **Prepare a separate attempt now checks the prior saved state and refuses to clear pending/uncertain or unreadable requests.** The prior export reproduced this receipt-loss gap in the browser; new tests cover the fix. A terminal failed/completed record may be released for a separate explicitly funded request, without refunding a counter.
+
+Unavailable saved images retain status/retry-reading recovery and never use a fake image. Account changes remount the existing Auth-scoped navigation stack; storage keys and reads remain owner-scoped. Physical Android Chrome remains a separate acceptance requirement.
+
+### A browser receipt with no database row
+
+A pre-dispatch upload/decoder rejection can leave a local receipt without a generation row. Do not invent a completed/failed DB record or automatically clear it. The operator must disable/drain workers, verify the exact owner/request has no row and no unresolved provider disposition, inspect any private source uploads, and establish that the current dispatch gate could not have sent this request. A missing row alone, especially with a legacy worker or administrative deletion, is not proof. Keep any other global hold untouched. If uncertainty remains, keep the receipt.
+
+Only after that investigation and explicit operator/owner approval may the user clear **that exact local receipt** in the staging browser, preserving their other settings. For example, privately replace the UUID placeholders below, inspect the stored object, and execute only when its receipt matches:
+
+```js
+const key = 'watercolor:reference-studio:v1:OWNER_UUID';
+const settings = JSON.parse(sessionStorage.getItem(key));
+if (settings?.receipt !== 'INVESTIGATED_REQUEST_UUID') throw Error('Different receipt; stop');
+delete settings.receipt;
+sessionStorage.setItem(key, JSON.stringify(settings));
+location.reload();
+```
+
+This changes only account-scoped browser preparation state; it cannot release a DB hold, refund/reset an allowance or dispatch anything. Preserve the incident ID/evidence privately. A subsequent paid attempt still requires fresh approval and all preflight gates. Unused Storage objects need separately authorised retention cleanup, not automatic deletion during reconciliation.
+
+The one-test profile also requires the owner's verified numerical **Standard** image-input/image-output/text-input rates and `billingUncertaintyAcknowledged=true`. Preflight rejects a budget below the estimated output-only floor. Input cost is still unknown and may raise the total; this floor check does not enforce a total dollar cap. If the owner requires an absolute cap that the actual provider project cannot enforce, do not dispatch. The owner must resolve that restriction before authorising the test.

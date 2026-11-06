@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "studioInActualApp": true,
+  "serverConfigurationAbsent": true,
+  "noBrowserPaidEndpoint": true,
+  "noFixtureBypass": true,
+  "productionMigrationNotAutomatic": true
+}

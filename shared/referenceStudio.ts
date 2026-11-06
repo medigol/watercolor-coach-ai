@@ -264,7 +264,7 @@ export function editPrompt(r: StudioRequest): string {
   }`;
 }
 export function outputSize(
-  r: StudioRequest,
+  r: { input: { width: number; height: number } },
 ): string {
   const { width, height } = r.input, ratio = width / height;
   if (ratio < 1 / 3 || ratio > 3) {
@@ -279,6 +279,66 @@ export function outputSize(
   return `${Math.round(width * scale / 16) * 16}x${
     Math.round(height * scale / 16) * 16
   }`;
+}
+/** Approval-only metadata: no image bytes, storage paths or paid consent. */
+export function referenceTestPlan(
+  r: Pick<
+    StudioRequest,
+    "ownerId" | "parentId" | "source" | "input" | "direction" | "pixels"
+  >,
+) {
+  const identity = (i: ImageIdentity) => ({
+    sha256: i.sha256,
+    width: i.width,
+    height: i.height,
+    bytes: i.bytes,
+  });
+  return {
+    schema: "reference-test-plan/v1",
+    configuration: {
+      ownerId: r.ownerId,
+      parentId: r.parentId,
+      model: referenceModel,
+      images: 1,
+      quality: "medium",
+      format: "png",
+      size: outputSize(r),
+      source: identity(r.source),
+      input: identity(r.input),
+      direction: r.direction,
+      pixels: r.pixels,
+    },
+  };
+}
+export function canonicalReferenceJson(value: unknown): string {
+  const sorted = (v: unknown): unknown =>
+    Array.isArray(v)
+      ? v.map(sorted)
+      : v !== null && typeof v === "object"
+      ? Object.fromEntries(
+        Object.keys(v).sort().map(
+          (k) => [k, sorted((v as Record<string, unknown>)[k])],
+        ),
+      )
+      : v;
+  return JSON.stringify(sorted(value));
+}
+export function referenceSubmissionAdvice(code: unknown): string {
+  switch (code) {
+    case "configuration_not_approved":
+      return "These image or artistic choices do not match the approved test. Keep this request receipt and ask the owner to review the settings. No automatic retry was made.";
+    case "preparation_unavailable":
+      return "The photo or private upload could not be processed. A smaller JPEG or PNG may be needed, even within the size limit. Keep this receipt and check the request before another edit.";
+    case "generation_disabled":
+      return "AI image editing is unavailable. Keep this receipt while the owner checks setup. Local preparation and PNG exports are still available.";
+    case "allowance_unavailable":
+    case "limit":
+      return "No image-edit allowance is available. Keep this receipt; a separate owner-approved allowance is required. Local tools remain available.";
+    case "busy":
+      return "An earlier image edit is still unresolved. Keep this receipt and ask the operator to check the saved requests. Do not start another paid edit.";
+    default:
+      return "Generation was not confirmed. Keep this request receipt and check its status; do not submit another paid edit.";
+  }
 }
 export const statusAdvice: Record<GenerationStatus, string> = {
   pending:

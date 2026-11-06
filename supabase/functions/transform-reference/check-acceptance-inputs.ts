@@ -7,12 +7,18 @@ if (Deno.args.length !== 2) {
   );
 }
 const manifest = JSON.parse(await Deno.readTextFile(Deno.args[0]));
-const categories = ["landscape", "architecture", "botanical", "people"];
+const categories = [
+  "landscape",
+  "architecture",
+  "botanical",
+  "people",
+  "colour-landscape",
+];
 if (
   manifest.schema !== "reference-artistic-acceptance-set/v1" ||
-  !Array.isArray(manifest.cases) || manifest.cases.length !== 4
+  !Array.isArray(manifest.cases) || manifest.cases.length !== 5
 ) {
-  throw Error("Expected four-photo acceptance manifest");
+  throw Error("Expected four original cases and separate colour landscape");
 }
 const sources = [];
 for (const category of categories) {

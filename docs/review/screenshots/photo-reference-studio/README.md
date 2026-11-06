@@ -25,3 +25,18 @@ Representative captures (fixtures, not real AI output):
 ![Mobile comparison](07-comparison-mobile.png)
 
 ![Refinement source provenance](13-refinement-source-mobile.png)
+
+
+## Final staging preparation follow-up
+
+Actual exported Expo app at 390px mobile and 1440px desktop. All source/output images are local deterministic fixtures; there was **no real image-provider request or paid grant**. The displayed allowance 4 is a browser fixture, not the one-attempt staging plan. The old receipt-loss reproduction screenshot comes from the prior configured export; its caption here identifies the fixture even though that failure capture predates the banner injection on that page.
+
+- [Before: unresolved receipt cleared](staging/before-receipt-cleared-fixture.png). The new browser assertion fails against this previous export.
+- [After: unresolved receipt retained](staging/14-receipt-retained-mobile.png). No new generation occurs.
+- [Zero allowance, local tools remain usable](staging/15-no-allowance-mobile.png).
+- [Server preparation rejection suggests a smaller copy](staging/16a-smaller-photo-advice-mobile.png).
+- [Unreadable prior request keeps its receipt](staging/16-preparation-rejection-mobile.png).
+- [Approval-only export, mobile](staging/17-request-approval-mobile.png).
+- [Approval-only export, desktop](staging/18-request-approval-desktop.png).
+
+Inspected text wrapping, touch targets, full button names, readable error/receipt recovery and no horizontal overflow. Browser emulation does not certify physical Android Chrome or actual output fidelity. The proposed real source-photo bytes remain outside the repository and were not sent for generation.

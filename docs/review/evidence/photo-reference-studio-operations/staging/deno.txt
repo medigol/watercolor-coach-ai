@@ -1,0 +1,15 @@
+Check file:///workspace/watercolor-coach-ai/supabase/functions/transform-reference/image_test.ts
+Check file:///workspace/watercolor-coach-ai/supabase/functions/transform-reference/operations_test.ts
+running 6 tests from ./supabase/functions/transform-reference/image_test.ts
+real PNG decoder verifies bytes and dimensions ... ok (10ms)
+real JPEG decoder verifies bytes and dimensions ... ok (56ms)
+malformed/truncated header-valid PNG never passes full decoding ... ok (3ms)
+PNG CRC tampering is rejected ... ok (1ms)
+overlarge dimensions fail before decoder allocation ... ok (1ms)
+truncated JPEG is rejected ... ok (22ms)
+running 3 tests from ./supabase/functions/transform-reference/operations_test.ts
+offline recovery plan fully decodes/hashes existing PNG and emits only bounded RPC parameters ... ok (351ms)
+offline recovery plan refuses malformed image bytes ... ok (371ms)
+offline recovery plan refuses unresolved upstream work ... ok (256ms)
+
+ok | 9 passed | 0 failed (1s)
