@@ -1,0 +1,67 @@
+{
+  "retrievedAtDate": "2026-11-06",
+  "imageProviderRequests": 0,
+  "paidCalls": 0,
+  "organisationAccessVerified": false,
+  "standardRatesRetrieved": {
+    "imageInputPerMillionUSD": 8,
+    "imageOutputPerMillionUSD": 30,
+    "textInputPerMillionUSD": 5
+  },
+  "batchRatesNotApplicableToSynchronousEdits": {
+    "imageInputPerMillionUSD": 4,
+    "imageOutputPerMillionUSD": 15,
+    "textInputPerMillionUSD": 2.5
+  },
+  "organisationPriceUnverified": true,
+  "pinnedModel": "gpt-image-2-2026-04-21",
+  "providerContractChanged": false,
+  "snapshotDocumented": true,
+  "inputTokenEstimateUnknown": true,
+  "retention": "Images edits: not used for training by default; ordinary abuse monitoring up to 30 days with documented exceptions/approval conditions. No zero-retention promise.",
+  "colourSource": "Own-work CC0 by KoheiU, no additional restriction in inspected metadata; transmission consent remains absent.",
+  "sources": [
+    {
+      "url": "https://developers.openai.com/api/docs/pricing.md",
+      "responseSha256": "f1ade44afc62fd8a12dd6e199bcecaa989a94c9b691aa620a34e1504ff62ff57"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/models/gpt-image-2.md",
+      "responseSha256": "8ee0dd5f26541e7f72fe1ed68e2a014a08e2c7f9d8bcf2cbe69fe75a854c1cff"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/image-generation.md",
+      "responseSha256": "52c43f91f992d61b2d7b3557c091771a0cc5cd62ff71972fb86de052d5751f4e"
+    },
+    {
+      "url": "https://developers.openai.com/api/reference/resources/images/methods/edit.md",
+      "responseSha256": "1b6555eb8c4f47226f7143baee7b0e7ee4901892e3b1035f967b63e90510bf75"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/your-data.md",
+      "responseSha256": "16e953514150dd5cbf2c599868ca14253c3b8d78cd7268e950a6f665418565ed"
+    },
+    {
+      "url": "https://openai.com/api/pricing/",
+      "responseSha256": "cde252ec7a17a13d197f36b43a4e5b9eea15df62dd7d1428e8cdaa8bcff34840"
+    },
+    {
+      "url": "https://developers.openai.com/api/reference/overview.md",
+      "responseSha256": "a046d08b9f57f2d8e5e540c2a9ae201b93a6c64647679e81bea0eabe787f58b7"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/images-vision.md",
+      "responseSha256": "8e59a055f7a0491ae9ff5c16f4cd0feed1d54620b0d72ed58856002a3bb85d34"
+    },
+    {
+      "url": "https://commons.wikimedia.org/w/api.php?action=query&prop=revisions&pageids=157223775&rvprop=content&rvslots=main&format=json",
+      "responseSha256": "faaab385a92cae23a7b2ab84479e0b792311f414319fdaa1a5b399dbf581bfbd"
+    }
+  ],
+  "calculatorRechecked": {
+    "url": "https://developers.openai.com/_astro/GptImageTokenCalculator.react.5ILCRlTd.js?dpl=dpl_FNWr5x59AwyJusQM7Ta9UJk2Ebb1",
+    "responseSha256": "634fd80d5d0e6e618d52f7a09ca3174312ad548e4cbb1c5055066dca9c05fd55",
+    "gptImage2MediumCoefficient": 48,
+    "formulaUnchanged": true
+  }
+}

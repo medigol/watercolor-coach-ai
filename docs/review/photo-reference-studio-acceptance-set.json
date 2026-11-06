@@ -1,0 +1,1578 @@
+{
+  "schema": "reference-artistic-acceptance-set/v1",
+  "preparedAt": "2026-11-06",
+  "photosCommitted": false,
+  "privateUserPhotosUsed": false,
+  "providerTransmissions": 0,
+  "imagesGenerated": 0,
+  "automaticSequence": false,
+  "firstCaseId": "reference-landscape-01",
+  "copyrightClearanceDoesNotGrantTransmissionOrLikenessPermission": true,
+  "caseOrder": [
+    "reference-landscape-01",
+    "reference-architecture-01",
+    "reference-botanical-01",
+    "reference-people-01",
+    "reference-colour-landscape-01"
+  ],
+  "cases": [
+    {
+      "category": "landscape",
+      "title": "File:Adams The Tetons and the Snake River.jpg",
+      "pageId": 118192,
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Adams_The_Tetons_and_the_Snake_River.jpg",
+      "selectedInputUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Adams_The_Tetons_and_the_Snake_River.jpg/1920px-Adams_The_Tetons_and_the_Snake_River.jpg",
+      "commonsDerivative": true,
+      "sha256": "da9e2f054a9b2907971245d3d6152366fc6dc4e4b97753fa47ffb19e41956f9d",
+      "bytes": 614519,
+      "sourceWidth": 3000,
+      "sourceHeight": 2402,
+      "selectedWidth": 1920,
+      "selectedHeight": 1537,
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "artist": "Ansel Adams",
+      "credit": "Ansel Adams, The Tetons and the Snake River (1942), NARA 79-AAG-1",
+      "usageTerms": "Public domain",
+      "sentToProvider": false,
+      "ownerTransmissionAuthorised": false,
+      "caseId": "reference-landscape-01",
+      "acceptanceTitle": "Tetons and Snake River: faithful monochrome simplification",
+      "inputVisuallyInspected": true,
+      "inputNature": "Real source photograph/scan; not generated and not a model output",
+      "rights": {
+        "copyrightBasisVerified": true,
+        "basis": "PD-USGov",
+        "sourceMetadataVerified": "2026-11-06",
+        "creditText": "Ansel Adams, The Tetons and the Snake River (1942), NARA 79-AAG-1",
+        "likenessReviewRequired": false,
+        "modelReleaseObtained": false,
+        "ownerTransmissionPermission": false,
+        "permittedTestScopePendingOwnerApproval": "Private educational staging evaluation only; no publication or endorsement",
+        "licenceTemplate": "PD-USGov",
+        "basisEvidenceUrl": "https://www.archives.gov/research/ansel-adams/",
+        "sourceFilePage": "https://commons.wikimedia.org/wiki/File:Adams_The_Tetons_and_the_Snake_River.jpg",
+        "basisExplanation": "US Government work; Commons records Adams as employed by the US Government for this photograph.",
+        "territorialCaveat": "Copyright basis reviewed from source records; owner must confirm its use and jurisdiction before transmission/publication."
+      },
+      "direction": {
+        "goal": "simplify",
+        "strength": "subtle",
+        "preserve": {
+          "subject": true,
+          "geometry": true,
+          "identity": true,
+          "lights": true,
+          "colours": true,
+          "details": "Mountain ridgeline; snow lights; three visible river bends and both banks; nearest fir silhouettes; monochrome values."
+        },
+        "changes": [
+          "background",
+          "secondary-objects"
+        ],
+        "colour": "original",
+        "detail": "large-shapes",
+        "mood": "original",
+        "instruction": "Keep the original monochrome scene and framing. Preserve the mountain ridgeline, snow lights, river bends and nearest fir-tree silhouettes. Group fine foliage into quieter connected tones without moving contours. Do not increase global contrast, invent objects, colourise, or add paper texture. Preserve the existing composition if no change is justified."
+      },
+      "pixels": {
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "rotate": 0,
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0
+      },
+      "preserveRequirements": [
+        "Original viewpoint, framing and horizon",
+        "Mountain/ridgeline geometry and snow lights",
+        "Existing river/bank curves and foreground silhouettes",
+        "Monochrome tonal hierarchy; no invented original colours"
+      ],
+      "requestedChanges": [
+        "Reduce tiny foliage/surface detail within existing masses",
+        "Retain a photographic reference appearance; a minimal/no-change outcome is valid"
+      ],
+      "unacceptableAlterations": [
+        "River or peak moved/re-shaped",
+        "Forests removed rather than simplified within the existing silhouette",
+        "Colourisation, new buildings, paper texture, arbitrary global contrast increase"
+      ],
+      "inputInspectionNotes": "The supplied photograph already has strong composition. Judge whether reduced microtexture helps a broad wash/value plan without weakening that organisation.",
+      "humanReviewRubric": [
+        {
+          "criterion": "source_fidelity",
+          "question": "Can the reviewer match every protected subject/relationship to the actual source?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "composition",
+          "question": "Did framing/shape relationships remain purposeful, without imposed thirds or relocation?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "values_lights",
+          "question": "Are retained lights and large value masses readable without an arbitrary contrast boost?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "colour",
+          "question": "Are colour decisions relevant and restrained; for monochrome, did it remain monochrome?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "detail_focal_hierarchy",
+          "question": "Did permitted simplification help emphasis without merely obscuring or distorting the scene?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "geometry_anatomy",
+          "question": "Are visible proportions, architecture, petals or anatomy coherent?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "unexpected_edits",
+          "question": "Are there any unrequested additions, removals, duplicates, text or texture?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "paintability",
+          "question": "Can a painter plan connected wash shapes, protected lights, edges and selective detail from it?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "actual_changes",
+          "question": "Which requested changes actually happened, rather than merely being requested?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        }
+      ],
+      "allowedOutputDispositions": [
+        "USEFUL_REFERENCE",
+        "PRESERVE_ORIGINAL_NO_CLEAR_BENEFIT",
+        "REJECT_FIDELITY_OR_ARTISTIC_FAILURE",
+        "HOLD_FOR_REVIEW"
+      ],
+      "actualProviderOutput": false,
+      "plannedRequests": 1,
+      "approvedRequests": 0,
+      "paidBudgetUSD": null,
+      "directionSha256": "9b742f11444504bb68ce11e3f3240da6e5e3b60974f8255ac9f17bd5a7b25b52",
+      "expectedPreparedDimensions": {
+        "width": 1536,
+        "height": 1230
+      },
+      "expectedOutputDimensions": {
+        "width": 1152,
+        "height": 912
+      },
+      "conditionalCostExample": {
+        "model": "gpt-image-2-2026-04-21",
+        "quality": "medium",
+        "width": 1152,
+        "height": 912,
+        "estimatedOutputTokens": 1392,
+        "imageInputTokensAssumed": 2000,
+        "textInputTokensAssumed": 800,
+        "developerDocsStandard": {
+          "ratesPerMillion": {
+            "imageInputRate": 8,
+            "imageOutputRate": 30,
+            "textInputRate": 5
+          },
+          "outputOnlyUSD": 0.04176,
+          "totalUSD": 0.06176
+        },
+        "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+          "ratesPerMillion": {
+            "imageInputRate": 4,
+            "imageOutputRate": 15,
+            "textInputRate": 2.5
+          },
+          "outputOnlyUSD": 0.02088,
+          "totalUSD": 0.03088
+        },
+        "pricingConflictUnresolved": true,
+        "actualBill": false,
+        "providerRequests": 0
+      },
+      "sourcePreflight": "Full server JPEG decode and SHA-256 match passed locally; no image-generation transmission.",
+      "independentReviewWorksheet": {
+        "caseId": "reference-landscape-01",
+        "reviewer": null,
+        "providerOutputSha256": null,
+        "status": "NOT_RUN",
+        "protectedSourceChecklist": [
+          "Original viewpoint, framing and horizon",
+          "Mountain/ridgeline geometry and snow lights",
+          "Existing river/bank curves and foreground silhouettes",
+          "Monochrome tonal hierarchy; no invented original colours"
+        ],
+        "sections": [
+          {
+            "category": "A_source_fidelity",
+            "questions": [
+              "Match the main subject, protected geometry and identity against the source/prepared input.",
+              "Check duplicated/missing objects, invented structures/anatomy and perspective drift."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "B_composition",
+            "questions": [
+              "Compare major masses, focal/supporting relationships and useful negative space.",
+              "Identify requested crop/grouping that actually occurred, separating local crop from AI changes.",
+              "Describe original strengths preserved or needlessly lost."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "C_colour",
+            "questions": [
+              "Compare requested colour changes and credible temperature relationships.",
+              "Check supporting colour competition and arbitrary focal oversaturation.",
+              "Decide whether these relationships can usefully be interpreted with physical pigments; monochrome preservation is N/A to colour-improvement claims."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "D_values",
+            "questions": [
+              "Compare readable light/middle/dark groups, reserved lights and intentional contrast.",
+              "Reject automatic global contrast/focal darkening that harms the source intention."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "E_paintability",
+            "questions": [
+              "Can a painter organise manageable connected wash groups, practical edges and selective detail?",
+              "Does the result provide useful artistic choices rather than indiscriminate blur or texture?"
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "F_requested_vs_observed",
+            "questions": [
+              "Inspect each request separately; never copy a prompt into observed findings.",
+              "List confirmed, partial, unachieved, unrequested and uncertain changes, with image-region evidence."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          }
+        ],
+        "changeReview": [
+          {
+            "requested": "Reduce tiny foliage/surface detail within existing masses",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          },
+          {
+            "requested": "Retain a photographic reference appearance; a minimal/no-change outcome is valid",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          }
+        ],
+        "allowedChangeClassifications": [
+          "CONFIRMED",
+          "PARTIALLY_ACHIEVED",
+          "UNACHIEVED",
+          "UNREQUESTED",
+          "UNCERTAIN"
+        ],
+        "unrequestedChanges": [],
+        "technicalValidityDoesNotImplyArtisticAcceptance": true,
+        "finalDisposition": null,
+        "allowedDispositions": [
+          "ACCEPT_USEFUL_REFERENCE",
+          "PREFER_ORIGINAL_NO_BENEFIT",
+          "REJECT_ARTISTICALLY_UNSUITABLE",
+          "HOLD_FOR_REVIEW"
+        ]
+      }
+    },
+    {
+      "category": "architecture",
+      "title": "File:FRONT VIEW. - Sayre-Troy House, Adams and Jefferson Street, Montgomery, Montgomery County, AL HABS ALA,51-MONG,21-1.tif",
+      "pageId": 33679512,
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:FRONT_VIEW._-_Sayre-Troy_House,_Adams_and_Jefferson_Street,_Montgomery,_Montgomery_County,_AL_HABS_ALA,51-MONG,21-1.tif",
+      "selectedInputUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/FRONT_VIEW._-_Sayre-Troy_House%2C_Adams_and_Jefferson_Street%2C_Montgomery%2C_Montgomery_County%2C_AL_HABS_ALA%2C51-MONG%2C21-1.tif/lossy-page1-1920px-FRONT_VIEW._-_Sayre-Troy_House%2C_Adams_and_Jefferson_Street%2C_Montgomery%2C_Montgomery_County%2C_AL_HABS_ALA%2C51-MONG%2C21-1.tif.jpg",
+      "commonsDerivative": true,
+      "sha256": "f0eb3ea412d7068a955e09342a274fc28c92b36a5215fc045040edaaee899894",
+      "bytes": 710737,
+      "sourceWidth": 5000,
+      "sourceHeight": 3575,
+      "selectedWidth": 1920,
+      "selectedHeight": 1373,
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "artist": "W. N. Manning (HABS record title)",
+      "credit": "Historic American Buildings Survey / Library of Congress, HABS ALA,51-MONG,21-1, 16 April 1934",
+      "usageTerms": "Public domain",
+      "sentToProvider": false,
+      "ownerTransmissionAuthorised": false,
+      "caseId": "reference-architecture-01",
+      "acceptanceTitle": "HABS house exterior: conservative structural reference",
+      "inputVisuallyInspected": true,
+      "inputNature": "Real source photograph/scan; not generated and not a model output",
+      "rights": {
+        "copyrightBasisVerified": true,
+        "basis": "PD-USGov-NPS",
+        "sourceMetadataVerified": "2026-11-06",
+        "creditText": "Historic American Buildings Survey / Library of Congress, HABS ALA,51-MONG,21-1, 16 April 1934",
+        "likenessReviewRequired": false,
+        "modelReleaseObtained": false,
+        "ownerTransmissionPermission": false,
+        "permittedTestScopePendingOwnerApproval": "Private educational staging evaluation only; no publication or endorsement",
+        "licenceTemplate": "PD-USGov-NPS",
+        "basisEvidenceUrl": "https://www.loc.gov/pictures/item/al0661.photos.005994p",
+        "sourceFilePage": "https://commons.wikimedia.org/wiki/File:FRONT_VIEW._-_Sayre-Troy_House,_Adams_and_Jefferson_Street,_Montgomery,_Montgomery_County,_AL_HABS_ALA,51-MONG,21-1.tif",
+        "basisExplanation": "HABS record and Commons PD-USGov-NPS template. Photograph credit comes from record title, not its related-name field.",
+        "territorialCaveat": "Copyright basis reviewed from source records; owner must confirm its use and jurisdiction before transmission/publication."
+      },
+      "direction": {
+        "goal": "realism",
+        "strength": "subtle",
+        "preserve": {
+          "subject": true,
+          "geometry": true,
+          "identity": true,
+          "lights": true,
+          "colours": true,
+          "details": "House/roof proportions, all visible openings and columns, porch/steps, tree-trunk positions and the existing occlusions."
+        },
+        "changes": [
+          "background",
+          "secondary-objects"
+        ],
+        "colour": "original",
+        "detail": "reduce-background",
+        "mood": "original",
+        "instruction": "Keep the house proportions, roof planes, visible column/window spacing, porch and steps. Keep the foreground tree trunks in place; do not invent wall or window details behind them. Quiet minor leaves and grass within their current masses. Keep monochrome values and a photographic reference; do not redesign the house or remove its trees."
+      },
+      "pixels": {
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "rotate": 0,
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0
+      },
+      "preserveRequirements": [
+        "Building proportions and receding wall/roof edge families",
+        "Count/spacing of visible columns, openings, shutters and steps",
+        "Foreground trunks and their occlusion of the building",
+        "Monochrome lighting and supporting masses"
+      ],
+      "requestedChanges": [
+        "Simplify small leaf, grass and lattice texture conservatively",
+        "Optional explicit local crop trims scan border only after owner preview"
+      ],
+      "unacceptableAlterations": [
+        "Invented windows/columns, changed perspective or room/roof geometry",
+        "Revealing fabricated architecture behind removed trunks",
+        "New decoration, colourisation or global sharpening"
+      ],
+      "inputInspectionNotes": "The real input includes scan borders/catalogue writing and foreground occlusion. Do not treat invented hidden facade details as a useful improvement.",
+      "humanReviewRubric": [
+        {
+          "criterion": "source_fidelity",
+          "question": "Can the reviewer match every protected subject/relationship to the actual source?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "composition",
+          "question": "Did framing/shape relationships remain purposeful, without imposed thirds or relocation?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "values_lights",
+          "question": "Are retained lights and large value masses readable without an arbitrary contrast boost?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "colour",
+          "question": "Are colour decisions relevant and restrained; for monochrome, did it remain monochrome?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "detail_focal_hierarchy",
+          "question": "Did permitted simplification help emphasis without merely obscuring or distorting the scene?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "geometry_anatomy",
+          "question": "Are visible proportions, architecture, petals or anatomy coherent?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "unexpected_edits",
+          "question": "Are there any unrequested additions, removals, duplicates, text or texture?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "paintability",
+          "question": "Can a painter plan connected wash shapes, protected lights, edges and selective detail from it?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "actual_changes",
+          "question": "Which requested changes actually happened, rather than merely being requested?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        }
+      ],
+      "allowedOutputDispositions": [
+        "USEFUL_REFERENCE",
+        "PRESERVE_ORIGINAL_NO_CLEAR_BENEFIT",
+        "REJECT_FIDELITY_OR_ARTISTIC_FAILURE",
+        "HOLD_FOR_REVIEW"
+      ],
+      "actualProviderOutput": false,
+      "plannedRequests": 1,
+      "approvedRequests": 0,
+      "paidBudgetUSD": null,
+      "directionSha256": "ea4f9ca9e1c7832efa8851625dd9c6c18927fa546d5b636e9ae2648b446550b9",
+      "expectedPreparedDimensions": {
+        "width": 1536,
+        "height": 1098
+      },
+      "expectedOutputDimensions": {
+        "width": 1216,
+        "height": 864
+      },
+      "conditionalCostExample": {
+        "model": "gpt-image-2-2026-04-21",
+        "quality": "medium",
+        "width": 1216,
+        "height": 864,
+        "estimatedOutputTokens": 1245,
+        "imageInputTokensAssumed": 2000,
+        "textInputTokensAssumed": 800,
+        "developerDocsStandard": {
+          "ratesPerMillion": {
+            "imageInputRate": 8,
+            "imageOutputRate": 30,
+            "textInputRate": 5
+          },
+          "outputOnlyUSD": 0.03735,
+          "totalUSD": 0.05735
+        },
+        "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+          "ratesPerMillion": {
+            "imageInputRate": 4,
+            "imageOutputRate": 15,
+            "textInputRate": 2.5
+          },
+          "outputOnlyUSD": 0.018675,
+          "totalUSD": 0.028675
+        },
+        "pricingConflictUnresolved": true,
+        "actualBill": false,
+        "providerRequests": 0
+      },
+      "sourcePreflight": "Full server JPEG decode and SHA-256 match passed locally; no image-generation transmission.",
+      "independentReviewWorksheet": {
+        "caseId": "reference-architecture-01",
+        "reviewer": null,
+        "providerOutputSha256": null,
+        "status": "NOT_RUN",
+        "protectedSourceChecklist": [
+          "Building proportions and receding wall/roof edge families",
+          "Count/spacing of visible columns, openings, shutters and steps",
+          "Foreground trunks and their occlusion of the building",
+          "Monochrome lighting and supporting masses"
+        ],
+        "sections": [
+          {
+            "category": "A_source_fidelity",
+            "questions": [
+              "Match the main subject, protected geometry and identity against the source/prepared input.",
+              "Check duplicated/missing objects, invented structures/anatomy and perspective drift."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "B_composition",
+            "questions": [
+              "Compare major masses, focal/supporting relationships and useful negative space.",
+              "Identify requested crop/grouping that actually occurred, separating local crop from AI changes.",
+              "Describe original strengths preserved or needlessly lost."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "C_colour",
+            "questions": [
+              "Compare requested colour changes and credible temperature relationships.",
+              "Check supporting colour competition and arbitrary focal oversaturation.",
+              "Decide whether these relationships can usefully be interpreted with physical pigments; monochrome preservation is N/A to colour-improvement claims."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "D_values",
+            "questions": [
+              "Compare readable light/middle/dark groups, reserved lights and intentional contrast.",
+              "Reject automatic global contrast/focal darkening that harms the source intention."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "E_paintability",
+            "questions": [
+              "Can a painter organise manageable connected wash groups, practical edges and selective detail?",
+              "Does the result provide useful artistic choices rather than indiscriminate blur or texture?"
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "F_requested_vs_observed",
+            "questions": [
+              "Inspect each request separately; never copy a prompt into observed findings.",
+              "List confirmed, partial, unachieved, unrequested and uncertain changes, with image-region evidence."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          }
+        ],
+        "changeReview": [
+          {
+            "requested": "Simplify small leaf, grass and lattice texture conservatively",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          },
+          {
+            "requested": "Optional explicit local crop trims scan border only after owner preview",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          }
+        ],
+        "allowedChangeClassifications": [
+          "CONFIRMED",
+          "PARTIALLY_ACHIEVED",
+          "UNACHIEVED",
+          "UNREQUESTED",
+          "UNCERTAIN"
+        ],
+        "unrequestedChanges": [],
+        "technicalValidityDoesNotImplyArtisticAcceptance": true,
+        "finalDisposition": null,
+        "allowedDispositions": [
+          "ACCEPT_USEFUL_REFERENCE",
+          "PREFER_ORIGINAL_NO_BENEFIT",
+          "REJECT_ARTISTICALLY_UNSUITABLE",
+          "HOLD_FOR_REVIEW"
+        ]
+      }
+    },
+    {
+      "category": "botanical",
+      "title": "File:Pink Rose flower-.jpg",
+      "pageId": 141170849,
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Pink_Rose_flower-.jpg",
+      "selectedInputUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Pink_Rose_flower-.jpg",
+      "commonsDerivative": false,
+      "sha256": "b71a1e4b3a54cfdcb7f1b357d71dfbc92a358541f3674fc71c47f3fa93a65a7e",
+      "bytes": 76807,
+      "sourceWidth": 1080,
+      "sourceHeight": 1132,
+      "selectedWidth": 1080,
+      "selectedHeight": 1132,
+      "licence": "CC0",
+      "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "artist": "Boopathi Raja123",
+      "credit": "Boopathi Raja123, Pink Rose flower-, 21 November 2023, CC0",
+      "usageTerms": "Creative Commons Zero, Public Domain Dedication",
+      "sentToProvider": false,
+      "ownerTransmissionAuthorised": false,
+      "caseId": "reference-botanical-01",
+      "acceptanceTitle": "Pink rose: quieter supporting colour relationships",
+      "inputVisuallyInspected": true,
+      "inputNature": "Real source photograph/scan; not generated and not a model output",
+      "rights": {
+        "copyrightBasisVerified": true,
+        "basis": "CC0 dedication",
+        "sourceMetadataVerified": "2026-11-06",
+        "creditText": "Boopathi Raja123, Pink Rose flower-, 21 November 2023, CC0",
+        "likenessReviewRequired": false,
+        "modelReleaseObtained": false,
+        "ownerTransmissionPermission": false,
+        "permittedTestScopePendingOwnerApproval": "Private educational staging evaluation only; no publication or endorsement",
+        "licenceTemplate": "self|cc-zero",
+        "basisEvidenceUrl": "https://commons.wikimedia.org/wiki/File:Pink_Rose_flower-.jpg",
+        "sourceFilePage": "https://commons.wikimedia.org/wiki/File:Pink_Rose_flower-.jpg",
+        "basisExplanation": "Uploader states own work and CC0 dedication.",
+        "territorialCaveat": "Copyright basis reviewed from source records; owner must confirm its use and jurisdiction before transmission/publication."
+      },
+      "direction": {
+        "goal": "colour",
+        "strength": "balanced",
+        "preserve": {
+          "subject": true,
+          "geometry": true,
+          "identity": true,
+          "lights": true,
+          "colours": true,
+          "details": "Main rose identity, visible petal arrangement and silhouette; pink hue and highlights; stem and visible leaves."
+        },
+        "changes": [
+          "colour",
+          "background"
+        ],
+        "colour": "restrained",
+        "detail": "reduce-background",
+        "mood": "original",
+        "instruction": "Keep the main pink rose, its petal arrangement, outer silhouette, stem and visible leaves. Retain its pink hue and natural highlights. Quiet the competing magenta/red background blooms and minor background detail without moving them or erasing the main flower. Do not add petals, change the main bloom into another flower, or apply a decorative painted texture."
+      },
+      "pixels": {
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "rotate": 0,
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0
+      },
+      "preserveRequirements": [
+        "Main bloom position, petal-layer relationships and silhouette",
+        "Stem direction and visible leaf geometry",
+        "Main rose pink hue and highlights",
+        "Existing shallow-depth relationships"
+      ],
+      "requestedChanges": [
+        "Reduce supporting background chroma/detail selectively",
+        "Keep the primary rose readable without uniformly increasing contrast"
+      ],
+      "unacceptableAlterations": [
+        "Invented/duplicated petal structures or missing outer petals",
+        "Main bloom hue replaced, stem/leaf anatomy distorted",
+        "All-colour desaturation or blur falsely presented as semantic editing"
+      ],
+      "inputInspectionNotes": "Compare the main rose with the bright blurred blooms above it. A useful result quiets that competition while keeping the primary flower recognisable.",
+      "humanReviewRubric": [
+        {
+          "criterion": "source_fidelity",
+          "question": "Can the reviewer match every protected subject/relationship to the actual source?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "composition",
+          "question": "Did framing/shape relationships remain purposeful, without imposed thirds or relocation?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "values_lights",
+          "question": "Are retained lights and large value masses readable without an arbitrary contrast boost?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "colour",
+          "question": "Are colour decisions relevant and restrained; for monochrome, did it remain monochrome?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "detail_focal_hierarchy",
+          "question": "Did permitted simplification help emphasis without merely obscuring or distorting the scene?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "geometry_anatomy",
+          "question": "Are visible proportions, architecture, petals or anatomy coherent?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "unexpected_edits",
+          "question": "Are there any unrequested additions, removals, duplicates, text or texture?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "paintability",
+          "question": "Can a painter plan connected wash shapes, protected lights, edges and selective detail from it?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "actual_changes",
+          "question": "Which requested changes actually happened, rather than merely being requested?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        }
+      ],
+      "allowedOutputDispositions": [
+        "USEFUL_REFERENCE",
+        "PRESERVE_ORIGINAL_NO_CLEAR_BENEFIT",
+        "REJECT_FIDELITY_OR_ARTISTIC_FAILURE",
+        "HOLD_FOR_REVIEW"
+      ],
+      "actualProviderOutput": false,
+      "plannedRequests": 1,
+      "approvedRequests": 0,
+      "paidBudgetUSD": null,
+      "directionSha256": "65777eacca9d1c0d1682fe8be4235f3b6baa9b90eb6bccaaab888f5954867a03",
+      "expectedPreparedDimensions": {
+        "width": 1080,
+        "height": 1132
+      },
+      "expectedOutputDimensions": {
+        "width": 1008,
+        "height": 1056
+      },
+      "conditionalCostExample": {
+        "model": "gpt-image-2-2026-04-21",
+        "quality": "medium",
+        "width": 1008,
+        "height": 1056,
+        "estimatedOutputTokens": 1692,
+        "imageInputTokensAssumed": 2000,
+        "textInputTokensAssumed": 800,
+        "developerDocsStandard": {
+          "ratesPerMillion": {
+            "imageInputRate": 8,
+            "imageOutputRate": 30,
+            "textInputRate": 5
+          },
+          "outputOnlyUSD": 0.05076,
+          "totalUSD": 0.07076
+        },
+        "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+          "ratesPerMillion": {
+            "imageInputRate": 4,
+            "imageOutputRate": 15,
+            "textInputRate": 2.5
+          },
+          "outputOnlyUSD": 0.02538,
+          "totalUSD": 0.03538
+        },
+        "pricingConflictUnresolved": true,
+        "actualBill": false,
+        "providerRequests": 0
+      },
+      "sourcePreflight": "Full server JPEG decode and SHA-256 match passed locally; no image-generation transmission.",
+      "independentReviewWorksheet": {
+        "caseId": "reference-botanical-01",
+        "reviewer": null,
+        "providerOutputSha256": null,
+        "status": "NOT_RUN",
+        "protectedSourceChecklist": [
+          "Main bloom position, petal-layer relationships and silhouette",
+          "Stem direction and visible leaf geometry",
+          "Main rose pink hue and highlights",
+          "Existing shallow-depth relationships"
+        ],
+        "sections": [
+          {
+            "category": "A_source_fidelity",
+            "questions": [
+              "Match the main subject, protected geometry and identity against the source/prepared input.",
+              "Check duplicated/missing objects, invented structures/anatomy and perspective drift."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "B_composition",
+            "questions": [
+              "Compare major masses, focal/supporting relationships and useful negative space.",
+              "Identify requested crop/grouping that actually occurred, separating local crop from AI changes.",
+              "Describe original strengths preserved or needlessly lost."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "C_colour",
+            "questions": [
+              "Compare requested colour changes and credible temperature relationships.",
+              "Check supporting colour competition and arbitrary focal oversaturation.",
+              "Decide whether these relationships can usefully be interpreted with physical pigments; monochrome preservation is N/A to colour-improvement claims."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "D_values",
+            "questions": [
+              "Compare readable light/middle/dark groups, reserved lights and intentional contrast.",
+              "Reject automatic global contrast/focal darkening that harms the source intention."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "E_paintability",
+            "questions": [
+              "Can a painter organise manageable connected wash groups, practical edges and selective detail?",
+              "Does the result provide useful artistic choices rather than indiscriminate blur or texture?"
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "F_requested_vs_observed",
+            "questions": [
+              "Inspect each request separately; never copy a prompt into observed findings.",
+              "List confirmed, partial, unachieved, unrequested and uncertain changes, with image-region evidence."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          }
+        ],
+        "changeReview": [
+          {
+            "requested": "Reduce supporting background chroma/detail selectively",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          },
+          {
+            "requested": "Keep the primary rose readable without uniformly increasing contrast",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          }
+        ],
+        "allowedChangeClassifications": [
+          "CONFIRMED",
+          "PARTIALLY_ACHIEVED",
+          "UNACHIEVED",
+          "UNREQUESTED",
+          "UNCERTAIN"
+        ],
+        "unrequestedChanges": [],
+        "technicalValidityDoesNotImplyArtisticAcceptance": true,
+        "finalDisposition": null,
+        "allowedDispositions": [
+          "ACCEPT_USEFUL_REFERENCE",
+          "PREFER_ORIGINAL_NO_BENEFIT",
+          "REJECT_ARTISTICALLY_UNSUITABLE",
+          "HOLD_FOR_REVIEW"
+        ]
+      }
+    },
+    {
+      "category": "people",
+      "title": "File:Eileen Collins, early NASA portrait.jpg",
+      "pageId": 380248,
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Eileen_Collins,_early_NASA_portrait.jpg",
+      "selectedInputUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Eileen_Collins%2C_early_NASA_portrait.jpg/1280px-Eileen_Collins%2C_early_NASA_portrait.jpg",
+      "commonsDerivative": true,
+      "sha256": "99987c2702c7b3e35fd84955c5584a131f3f7bd1e6953124fd969c995692defd",
+      "bytes": 391509,
+      "sourceWidth": 2250,
+      "sourceHeight": 2848,
+      "selectedWidth": 1280,
+      "selectedHeight": 1620,
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "artist": "NASA (individual photographer unrecorded)",
+      "credit": "NASA, Eileen Collins, early official portrait; source Chandra illustration library",
+      "usageTerms": "Public domain",
+      "sentToProvider": false,
+      "ownerTransmissionAuthorised": false,
+      "caseId": "reference-people-01",
+      "acceptanceTitle": "NASA portrait: identity-preserving background simplification",
+      "inputVisuallyInspected": true,
+      "inputNature": "Real source photograph/scan; not generated and not a model output",
+      "rights": {
+        "copyrightBasisVerified": true,
+        "basis": "PD-USGov-NASA",
+        "sourceMetadataVerified": "2026-11-06",
+        "creditText": "NASA, Eileen Collins, early official portrait; source Chandra illustration library",
+        "likenessReviewRequired": true,
+        "modelReleaseObtained": false,
+        "ownerTransmissionPermission": false,
+        "permittedTestScopePendingOwnerApproval": "Private educational staging evaluation only; no publication or endorsement",
+        "licenceTemplate": "PD-USGov-NASA",
+        "basisEvidenceUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+        "sourceFilePage": "https://commons.wikimedia.org/wiki/File:Eileen_Collins,_early_NASA_portrait.jpg",
+        "basisExplanation": "Commons PD-USGov-NASA; linked Chandra source credits NASA. Public-domain copyright does not resolve personality/endorsement rights.",
+        "territorialCaveat": "Copyright basis reviewed from source records; owner must confirm its use and jurisdiction before transmission/publication."
+      },
+      "direction": {
+        "goal": "realism",
+        "strength": "subtle",
+        "preserve": {
+          "subject": true,
+          "geometry": true,
+          "identity": true,
+          "lights": true,
+          "colours": true,
+          "details": "Face/expression/age/hair; hands/fingers/rings; suit and patches; flag; table; shuttle model geometry and markings."
+        },
+        "changes": [
+          "background"
+        ],
+        "colour": "original",
+        "detail": "reduce-background",
+        "mood": "original",
+        "instruction": "Keep Eileen Collins recognisable and unchanged: face, expression, age, hair, pose, hands and fingers. Keep the flight suit, insignia/name patch, flag, table and shuttle model in their positions. Only quiet small backdrop/cloth texture. No beautification, facial reshaping, extra fingers, changed lettering or new objects. Do not imply NASA endorsement."
+      },
+      "pixels": {
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "rotate": 0,
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0
+      },
+      "preserveRequirements": [
+        "Recognisable face, expression, hair and apparent age",
+        "Pose, hands/fingers, rings and body proportions",
+        "Suit/insignia/name patch and flag relationships",
+        "Shuttle model geometry, placement, markings and supporting table"
+      ],
+      "requestedChanges": [
+        "Quiet minor backdrop/cloth texture only",
+        "No editing of face, anatomy, text, model geometry or insignia"
+      ],
+      "unacceptableAlterations": [
+        "Identity/age/expression drift or beautification",
+        "Invented/duplicated fingers, limbs, model parts or lettering",
+        "Changed insignia/name patch, endorsement implication, new objects"
+      ],
+      "inputInspectionNotes": "This is a sensitive fidelity test, not a face-enhancement request. Copyright public domain does not establish a model release or permission to imply endorsement.",
+      "humanReviewRubric": [
+        {
+          "criterion": "source_fidelity",
+          "question": "Can the reviewer match every protected subject/relationship to the actual source?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "composition",
+          "question": "Did framing/shape relationships remain purposeful, without imposed thirds or relocation?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "values_lights",
+          "question": "Are retained lights and large value masses readable without an arbitrary contrast boost?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "colour",
+          "question": "Are colour decisions relevant and restrained; for monochrome, did it remain monochrome?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "detail_focal_hierarchy",
+          "question": "Did permitted simplification help emphasis without merely obscuring or distorting the scene?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "geometry_anatomy",
+          "question": "Are visible proportions, architecture, petals or anatomy coherent?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "unexpected_edits",
+          "question": "Are there any unrequested additions, removals, duplicates, text or texture?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "paintability",
+          "question": "Can a painter plan connected wash shapes, protected lights, edges and selective detail from it?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "actual_changes",
+          "question": "Which requested changes actually happened, rather than merely being requested?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        }
+      ],
+      "allowedOutputDispositions": [
+        "USEFUL_REFERENCE",
+        "PRESERVE_ORIGINAL_NO_CLEAR_BENEFIT",
+        "REJECT_FIDELITY_OR_ARTISTIC_FAILURE",
+        "HOLD_FOR_REVIEW"
+      ],
+      "actualProviderOutput": false,
+      "plannedRequests": 1,
+      "approvedRequests": 0,
+      "paidBudgetUSD": null,
+      "directionSha256": "ab2703714fda97218f426e8748c41edeac3b00d4e5bf0b3620566fa37a4a0ab1",
+      "expectedPreparedDimensions": {
+        "width": 1214,
+        "height": 1536
+      },
+      "expectedOutputDimensions": {
+        "width": 912,
+        "height": 1152
+      },
+      "conditionalCostExample": {
+        "model": "gpt-image-2-2026-04-21",
+        "quality": "medium",
+        "width": 912,
+        "height": 1152,
+        "estimatedOutputTokens": 1392,
+        "imageInputTokensAssumed": 2000,
+        "textInputTokensAssumed": 800,
+        "developerDocsStandard": {
+          "ratesPerMillion": {
+            "imageInputRate": 8,
+            "imageOutputRate": 30,
+            "textInputRate": 5
+          },
+          "outputOnlyUSD": 0.04176,
+          "totalUSD": 0.06176
+        },
+        "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+          "ratesPerMillion": {
+            "imageInputRate": 4,
+            "imageOutputRate": 15,
+            "textInputRate": 2.5
+          },
+          "outputOnlyUSD": 0.02088,
+          "totalUSD": 0.03088
+        },
+        "pricingConflictUnresolved": true,
+        "actualBill": false,
+        "providerRequests": 0
+      },
+      "sourcePreflight": "Full server JPEG decode and SHA-256 match passed locally; no image-generation transmission.",
+      "independentReviewWorksheet": {
+        "caseId": "reference-people-01",
+        "reviewer": null,
+        "providerOutputSha256": null,
+        "status": "NOT_RUN",
+        "protectedSourceChecklist": [
+          "Recognisable face, expression, hair and apparent age",
+          "Pose, hands/fingers, rings and body proportions",
+          "Suit/insignia/name patch and flag relationships",
+          "Shuttle model geometry, placement, markings and supporting table"
+        ],
+        "sections": [
+          {
+            "category": "A_source_fidelity",
+            "questions": [
+              "Match the main subject, protected geometry and identity against the source/prepared input.",
+              "Check duplicated/missing objects, invented structures/anatomy and perspective drift."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "B_composition",
+            "questions": [
+              "Compare major masses, focal/supporting relationships and useful negative space.",
+              "Identify requested crop/grouping that actually occurred, separating local crop from AI changes.",
+              "Describe original strengths preserved or needlessly lost."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "C_colour",
+            "questions": [
+              "Compare requested colour changes and credible temperature relationships.",
+              "Check supporting colour competition and arbitrary focal oversaturation.",
+              "Decide whether these relationships can usefully be interpreted with physical pigments; monochrome preservation is N/A to colour-improvement claims."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "D_values",
+            "questions": [
+              "Compare readable light/middle/dark groups, reserved lights and intentional contrast.",
+              "Reject automatic global contrast/focal darkening that harms the source intention."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "E_paintability",
+            "questions": [
+              "Can a painter organise manageable connected wash groups, practical edges and selective detail?",
+              "Does the result provide useful artistic choices rather than indiscriminate blur or texture?"
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "F_requested_vs_observed",
+            "questions": [
+              "Inspect each request separately; never copy a prompt into observed findings.",
+              "List confirmed, partial, unachieved, unrequested and uncertain changes, with image-region evidence."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          }
+        ],
+        "changeReview": [
+          {
+            "requested": "Quiet minor backdrop/cloth texture only",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          },
+          {
+            "requested": "No editing of face, anatomy, text, model geometry or insignia",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          }
+        ],
+        "allowedChangeClassifications": [
+          "CONFIRMED",
+          "PARTIALLY_ACHIEVED",
+          "UNACHIEVED",
+          "UNREQUESTED",
+          "UNCERTAIN"
+        ],
+        "unrequestedChanges": [],
+        "technicalValidityDoesNotImplyArtisticAcceptance": true,
+        "finalDisposition": null,
+        "allowedDispositions": [
+          "ACCEPT_USEFUL_REFERENCE",
+          "PREFER_ORIGINAL_NO_BENEFIT",
+          "REJECT_ARTISTICALLY_UNSUITABLE",
+          "HOLD_FOR_REVIEW"
+        ]
+      }
+    },
+    {
+      "category": "colour-landscape",
+      "title": "File:ケザン橋から見える景色 ベトナムゲアン省コンクオン郡ケザン村.jpg",
+      "pageId": 157223775,
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:%E3%82%B1%E3%82%B6%E3%83%B3%E6%A9%8B%E3%81%8B%E3%82%89%E8%A6%8B%E3%81%88%E3%82%8B%E6%99%AF%E8%89%B2_%E3%83%99%E3%83%88%E3%83%8A%E3%83%A0%E3%82%B2%E3%82%A2%E3%83%B3%E7%9C%81%E3%82%B3%E3%83%B3%E3%82%AF%E3%82%AA%E3%83%B3%E9%83%A1%E3%82%B1%E3%82%B6%E3%83%B3%E6%9D%91.jpg",
+      "selectedInputUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b7/%E3%82%B1%E3%82%B6%E3%83%B3%E6%A9%8B%E3%81%8B%E3%82%89%E8%A6%8B%E3%81%88%E3%82%8B%E6%99%AF%E8%89%B2_%E3%83%99%E3%83%88%E3%83%8A%E3%83%A0%E3%82%B2%E3%82%A2%E3%83%B3%E7%9C%81%E3%82%B3%E3%83%B3%E3%82%AF%E3%82%AA%E3%83%B3%E9%83%A1%E3%82%B1%E3%82%B6%E3%83%B3%E6%9D%91.jpg",
+      "commonsDerivative": false,
+      "sha256": "7f158bb24bca52321cfe84aad258ebca2b8960673d99ba03717a47460bc31411",
+      "bytes": 154083,
+      "sourceWidth": 1477,
+      "sourceHeight": 1108,
+      "selectedWidth": 1477,
+      "selectedHeight": 1108,
+      "licence": "CC0",
+      "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "artist": "KoheiU",
+      "credit": "KoheiU, scenery from Khe Ran bridge, Vietnam, 29 December 2024, CC0",
+      "usageTerms": "Creative Commons Zero, Public Domain Dedication",
+      "sentToProvider": false,
+      "ownerTransmissionAuthorised": false,
+      "caseId": "reference-colour-landscape-01",
+      "acceptanceTitle": "Colour river landscape: purposeful hierarchy and simplification",
+      "inputVisuallyInspected": true,
+      "inputNature": "Real colour photograph; source pixels unchanged; not a generated result",
+      "rights": {
+        "copyrightBasisVerified": true,
+        "basis": "CC0 dedication",
+        "sourceMetadataVerified": "2026-11-06",
+        "creditText": "KoheiU, scenery from Khe Ran bridge, Vietnam, 29 December 2024, CC0",
+        "likenessReviewRequired": false,
+        "modelReleaseObtained": false,
+        "ownerTransmissionPermission": false,
+        "permittedTestScopePendingOwnerApproval": "Private educational staging image editing only, subject to explicit owner transmission approval",
+        "licenceTemplate": "self|cc-zero",
+        "basisEvidenceUrl": "https://commons.wikimedia.org/wiki/File:%E3%82%B1%E3%82%B6%E3%83%B3%E6%A9%8B%E3%81%8B%E3%82%89%E8%A6%8B%E3%81%88%E3%82%8B%E6%99%AF%E8%89%B2_%E3%83%99%E3%83%88%E3%83%8A%E3%83%A0%E3%82%B2%E3%82%A2%E3%83%B3%E7%9C%81%E3%82%B3%E3%83%B3%E3%82%AF%E3%82%AA%E3%83%B3%E9%83%A1%E3%82%B1%E3%82%B6%E3%83%B3%E6%9D%91.jpg",
+        "sourceFilePage": "https://commons.wikimedia.org/wiki/File:%E3%82%B1%E3%82%B6%E3%83%B3%E6%A9%8B%E3%81%8B%E3%82%89%E8%A6%8B%E3%81%88%E3%82%8B%E6%99%AF%E8%89%B2_%E3%83%99%E3%83%88%E3%83%8A%E3%83%A0%E3%82%B2%E3%82%A2%E3%83%B3%E7%9C%81%E3%82%B3%E3%83%B3%E3%82%AF%E3%82%AA%E3%83%B3%E9%83%A1%E3%82%B1%E3%82%B6%E3%83%B3%E6%9D%91.jpg",
+        "basisExplanation": "Source page states own work by KoheiU with CC0 dedication; metadata has no additional restrictions. No identifiable person was observed in the selected image.",
+        "territorialCaveat": "Copyright dedication is not provider-transmission consent; owner must confirm intended use and any applicable non-copyright rights."
+      },
+      "direction": {
+        "goal": "focal",
+        "strength": "balanced",
+        "preserve": {
+          "subject": true,
+          "geometry": true,
+          "identity": true,
+          "lights": true,
+          "colours": false,
+          "details": "Preserve river bends/banks, mountain skyline, tree-clump positions and overcast daylight. Retain the river, gravel and vegetation as natural blue-grey, earth and green families."
+        },
+        "changes": [
+          "colour",
+          "values",
+          "background",
+          "secondary-objects"
+        ],
+        "colour": "restrained",
+        "detail": "large-shapes",
+        "mood": "quiet",
+        "instruction": "Keep the prepared framing, river bends, mountain skyline and main tree masses. Group busy gravel/foliage marks within their existing contours. Quiet competing cyan-green colour; distinguish slightly warmer gravel from cooler water while retaining overcast daylight. Keep distant hills quieter than the nearer bank without a global contrast boost. Remove only the small red item on the lower-left gravel bank. No new boats, buildings, sunset, moved shoreline or painted-paper effect."
+      },
+      "pixels": {
+        "crop": {
+          "x": 0,
+          "y": 0.12,
+          "width": 1,
+          "height": 0.88
+        },
+        "rotate": 0,
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0
+      },
+      "preserveRequirements": [
+        "River/bank curves and the negative space of the main water shape",
+        "Mountain skyline and progressively quieter distant ridges",
+        "Main left/right tree-mass locations; retained water/sky light relationships",
+        "Credible overcast daylight and natural colour families"
+      ],
+      "requestedChanges": [
+        "Local preparation: deliberately trim only the upper 12% of sky; retain the original unchanged. This crop is not an AI improvement.",
+        "AI: group small gravel/foliage marks into manageable masses without moving contours",
+        "AI: restrain competing cyan/green and separate modestly warmer earth from cooler water",
+        "AI: quiet distant value/chroma relationships, preserve the main water light; no automatic focal darkening",
+        "AI: remove only the visible small red item on the lower-left gravel bank"
+      ],
+      "unacceptableAlterations": [
+        "Changed mountain skyline, moved river/banks or invented boats/buildings",
+        "Lost tree masses, flattened depth, artificial sunset or excessive warm/cool split",
+        "Uniform blur or desaturation passed off as semantic simplification",
+        "A bright oversaturated focal accent or arbitrary global contrast boost",
+        "Removal of an unrequested main shape or clipped mountain following the local crop"
+      ],
+      "inputInspectionNotes": "Visible colour source has blue-grey sky/water, green canopy and warmer gravel; a broad empty sky, fragmented left-bank marks and detailed foliage provide testable simplification opportunities. The small red item is visible near 5% across / 82% down the original; its material is not inferred. The existing scene has strengths and may remain the better reference.",
+      "humanReviewRubric": [
+        {
+          "criterion": "source_fidelity",
+          "question": "Can the reviewer match every protected subject/relationship to the actual source?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "composition",
+          "question": "Did framing/shape relationships remain purposeful, without imposed thirds or relocation?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "values_lights",
+          "question": "Are retained lights and large value masses readable without an arbitrary contrast boost?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "colour",
+          "question": "Are colour decisions relevant and restrained; for monochrome, did it remain monochrome?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "detail_focal_hierarchy",
+          "question": "Did permitted simplification help emphasis without merely obscuring or distorting the scene?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "geometry_anatomy",
+          "question": "Are visible proportions, architecture, petals or anatomy coherent?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "unexpected_edits",
+          "question": "Are there any unrequested additions, removals, duplicates, text or texture?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "paintability",
+          "question": "Can a painter plan connected wash shapes, protected lights, edges and selective detail from it?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "actual_changes",
+          "question": "Which requested changes actually happened, rather than merely being requested?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        }
+      ],
+      "allowedOutputDispositions": [
+        "USEFUL_REFERENCE",
+        "PRESERVE_ORIGINAL_NO_CLEAR_BENEFIT",
+        "REJECT_FIDELITY_OR_ARTISTIC_FAILURE",
+        "HOLD_FOR_REVIEW"
+      ],
+      "actualProviderOutput": false,
+      "plannedRequests": 1,
+      "approvedRequests": 0,
+      "paidBudgetUSD": null,
+      "directionSha256": "6858693ed2c413a5b2ef7c35338c7621939b14568b6c2b9fb867e173da24974c",
+      "independentReviewWorksheet": {
+        "caseId": "reference-colour-landscape-01",
+        "reviewer": null,
+        "providerOutputSha256": null,
+        "status": "NOT_RUN",
+        "protectedSourceChecklist": [
+          "River/bank curves and the negative space of the main water shape",
+          "Mountain skyline and progressively quieter distant ridges",
+          "Main left/right tree-mass locations; retained water/sky light relationships",
+          "Credible overcast daylight and natural colour families"
+        ],
+        "sections": [
+          {
+            "category": "A_source_fidelity",
+            "questions": [
+              "Match the main subject, protected geometry and identity against the source/prepared input.",
+              "Check duplicated/missing objects, invented structures/anatomy and perspective drift."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "B_composition",
+            "questions": [
+              "Compare major masses, focal/supporting relationships and useful negative space.",
+              "Identify requested crop/grouping that actually occurred, separating local crop from AI changes.",
+              "Describe original strengths preserved or needlessly lost."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "C_colour",
+            "questions": [
+              "Compare requested colour changes and credible temperature relationships.",
+              "Check supporting colour competition and arbitrary focal oversaturation.",
+              "Decide whether these relationships can usefully be interpreted with physical pigments; monochrome preservation is N/A to colour-improvement claims."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "D_values",
+            "questions": [
+              "Compare readable light/middle/dark groups, reserved lights and intentional contrast.",
+              "Reject automatic global contrast/focal darkening that harms the source intention."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "E_paintability",
+            "questions": [
+              "Can a painter organise manageable connected wash groups, practical edges and selective detail?",
+              "Does the result provide useful artistic choices rather than indiscriminate blur or texture?"
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          },
+          {
+            "category": "F_requested_vs_observed",
+            "questions": [
+              "Inspect each request separately; never copy a prompt into observed findings.",
+              "List confirmed, partial, unachieved, unrequested and uncertain changes, with image-region evidence."
+            ],
+            "verdict": "NOT_REVIEWED",
+            "evidence": null
+          }
+        ],
+        "changeReview": [
+          {
+            "requested": "Local preparation: deliberately trim only the upper 12% of sky; retain the original unchanged. This crop is not an AI improvement.",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          },
+          {
+            "requested": "AI: group small gravel/foliage marks into manageable masses without moving contours",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          },
+          {
+            "requested": "AI: restrain competing cyan/green and separate modestly warmer earth from cooler water",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          },
+          {
+            "requested": "AI: quiet distant value/chroma relationships, preserve the main water light; no automatic focal darkening",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          },
+          {
+            "requested": "AI: remove only the visible small red item on the lower-left gravel bank",
+            "classification": "NOT_REVIEWED",
+            "observedEvidence": null
+          }
+        ],
+        "allowedChangeClassifications": [
+          "CONFIRMED",
+          "PARTIALLY_ACHIEVED",
+          "UNACHIEVED",
+          "UNREQUESTED",
+          "UNCERTAIN"
+        ],
+        "unrequestedChanges": [],
+        "technicalValidityDoesNotImplyArtisticAcceptance": true,
+        "finalDisposition": null,
+        "allowedDispositions": [
+          "ACCEPT_USEFUL_REFERENCE",
+          "PREFER_ORIGINAL_NO_BENEFIT",
+          "REJECT_ARTISTICALLY_UNSUITABLE",
+          "HOLD_FOR_REVIEW"
+        ]
+      },
+      "expectedPreparedDimensions": {
+        "width": 1477,
+        "height": 975
+      },
+      "expectedOutputDimensions": {
+        "width": 1264,
+        "height": 832
+      },
+      "conditionalCostExample": {
+        "model": "gpt-image-2-2026-04-21",
+        "quality": "medium",
+        "width": 1264,
+        "height": 832,
+        "estimatedOutputTokens": 1172,
+        "imageInputTokensAssumed": 2000,
+        "textInputTokensAssumed": 800,
+        "developerDocsStandard": {
+          "ratesPerMillion": {
+            "imageInputRate": 8,
+            "imageOutputRate": 30,
+            "textInputRate": 5
+          },
+          "outputOnlyUSD": 0.03516,
+          "totalUSD": 0.05516
+        },
+        "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+          "ratesPerMillion": {
+            "imageInputRate": 4,
+            "imageOutputRate": 15,
+            "textInputRate": 2.5
+          },
+          "outputOnlyUSD": 0.01758,
+          "totalUSD": 0.02758
+        },
+        "pricingConflictUnresolved": true,
+        "actualBill": false,
+        "providerRequests": 0
+      }
+    }
+  ],
+  "rejectedInputCandidates": [
+    {
+      "title": "File:Flower Rose. (9179123362).jpg",
+      "reason": "Actual raster inspection found digital ripple/distortion effects; rejected as an unaltered botanical source."
+    },
+    {
+      "title": "Full-resolution Adams landscape JPEG (3000 x 2402)",
+      "reason": "Header-valid 7.2 MP source exceeded the pinned JPEG decoder 100 MB memory budget. Replaced in the acceptance set by the documented 1920 px Commons derivative; no server limit raised."
+    }
+  ],
+  "proposedTests": [
+    {
+      "id": "A",
+      "caseId": "reference-landscape-01",
+      "purpose": "Faithful image-edit smoke test: recognition/preservation, API contract, private saved output/recovery. Does not prove colour improvement.",
+      "independentOwnerApprovalRequired": true,
+      "automatic": false,
+      "approvedRequests": 0
+    },
+    {
+      "id": "B",
+      "caseId": "reference-colour-landscape-01",
+      "purpose": "Actual product-value test: composition/grouping, colour hierarchy, values, focal clarity, selective simplification/removal and watercolour paintability. Separate from smoke test A and its deterministic crop.",
+      "independentOwnerApprovalRequired": true,
+      "automatic": false,
+      "approvedRequests": 0
+    }
+  ]
+}

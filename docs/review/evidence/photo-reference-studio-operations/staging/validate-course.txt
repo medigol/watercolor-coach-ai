@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "units": 32,
+  "canonicalSteps": 27,
+  "diagnostics": 17,
+  "previews": 12,
+  "sources": 26,
+  "views": 30,
+  "errors": []
+}

@@ -1,0 +1,310 @@
+{
+  "cases": [
+    {
+      "width": 375,
+      "name": "landscape",
+      "dimensions": [
+        600,
+        480
+      ],
+      "calls": 0
+    },
+    {
+      "width": 375,
+      "name": "portrait",
+      "dimensions": [
+        450,
+        800
+      ],
+      "calls": 0
+    },
+    {
+      "width": 375,
+      "name": "square",
+      "dimensions": [
+        600,
+        640
+      ],
+      "calls": 0
+    },
+    {
+      "width": 375,
+      "name": "wide",
+      "dimensions": [
+        1200,
+        240
+      ],
+      "calls": 0
+    },
+    {
+      "width": 390,
+      "name": "landscape",
+      "dimensions": [
+        600,
+        480
+      ],
+      "calls": 0
+    },
+    {
+      "width": 390,
+      "name": "portrait",
+      "dimensions": [
+        450,
+        800
+      ],
+      "calls": 0
+    },
+    {
+      "width": 390,
+      "name": "square",
+      "dimensions": [
+        600,
+        640
+      ],
+      "calls": 0
+    },
+    {
+      "width": 390,
+      "name": "wide",
+      "dimensions": [
+        1200,
+        240
+      ],
+      "calls": 0
+    },
+    {
+      "width": 430,
+      "name": "landscape",
+      "dimensions": [
+        600,
+        480
+      ],
+      "calls": 0
+    },
+    {
+      "width": 430,
+      "name": "portrait",
+      "dimensions": [
+        450,
+        800
+      ],
+      "calls": 0
+    },
+    {
+      "width": 430,
+      "name": "square",
+      "dimensions": [
+        600,
+        640
+      ],
+      "calls": 0
+    },
+    {
+      "width": 430,
+      "name": "wide",
+      "dimensions": [
+        1200,
+        240
+      ],
+      "calls": 0
+    },
+    {
+      "width": 768,
+      "name": "landscape",
+      "dimensions": [
+        600,
+        480
+      ],
+      "calls": 0
+    },
+    {
+      "width": 768,
+      "name": "portrait",
+      "dimensions": [
+        450,
+        800
+      ],
+      "calls": 0
+    },
+    {
+      "width": 768,
+      "name": "square",
+      "dimensions": [
+        600,
+        640
+      ],
+      "calls": 0
+    },
+    {
+      "width": 768,
+      "name": "wide",
+      "dimensions": [
+        1200,
+        240
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1024,
+      "name": "landscape",
+      "dimensions": [
+        600,
+        480
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1024,
+      "name": "portrait",
+      "dimensions": [
+        450,
+        800
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1024,
+      "name": "square",
+      "dimensions": [
+        600,
+        640
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1024,
+      "name": "wide",
+      "dimensions": [
+        1200,
+        240
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1440,
+      "name": "landscape",
+      "dimensions": [
+        600,
+        480
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1440,
+      "name": "portrait",
+      "dimensions": [
+        450,
+        800
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1440,
+      "name": "square",
+      "dimensions": [
+        600,
+        640
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1440,
+      "name": "wide",
+      "dimensions": [
+        1200,
+        240
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1800,
+      "name": "landscape",
+      "dimensions": [
+        600,
+        480
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1800,
+      "name": "portrait",
+      "dimensions": [
+        450,
+        800
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1800,
+      "name": "square",
+      "dimensions": [
+        600,
+        640
+      ],
+      "calls": 0
+    },
+    {
+      "width": 1800,
+      "name": "wide",
+      "dimensions": [
+        1200,
+        240
+      ],
+      "calls": 0
+    },
+    {
+      "nestedUiConfirmation": true,
+      "onlyArtworkPixels": true,
+      "semanticRecognition": "NOT_TESTED",
+      "calls": 0
+    },
+    {
+      "kind": "white-margin",
+      "fullArtwork": true
+    },
+    {
+      "kind": "blank",
+      "fullArtwork": true
+    },
+    {
+      "kind": "dark",
+      "fullArtwork": true
+    },
+    {
+      "mouseDrag": true
+    },
+    {
+      "touchDrag": true
+    },
+    {
+      "proposal": true,
+      "reset": true,
+      "surroundBypassBlocked": true
+    },
+    {
+      "alphaWhiteMatte": true
+    },
+    {
+      "exif6": true
+    },
+    {
+      "invalidLocalZeroCalls": true
+    },
+    {
+      "headerBeforeDecode": true
+    },
+    {
+      "uploadedOnlyConfirmedBytes": true,
+      "semanticCalls": 1,
+      "quota": 0
+    }
+  ],
+  "calls": {
+    "provider": 1,
+    "uploads": 1,
+    "writes": 0,
+    "removed": 1
+  },
+  "errors": [],
+  "nativeDeviceVerified": false
+}

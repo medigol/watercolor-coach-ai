@@ -1,0 +1,39 @@
+{
+  "schema": "reference-staging-profile/v1",
+  "expectedBranch": "codex/photo-to-painting-reference-studio",
+  "expectedCommit": null,
+  "productionSupabaseRef": null,
+  "stagingSupabaseRef": null,
+  "stagingFrontendUrl": null,
+  "testOwnerId": null,
+  "openAIProject": null,
+  "isolatedOpenAIProjectOrBudgetConfirmed": false,
+  "stagingReadAuthorised": false,
+  "phase": "disabled",
+  "approval": {
+    "ownerApproved": false,
+    "caseId": null,
+    "sourceSha256": null,
+    "directionSha256": null,
+    "configurationSha256": null,
+    "preparedInputSha256": null,
+    "model": "gpt-image-2-2026-04-21",
+    "quality": "medium",
+    "images": 1,
+    "maximumUSD": null,
+    "standardPricingBasis": null,
+    "standardPricingConfirmed": false,
+    "standardRatesUSDPerMillion": {
+      "imageInput": null,
+      "imageOutput": null,
+      "textInput": null
+    },
+    "billingUncertaintyAcknowledged": false,
+    "projectModelEditAccessConfirmed": false,
+    "transmissionConsent": false,
+    "retentionAcknowledged": false,
+    "operator": null,
+    "windowStart": null,
+    "windowEnd": null
+  }
+}

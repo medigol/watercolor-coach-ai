@@ -1,0 +1,84 @@
+{
+  "retrievedAtDate": "2026-11-06",
+  "authenticatedProviderRequests": 0,
+  "imageGenerationRequests": 0,
+  "organisationAccessVerified": false,
+  "pricingConflictUnresolved": true,
+  "rawResponsesCommitted": false,
+  "sources": [
+    {
+      "url": "https://developers.openai.com/api/docs/pricing.md",
+      "localEvidenceName": "pricing.md",
+      "sha256": "f1ade44afc62fd8a12dd6e199bcecaa989a94c9b691aa620a34e1504ff62ff57",
+      "finding": "Standard GPT Image 2: image input 8, image output 30, text input 5 USD/M; Batch 4/15/2.50. Owner-quoted lower synchronous rate unresolved."
+    },
+    {
+      "url": "https://openai.com/api/pricing/",
+      "localEvidenceName": "public-pricing.html",
+      "sha256": "794c29ead8cea478547487237d07e3f9015a9d01677fd76f93022692b45d2c16",
+      "finding": "No standalone GPT Image 2 pricing card found in inspected response; newer 2.6 cards do not establish this pin price."
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/image-generation.md",
+      "localEvidenceName": "image-guide.md",
+      "sha256": "cf45f873eefaa5da6104d78843bb6add731569d5ee29b203383c0a3628702be1",
+      "finding": "Image-conditioned editing and supported GPT Image 2 options; examples use multipart files."
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/image-generation",
+      "localEvidenceName": "image-guide.html",
+      "sha256": "2cd8cfdbead538eae06698164c940cd015632541ffc2df05198b20eb7ebc4a76",
+      "finding": "Served official calculator properties inspected; outputPricePerMillion 30."
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/models/gpt-image-2.md",
+      "localEvidenceName": "model.md",
+      "sha256": "8ee0dd5f26541e7f72fe1ed68e2a014a08e2c7f9d8bcf2cbe69fe75a854c1cff",
+      "finding": "Snapshot gpt-image-2-2026-04-21; editing and no Free tier. Does not prove organisation access."
+    },
+    {
+      "url": "https://developers.openai.com/api/reference/resources/images/methods/edit.md",
+      "localEvidenceName": "edit-api.md",
+      "sha256": "57f6cfdfc644504ff15d783a0c7ecf2a26a300ff96bf04c3b7c3c3fcd9bab875",
+      "finding": "Images edit parameters/response; JSON and multipart guide contract cross-checked."
+    },
+    {
+      "url": "https://developers.openai.com/api/reference/overview.md",
+      "localEvidenceName": "api-overview.md",
+      "sha256": "a046d08b9f57f2d8e5e540c2a9ae201b93a6c64647679e81bea0eabe787f58b7",
+      "finding": "X-Client-Request-Id is a tracing/support identifier, not documented idempotency."
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/images-vision.md",
+      "localEvidenceName": "vision.md",
+      "sha256": "8e59a055f7a0491ae9ff5c16f4cd0feed1d54620b0d72ed58856002a3bb85d34",
+      "finding": "Vision calculators exclude GPT Image generation/edit input-token estimates."
+    },
+    {
+      "url": "https://developers.openai.com/_astro/GptImageTokenCalculator.react.Cmlb2knr.js",
+      "localEvidenceName": "calculator.js",
+      "sha256": "01d3c4b0d28b04cc16a46168af566a75d2596e5c5df4706dbbd480716facb092",
+      "finding": "Medium output-token formula inspected; reimplemented offline without copying the full module."
+    },
+    {
+      "url": "https://commons.wikimedia.org/w/api.php",
+      "localEvidenceName": "rights-wikitext.json",
+      "sha256": "580539bc13540c06f5e7c9ef41430d437fcf9818061ebba02ac0277e6d4fb860",
+      "finding": "Four named file records: PD-USGov, PD-USGov-NPS, self|cc-zero and PD-USGov-NASA; public API metadata/source text inspected.",
+      "requestParameters": {
+        "action": "query",
+        "prop": "revisions",
+        "rvprop": "content",
+        "rvslots": "main",
+        "pageids": "118192|33679512|141170849|380248",
+        "format": "json"
+      }
+    },
+    {
+      "url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "localEvidenceName": "nasa-rights.html",
+      "sha256": "3ebbfc7b7a808cd3e7e88be90ec7e1697d99fffddcc1ac849443b1a7c387d3a2",
+      "finding": "NASA imagery copyright and separate identifiable-person/endorsement limitations reviewed."
+    }
+  ]
+}

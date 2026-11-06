@@ -1,0 +1,502 @@
+{
+  "schema": "photo-reference-studio-operations-validation/v2",
+  "executedAt": "2026-11-06T22:30:03.649007+00:00",
+  "verdict": "CONDITIONALLY READY FOR STAGING TEST",
+  "actualStagingPreflight": "BLOCKED: required real identifiers, authorisations and fresh hosted evidence are absent; not contacted.",
+  "reviewedStartingHead": "5f91a56acb5acff0c36b23c931d1d51fc8a9e903",
+  "branch": "codex/photo-to-painting-reference-studio",
+  "productionMain": "5732b2ab8e9b4f5cda06d851791b4349d935400f",
+  "draftPr": "https://github.com/medigol/watercolor-coach-ai/pull/44",
+  "historicalValidation": "docs/review/evidence/photo-reference-studio-operations/validation-5f91a56.json",
+  "testedWorkingSourceFingerprint": "b24c565afef15762cf0307b11c21e323dc958b8f36d925b21c40ff6e4aed3eb3",
+  "sourceFiles": [
+    "components/ReferenceStudio.web.tsx",
+    "config/reference-staging-database-contract.json",
+    "config/reference-staging.example.json",
+    "lib/referenceStudioClient.ts",
+    "package.json",
+    "scripts/audit-reference-studio.cjs",
+    "scripts/reference-cost-estimate.cjs",
+    "scripts/reference-staging-preflight.cjs",
+    "scripts/reference-staging-snapshot.sql",
+    "scripts/test-reference-database.cjs",
+    "shared/referenceStudio.ts",
+    "supabase/functions/transform-reference/check-acceptance-inputs.ts",
+    "supabase/functions/transform-reference/deno.json",
+    "supabase/functions/transform-reference/deno.lock",
+    "supabase/functions/transform-reference/handler.ts",
+    "supabase/functions/transform-reference/image.ts",
+    "supabase/functions/transform-reference/image_test.ts",
+    "supabase/functions/transform-reference/index.ts",
+    "supabase/functions/transform-reference/operations_test.ts",
+    "supabase/functions/transform-reference/provider.ts",
+    "supabase/functions/transform-reference/reconcile-plan.ts",
+    "supabase/migrations/202611060001_reference_studio.sql",
+    "supabase/migrations/202611060002_reference_operations.sql",
+    "tests/browser/reference-studio.cjs",
+    "tests/helpers/reference-operations-db.cjs",
+    "tests/reference-acceptance-set.test.cjs",
+    "tests/reference-cost-estimate.test.cjs",
+    "tests/reference-staging-preflight.test.cjs",
+    "tests/reference-studio.test.cjs"
+  ],
+  "checks": [
+    {
+      "name": "Full unit/integration suite",
+      "command": "node --test --test-concurrency=2 tests/*.test.cjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "2145 passed, zero failed/cancelled/skipped. Includes 51 studio, 6 preflight, 4 calculator and 1 acceptance-set tests; do not add focused counts again.",
+      "logSha256": "a3ce2236ca7a000115fa477d019128bf6569987d0bb17e8a8a14eea800f082a6",
+      "completedAt": "2026-11-06T22:27:55.843786+00:00"
+    },
+    {
+      "name": "Frontend TypeScript",
+      "command": "npm run typecheck",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Strict frontend; unchanged critique/auth/learner contracts.",
+      "logSha256": "cf211dd2ce0ed67a9c222bccc6e4c7af5133e7bebb81b6b15e071394bc782ffe",
+      "completedAt": "2026-11-06T22:19:06.051086+00:00"
+    },
+    {
+      "name": "Strict Edge and offline tools",
+      "command": "DENO_DIR=/tmp/visual-video-upgrade/deno-cache DENO_TLS_CA_STORE=system /tmp/visual-video-upgrade/bin/deno check --config supabase/functions/generate-feedback/deno.json supabase/functions/generate-feedback/index.ts supabase/functions/transform-reference/index.ts supabase/functions/transform-reference/reconcile-plan.ts supabase/functions/transform-reference/check-acceptance-inputs.ts",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Both functions and actual offline utilities; no execution/deployment of endpoints.",
+      "logSha256": "093e1a52d56c022208b776d95fc58ccb661e8223073120143d9298c7cd3f2c01",
+      "completedAt": "2026-11-06T22:18:57.159468+00:00"
+    },
+    {
+      "name": "Real decoders and offline recovery",
+      "command": "DENO_DIR=/tmp/visual-video-upgrade/deno-cache DENO_TLS_CA_STORE=system /tmp/visual-video-upgrade/bin/deno test --allow-read --allow-write=tests/.reference-operator-tmp --allow-run=/tmp/visual-video-upgrade/bin/deno --allow-env --allow-sys --config supabase/functions/transform-reference/deno.json supabase/functions/transform-reference/image_test.ts supabase/functions/transform-reference/operations_test.ts",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "9 passed, zero failed. Synthetic PNG/JPEG fixtures, no live recovery or provider.",
+      "logSha256": "e21ae689a2ea51c9ac77dd0c59cf76106d9fca73d966f9ebe29dfbb7a50409b0",
+      "completedAt": "2026-11-06T22:17:37.186920+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/deno.txt",
+      "reportSha256": "2f41e33bdb783e3b888672efbfb9b76c22b040a429e1a50ef0f1704a5b571245"
+    },
+    {
+      "name": "Reference SQL/security/preflight definitions",
+      "command": "node scripts/test-reference-database.cjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Cached PostgreSQL16, network none/no ports. Both migration reruns, old defects reproduced before002 in rolled-back transactions, current DELETE/NULL guards, concurrency/cancellation/uncertain/CAS, private policies/service-only RPCs and separate allowance. Exact staging read-only SQL executed; reviewed definition fingerprints matched. No hosted Storage HTTP.",
+      "logSha256": "52f1908e052953abbf2495ab5bcf4a2331a94e0167613cbb3ea01f3ca9239cb8",
+      "completedAt": "2026-11-06T22:16:53.328803+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/db-final.txt",
+      "reportSha256": "52f1908e052953abbf2495ab5bcf4a2331a94e0167613cbb3ea01f3ca9239cb8"
+    },
+    {
+      "name": "Existing database security",
+      "command": "node scripts/test-local-database.cjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Production schema reruns and legacy transactional quota/RLS/storage concurrency on disposable PostgreSQL only.",
+      "logSha256": "4605a17113dfa80e4e13f60616ef4b96b03f4d2d9181bbbfe346820094a9cf02",
+      "completedAt": "2026-11-06T22:16:36.661520+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/db-existing.txt",
+      "reportSha256": "4605a17113dfa80e4e13f60616ef4b96b03f4d2d9181bbbfe346820094a9cf02"
+    },
+    {
+      "name": "Configured production export",
+      "command": "EXPO_PUBLIC_SUPABASE_URL=https://watercolor-test.supabase.co EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_browser_test_only EXPO_WEB_BASE_PATH=/watercolor-coach-ai npm run build:web",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Actual production-mode Expo export; synthetic public config. Browser rerun uses immutable /tmp/pr44-staging/configured-dist.",
+      "logSha256": "58c70f3af8fa61e0cee9d297e712dff3f7c7056ff0d0309521e4ddcaff17c636",
+      "completedAt": "2026-11-06T22:17:30.159220+00:00"
+    },
+    {
+      "name": "Unconfigured production export",
+      "command": "env -u EXPO_PUBLIC_SUPABASE_URL -u EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_WEB_BASE_PATH=/watercolor-coach-ai npm run build:web",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Actual web export without account configuration, no hosted deployment.",
+      "logSha256": "8f85eff2abde1a933eabb920c2ed71040db605232616582b2861751a7af9eb75",
+      "completedAt": "2026-11-06T22:22:58.828811+00:00"
+    },
+    {
+      "name": "Pilot validator",
+      "command": "node scripts/validate-instruction.cjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "10 units/8 diagnostics/5 provisional references.",
+      "logSha256": "c926f1624749b3748c22e29b6f23840169bc97bef496dfd39bfcad50ac5c48e3",
+      "completedAt": "2026-11-06T22:19:41.085581+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/validate-instruction.txt",
+      "reportSha256": "c926f1624749b3748c22e29b6f23840169bc97bef496dfd39bfcad50ac5c48e3"
+    },
+    {
+      "name": "Course/artwork validator",
+      "command": "node scripts/validate-learning-upgrade.cjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "32 units/27 steps/17 diagnostics/12 provisional links/26 sources preserved.",
+      "logSha256": "051b39c94c8defcc4f4ffe822d7e6f6358b49559269a969d648b8b9b2f9a5008",
+      "completedAt": "2026-11-06T22:19:43.313485+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/validate-course.txt",
+      "reportSha256": "051b39c94c8defcc4f4ffe822d7e6f6358b49559269a969d648b8b9b2f9a5008"
+    },
+    {
+      "name": "Approved-media gate",
+      "command": "node scripts/validate-learning-media.cjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Contract PASS; editorial completeness remains BLOCKED_NO_VERIFIED_CONTENT; catalogue empty.",
+      "logSha256": "387801b464c8afac16602b146505b1293fdbb43544dc389b3bb08c57723b6fd0",
+      "completedAt": "2026-11-06T22:19:45.417395+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/validate-media.txt",
+      "reportSha256": "387801b464c8afac16602b146505b1293fdbb43544dc389b3bb08c57723b6fd0"
+    },
+    {
+      "name": "Preview publication",
+      "command": "node scripts/validate-video-preview.cjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "17 candidates,4 owner screenings,18 proposals preserved; no approvals.",
+      "logSha256": "d284fe18e12587e0a5605964d76e439d90cd50152dba5a338478fb5b73b2b4b4",
+      "completedAt": "2026-11-06T22:19:47.145320+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/validate-preview.txt",
+      "reportSha256": "d284fe18e12587e0a5605964d76e439d90cd50152dba5a338478fb5b73b2b4b4"
+    },
+    {
+      "name": "Studio bundle audit",
+      "command": "node scripts/audit-reference-studio.cjs dist",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "No server credentials/config names/paid endpoint or fixture bypass in actual configured browser bundle.",
+      "logSha256": "ea57112454bf98129ad8439dc28ba629a263cacca396f5c60b9ad690bed03271",
+      "completedAt": "2026-11-06T22:19:38.285701+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/audit-studio.txt",
+      "reportSha256": "ea57112454bf98129ad8439dc28ba629a263cacca396f5c60b9ad690bed03271"
+    },
+    {
+      "name": "Teaching bundle audit",
+      "command": "node scripts/audit-instruction-bundle.cjs dist",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "17 videos included; no private/approval markers.",
+      "logSha256": "416f07987bc4746ef0fcc1f7ad1cd6e71779f9f1571e03591a587694e84441d6",
+      "completedAt": "2026-11-06T22:19:39.909631+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/audit-teaching.txt",
+      "reportSha256": "416f07987bc4746ef0fcc1f7ad1cd6e71779f9f1571e03591a587694e84441d6"
+    },
+    {
+      "name": "Protected critique lock",
+      "command": "node -e 'const p=require(\"./scripts/benchmark/production.cjs\");p.verifyProductionFiles(p.lockedProduction().identity);console.log(\"Protected critique source PASS\")'",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Protected prompt/contract/runtime source lock unchanged.",
+      "logSha256": "834c8aa164a40f3139dcc9569abe31560780b4b84873b4ad51e0c96adf07df45",
+      "completedAt": "2026-11-06T22:19:44.933415+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/audit-protected.txt",
+      "reportSha256": "834c8aa164a40f3139dcc9569abe31560780b4b84873b4ad51e0c96adf07df45"
+    },
+    {
+      "name": "Studio browser",
+      "command": "node tests/browser/reference-studio.cjs http://127.0.0.1:8255/watercolor-coach-ai /tmp/pr44-staging/browser-studio-final",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "12 scenarios, seven widths, keyboard/enlarged text, actual local/export/approval JSON, comparison/lineage/reload/account isolation; zero-allowance/resource errors and unresolved/unreadable receipt retention. Two simulated image dispatches, zero real calls.",
+      "logSha256": "14ed55986e3c9dac2b7e323892e7f2b2be9a23ae503a2a8fd27b7e3fcd1ebc0c",
+      "completedAt": "2026-11-06T22:24:20.813167+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/browser-studio.json",
+      "reportSha256": "87c144c3817df11a2778767cc27d02dffdaf5550414cc845bce47f5d92ff8d38"
+    },
+    {
+      "name": "Learning browser",
+      "command": "node tests/browser/learning.cjs http://127.0.0.1:8254/watercolor-coach-ai /tmp/pr44-staging/browser-learning",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "35 responsive route cases plus8 first-viewport checks; note/completion/resume/preference/account/storage-recovery regressions.",
+      "logSha256": "680d02cd5ee4d5ec791beebf4fcd00cca77c96407f83cfff61a7702a9b1557a0",
+      "completedAt": "2026-11-06T22:20:41.123003+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/browser-learning.json",
+      "reportSha256": "a9c9d616957c017f181d66e7162cf2ba941aa1be04c4a47c10ae0d25553629be"
+    },
+    {
+      "name": "Assessment/auth/saved artwork browser",
+      "command": "node tests/browser/professional-workspace.cjs http://127.0.0.1:8255/watercolor-coach-ai /tmp/pr44-staging/browser-assessment-final",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "160 existing responsive/calibration/freeze/depth/semantic cases; legacy saved results/critique/auth. Immutable configured export, deterministic backend, no paid calls.",
+      "logSha256": "b6a764ac3487aa63c53c8aabb53b423bd72cd92db24ae95fb425ef70328c28a5",
+      "completedAt": "2026-11-06T22:26:53.582472+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/browser-assessment.json",
+      "reportSha256": "6d9cf81e76e6919e93070227f417e7dafb892acac7799ea889f1aea0e362226a"
+    },
+    {
+      "name": "Video Library browser",
+      "command": "node tests/browser/video-preview.cjs http://127.0.0.1:8254/watercolor-coach-ai /tmp/pr44-staging/browser-video",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "22 cases; synthetic official-controller contract, not actual YouTube playback.",
+      "logSha256": "b1bb7ae5db15ea1c6a8db74f68c613ed1553ade40d28a80de35b145da92e4b45",
+      "completedAt": "2026-11-06T22:20:43.634895+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/browser-video.json",
+      "reportSha256": "7f20cdd78669e3a61953e3b188731e1baa69c35cb87b5a10cd0fc62326b8ab72"
+    },
+    {
+      "name": "Image preparation browser",
+      "command": "node tests/browser/artwork-preparation.cjs http://127.0.0.1:8254/watercolor-coach-ai /tmp/pr44-staging/browser-image-preparation",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "40 real local raster-processing cases; semantic provider mocked.",
+      "logSha256": "865f1190cdd326efd699928d83669849c0a768b0ac75aa4b938387f82c842ec1",
+      "completedAt": "2026-11-06T22:21:20.885292+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/browser-image-preparation.json",
+      "reportSha256": "814306a5b3e71e39dfb3f72bcaaeacb3463ed4b154307667617c261ad3883c83"
+    },
+    {
+      "name": "Unconfigured browser",
+      "command": "node tests/browser/unconfigured-pages.cjs http://127.0.0.1:8254/watercolor-coach-ai /tmp/pr44-staging/browser-unconfigured",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "16 routes; zero external requests and runtime errors.",
+      "logSha256": "86f23fe7bcd4421004f26cc190f4e4e3474521d7b355b387e29a9d43ba75d192",
+      "completedAt": "2026-11-06T22:24:15.589398+00:00"
+    },
+    {
+      "name": "Five actual source preflights",
+      "command": "DENO_DIR=/tmp/visual-video-upgrade/deno-cache DENO_TLS_CA_STORE=system /tmp/visual-video-upgrade/bin/deno run --cached-only --allow-read supabase/functions/transform-reference/check-acceptance-inputs.ts docs/review/photo-reference-studio-acceptance-set.json /tmp/pr44-ops/public-photos",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Original4 hashes retained; separate colour JPEG inspected and fully decoded. Public source bytes only in temporary directories, no provider transmission.",
+      "logSha256": "9cfbe4831e8c5b4202dc4b2c2a2c39a6a976a50675964912fc50121f3ca320d0",
+      "completedAt": "2026-11-06T22:16:25.945981+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/photo-preflight.json",
+      "reportSha256": "9cfbe4831e8c5b4202dc4b2c2a2c39a6a976a50675964912fc50121f3ca320d0"
+    },
+    {
+      "name": "Default staging preflight blocks safely",
+      "command": "node scripts/reference-staging-preflight.cjs",
+      "result": "EXPECTED_BLOCK",
+      "exitCode": 2,
+      "scope": "Expected exit2: no actual staging identifiers/approval/evidence. Environment presence only; zero network, provider calls or hosted writes.",
+      "logSha256": "5a7b302d888717cadd167af7853a78f75a30e59036812febc9fea7c7fe6a3089",
+      "completedAt": "2026-11-06T22:28:11.439108+00:00",
+      "report": "docs/review/evidence/photo-reference-studio-operations/staging/preflight-offline.json",
+      "reportSha256": "5a7b302d888717cadd167af7853a78f75a30e59036812febc9fea7c7fe6a3089"
+    },
+    {
+      "name": "Offline artifact preparation",
+      "command": "node scripts/reference-staging-preflight.cjs --prepare /tmp/pr44-staging/artifact-review",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "Ten runtime/migration source files hash-checked; transform-reference-only config. Review-only because profile unconfigured/checkout not yet committed. No deploy. Final clean-commit artifact can be reproduced after owner profile is supplied.",
+      "logSha256": "2d1cd9b4849dab223de6d63963f3e5db7876133336545b1acf46eb0e5e3b5c5b",
+      "completedAt": "2026-11-06T22:24:45.942237+00:00"
+    },
+    {
+      "name": "Protected production paths",
+      "command": "git diff --exit-code 5f91a56 -- learning providers hooks supabase/schema.sql supabase/migrations supabase/functions/generate-feedback supabase/functions/_shared .github/workflows lib/artworks.ts components/ResultExperience.tsx components/SaveResultButton.tsx lib/supabase.ts",
+      "result": "PASS",
+      "exitCode": 0,
+      "scope": "No changes to migrations001/002, critique/learning/auth/media/deployment contracts.",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "completedAt": "2026-11-06T22:24:47.004011+00:00"
+    }
+  ],
+  "protectedContracts": [
+    {
+      "path": "lib/artworks.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "e9dc19ecd615c86662e24fe48696cf079d4604228ad785e9a881e4625ca414d9"
+    },
+    {
+      "path": "lib/referencePreparation.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "7e0659b04e111546f49e91ca1ce38a2b7dc6e4da4eabcfa0f70cff6d5e5a6cb5"
+    },
+    {
+      "path": "lib/supabase.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "232faa19502dbc39da86f20ab53089c124c4bcb18f835253cde45d72d2c859fc"
+    },
+    {
+      "path": "components/SaveResultButton.tsx",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "145357a807637b651056340d5785f6507e99d5ccdf2936840546cb22ed579b17"
+    },
+    {
+      "path": "components/ResultExperience.tsx",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "cab82d0721d3e3853283719458e725dc8ad73a1a228d2a5761feb26ab8cf3621"
+    },
+    {
+      "path": "components/ReferencePreparation.tsx",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "d17c8708718c55219232dded9b64813c4b8e61eed39f81b42f947d0ca2da28d5"
+    },
+    {
+      "path": "components/ReferenceImage.web.tsx",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "2790978aafebb7869cb8dac27f4d28da4219e2fa69bc51dc4e2b3bfc147499e8"
+    },
+    {
+      "path": "components/ReferenceAdjustment.web.tsx",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "ba0f399167af957dd3e3a80a51904e88ee2818813c5826382a50584882491dd3"
+    },
+    {
+      "path": "hooks/useSavedResult.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "eeba213d76f2f185ab5ebf9b575429353babe9d352c251380b9d4647cb4300a6"
+    },
+    {
+      "path": "supabase/schema.sql",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "75fb2aeaff03d25ecab3db0c1e79873fc32de1d116e699af396cff77ea81c40a"
+    },
+    {
+      "path": "supabase/functions/generate-feedback/index.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "466e14f3d5ee6aba56d26f42826e122ff3010b1b15b53f626e83686b6f5d0528"
+    },
+    {
+      "path": "supabase/functions/generate-feedback/handler.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "50d7ad9f774de02a0c08b9e45815ccf553b0178e3b8519193cff41599733d178"
+    },
+    {
+      "path": "supabase/functions/_shared/prompts.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "60d8fbb0957d9a133c0c213950fbe894fe9abbd3f94247246bca03a7f15fcffe"
+    },
+    {
+      "path": "supabase/functions/_shared/contract.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "6e692e6860748feadbb1fc88021dfe485185fd884bec12a159ad6817a3063249"
+    },
+    {
+      "path": "providers/AuthProvider.tsx",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "75d5ea6c44ae956e61b1e589aeda288d712faabfd07a3f3f1eee71448efc60b2"
+    },
+    {
+      "path": "providers/LearningProvider.tsx",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "97fbfbffd4e8db08234bbde620d635931166bbcd79f9a97e7ad1faa63f2d2920"
+    },
+    {
+      "path": "learning/content.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "0cd27e576c2a195b6741636b25d0106a1a4f86d5ddad28daa363139c24a5fbc9"
+    },
+    {
+      "path": "learning/types.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "e9bb22c175d86d5735a33fbc9202dbf5405a11e9e372c573bdd3a4c97aaa4c0f"
+    },
+    {
+      "path": "learning/progress.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "582202ec9b22136177f1ab34af13436bc204828b4118bf45a77018c6e065df36"
+    },
+    {
+      "path": "learning/media.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "a689a20d754072bd6d8b5c13cf4b749c8c993a164d3b110004049d5afbc3d54b"
+    },
+    {
+      "path": "learning/videoPreviewCatalogue.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "547ffe15aea1d758f6251b27e822a526a8945825f54d35a4a8c254752ba34f84"
+    },
+    {
+      "path": "learning/videoLearning.ts",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "da2ad059732e5ad2bcbc692adec851d8b3d76cb30f61a34c44698ada21a2d9b5"
+    },
+    {
+      "path": ".github/workflows/deploy-pages.yml",
+      "unchangedFromProductionBaseline": true,
+      "sha256": "369fe17de42a1ca9dfef7195d9f5706c24fc9b2194e33a3b70e4ebb88245c4b3"
+    }
+  ],
+  "provider": {
+    "model": "gpt-image-2-2026-04-21",
+    "snapshotAndMultipartContractRecheckedFromOfficialDocs": true,
+    "organisationModelEditAccessVerified": false,
+    "accountSpecificPricingVerified": false,
+    "imageProviderRequests": 0,
+    "paidCalls": 0,
+    "paidCredentialsConfigured": false,
+    "authorisedBudgetUSD": null,
+    "lowerRateClassifiedAs": "Batch in retrieved developer table; not used for synchronous edit estimate",
+    "standardRatesRetrieved": {
+      "imageInput": 8,
+      "imageOutput": 30,
+      "textInput": 5
+    },
+    "research": "docs/review/evidence/photo-reference-studio-operations/staging/official-research.json",
+    "actualUsageOrBill": null
+  },
+  "acceptance": {
+    "manifest": "docs/review/photo-reference-studio-acceptance-set.json",
+    "sourcePhotosInspectedAndDecoded": 5,
+    "originalFourSourceHashesPreserved": true,
+    "testA": "Faithful monochrome smoke/storage/recovery; not colour improvement",
+    "testB": "Separately proposed CC0 colour landscape, independent approval",
+    "actualOutputs": 0,
+    "transmissionPermissions": false,
+    "observedChangeFindingsPopulated": false,
+    "artistSignoff": false,
+    "privatePhotosCommitted": 0
+  },
+  "stagingPreparation": {
+    "defaultMode": "offline/read-only",
+    "collectorWasExecutedAgainstHostedProject": false,
+    "actualIdentifiersInvented": false,
+    "actualProjectIDsKnown": false,
+    "separateProjectEnforcedByProfileChecks": true,
+    "artifactOnlyFunction": "transform-reference",
+    "sqlMode": "READ ONLY transaction + rollback; only run in owner-authorised staging later",
+    "sqlFingerprintSource": "Isolated PostgreSQL16 actual migrations001/002",
+    "configurationBinding": "owner/source/prepared identities + exact direction/pixels/model/size/quality/count, SHA256; no consent or request UUID in approval export",
+    "budgetGuard": "Owner-confirmed Standard rates + estimated output-floor check + billing uncertainty acknowledgement; NOT a total dollar cap"
+  },
+  "reproducedAndFixed": [
+    {
+      "issue": "Unresolved receipt could be cleared by Prepare a separate attempt",
+      "baselineExport": "previous configured app/UI at5f91a56",
+      "reproduction": "New browser retention assertion fails beforefix; passes after real saved-status check",
+      "baselineLogSha256": "d8f6041b3bf00617973530f85663cc90f0b6310ea6f08472b6feeaa61568c105"
+    }
+  ],
+  "earlierRunLimitations": [
+    {
+      "command": "Assessment browser against mutable dist",
+      "result": "FAIL: Tower study timeout after served dist was replaced with unconfigured export",
+      "correction": "Reran unmodified assessment assertions against immutable configured-dist; PASS160 cases."
+    },
+    {
+      "command": "Initial preflight unit fixture",
+      "result": "Definition-hash drift test incorrectly shared a mutable object with expected hashes",
+      "correction": "Cloned observed hash fixture; original assertion retained and passed."
+    }
+  ],
+  "screenshots": {
+    "index": "docs/review/screenshots/photo-reference-studio/README.md",
+    "followUpDirectory": "docs/review/screenshots/photo-reference-studio/staging",
+    "committedFollowUpCaptures": 7,
+    "actualApp": true,
+    "syntheticProviderOnly": true,
+    "physicalAndroidChrome": false
+  },
+  "remainingOwnerActions": [
+    "Supply/authorise actual separate staging Supabase ref, production ref for exclusion, HTTPS frontend host, named test account and isolated OpenAI project.",
+    "Separately authorise staging schema001/002/function/preview deployment and read-only preflight; no production workflows.",
+    "Confirm actual pinned-model edit access, Standard project rates, retention and budget enforcement/uncertainty.",
+    "Approve exact TestA source + exported configuration/input hashes, one attempt, USD maximum, transmission consent, operator and time window.",
+    "Only then authorise dedicated paid staging key/configuration, grant one remaining allowance without reset, refresh snapshots and run non-dispatching preflight.",
+    "Perform exactly one explicit edit, inspect real output/billing/private saved recovery and human worksheet, then stop. TestB needs its own approval."
+  ],
+  "hostedChanges": 0,
+  "deployments": 0,
+  "merges": 0
+}

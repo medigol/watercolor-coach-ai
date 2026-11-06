@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "allCandidates": 17,
+  "privateAndSyntheticMediaAbsent": true,
+  "inlineInstructionPresent": true,
+  "entrySha256": "0382b876bc90cc5896d490c63f96831cd5e1bc40ea3fa7becf46d19deb29cffb"
+}

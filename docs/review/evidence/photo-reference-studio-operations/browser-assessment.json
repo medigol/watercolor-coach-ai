@@ -1,0 +1,1510 @@
+{
+  "uploadFailureCheck": true,
+  "accessibleHeadings": true,
+  "authAccountJourney": true,
+  "preparationMatrix": [
+    {
+      "width": 375,
+      "crop": "480x320",
+      "calls": 0
+    },
+    {
+      "width": 390,
+      "crop": "480x320",
+      "calls": 0
+    },
+    {
+      "width": 430,
+      "crop": "480x320",
+      "calls": 0
+    },
+    {
+      "width": 768,
+      "crop": "480x320",
+      "calls": 0
+    },
+    {
+      "width": 1024,
+      "crop": "480x320",
+      "calls": 0
+    },
+    {
+      "width": 1440,
+      "crop": "480x320",
+      "calls": 0
+    },
+    {
+      "width": 1800,
+      "crop": "480x320",
+      "calls": 0
+    }
+  ],
+  "eligibilityMatrix": [
+    {
+      "code": "unsupported_artwork",
+      "providerCalls": 1,
+      "successfulQuota": 0,
+      "cleaned": true
+    },
+    {
+      "code": "artwork_uncertain",
+      "providerCalls": 1,
+      "successfulQuota": 0,
+      "cleaned": true
+    },
+    {
+      "code": "crop_needed",
+      "providerCalls": 1,
+      "successfulQuota": 0,
+      "cleaned": true
+    }
+  ],
+  "matrix": [
+    {
+      "aspect": "landscape",
+      "width": 375,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 390,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 430,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 768,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 1024,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 1440,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 1800,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 375,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 390,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 430,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 768,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 1024,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 1440,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 1800,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 375,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 390,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 430,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 768,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 1024,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 1440,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 1800,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 375,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 390,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 430,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 768,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 1024,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 1440,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 1800,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 375,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 390,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 430,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 768,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 1024,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 1440,
+      "aligned": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 1800,
+      "aligned": true,
+      "readonly": true
+    }
+  ],
+  "evidenceMatrix": [
+    {
+      "aspect": "landscape",
+      "width": 375,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 390,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 430,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 768,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 1024,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 1440,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "landscape",
+      "width": 1800,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 375,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 390,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 430,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 768,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 1024,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 1440,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait",
+      "width": 1800,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 375,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 390,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 430,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 768,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 1024,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 1440,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "square",
+      "width": 1800,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 375,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 390,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 430,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 768,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 1024,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 1440,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "wide",
+      "width": 1800,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 375,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 390,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 430,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 768,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 1024,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 1440,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "aspect": "portrait-vehicle",
+      "width": 1800,
+      "original": true,
+      "sameRegion": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    }
+  ],
+  "tonalMatrix": [
+    {
+      "width": 375,
+      "originalRegions": true,
+      "linearLuminance": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "width": 390,
+      "originalRegions": true,
+      "linearLuminance": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "width": 430,
+      "originalRegions": true,
+      "linearLuminance": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "width": 768,
+      "originalRegions": true,
+      "linearLuminance": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "width": 1024,
+      "originalRegions": true,
+      "linearLuminance": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "width": 1440,
+      "originalRegions": true,
+      "linearLuminance": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    },
+    {
+      "width": 1800,
+      "originalRegions": true,
+      "linearLuminance": true,
+      "grayscaleOnly": true,
+      "readonly": true
+    }
+  ],
+  "calibrationMatrix": [
+    {
+      "width": 375,
+      "labelIsolation": true,
+      "contextualCrop": true,
+      "processSafety": true,
+      "readonly": true
+    },
+    {
+      "width": 390,
+      "labelIsolation": true,
+      "contextualCrop": true,
+      "processSafety": true,
+      "readonly": true
+    },
+    {
+      "width": 430,
+      "labelIsolation": true,
+      "contextualCrop": true,
+      "processSafety": true,
+      "readonly": true
+    },
+    {
+      "width": 1440,
+      "labelIsolation": true,
+      "contextualCrop": true,
+      "processSafety": true,
+      "readonly": true
+    }
+  ],
+  "providerMatrix": [
+    {
+      "width": 390,
+      "normalizedV1": true,
+      "readonly": true
+    },
+    {
+      "width": 1440,
+      "normalizedV1": true,
+      "readonly": true
+    }
+  ],
+  "finalCalibrationMatrix": [
+    {
+      "width": 375,
+      "cleanAssessment": true,
+      "relationshipLabels": true,
+      "unsafeDepthOmitted": true,
+      "readonly": true
+    },
+    {
+      "width": 390,
+      "cleanAssessment": true,
+      "relationshipLabels": true,
+      "unsafeDepthOmitted": true,
+      "readonly": true
+    },
+    {
+      "width": 430,
+      "cleanAssessment": true,
+      "relationshipLabels": true,
+      "unsafeDepthOmitted": true,
+      "readonly": true
+    },
+    {
+      "width": 768,
+      "cleanAssessment": true,
+      "relationshipLabels": true,
+      "unsafeDepthOmitted": true,
+      "readonly": true
+    },
+    {
+      "width": 1024,
+      "cleanAssessment": true,
+      "relationshipLabels": true,
+      "unsafeDepthOmitted": true,
+      "readonly": true
+    },
+    {
+      "width": 1440,
+      "cleanAssessment": true,
+      "relationshipLabels": true,
+      "unsafeDepthOmitted": true,
+      "readonly": true
+    },
+    {
+      "width": 1800,
+      "cleanAssessment": true,
+      "relationshipLabels": true,
+      "unsafeDepthOmitted": true,
+      "readonly": true
+    }
+  ],
+  "liveFreezeMatrix": [
+    {
+      "kind": "church",
+      "width": 375,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 390,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 430,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 768,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 1024,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 1440,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 1800,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 375,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 390,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 430,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 768,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 1024,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 1440,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 1800,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 375,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 390,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 430,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 768,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 1024,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 1440,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 1800,
+      "evidenceAligned": true,
+      "deduplicated": true,
+      "noOrphanNotes": true,
+      "geometryConsistent": true,
+      "assessmentConsistent": true,
+      "sharedColourNotice": true,
+      "readonly": true
+    }
+  ],
+  "finalFreezeFixMatrix": [
+    {
+      "kind": "active",
+      "width": 375,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "active",
+      "width": 390,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "active",
+      "width": 430,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "active",
+      "width": 768,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "active",
+      "width": 1024,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "active",
+      "width": 1440,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "active",
+      "width": 1800,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "quiet",
+      "width": 375,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "quiet",
+      "width": 390,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "quiet",
+      "width": 430,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "quiet",
+      "width": 768,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "quiet",
+      "width": 1024,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "quiet",
+      "width": 1440,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "quiet",
+      "width": 1800,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "uncertain",
+      "width": 375,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "uncertain",
+      "width": 390,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "uncertain",
+      "width": 430,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "uncertain",
+      "width": 768,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "uncertain",
+      "width": 1024,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "uncertain",
+      "width": 1440,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    },
+    {
+      "kind": "uncertain",
+      "width": 1800,
+      "roleConsistent": true,
+      "processSafe": true,
+      "singleVariable": true,
+      "statusConsistent": true,
+      "readonly": true
+    }
+  ],
+  "analysisDepthMatrix": [
+    {
+      "width": 375,
+      "completeTeaching": true,
+      "safePreservation": true,
+      "processFree": true,
+      "readonly": true
+    },
+    {
+      "width": 390,
+      "completeTeaching": true,
+      "safePreservation": true,
+      "processFree": true,
+      "readonly": true
+    },
+    {
+      "width": 430,
+      "completeTeaching": true,
+      "safePreservation": true,
+      "processFree": true,
+      "readonly": true
+    },
+    {
+      "width": 768,
+      "completeTeaching": true,
+      "safePreservation": true,
+      "processFree": true,
+      "readonly": true
+    },
+    {
+      "width": 1024,
+      "completeTeaching": true,
+      "safePreservation": true,
+      "processFree": true,
+      "readonly": true
+    },
+    {
+      "width": 1440,
+      "completeTeaching": true,
+      "safePreservation": true,
+      "processFree": true,
+      "readonly": true
+    },
+    {
+      "width": 1800,
+      "completeTeaching": true,
+      "safePreservation": true,
+      "processFree": true,
+      "readonly": true
+    }
+  ],
+  "cleanupMatrix": [
+    {
+      "width": 375,
+      "focalConsistent": true,
+      "noHiddenCritique": true,
+      "grammar": true,
+      "safeMixes": true,
+      "english": true,
+      "readableBrush": true,
+      "readonly": true
+    },
+    {
+      "width": 390,
+      "focalConsistent": true,
+      "noHiddenCritique": true,
+      "grammar": true,
+      "safeMixes": true,
+      "english": true,
+      "readableBrush": true,
+      "readonly": true
+    },
+    {
+      "width": 430,
+      "focalConsistent": true,
+      "noHiddenCritique": true,
+      "grammar": true,
+      "safeMixes": true,
+      "english": true,
+      "readableBrush": true,
+      "readonly": true
+    },
+    {
+      "width": 768,
+      "focalConsistent": true,
+      "noHiddenCritique": true,
+      "grammar": true,
+      "safeMixes": true,
+      "english": true,
+      "readableBrush": true,
+      "readonly": true
+    },
+    {
+      "width": 1024,
+      "focalConsistent": true,
+      "noHiddenCritique": true,
+      "grammar": true,
+      "safeMixes": true,
+      "english": true,
+      "readableBrush": true,
+      "readonly": true
+    },
+    {
+      "width": 1440,
+      "focalConsistent": true,
+      "noHiddenCritique": true,
+      "grammar": true,
+      "safeMixes": true,
+      "english": true,
+      "readableBrush": true,
+      "readonly": true
+    },
+    {
+      "width": 1800,
+      "focalConsistent": true,
+      "noHiddenCritique": true,
+      "grammar": true,
+      "safeMixes": true,
+      "english": true,
+      "readableBrush": true,
+      "readonly": true
+    }
+  ],
+  "semanticMatrix": [
+    {
+      "kind": "church",
+      "width": 375,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 390,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 430,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 768,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 1024,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 1440,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "church",
+      "width": 1800,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 375,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 390,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 430,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 768,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 1024,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 1440,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "van",
+      "width": 1800,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 375,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 390,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 430,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 768,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 1024,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 1440,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    },
+    {
+      "kind": "boat",
+      "width": 1800,
+      "coherentAssessment": true,
+      "safeStrength": true,
+      "noFalseAlternative": true,
+      "neutralPractice": true,
+      "readonly": true
+    }
+  ],
+  "calls": {
+    "edgeCalls": 12,
+    "used": 3,
+    "rpcCalls": 0,
+    "reads": 116,
+    "uploads": 8,
+    "removed": 4
+  },
+  "errors": [],
+  "requests": [
+    {
+      "id": "822a4deb-a7e8-442f-a0f1-df57903f115e",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "31241417-2e45-47cc-8860-e450c34970d1",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "31241417-2e45-47cc-8860-e450c34970d1",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "31241417-2e45-47cc-8860-e450c34970d1",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "31241417-2e45-47cc-8860-e450c34970d1",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "31241417-2e45-47cc-8860-e450c34970d1",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "31241417-2e45-47cc-8860-e450c34970d1",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "31241417-2e45-47cc-8860-e450c34970d1",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "f1d8d1e5-75d5-458f-9ef0-95f2c96c2fd8",
+      "focus": null,
+      "mode": "create_reference"
+    },
+    {
+      "id": "783ae133-3b08-43d8-b0d3-7f1d42b35cb9",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "bb1eefe0-099b-49df-a95a-9f81402e478c",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    },
+    {
+      "id": "90722168-0087-42c5-b251-47bf64b73772",
+      "focus": "Overall feedback",
+      "mode": "improve_painting"
+    }
+  ],
+  "controlled": true
+}

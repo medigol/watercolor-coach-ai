@@ -1,0 +1,32 @@
+{
+  "policies": {
+    "storage.objects.reference_images_read": "a2304999cedd95176469ceee0b54ea41",
+    "storage.objects.reference_source_insert": "fc90dc5e6d56ad012d1191ef41e10ed7",
+    "storage.objects.reference_storage_guard": "2b61ac4ec95a5251e3f01a7382d9e370",
+    "storage.objects.reference_storage_no_delete": "ce3cef2886cf06ff6004e7fbce0044ae",
+    "storage.objects.reference_storage_no_update": "67f3c5fd1ecbe975cb5321391eb639b1",
+    "storage.objects.reference_storage_write_guard": "c1d7d9f4233520a1910a851fe331da45",
+    "public.reference_generations.reference_records_guard": "44e3e59b8a5eeb831798e2ebfb24da12",
+    "public.reference_generations.reference_records_owner": "9788c867d731ce5eec43426e4a313926",
+    "public.reference_generations.reference_records_no_delete": "227106baaf1cd1b5e611308d126b27db",
+    "public.reference_generation_accounts.reference_accounts_guard": "44e3e59b8a5eeb831798e2ebfb24da12",
+    "public.reference_generation_accounts.reference_accounts_owner": "9788c867d731ce5eec43426e4a313926",
+    "public.reference_generation_accounts.reference_accounts_no_delete": "227106baaf1cd1b5e611308d126b27db"
+  },
+  "functions": {
+    "valid_reference_output": "69bbd9e1f84cf6533c21646a62490b7b",
+    "begin_reference_dispatch": "6f26232dd3146807547ba9aaccdf057b",
+    "mark_reference_uncertain": "c1a5f0bd59d7c8b7095847670f1a49cf",
+    "claim_reference_generation": "8c629721cd7df813243eaa087e50f910",
+    "reference_operations_version": "8c302eee0c33d680d9a2d8a754eea769",
+    "complete_reference_generation": "3af7fd5c37e7ff6aea555603e144d5be",
+    "reconcile_reference_generation": "89bc685562716e8519b15660a88f876d",
+    "note_reference_provider_receipt": "06ae51cbe67136b65628b57410d4338d"
+  },
+  "constraints": {
+    "reference_output_integrity": "4bd6a10ade32df68092c26fad7768fab",
+    "reference_generations_check": "95097a53fc6ebbe58d66ec0963e56a25",
+    "reference_dispatch_integrity": "6388f6eaafad599103976c0d2cbc346d",
+    "reference_generations_status_check": "ce6f2a4a43a33e43a3bf12c90126b4e2"
+  }
+}

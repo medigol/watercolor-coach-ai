@@ -1,0 +1,68 @@
+{
+  "verdict": "BLOCKED",
+  "mode": "offline evidence verification",
+  "checks": [
+    {
+      "name": "staging profile complete and production excluded",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "branch, exact commit and clean worktree",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "fresh database evidence",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "migrations 001/002 and exact guarded definitions",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "private storage and RLS",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "dedicated real test account",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "global hold clear",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "fresh authenticated function contract",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "required server environment by presence only",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "pinned one-image function release",
+      "result": "BLOCKED"
+    },
+    {
+      "name": "disabled by default and no enabled allowances",
+      "result": "BLOCKED"
+    }
+  ],
+  "missing": [
+    "expected commit",
+    "productionSupabaseRef",
+    "stagingSupabaseRef",
+    "distinct staging project",
+    "testOwnerId",
+    "non-production stagingFrontendUrl",
+    "openAIProject",
+    "isolated OpenAI project/budget confirmation"
+  ],
+  "liveProviderAccessVerified": false,
+  "providerRequests": 0,
+  "paidCalls": 0,
+  "hostedWrites": 0,
+  "environmentPresence": {
+    "REFERENCE_PREFLIGHT_STAGING_ANON_KEY": false,
+    "REFERENCE_PREFLIGHT_STAGING_USER_JWT": false
+  }
+}

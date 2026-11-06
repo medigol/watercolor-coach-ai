@@ -55,6 +55,7 @@ const token = [
       origin: url.origin,
       path: url.pathname,
       method: req.method(),
+      action: url.pathname.endsWith("/transform-reference") && req.method()==="POST" ? req.postDataJSON()?.action : undefined,
     });
     if (url.origin === new URL(base).origin) return route.continue();
     if (url.hostname !== "watercolor-test.supabase.co") {
@@ -80,6 +81,8 @@ const token = [
       return reply({ display_name: "Learner" });
     if (req.method() === "GET" && url.pathname.endsWith("/artworks"))
       return reply([]);
+    if (req.method() === "GET" && url.pathname.endsWith("/reference_generations")) return reply([]);
+    if (req.method() === "POST" && url.pathname.endsWith("/transform-reference") && req.postDataJSON()?.action === "capabilities") return reply({enabled:false,remaining:0});
     unexpected.push(req.method() + " " + url.pathname);
     return route.abort();
   });
@@ -724,7 +727,7 @@ const token = [
     assert.deepEqual(errors, []);
     assert.deepEqual(unexpected, []);
     assert(
-      !network.some((n) => /functions\/v1|storage\/v1/.test(n.path)),
+      !network.some((n) => /functions\/v1|storage\/v1/.test(n.path) && !(n.path==="/functions/v1/transform-reference" && n.action==="capabilities")),
       "learning creates zero AI requests or artwork uploads",
     );
     fs.writeFileSync(

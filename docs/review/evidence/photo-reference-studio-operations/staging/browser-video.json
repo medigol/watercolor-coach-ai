@@ -1,0 +1,100 @@
+{
+  "source": "Actual configured Expo export, synthetic account/provider only",
+  "date": "2026-11-06T22:20:43.637Z",
+  "tests": 22,
+  "pass": 22,
+  "errors": [],
+  "unexpectedRequests": [],
+  "matrix": [
+    {
+      "name": "All 17 candidates and all three Javid videos remain available with learning titles and levels",
+      "status": "PASS"
+    },
+    {
+      "name": "Library works at seven widths with keyboard-reachable 44px Watch actions and no overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "A single library Watch action loads the selected default, without a redundant Load action",
+      "status": "PASS"
+    },
+    {
+      "name": "Replay and endpoint enforcement use absolute proposed boundaries, never lesson completion",
+      "status": "PASS"
+    },
+    {
+      "name": "Return to practice pauses, removes the frame and focuses the visible physical exercise",
+      "status": "PASS"
+    },
+    {
+      "name": "Deep link, reload and URL watch hints never auto-load; every candidate Watch uses its evidence-based default",
+      "status": "PASS"
+    },
+    {
+      "name": "Watch and owner-mode navigation work by keyboard with accurate disclosure state",
+      "status": "PASS"
+    },
+    {
+      "name": "Mapped lesson step chooses Louise’s relevant chapter rather than unrelated introduction",
+      "status": "PASS"
+    },
+    {
+      "name": "Chapter switching, outside-window seeking and replay restore correct bounds on the same player",
+      "status": "PASS"
+    },
+    {
+      "name": "Owner review is a separate explicit mode; learner view contains no timestamps form, export or caption settings",
+      "status": "PASS"
+    },
+    {
+      "name": "Caption preference requests remain in owner mode and preserve selected boundaries",
+      "status": "PASS"
+    },
+    {
+      "name": "Private review saves and exports explicit observations; never grants approval or leaks account identity",
+      "status": "PASS"
+    },
+    {
+      "name": "Seven responsive player widths meet 200×200, and mobile first viewport exposes Watch with no technical form",
+      "status": "PASS"
+    },
+    {
+      "name": "Short viewport, keyboard focus and enlarged-text reflow retain reachable practice and player actions",
+      "status": "PASS"
+    },
+    {
+      "name": "Topic and experience filters retain all candidates and avoid unrelated step claims",
+      "status": "PASS"
+    },
+    {
+      "name": "Café conflict and Louise start-only stay unverified; unseen content is labelled suggested focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Provider restriction and failed API connection preserve written practice and offer retry or original",
+      "status": "PASS"
+    },
+    {
+      "name": "Continue lesson resumes existing step and checklist, with no learning writes from video playback",
+      "status": "PASS"
+    },
+    {
+      "name": "Route cleanup pauses/destroys the player, and returning to Learn does not start background playback",
+      "status": "PASS"
+    },
+    {
+      "name": "Unknown candidate is not silently substituted and never loads a player",
+      "status": "PASS"
+    },
+    {
+      "name": "Invalid private review data remains untouched outside owner mode; explicit recovery keeps learning",
+      "status": "PASS"
+    },
+    {
+      "name": "Failed owner save is truthful and exportable, with learner progress unchanged",
+      "status": "PASS"
+    }
+  ],
+  "liveYouTubeVerified": false,
+  "physicalDeviceTested": false
+}

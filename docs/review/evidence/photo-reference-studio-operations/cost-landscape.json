@@ -1,0 +1,30 @@
+{
+  "model": "gpt-image-2-2026-04-21",
+  "quality": "medium",
+  "width": 1152,
+  "height": 912,
+  "estimatedOutputTokens": 1392,
+  "imageInputTokensAssumed": 2000,
+  "textInputTokensAssumed": 800,
+  "developerDocsStandard": {
+    "ratesPerMillion": {
+      "imageInputRate": 8,
+      "imageOutputRate": 30,
+      "textInputRate": 5
+    },
+    "outputOnlyUSD": 0.04176,
+    "totalUSD": 0.06176
+  },
+  "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+    "ratesPerMillion": {
+      "imageInputRate": 4,
+      "imageOutputRate": 15,
+      "textInputRate": 2.5
+    },
+    "outputOnlyUSD": 0.02088,
+    "totalUSD": 0.03088
+  },
+  "pricingConflictUnresolved": true,
+  "actualBill": false,
+  "providerRequests": 0
+}
