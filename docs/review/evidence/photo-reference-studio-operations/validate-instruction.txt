@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "units": 10,
+  "diagnostics": 8,
+  "previewReferences": 5,
+  "distinctCandidates": 2,
+  "approvedResources": 0,
+  "errors": []
+}

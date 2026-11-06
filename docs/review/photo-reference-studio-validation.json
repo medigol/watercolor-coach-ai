@@ -526,5 +526,7 @@
     "Real photo-to-image output fidelity and physical watercolour utility review across four categories",
     "Actual Android Chrome acceptance; independent artistic judgement",
     "Operational retention/reconciliation/worker review before broader public scale"
-  ]
+  ],
+  "scope": "Initial implementation validation at the earlier PR head; counts and timestamps are historical, not rerun results.",
+  "operationalReadinessFollowUp": "photo-reference-studio-operations-validation.json"
 }

@@ -178,6 +178,13 @@ function harness(overrides = {}) {
       };
       return { status: "claimed" };
     },
+    beginDispatch: async () => {
+      if (
+        record.status !== "pending" || record.dispatch_phase === "dispatched"
+      ) return false;
+      record.dispatch_phase = "dispatched";
+      return true;
+    },
     generate: async () => {
       calls.generate++;
       return png(...s.outputSize(valid).split("x").map(Number));
@@ -286,6 +293,40 @@ test("replay returns existing result with no second provider call or output save
   assert.equal(h.calls.generate, 1);
   assert.equal(h.calls.save, 1);
 });
+test("key-reordered replay is read-only and conflicting replay never claims a reservation", async () => {
+  const h = harness();
+  await post(h);
+  const before = h.calls.claim;
+  const reordered = Object.fromEntries(Object.entries(valid).reverse());
+  assert.equal((await post(h, reordered)).status, 200);
+  assert.equal(h.calls.claim, before);
+  const conflict = structuredClone(valid);
+  conflict.direction.instruction = "different request";
+  assert.equal((await post(h, conflict)).status, 409);
+  assert.equal(h.calls.claim, before);
+  assert.equal(h.calls.generate, 1);
+});
+test("operator cancellation before dispatch prevents a paid call", async () => {
+  const h = harness();
+  h.d.beginDispatch = async () => {
+    h.record.status = "failed";
+    return false;
+  };
+  assert.equal((await post(h)).status, 200);
+  assert.equal(h.calls.generate, 0);
+  assert.equal(h.calls.save, 0);
+});
+test("lost dispatch-gate response is held, never interpreted as permission to generate", async () => {
+  const h = harness({
+    beginDispatch: async () => {
+      throw Error("lost RPC response");
+    },
+  });
+  assert.equal((await post(h)).status, 202);
+  await post(h);
+  assert.equal(h.calls.generate, 0);
+  assert.equal(h.record.status, "uncertain");
+});
 test("provider timeout is uncertain, retained and never retried on resubmission", async () => {
   let n = 0;
   const h = harness({
@@ -382,4 +423,71 @@ test("prompt keeps user prose as bounded data and makes no verified process clai
   assert(p.includes("preserve"));
   assert(p.includes(JSON.stringify(r.direction)));
   assert(!p.includes("test-key"));
+});
+test("provider receipt keeps safe request ID/token counts and adds a trace ID, not a retry key", async () => {
+  const receipts = [];
+  await editReference(valid, png(), "secret", async (url, init) => {
+    assert.equal(init.headers["X-Client-Request-Id"], id);
+    assert.equal(init.headers["Idempotency-Key"], undefined);
+    return new Response(
+      JSON.stringify({
+        data: [{ b64_json: png().toString("base64") }],
+        usage: {
+          input_tokens_details: {
+            image_tokens: 1800,
+            text_tokens: 600,
+            private: "signed URL",
+          },
+          output_tokens: 1400,
+          total_tokens: 3800,
+          raw: "private",
+        },
+      }),
+      { headers: { "x-request-id": "req_fixture_123" } },
+    );
+  }, async (r) => receipts.push(r));
+  assert.deepEqual(receipts, [{
+    requestId: "req_fixture_123",
+    httpStatus: 200,
+    usage: {
+      imageInputTokens: 1800,
+      textInputTokens: 600,
+      outputTokens: 1400,
+      totalTokens: 3800,
+    },
+  }]);
+});
+test("HTTP error and invalid output preserve response receipt without logging its body", async () => {
+  const receipts = [];
+  await assert.rejects(
+    editReference(
+      valid,
+      png(),
+      "secret",
+      async () =>
+        new Response("private raw error", {
+          status: 403,
+          headers: { "x-request-id": "req_rejected" },
+        }),
+      async (r) => receipts.push(r),
+    ),
+  );
+  assert.deepEqual(receipts, [{
+    requestId: "req_rejected",
+    httpStatus: 403,
+    usage: null,
+  }]);
+});
+test("receipt persistence failure cannot retry the provider or destroy a valid image", async () => {
+  let calls = 0;
+  const b = await editReference(valid, png(), "secret", async () => {
+    calls++;
+    return new Response(
+      JSON.stringify({ data: [{ b64_json: png().toString("base64") }] }),
+    );
+  }, async () => {
+    throw Error("receipt save unavailable");
+  });
+  assert.equal(calls, 1);
+  assert.deepEqual(b, new Uint8Array(png()));
 });

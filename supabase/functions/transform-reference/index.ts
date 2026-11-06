@@ -82,6 +82,12 @@ Deno.serve(studioHandler({
     ).select("enabled,attempt_limit,attempts_reserved").eq("user_id", u.id)
       .maybeSingle();
     if (error) throw Error("Setup required");
+    if (data?.enabled) {
+      const ready = await admin().rpc("reference_operations_version");
+      if (ready.error || ready.data !== "reference-operations/v1") {
+        throw Error("Operations migration required");
+      }
+    }
     return {
       enabled: !!data?.enabled,
       remaining: Math.max(
@@ -119,8 +125,18 @@ Deno.serve(studioHandler({
     }
     return result as Claim;
   },
-  generate(r, b) {
-    return editReference(r, b, key!);
+  async beginDispatch(u, r) {
+    return await rpc("begin_reference_dispatch", u, r, { p_request: r }) ===
+      true;
+  },
+  generate(r, b, u) {
+    return editReference(r, b, key!, fetch, async (receipt) => {
+      await rpc("note_reference_provider_receipt", u, r, {
+        p_request_id: receipt.requestId,
+        p_http_status: receipt.httpStatus,
+        p_usage: receipt.usage,
+      });
+    });
   },
   async save(u, r, bytes, size) {
     const path = `${u.id}/${r.id}/generated.png`;

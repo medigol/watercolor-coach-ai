@@ -1,0 +1,9 @@
+{
+  "contract": "PASS",
+  "previewCandidates": 17,
+  "learningGuides": 17,
+  "ownerScreenings": 4,
+  "proposedWindows": 18,
+  "approvedLessonResources": 0,
+  "errors": []
+}

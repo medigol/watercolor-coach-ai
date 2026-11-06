@@ -1,0 +1,1 @@
+PASS: real PostgreSQL 16; schema rerun twice; owner-only RLS/storage paths; server-only RPCs; transactional quota/idempotency/rollback tests; simultaneous independent claims yield exactly one reservation. No live Supabase services contacted.

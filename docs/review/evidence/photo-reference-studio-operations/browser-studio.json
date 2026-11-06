@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "matrix": [
+    {
+      "name": "Generation fails closed before configuration and without an actual decoded photo",
+      "status": "PASS"
+    },
+    {
+      "name": "Malformed images are rejected before upload; original bytes survive local preparation",
+      "status": "PASS"
+    },
+    {
+      "name": "JPEG EXIF orientation is normalised before processing while source bytes stay intact",
+      "status": "PASS"
+    },
+    {
+      "name": "Local crop/rotation and actual value PNG export work without AI or image upload",
+      "status": "PASS"
+    },
+    {
+      "name": "Intentions and bounded preserve/change controls reach one explicit request",
+      "status": "PASS"
+    },
+    {
+      "name": "Real fixture image bytes, before/after, planning, guidance and exports render; reload never generates",
+      "status": "PASS"
+    },
+    {
+      "name": "Refinement derives from the selected saved output, needs fresh consent and records lineage",
+      "status": "PASS"
+    },
+    {
+      "name": "Saved reference list is independent of legacy artwork records",
+      "status": "PASS"
+    },
+    {
+      "name": "Seven widths, enlarged text, keyboard access and all four synthetic categories remain usable",
+      "status": "PASS"
+    },
+    {
+      "name": "A second account cannot restore private direction, receipt or output from the first",
+      "status": "PASS"
+    }
+  ],
+  "simulatedImageDispatches": 2,
+  "realProviderCalls": 0,
+  "productionWrites": 0,
+  "paidCalls": 0,
+  "fixtures": [
+    "landscape",
+    "urban",
+    "botanical",
+    "portrait"
+  ],
+  "artisticFidelityTested": false,
+  "errors": [],
+  "unexpected": []
+}

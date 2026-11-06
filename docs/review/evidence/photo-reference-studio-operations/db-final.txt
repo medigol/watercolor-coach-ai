@@ -1,0 +1,3 @@
+REPRODUCED original defects in rolled-back local transactions: future client DELETE and completed NULL output path
+PASS: legacy quarantine, dispatch gate concurrency, cancellation, safe audited recovery, immutable holds, replay/CAS, output integrity, receipt privacy and no client deletion
+PASS: migration rerun; owner-only reads; restrictive write/storage guards; server-only RPCs; concurrent global reservation; idempotency; conflict; uncertain hold; explicit reconciliation; separate attempt limit; critique counters unchanged.

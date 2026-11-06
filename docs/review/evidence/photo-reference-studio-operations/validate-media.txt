@@ -1,0 +1,7 @@
+{
+  "contract": "PASS",
+  "videos": 0,
+  "segments": 0,
+  "editorialCompleteness": "BLOCKED_NO_VERIFIED_CONTENT",
+  "errors": []
+}

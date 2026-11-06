@@ -109,6 +109,17 @@ function parallel(text) {
     sql(
       `insert into auth.users(id,email) values('${owner}','one@example.invalid'),('${other}','two@example.invalid');insert into public.reference_generation_accounts(user_id,enabled,attempt_limit) values('${owner}',true,2),('${other}',true,2);`,
     );
+    const operations = require("../tests/helpers/reference-operations-db.cjs");
+    const legacy = operations.prepare(sql);
+    for (let i = 0; i < 2; i++) {
+      sql(
+        fs.readFileSync(
+          "supabase/migrations/202611060002_reference_operations.sql",
+          "utf8",
+        ),
+      );
+    }
+    operations.upgrade(sql, legacy);
     const result = await Promise.all([
       parallel(claim(r1)),
       parallel(claim(r2)),
@@ -186,20 +197,13 @@ function parallel(text) {
     );
     assert.equal(JSON.parse(sql(claim(loser)).stdout).status, "busy");
     assert.equal(JSON.parse(sql(claim(r)).stdout).record.status, "uncertain");
-    // Explicit owner reconciliation is simulated only in this disposable DB.
-    sql(
-      `update public.reference_generations set status='failed' where id='${r.id}';`,
-    );
+    operations.cancelReserved(sql, r);
     const second = structuredClone(r);
     second.id = "30000000-0000-4000-8000-000000000001";
     second.source.path = `${r.ownerId}/${second.id}/source.png`;
     second.input.path = `${r.ownerId}/${second.id}/input.png`;
     assert.equal(JSON.parse(sql(claim(second)).stdout).status, "claimed");
-    sql(
-      `set role service_role;select public.complete_reference_generation('${second.ownerId}','${second.id}','{"model":"gpt-image-2-2026-04-21","width":1536,"height":1024,"bytes":100,"sha256":"${
-        "a".repeat(64)
-      }"}');`,
-    );
+    await operations.recoverDispatched(sql, parallel, second);
     const third = structuredClone(second);
     third.id = "30000000-0000-4000-8000-000000000002";
     assert.equal(JSON.parse(sql(claim(third)).stdout).status, "limit");

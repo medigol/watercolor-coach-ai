@@ -2,6 +2,7 @@ import {
   isId,
   outputSize,
   type ReferenceRecord,
+  sameReferenceRequest,
   type StudioRequest,
   validStudioRequest,
 } from "../../../shared/referenceStudio.ts";
@@ -19,7 +20,12 @@ export interface StudioDependencies {
   download(u: StudioUser, path: string): Promise<Uint8Array>;
   decode(bytes: Uint8Array): { width: number; height: number };
   claim(u: StudioUser, r: StudioRequest): Promise<Claim>;
-  generate(r: StudioRequest, bytes: Uint8Array): Promise<Uint8Array>;
+  beginDispatch(u: StudioUser, r: StudioRequest): Promise<boolean>;
+  generate(
+    r: StudioRequest,
+    bytes: Uint8Array,
+    user: StudioUser,
+  ): Promise<Uint8Array>;
   save(
     u: StudioUser,
     r: StudioRequest,
@@ -116,12 +122,8 @@ export function studioHandler(d: StudioDependencies) {
     try {
       const existing = await d.existing(u, r.id);
       if (existing) {
-        if (JSON.stringify(existing.request_json) !== JSON.stringify(r)) {
-          // JSONB key order is not significant; the atomic claim owns semantic matching.
-          const result = await d.claim(u, r);
-          if (result.status === "conflict") {
-            return reply({ code: "request_conflict" }, 409);
-          }
+        if (!sameReferenceRequest(existing.request_json, r)) {
+          return reply({ code: "request_conflict" }, 409);
         }
         return reply({ record: existing });
       }
@@ -165,7 +167,12 @@ export function studioHandler(d: StudioDependencies) {
       if (c.status === "existing") return reply({ record: c.record });
       if (c.status !== "claimed") return reply({ code: c.status }, 409);
       try {
-        const output = await d.generate(r, input),
+        // Authorise dispatch exactly once, atomically with operator cancellation.
+        // An ambiguous RPC response never justifies calling the paid provider.
+        if (!await d.beginDispatch(u, r)) {
+          return reply({ record: await d.existing(u, r.id) });
+        }
+        const output = await d.generate(r, input, u),
           h = imageHeader(output),
           size = d.decode(output);
         const [w, hgt] = outputSize(r).split("x").map(Number);

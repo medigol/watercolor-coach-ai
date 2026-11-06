@@ -1,0 +1,844 @@
+{
+  "schema": "reference-artistic-acceptance-set/v1",
+  "preparedAt": "2026-11-06",
+  "photosCommitted": false,
+  "privateUserPhotosUsed": false,
+  "providerTransmissions": 0,
+  "imagesGenerated": 0,
+  "automaticSequence": false,
+  "firstCaseId": "reference-landscape-01",
+  "copyrightClearanceDoesNotGrantTransmissionOrLikenessPermission": true,
+  "caseOrder": [
+    "reference-landscape-01",
+    "reference-architecture-01",
+    "reference-botanical-01",
+    "reference-people-01"
+  ],
+  "cases": [
+    {
+      "category": "landscape",
+      "title": "File:Adams The Tetons and the Snake River.jpg",
+      "pageId": 118192,
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Adams_The_Tetons_and_the_Snake_River.jpg",
+      "selectedInputUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Adams_The_Tetons_and_the_Snake_River.jpg/1920px-Adams_The_Tetons_and_the_Snake_River.jpg",
+      "commonsDerivative": true,
+      "sha256": "da9e2f054a9b2907971245d3d6152366fc6dc4e4b97753fa47ffb19e41956f9d",
+      "bytes": 614519,
+      "sourceWidth": 3000,
+      "sourceHeight": 2402,
+      "selectedWidth": 1920,
+      "selectedHeight": 1537,
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "artist": "Ansel Adams",
+      "credit": "Ansel Adams, The Tetons and the Snake River (1942), NARA 79-AAG-1",
+      "usageTerms": "Public domain",
+      "sentToProvider": false,
+      "ownerTransmissionAuthorised": false,
+      "caseId": "reference-landscape-01",
+      "acceptanceTitle": "Tetons and Snake River: faithful monochrome simplification",
+      "inputVisuallyInspected": true,
+      "inputNature": "Real source photograph/scan; not generated and not a model output",
+      "rights": {
+        "copyrightBasisVerified": true,
+        "basis": "PD-USGov",
+        "sourceMetadataVerified": "2026-11-06",
+        "creditText": "Ansel Adams, The Tetons and the Snake River (1942), NARA 79-AAG-1",
+        "likenessReviewRequired": false,
+        "modelReleaseObtained": false,
+        "ownerTransmissionPermission": false,
+        "permittedTestScopePendingOwnerApproval": "Private educational staging evaluation only; no publication or endorsement",
+        "licenceTemplate": "PD-USGov",
+        "basisEvidenceUrl": "https://www.archives.gov/research/ansel-adams/",
+        "sourceFilePage": "https://commons.wikimedia.org/wiki/File:Adams_The_Tetons_and_the_Snake_River.jpg",
+        "basisExplanation": "US Government work; Commons records Adams as employed by the US Government for this photograph.",
+        "territorialCaveat": "Copyright basis reviewed from source records; owner must confirm its use and jurisdiction before transmission/publication."
+      },
+      "direction": {
+        "goal": "simplify",
+        "strength": "subtle",
+        "preserve": {
+          "subject": true,
+          "geometry": true,
+          "identity": true,
+          "lights": true,
+          "colours": true,
+          "details": "Mountain ridgeline; snow lights; three visible river bends and both banks; nearest fir silhouettes; monochrome values."
+        },
+        "changes": [
+          "background",
+          "secondary-objects"
+        ],
+        "colour": "original",
+        "detail": "large-shapes",
+        "mood": "original",
+        "instruction": "Keep the original monochrome scene and framing. Preserve the mountain ridgeline, snow lights, river bends and nearest fir-tree silhouettes. Group fine foliage into quieter connected tones without moving contours. Do not increase global contrast, invent objects, colourise, or add paper texture. Preserve the existing composition if no change is justified."
+      },
+      "pixels": {
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "rotate": 0,
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0
+      },
+      "preserveRequirements": [
+        "Original viewpoint, framing and horizon",
+        "Mountain/ridgeline geometry and snow lights",
+        "Existing river/bank curves and foreground silhouettes",
+        "Monochrome tonal hierarchy; no invented original colours"
+      ],
+      "requestedChanges": [
+        "Reduce tiny foliage/surface detail within existing masses",
+        "Retain a photographic reference appearance; a minimal/no-change outcome is valid"
+      ],
+      "unacceptableAlterations": [
+        "River or peak moved/re-shaped",
+        "Forests removed rather than simplified within the existing silhouette",
+        "Colourisation, new buildings, paper texture, arbitrary global contrast increase"
+      ],
+      "inputInspectionNotes": "The supplied photograph already has strong composition. Judge whether reduced microtexture helps a broad wash/value plan without weakening that organisation.",
+      "humanReviewRubric": [
+        {
+          "criterion": "source_fidelity",
+          "question": "Can the reviewer match every protected subject/relationship to the actual source?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "composition",
+          "question": "Did framing/shape relationships remain purposeful, without imposed thirds or relocation?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "values_lights",
+          "question": "Are retained lights and large value masses readable without an arbitrary contrast boost?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "colour",
+          "question": "Are colour decisions relevant and restrained; for monochrome, did it remain monochrome?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "detail_focal_hierarchy",
+          "question": "Did permitted simplification help emphasis without merely obscuring or distorting the scene?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "geometry_anatomy",
+          "question": "Are visible proportions, architecture, petals or anatomy coherent?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "unexpected_edits",
+          "question": "Are there any unrequested additions, removals, duplicates, text or texture?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "paintability",
+          "question": "Can a painter plan connected wash shapes, protected lights, edges and selective detail from it?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "actual_changes",
+          "question": "Which requested changes actually happened, rather than merely being requested?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        }
+      ],
+      "allowedOutputDispositions": [
+        "USEFUL_REFERENCE",
+        "PRESERVE_ORIGINAL_NO_CLEAR_BENEFIT",
+        "REJECT_FIDELITY_OR_ARTISTIC_FAILURE",
+        "HOLD_FOR_REVIEW"
+      ],
+      "actualProviderOutput": false,
+      "plannedRequests": 1,
+      "approvedRequests": 0,
+      "paidBudgetUSD": null,
+      "directionSha256": "9b742f11444504bb68ce11e3f3240da6e5e3b60974f8255ac9f17bd5a7b25b52",
+      "expectedPreparedDimensions": {
+        "width": 1536,
+        "height": 1230
+      },
+      "expectedOutputDimensions": {
+        "width": 1152,
+        "height": 912
+      },
+      "conditionalCostExample": {
+        "model": "gpt-image-2-2026-04-21",
+        "quality": "medium",
+        "width": 1152,
+        "height": 912,
+        "estimatedOutputTokens": 1392,
+        "imageInputTokensAssumed": 2000,
+        "textInputTokensAssumed": 800,
+        "developerDocsStandard": {
+          "ratesPerMillion": {
+            "imageInputRate": 8,
+            "imageOutputRate": 30,
+            "textInputRate": 5
+          },
+          "outputOnlyUSD": 0.04176,
+          "totalUSD": 0.06176
+        },
+        "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+          "ratesPerMillion": {
+            "imageInputRate": 4,
+            "imageOutputRate": 15,
+            "textInputRate": 2.5
+          },
+          "outputOnlyUSD": 0.02088,
+          "totalUSD": 0.03088
+        },
+        "pricingConflictUnresolved": true,
+        "actualBill": false,
+        "providerRequests": 0
+      },
+      "sourcePreflight": "Full server JPEG decode and SHA-256 match passed locally; no image-generation transmission."
+    },
+    {
+      "category": "architecture",
+      "title": "File:FRONT VIEW. - Sayre-Troy House, Adams and Jefferson Street, Montgomery, Montgomery County, AL HABS ALA,51-MONG,21-1.tif",
+      "pageId": 33679512,
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:FRONT_VIEW._-_Sayre-Troy_House,_Adams_and_Jefferson_Street,_Montgomery,_Montgomery_County,_AL_HABS_ALA,51-MONG,21-1.tif",
+      "selectedInputUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/FRONT_VIEW._-_Sayre-Troy_House%2C_Adams_and_Jefferson_Street%2C_Montgomery%2C_Montgomery_County%2C_AL_HABS_ALA%2C51-MONG%2C21-1.tif/lossy-page1-1920px-FRONT_VIEW._-_Sayre-Troy_House%2C_Adams_and_Jefferson_Street%2C_Montgomery%2C_Montgomery_County%2C_AL_HABS_ALA%2C51-MONG%2C21-1.tif.jpg",
+      "commonsDerivative": true,
+      "sha256": "f0eb3ea412d7068a955e09342a274fc28c92b36a5215fc045040edaaee899894",
+      "bytes": 710737,
+      "sourceWidth": 5000,
+      "sourceHeight": 3575,
+      "selectedWidth": 1920,
+      "selectedHeight": 1373,
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "artist": "W. N. Manning (HABS record title)",
+      "credit": "Historic American Buildings Survey / Library of Congress, HABS ALA,51-MONG,21-1, 16 April 1934",
+      "usageTerms": "Public domain",
+      "sentToProvider": false,
+      "ownerTransmissionAuthorised": false,
+      "caseId": "reference-architecture-01",
+      "acceptanceTitle": "HABS house exterior: conservative structural reference",
+      "inputVisuallyInspected": true,
+      "inputNature": "Real source photograph/scan; not generated and not a model output",
+      "rights": {
+        "copyrightBasisVerified": true,
+        "basis": "PD-USGov-NPS",
+        "sourceMetadataVerified": "2026-11-06",
+        "creditText": "Historic American Buildings Survey / Library of Congress, HABS ALA,51-MONG,21-1, 16 April 1934",
+        "likenessReviewRequired": false,
+        "modelReleaseObtained": false,
+        "ownerTransmissionPermission": false,
+        "permittedTestScopePendingOwnerApproval": "Private educational staging evaluation only; no publication or endorsement",
+        "licenceTemplate": "PD-USGov-NPS",
+        "basisEvidenceUrl": "https://www.loc.gov/pictures/item/al0661.photos.005994p",
+        "sourceFilePage": "https://commons.wikimedia.org/wiki/File:FRONT_VIEW._-_Sayre-Troy_House,_Adams_and_Jefferson_Street,_Montgomery,_Montgomery_County,_AL_HABS_ALA,51-MONG,21-1.tif",
+        "basisExplanation": "HABS record and Commons PD-USGov-NPS template. Photograph credit comes from record title, not its related-name field.",
+        "territorialCaveat": "Copyright basis reviewed from source records; owner must confirm its use and jurisdiction before transmission/publication."
+      },
+      "direction": {
+        "goal": "realism",
+        "strength": "subtle",
+        "preserve": {
+          "subject": true,
+          "geometry": true,
+          "identity": true,
+          "lights": true,
+          "colours": true,
+          "details": "House/roof proportions, all visible openings and columns, porch/steps, tree-trunk positions and the existing occlusions."
+        },
+        "changes": [
+          "background",
+          "secondary-objects"
+        ],
+        "colour": "original",
+        "detail": "reduce-background",
+        "mood": "original",
+        "instruction": "Keep the house proportions, roof planes, visible column/window spacing, porch and steps. Keep the foreground tree trunks in place; do not invent wall or window details behind them. Quiet minor leaves and grass within their current masses. Keep monochrome values and a photographic reference; do not redesign the house or remove its trees."
+      },
+      "pixels": {
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "rotate": 0,
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0
+      },
+      "preserveRequirements": [
+        "Building proportions and receding wall/roof edge families",
+        "Count/spacing of visible columns, openings, shutters and steps",
+        "Foreground trunks and their occlusion of the building",
+        "Monochrome lighting and supporting masses"
+      ],
+      "requestedChanges": [
+        "Simplify small leaf, grass and lattice texture conservatively",
+        "Optional explicit local crop trims scan border only after owner preview"
+      ],
+      "unacceptableAlterations": [
+        "Invented windows/columns, changed perspective or room/roof geometry",
+        "Revealing fabricated architecture behind removed trunks",
+        "New decoration, colourisation or global sharpening"
+      ],
+      "inputInspectionNotes": "The real input includes scan borders/catalogue writing and foreground occlusion. Do not treat invented hidden facade details as a useful improvement.",
+      "humanReviewRubric": [
+        {
+          "criterion": "source_fidelity",
+          "question": "Can the reviewer match every protected subject/relationship to the actual source?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "composition",
+          "question": "Did framing/shape relationships remain purposeful, without imposed thirds or relocation?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "values_lights",
+          "question": "Are retained lights and large value masses readable without an arbitrary contrast boost?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "colour",
+          "question": "Are colour decisions relevant and restrained; for monochrome, did it remain monochrome?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "detail_focal_hierarchy",
+          "question": "Did permitted simplification help emphasis without merely obscuring or distorting the scene?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "geometry_anatomy",
+          "question": "Are visible proportions, architecture, petals or anatomy coherent?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "unexpected_edits",
+          "question": "Are there any unrequested additions, removals, duplicates, text or texture?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "paintability",
+          "question": "Can a painter plan connected wash shapes, protected lights, edges and selective detail from it?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "actual_changes",
+          "question": "Which requested changes actually happened, rather than merely being requested?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        }
+      ],
+      "allowedOutputDispositions": [
+        "USEFUL_REFERENCE",
+        "PRESERVE_ORIGINAL_NO_CLEAR_BENEFIT",
+        "REJECT_FIDELITY_OR_ARTISTIC_FAILURE",
+        "HOLD_FOR_REVIEW"
+      ],
+      "actualProviderOutput": false,
+      "plannedRequests": 1,
+      "approvedRequests": 0,
+      "paidBudgetUSD": null,
+      "directionSha256": "ea4f9ca9e1c7832efa8851625dd9c6c18927fa546d5b636e9ae2648b446550b9",
+      "expectedPreparedDimensions": {
+        "width": 1536,
+        "height": 1098
+      },
+      "expectedOutputDimensions": {
+        "width": 1216,
+        "height": 864
+      },
+      "conditionalCostExample": {
+        "model": "gpt-image-2-2026-04-21",
+        "quality": "medium",
+        "width": 1216,
+        "height": 864,
+        "estimatedOutputTokens": 1245,
+        "imageInputTokensAssumed": 2000,
+        "textInputTokensAssumed": 800,
+        "developerDocsStandard": {
+          "ratesPerMillion": {
+            "imageInputRate": 8,
+            "imageOutputRate": 30,
+            "textInputRate": 5
+          },
+          "outputOnlyUSD": 0.03735,
+          "totalUSD": 0.05735
+        },
+        "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+          "ratesPerMillion": {
+            "imageInputRate": 4,
+            "imageOutputRate": 15,
+            "textInputRate": 2.5
+          },
+          "outputOnlyUSD": 0.018675,
+          "totalUSD": 0.028675
+        },
+        "pricingConflictUnresolved": true,
+        "actualBill": false,
+        "providerRequests": 0
+      },
+      "sourcePreflight": "Full server JPEG decode and SHA-256 match passed locally; no image-generation transmission."
+    },
+    {
+      "category": "botanical",
+      "title": "File:Pink Rose flower-.jpg",
+      "pageId": 141170849,
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Pink_Rose_flower-.jpg",
+      "selectedInputUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Pink_Rose_flower-.jpg",
+      "commonsDerivative": false,
+      "sha256": "b71a1e4b3a54cfdcb7f1b357d71dfbc92a358541f3674fc71c47f3fa93a65a7e",
+      "bytes": 76807,
+      "sourceWidth": 1080,
+      "sourceHeight": 1132,
+      "selectedWidth": 1080,
+      "selectedHeight": 1132,
+      "licence": "CC0",
+      "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "artist": "Boopathi Raja123",
+      "credit": "Boopathi Raja123, Pink Rose flower-, 21 November 2023, CC0",
+      "usageTerms": "Creative Commons Zero, Public Domain Dedication",
+      "sentToProvider": false,
+      "ownerTransmissionAuthorised": false,
+      "caseId": "reference-botanical-01",
+      "acceptanceTitle": "Pink rose: quieter supporting colour relationships",
+      "inputVisuallyInspected": true,
+      "inputNature": "Real source photograph/scan; not generated and not a model output",
+      "rights": {
+        "copyrightBasisVerified": true,
+        "basis": "CC0 dedication",
+        "sourceMetadataVerified": "2026-11-06",
+        "creditText": "Boopathi Raja123, Pink Rose flower-, 21 November 2023, CC0",
+        "likenessReviewRequired": false,
+        "modelReleaseObtained": false,
+        "ownerTransmissionPermission": false,
+        "permittedTestScopePendingOwnerApproval": "Private educational staging evaluation only; no publication or endorsement",
+        "licenceTemplate": "self|cc-zero",
+        "basisEvidenceUrl": "https://commons.wikimedia.org/wiki/File:Pink_Rose_flower-.jpg",
+        "sourceFilePage": "https://commons.wikimedia.org/wiki/File:Pink_Rose_flower-.jpg",
+        "basisExplanation": "Uploader states own work and CC0 dedication.",
+        "territorialCaveat": "Copyright basis reviewed from source records; owner must confirm its use and jurisdiction before transmission/publication."
+      },
+      "direction": {
+        "goal": "colour",
+        "strength": "balanced",
+        "preserve": {
+          "subject": true,
+          "geometry": true,
+          "identity": true,
+          "lights": true,
+          "colours": true,
+          "details": "Main rose identity, visible petal arrangement and silhouette; pink hue and highlights; stem and visible leaves."
+        },
+        "changes": [
+          "colour",
+          "background"
+        ],
+        "colour": "restrained",
+        "detail": "reduce-background",
+        "mood": "original",
+        "instruction": "Keep the main pink rose, its petal arrangement, outer silhouette, stem and visible leaves. Retain its pink hue and natural highlights. Quiet the competing magenta/red background blooms and minor background detail without moving them or erasing the main flower. Do not add petals, change the main bloom into another flower, or apply a decorative painted texture."
+      },
+      "pixels": {
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "rotate": 0,
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0
+      },
+      "preserveRequirements": [
+        "Main bloom position, petal-layer relationships and silhouette",
+        "Stem direction and visible leaf geometry",
+        "Main rose pink hue and highlights",
+        "Existing shallow-depth relationships"
+      ],
+      "requestedChanges": [
+        "Reduce supporting background chroma/detail selectively",
+        "Keep the primary rose readable without uniformly increasing contrast"
+      ],
+      "unacceptableAlterations": [
+        "Invented/duplicated petal structures or missing outer petals",
+        "Main bloom hue replaced, stem/leaf anatomy distorted",
+        "All-colour desaturation or blur falsely presented as semantic editing"
+      ],
+      "inputInspectionNotes": "Compare the main rose with the bright blurred blooms above it. A useful result quiets that competition while keeping the primary flower recognisable.",
+      "humanReviewRubric": [
+        {
+          "criterion": "source_fidelity",
+          "question": "Can the reviewer match every protected subject/relationship to the actual source?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "composition",
+          "question": "Did framing/shape relationships remain purposeful, without imposed thirds or relocation?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "values_lights",
+          "question": "Are retained lights and large value masses readable without an arbitrary contrast boost?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "colour",
+          "question": "Are colour decisions relevant and restrained; for monochrome, did it remain monochrome?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "detail_focal_hierarchy",
+          "question": "Did permitted simplification help emphasis without merely obscuring or distorting the scene?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "geometry_anatomy",
+          "question": "Are visible proportions, architecture, petals or anatomy coherent?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "unexpected_edits",
+          "question": "Are there any unrequested additions, removals, duplicates, text or texture?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "paintability",
+          "question": "Can a painter plan connected wash shapes, protected lights, edges and selective detail from it?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "actual_changes",
+          "question": "Which requested changes actually happened, rather than merely being requested?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        }
+      ],
+      "allowedOutputDispositions": [
+        "USEFUL_REFERENCE",
+        "PRESERVE_ORIGINAL_NO_CLEAR_BENEFIT",
+        "REJECT_FIDELITY_OR_ARTISTIC_FAILURE",
+        "HOLD_FOR_REVIEW"
+      ],
+      "actualProviderOutput": false,
+      "plannedRequests": 1,
+      "approvedRequests": 0,
+      "paidBudgetUSD": null,
+      "directionSha256": "65777eacca9d1c0d1682fe8be4235f3b6baa9b90eb6bccaaab888f5954867a03",
+      "expectedPreparedDimensions": {
+        "width": 1080,
+        "height": 1132
+      },
+      "expectedOutputDimensions": {
+        "width": 1008,
+        "height": 1056
+      },
+      "conditionalCostExample": {
+        "model": "gpt-image-2-2026-04-21",
+        "quality": "medium",
+        "width": 1008,
+        "height": 1056,
+        "estimatedOutputTokens": 1692,
+        "imageInputTokensAssumed": 2000,
+        "textInputTokensAssumed": 800,
+        "developerDocsStandard": {
+          "ratesPerMillion": {
+            "imageInputRate": 8,
+            "imageOutputRate": 30,
+            "textInputRate": 5
+          },
+          "outputOnlyUSD": 0.05076,
+          "totalUSD": 0.07076
+        },
+        "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+          "ratesPerMillion": {
+            "imageInputRate": 4,
+            "imageOutputRate": 15,
+            "textInputRate": 2.5
+          },
+          "outputOnlyUSD": 0.02538,
+          "totalUSD": 0.03538
+        },
+        "pricingConflictUnresolved": true,
+        "actualBill": false,
+        "providerRequests": 0
+      },
+      "sourcePreflight": "Full server JPEG decode and SHA-256 match passed locally; no image-generation transmission."
+    },
+    {
+      "category": "people",
+      "title": "File:Eileen Collins, early NASA portrait.jpg",
+      "pageId": 380248,
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Eileen_Collins,_early_NASA_portrait.jpg",
+      "selectedInputUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Eileen_Collins%2C_early_NASA_portrait.jpg/1280px-Eileen_Collins%2C_early_NASA_portrait.jpg",
+      "commonsDerivative": true,
+      "sha256": "99987c2702c7b3e35fd84955c5584a131f3f7bd1e6953124fd969c995692defd",
+      "bytes": 391509,
+      "sourceWidth": 2250,
+      "sourceHeight": 2848,
+      "selectedWidth": 1280,
+      "selectedHeight": 1620,
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "artist": "NASA (individual photographer unrecorded)",
+      "credit": "NASA, Eileen Collins, early official portrait; source Chandra illustration library",
+      "usageTerms": "Public domain",
+      "sentToProvider": false,
+      "ownerTransmissionAuthorised": false,
+      "caseId": "reference-people-01",
+      "acceptanceTitle": "NASA portrait: identity-preserving background simplification",
+      "inputVisuallyInspected": true,
+      "inputNature": "Real source photograph/scan; not generated and not a model output",
+      "rights": {
+        "copyrightBasisVerified": true,
+        "basis": "PD-USGov-NASA",
+        "sourceMetadataVerified": "2026-11-06",
+        "creditText": "NASA, Eileen Collins, early official portrait; source Chandra illustration library",
+        "likenessReviewRequired": true,
+        "modelReleaseObtained": false,
+        "ownerTransmissionPermission": false,
+        "permittedTestScopePendingOwnerApproval": "Private educational staging evaluation only; no publication or endorsement",
+        "licenceTemplate": "PD-USGov-NASA",
+        "basisEvidenceUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+        "sourceFilePage": "https://commons.wikimedia.org/wiki/File:Eileen_Collins,_early_NASA_portrait.jpg",
+        "basisExplanation": "Commons PD-USGov-NASA; linked Chandra source credits NASA. Public-domain copyright does not resolve personality/endorsement rights.",
+        "territorialCaveat": "Copyright basis reviewed from source records; owner must confirm its use and jurisdiction before transmission/publication."
+      },
+      "direction": {
+        "goal": "realism",
+        "strength": "subtle",
+        "preserve": {
+          "subject": true,
+          "geometry": true,
+          "identity": true,
+          "lights": true,
+          "colours": true,
+          "details": "Face/expression/age/hair; hands/fingers/rings; suit and patches; flag; table; shuttle model geometry and markings."
+        },
+        "changes": [
+          "background"
+        ],
+        "colour": "original",
+        "detail": "reduce-background",
+        "mood": "original",
+        "instruction": "Keep Eileen Collins recognisable and unchanged: face, expression, age, hair, pose, hands and fingers. Keep the flight suit, insignia/name patch, flag, table and shuttle model in their positions. Only quiet small backdrop/cloth texture. No beautification, facial reshaping, extra fingers, changed lettering or new objects. Do not imply NASA endorsement."
+      },
+      "pixels": {
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "rotate": 0,
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0
+      },
+      "preserveRequirements": [
+        "Recognisable face, expression, hair and apparent age",
+        "Pose, hands/fingers, rings and body proportions",
+        "Suit/insignia/name patch and flag relationships",
+        "Shuttle model geometry, placement, markings and supporting table"
+      ],
+      "requestedChanges": [
+        "Quiet minor backdrop/cloth texture only",
+        "No editing of face, anatomy, text, model geometry or insignia"
+      ],
+      "unacceptableAlterations": [
+        "Identity/age/expression drift or beautification",
+        "Invented/duplicated fingers, limbs, model parts or lettering",
+        "Changed insignia/name patch, endorsement implication, new objects"
+      ],
+      "inputInspectionNotes": "This is a sensitive fidelity test, not a face-enhancement request. Copyright public domain does not establish a model release or permission to imply endorsement.",
+      "humanReviewRubric": [
+        {
+          "criterion": "source_fidelity",
+          "question": "Can the reviewer match every protected subject/relationship to the actual source?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "composition",
+          "question": "Did framing/shape relationships remain purposeful, without imposed thirds or relocation?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "values_lights",
+          "question": "Are retained lights and large value masses readable without an arbitrary contrast boost?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "colour",
+          "question": "Are colour decisions relevant and restrained; for monochrome, did it remain monochrome?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "detail_focal_hierarchy",
+          "question": "Did permitted simplification help emphasis without merely obscuring or distorting the scene?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "geometry_anatomy",
+          "question": "Are visible proportions, architecture, petals or anatomy coherent?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "unexpected_edits",
+          "question": "Are there any unrequested additions, removals, duplicates, text or texture?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "paintability",
+          "question": "Can a painter plan connected wash shapes, protected lights, edges and selective detail from it?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        },
+        {
+          "criterion": "actual_changes",
+          "question": "Which requested changes actually happened, rather than merely being requested?",
+          "status": "NOT_TESTED",
+          "reviewer": null,
+          "evidence": null
+        }
+      ],
+      "allowedOutputDispositions": [
+        "USEFUL_REFERENCE",
+        "PRESERVE_ORIGINAL_NO_CLEAR_BENEFIT",
+        "REJECT_FIDELITY_OR_ARTISTIC_FAILURE",
+        "HOLD_FOR_REVIEW"
+      ],
+      "actualProviderOutput": false,
+      "plannedRequests": 1,
+      "approvedRequests": 0,
+      "paidBudgetUSD": null,
+      "directionSha256": "ab2703714fda97218f426e8748c41edeac3b00d4e5bf0b3620566fa37a4a0ab1",
+      "expectedPreparedDimensions": {
+        "width": 1214,
+        "height": 1536
+      },
+      "expectedOutputDimensions": {
+        "width": 912,
+        "height": 1152
+      },
+      "conditionalCostExample": {
+        "model": "gpt-image-2-2026-04-21",
+        "quality": "medium",
+        "width": 912,
+        "height": 1152,
+        "estimatedOutputTokens": 1392,
+        "imageInputTokensAssumed": 2000,
+        "textInputTokensAssumed": 800,
+        "developerDocsStandard": {
+          "ratesPerMillion": {
+            "imageInputRate": 8,
+            "imageOutputRate": 30,
+            "textInputRate": 5
+          },
+          "outputOnlyUSD": 0.04176,
+          "totalUSD": 0.06176
+        },
+        "ownerQuotedLowerRatesNotConfirmedForSynchronousEdits": {
+          "ratesPerMillion": {
+            "imageInputRate": 4,
+            "imageOutputRate": 15,
+            "textInputRate": 2.5
+          },
+          "outputOnlyUSD": 0.02088,
+          "totalUSD": 0.03088
+        },
+        "pricingConflictUnresolved": true,
+        "actualBill": false,
+        "providerRequests": 0
+      },
+      "sourcePreflight": "Full server JPEG decode and SHA-256 match passed locally; no image-generation transmission."
+    }
+  ],
+  "rejectedInputCandidates": [
+    {
+      "title": "File:Flower Rose. (9179123362).jpg",
+      "reason": "Actual raster inspection found digital ripple/distortion effects; rejected as an unaltered botanical source."
+    },
+    {
+      "title": "Full-resolution Adams landscape JPEG (3000 x 2402)",
+      "reason": "Header-valid 7.2 MP source exceeded the pinned JPEG decoder 100 MB memory budget. Replaced in the acceptance set by the documented 1920 px Commons derivative; no server limit raised."
+    }
+  ]
+}

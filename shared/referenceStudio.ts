@@ -89,6 +89,23 @@ export type StudioRequest = {
   paidConsent: true;
 };
 export type GenerationStatus = "pending" | "completed" | "failed" | "uncertain";
+/** JSONB key order is not meaningful; a replay must remain a read. */
+export function sameReferenceRequest(
+  a: StudioRequest,
+  b: StudioRequest,
+): boolean {
+  const canonical = (v: unknown): unknown =>
+    Array.isArray(v)
+      ? v.map(canonical)
+      : v !== null && typeof v === "object"
+      ? Object.fromEntries(
+        Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map((
+          [k, x],
+        ) => [k, canonical(x)]),
+      )
+      : v;
+  return JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
+}
 export type ReferenceRecord = {
   id: string;
   user_id: string;

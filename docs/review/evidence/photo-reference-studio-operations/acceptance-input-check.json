@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "sources": [
+    {
+      "caseId": "reference-landscape-01",
+      "width": 1920,
+      "height": 1537,
+      "bytes": 614519,
+      "sha256": "da9e2f054a9b2907971245d3d6152366fc6dc4e4b97753fa47ffb19e41956f9d",
+      "decodedLocally": true,
+      "sentToProvider": false
+    },
+    {
+      "caseId": "reference-architecture-01",
+      "width": 1920,
+      "height": 1373,
+      "bytes": 710737,
+      "sha256": "f0eb3ea412d7068a955e09342a274fc28c92b36a5215fc045040edaaee899894",
+      "decodedLocally": true,
+      "sentToProvider": false
+    },
+    {
+      "caseId": "reference-botanical-01",
+      "width": 1080,
+      "height": 1132,
+      "bytes": 76807,
+      "sha256": "b71a1e4b3a54cfdcb7f1b357d71dfbc92a358541f3674fc71c47f3fa93a65a7e",
+      "decodedLocally": true,
+      "sentToProvider": false
+    },
+    {
+      "caseId": "reference-people-01",
+      "width": 1280,
+      "height": 1620,
+      "bytes": 391509,
+      "sha256": "99987c2702c7b3e35fd84955c5584a131f3f7bd1e6953124fd969c995692defd",
+      "decodedLocally": true,
+      "sentToProvider": false
+    }
+  ],
+  "providerRequests": 0
+}
